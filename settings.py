@@ -33,3 +33,20 @@ TIME_FACTOR = 2
 NO_ACRO_PENALTY = 2
 NO_VOTE_PENALTY = 5
 BREAK = 15
+
+INSULTS = [
+    "are little bitches",
+    "are chumps",
+    "are cunt knockers",
+    "are lazy bastards",
+    "are busy with dcross's mom",
+]
+
+INSULT = [
+    "is a little bitch"
+    "is a chump",
+    "is a cunt knocker",
+    "is a lazy bastard",
+    "is busy with dcross's mom",
+]
+
