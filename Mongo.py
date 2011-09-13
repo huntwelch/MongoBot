@@ -9,6 +9,7 @@ import random
 import threading
 import urllib2
 import urllib
+from acro import Acro
 from time import *
 from settings import *
 
@@ -28,15 +29,13 @@ class Mongo:
         self.sock.send('USER '+IDENT+' '+HOST+' bla :'+REALNAME+'\n')
         self.sock.send('JOIN '+CHANNELINIT+'\n')
 
-        self.acro_active = False
+        self.acro = False
         self.values = False
 
         self.monitor()
 
     def monitor(self):
         while True:
-
-
             line = self.sock.recv(500)
             line = line.strip()
             if line != '':
@@ -47,11 +46,11 @@ class Mongo:
                 continue
         
             if line.find('PRIVMSG') != -1:
-                if self.acro_active:
+                if self.acro:
                     content = line.split(' ',3)
 
                     if content[2] == NICK:
-                        self.game_entry(content)
+                        self.acro.input(content)
 
                 self.parse(line)
     
@@ -79,7 +78,7 @@ class Mongo:
 
     def acroengine(self):
   
-        if self.acro_active:
+        if self.acro:
             self.say("Already a game in progress")
             return
 
@@ -87,64 +86,9 @@ class Mongo:
             self.say("Please select at least " + str(MIN_PLAYERS) + " players")
             return
                    
-        self.acro_record = ACROSCORE + strftime('%Y-%m-%d-%H%M')
-        open(self.acro_record ,'w')
-        self.acro_players = self.values
-        self.acro_active = True
         self.acro = Acro(self)
+        self.acro.players = self.values
         self.acro.start()
-
-    def game_entry(self,message):
-        sender = message[0][1:].split('!')[0]
-        entry = message[3][1:]
-
-        if sender not in self.acro_players:
-            return
-
-        if self.acro.acro_submit:
-
-            entries = 0
-
-            for line in open(self.acro_record):
-                try:
-                    current,subber,timed,what = line.split(":",3)
-                except:
-                    continue
-
-                if int(current) == self.acro.acro_round:
-                    entries += 1
-                if int(current) == self.acro.acro_round and sender == subber:
-                    return
-
-            TIME = int(mktime(localtime()) - self.acro.acro_mark)
-            er = str(self.acro.acro_round) + ":" + sender + ":" + str(TIME) + ":" + entry + "\n"
-            open(self.acro_record,'a').write(er)
-            numplayers = len(self.acro_players)
-            received = entries + 1
-
-            if received == numplayers:
-                self.acro.acro_submit = False
-                self.acro.acro_voting = True
-            else:
-                self.say("Entry recieved at " + str(TIME) + " seconds. " + str(numplayers - received) + " more to go.") 
-
-        elif self.acro.acro_voting:
-
-            try:
-                vote = int(entry)
-            except:
-                return 
-
-            if sender == self.acro.contenders[vote-1]["player"]:
-                self.say(sender + " tried to vote for himself. What a bitch.")
-                return
-
-            try:
-                self.acro.contenders[vote-1]["votes"] += 1
-                self.acro.voters.append(sender)
-            except:
-                return
-
 
     def logit(self,what):
         open(LOG,'a').write(what)
@@ -164,6 +108,9 @@ class Mongo:
 
         if content[:1] == "~":
             self.command(nick,content)
+
+        if content.find("mom"):
+            open(BRAIN + "/mom.log",'a').write(content)
      
     def update(self):
 
@@ -230,223 +177,4 @@ class Mongo:
     def reboot(self):
         sys.exit()
 
-class Acro(threading.Thread):
-    
-    def __init__(self,mongo):
-        threading.Thread.__init__(self)
-        self.mongo = mongo
-    
-    def gimper(self,check,action,penalty):
-
-        insults_plural = [
-            "are little bitches",
-            "are chumps",
-            "are cunt knockers",
-            "are lazy bastards",
-            "are busy with dcross's mom",
-        ]
-    
-        insults = [
-            "is a little bitch"
-            "is a chump",
-            "is a cunt knocker",
-            "is a lazy bastard",
-            "is busy with dcross's mom",
-        ]
- 
-        gimps = []
-        for player in self.mongo.acro_players:
-            if player not in check:
-                gimps.append(player)
-
-        use = insults
-
-        if gimps:
-            trail = 0
-            target = ""
-            plural = ""
-            for gimp in gimps:
-                post = ""
-                if trail == 1:
-                    use = insults_plural
-                    plural = "es"
-                    post = " and "
-                elif trail > 1:
-                    post = ", "
-
-                if gimp in self.gimps:
-                    self.gimps[gimp] += penalty
-                else:
-                    self.gimps[gimp] = penalty
-                        
-                target = gimp + post + target
-                trail += 1
-
-            self.mongo.say(target + " " + random.choice(use) + " and will be docked " + str(penalty) + " points for not " + action + ".")
-                    
-    def run(self):
- 
-
-        # TODO: make sure all players are present
-
-        self.acro_round = 1
-        self.acro_start = mktime(localtime())
-        self.acro_mark = mktime(localtime())
-        self.warned = False
-        self.acro_wait = True
-        self.acro_submit = False
-        self.acro_voting = False
-        self.acro_displayed = False
-        self.voters = []
-        self.gimps = {}
-
-        self.mongo.say("New game commencing in " + str(BREAK) + " seconds")
-
-        while True:
-            self.acro_current = mktime(localtime())
-
-            if self.acro_wait:
-                if self.acro_current > self.acro_mark + BREAK:
-                    self.acro_wait = False
-
-                    letters = []
-                    for line in open(BRAIN + "/letters"):
-                        addition = line.split()
-                        addition.pop()
-                        letters.extend(addition)
-
-                    acronym = ""
-                    length = random.randint(MINLEN,MAXLEN)
-                    for i in range(1,length):
-                        acronym = acronym + random.choice(letters).upper()
-
-                    self.acro_submit = True
-                    self.acro_mark = mktime(localtime())
-                    self.mongo.say("Round " + str(self.acro_round) + " commencing! Acronym is " + acronym)
-                    continue
-
-            if self.acro_submit:
-
-                # check for total answers
-
-                if self.acro_current > self.acro_mark + ROUNDTIME - WARNING and not self.warned:
-                    self.warned = True
-                    self.mongo.say(str(WARNING) + " seconds left...")
-                    continue
-
-                if self.acro_current > self.acro_mark + ROUNDTIME:
-                    self.acro_submit = False
-                    self.warned = False
-                    self.mongo.say("Round over, sluts. Here are the contenders:")
-
-                    # print responses
-
-                    self.contenders = []
-
-                    item = 1
-                    submitters = []
-                    for line in open(self.mongo.acro_record):
-                        try:
-                            r,s,t,c = line.split(":",3)
-                        except:
-                            continue
-
-                        if int(r) == self.acro_round:
-                            submitters.append(s)
-                            self.contenders.append({
-                                "player":s,
-                                "time":t,
-                                "entry":c.strip(),
-                                "votes":0,
-                            })
-                            self.mongo.say(str(item) + ": " + c)
-                            item += 1
-                    
-                    if not self.contenders:
-                        self.mongo.say("Don't waste my friggin time")
-                        sys.exit()
-                    
-                    self.gimper(submitters,"submitting",NO_ACRO_PENALTY)
-
-                    self.mongo.say("You have " + str(VOTETIME) + " seconds to vote.")
-                    self.acro_mark = mktime(localtime())
-                    self.acro_voting = True
-                    continue
-
-            if self.acro_voting:
-
-                # check for full votes
-
-                if self.acro_current > self.acro_mark + VOTETIME:
-                    self.acro_voting = False
-                    self.mongo.say("Votes are in. The results:")
-                            
-                    for r in self.contenders:
-                        if r['votes'] == 0:
-                            note = "dick."
-                        elif r['votes'] == 1:
-                            note = "1 vote."
-                        else:
-                            note = str(r['votes']) + " votes."
-
-                        self.mongo.say(r['player'] + "'s \"" + r['entry'] + "\" got " + note)
-
-                    self.gimper(self.voters,"voting",NO_VOTE_PENALTY)
-
-                    # calculate voting and time scores
-                    
-                    results = {}
-                    for player in self.mongo.acro_players:
-                        results[player] = {"score":0,"votes":0,"timebonus":0}
-                        if player in self.gimps:
-                            results[player]["score"] -= self.gimps[player]
-                        
-                    for r in self.contenders:
-                        if r['votes'] != 0:
-                            results[r['player']]['score'] += r['votes'] * 10 
-                            results[r['player']]['votes'] = r['votes']
-                            # TODO
-                            if int(r['time']) > ROUNDTIME/2:
-                                timebonus = int((ROUNDTIME/2 - int(r['time']))/TIME_FACTOR)
-                            else:
-                                timebonus = 0
-
-                            results[r['player']]['timebonus'] = timebonus
-                            results[r['player']]['score'] += timebonus
-                    
-                    tally = "Round:" + str(self.acro_round) + "\n"  
-                    
-                    for result in results:
-                        sc = results[result]
-                        word = "bonus"
-                        if sc['timebonus'] < 0:
-                            word = "penalty"
-                        self.mongo.say(result + " came in with " + str(sc['score']) + " with a time " + word + " of " + str(sc['timebonus']) + ".") 
-                        tally += result + " " + str(sc['score']) + " (" + str(sc['timebonus']) + ")\n"
-
-                    open(self.mongo.acro_record,'a').write("\n" + tally + "\n")
-
-                    # record in game tally
-
-                    if self.acro_round == ROUNDS:
-                        # calculate victor have battle vs. war
-
-                        # clear data
-                        self.contenders = []
-                        self.voters = []
-
-                        # shut 'er down
-                        self.mongo.say("Game over.")
-                        self.mongo.acro_active = False
-                        sys.exit()
-
-                    self.voters = []
-                    self.contenders = []
-                    self.gimps = {}
-                    self.acro_mark = mktime(localtime())
-                    self.mongo.say("Next round in " + str(BREAK) + " seconds.")
-                    self.acro_round += 1
-                    self.acro_wait = True
-                    continue
-         
 connect = Mongo()
