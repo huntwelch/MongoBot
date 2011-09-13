@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin/python
 
 import sys 
 import socket 
@@ -11,6 +11,12 @@ import urllib2
 import urllib
 from time import *
 from settings import *
+
+# TODO
+# better round time work
+# force entries to match acronym (?) what kind of exceptions...
+# move arco to imported file
+# put insults in imported file
 
 class Mongo:
 
@@ -100,7 +106,10 @@ class Mongo:
             entries = 0
 
             for line in open(self.acro_record):
-                current,subber,timed,what = line.split(":",3)
+                try:
+                    current,subber,timed,what = line.split(":",3)
+                except:
+                    continue
 
                 if int(current) == self.acro.acro_round:
                     entries += 1
@@ -126,8 +135,15 @@ class Mongo:
             except:
                 return 
 
-            self.acro.voters.append(sender)
-            self.acro.contenders[vote-1]["votes"] += 1
+            if sender == self.acro.contenders[vote-1]["player"]:
+                self.say(sender + " tried to vote for himself. What a bitch.")
+                return
+
+            try:
+                self.acro.contenders[vote-1]["votes"] += 1
+                self.acro.voters.append(sender)
+            except:
+                return
 
 
     def logit(self,what):
@@ -135,7 +151,11 @@ class Mongo:
 
     def parse(self,msg):
         info,content = msg[1:].split(':',1)
-        sender,type,room = info.strip().split()
+        try:
+            sender,type,room = info.strip().split()
+        except:
+            return
+
         nick = sender.split('!')[0]
         ip = sender.split('@')[1]
     
@@ -218,15 +238,28 @@ class Acro(threading.Thread):
     
     def gimper(self,check,action,penalty):
 
-        insults = [
-            "little bitches",
-            "chumps",
+        insults_plural = [
+            "are little bitches",
+            "are chumps",
+            "are cunt knockers",
+            "are lazy bastards",
+            "are busy with dcross's mom",
         ]
-       
+    
+        insults = [
+            "is a little bitch"
+            "is a chump",
+            "is a cunt knocker",
+            "is a lazy bastard",
+            "is busy with dcross's mom",
+        ]
+ 
         gimps = []
         for player in self.mongo.acro_players:
             if player not in check:
                 gimps.append(player)
+
+        use = insults
 
         if gimps:
             trail = 0
@@ -235,20 +268,21 @@ class Acro(threading.Thread):
             for gimp in gimps:
                 post = ""
                 if trail == 1:
+                    use = insults_plural
                     plural = "es"
                     post = " and "
                 elif trail > 1:
                     post = ", "
 
-                target = gimp + post + target
-                if target in self.gimps:
-                    self.gimps[target] += penalty
+                if gimp in self.gimps:
+                    self.gimps[gimp] += penalty
                 else:
-                    self.gimps[target] = penalty
+                    self.gimps[gimp] = penalty
                         
+                target = gimp + post + target
                 trail += 1
 
-            self.mongo.say(target + " are " + random.choice(insults) + " and will be docked " + str(penalty) + " points for not " + action + ".")
+            self.mongo.say(target + " " + random.choice(use) + " and will be docked " + str(penalty) + " points for not " + action + ".")
                     
     def run(self):
  
@@ -312,7 +346,11 @@ class Acro(threading.Thread):
                     item = 1
                     submitters = []
                     for line in open(self.mongo.acro_record):
-                        r,s,t,c = line.split(":",3)
+                        try:
+                            r,s,t,c = line.split(":",3)
+                        except:
+                            continue
+
                         if int(r) == self.acro_round:
                             submitters.append(s)
                             self.contenders.append({
@@ -322,8 +360,12 @@ class Acro(threading.Thread):
                                 "votes":0,
                             })
                             self.mongo.say(str(item) + ": " + c)
-                        item += 1
-
+                            item += 1
+                    
+                    if not self.contenders:
+                        self.mongo.say("Don't waste my friggin time")
+                        sys.exit()
+                    
                     self.gimper(submitters,"submitting",NO_ACRO_PENALTY)
 
                     self.mongo.say("You have " + str(VOTETIME) + " seconds to vote.")
@@ -364,16 +406,25 @@ class Acro(threading.Thread):
                             results[r['player']]['score'] += r['votes'] * 10 
                             results[r['player']]['votes'] = r['votes']
                             # TODO
-                            timebonus = int((ROUNDTIME/2 - int(r['time']))/TIME_FACTOR)
+                            if int(r['time']) > ROUNDTIME/2:
+                                timebonus = int((ROUNDTIME/2 - int(r['time']))/TIME_FACTOR)
+                            else:
+                                timebonus = 0
+
                             results[r['player']]['timebonus'] = timebonus
                             results[r['player']]['score'] += timebonus
-
+                    
+                    tally = "Round:" + str(self.acro_round) + "\n"  
+                    
                     for result in results:
                         sc = results[result]
                         word = "bonus"
                         if sc['timebonus'] < 0:
                             word = "penalty"
                         self.mongo.say(result + " came in with " + str(sc['score']) + " with a time " + word + " of " + str(sc['timebonus']) + ".") 
+                        tally += result + " " + str(sc['score']) + " (" + str(sc['timebonus']) + ")\n"
+
+                    open(self.mongo.acro_record,'a').write("\n" + tally + "\n")
 
                     # record in game tally
 
@@ -387,8 +438,11 @@ class Acro(threading.Thread):
                         # shut 'er down
                         self.mongo.say("Game over.")
                         self.mongo.acro_active = False
-                        return
+                        sys.exit()
 
+                    self.voters = []
+                    self.contenders = []
+                    self.gimps = {}
                     self.acro_mark = mktime(localtime())
                     self.mongo.say("Next round in " + str(BREAK) + " seconds.")
                     self.acro_round += 1

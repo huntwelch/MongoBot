@@ -2,11 +2,11 @@
  
 HOST = "irc.freenode.net"
 PORT = 6667
-NICK = "MongoBot"
+NICK = "Macroctic"
 IDENT = "mongo" 
 REALNAME = "mongo"
 OWNER = "hunt"
-CHANNELINIT = "#mongobot"
+CHANNELINIT = "#okdrink"
 
 # Directory settings
 
@@ -22,14 +22,14 @@ SHORTENER = "http://roa.st/api.php?roast="
 
 # Acro
 
-MINLEN = 3
+MINLEN = 4
 MAXLEN = 7
-ROUNDS = 1
-ROUNDTIME = 30
-WARNING = 3
-VOTETIME = 10
-MIN_PLAYERS = 1
-TIME_FACTOR = 5
+ROUNDS = 2
+ROUNDTIME = 120
+WARNING = 30
+VOTETIME = 30
+MIN_PLAYERS = 3
+TIME_FACTOR = 2
 NO_ACRO_PENALTY = 2
 NO_VOTE_PENALTY = 5
-BREAK = 5
+BREAK = 15
