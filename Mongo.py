@@ -109,8 +109,8 @@ class Mongo:
         if content[:1] == "~":
             self.command(nick,content)
 
-		if content.find("mom"):
-			open(BRAIN + "/mom.log",'a').write(content)
+        if content.find("mom"):
+            open(BRAIN + "/mom.log",'a').write(content)
      
     def update(self):
 
