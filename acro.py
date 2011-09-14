@@ -48,7 +48,7 @@ class Acro(threading.Thread):
         sender = message[0][1:].split('!')[0]
         entry = message[3][1:]
 
-        if sender not in self.players:
+        if sender not in self.players and self.round != 1:
             return
 
         if self.submit:
@@ -72,13 +72,21 @@ class Acro(threading.Thread):
             numplayers = len(self.players)
             received = entries + 1
 
-            if received == numplayers:
-                self.submit = False
-                self.voting = True
-            else:
-                self.mongo.say("Entry recieved at " + str(TIME) + " seconds. " + str(numplayers - received) + " more to go.") 
+            addition = ""
+            if self.round != 1:
+                addition = str(numplayers - received) + " more to go."
+
+            self.mongo.say("Entry recieved at " + str(TIME) + " seconds. " + addition) 
+
+            if received == numplayers and self.round != 1:
+                self.bypass = True
+            else: 
+                self.players.append(sender)
 
         elif self.voting:
+
+            if len(self.players) < MIN_PLAYERS:
+                self.mongo.say("Need at least" + str(MIN_PLAYERS) + " players. Sorry.") 
 
             try:
                 vote = int(entry)
@@ -92,6 +100,8 @@ class Acro(threading.Thread):
             try:
                 self.contenders[vote-1]["votes"] += 1
                 self.voters.append(sender)
+                if len(self.voters) == len(self.players):
+                    self.bypass = True
             except:
                 return
 
@@ -109,12 +119,11 @@ class Acro(threading.Thread):
         self.wait = True
         self.submit = False
         self.voting = False
+        self.bypass = False
         self.displayed = False
         self.voters = []
+        self.players = []
         self.gimps = {}
-
-        for player in self.players:
-            self.cumulative[player] = 0
 
         self.mongo.say("New game commencing in " + str(BREAK) + " seconds")
 
@@ -143,14 +152,17 @@ class Acro(threading.Thread):
 
             if self.submit:
 
-                # check for total answers
-
                 if self.current > self.mark + ROUNDTIME - WARNING and not self.warned:
                     self.warned = True
                     self.mongo.say(str(WARNING) + " seconds left...")
                     continue
 
-                if self.current > self.mark + ROUNDTIME:
+                if self.current > self.mark + ROUNDTIME or self.bypass:
+                    if self.round == 1:
+                        for player in self.players:
+                            self.cumulative[player] = 0
+
+                    self.bypass = False
                     self.submit = False
                     self.warned = False
                     self.mongo.say("Round over, sluts. Here are the contenders:")
@@ -182,7 +194,8 @@ class Acro(threading.Thread):
                         self.mongo.say("Don't waste my friggin time")
                         sys.exit()
                     
-                    self.gimper(submitters,"submitting",NO_ACRO_PENALTY)
+                    if self.round != 1:
+                        self.gimper(submitters,"submitting",NO_ACRO_PENALTY)
 
                     self.mongo.say("You have " + str(VOTETIME) + " seconds to vote.")
                     self.mark = mktime(localtime())
@@ -193,7 +206,8 @@ class Acro(threading.Thread):
 
                 # check for full votes
 
-                if self.current > self.mark + VOTETIME:
+                if self.current > self.mark + VOTETIME or self.bypass:
+                    self.bypass = False
                     self.voting = False
                     self.mongo.say("Votes are in. The results:")
                             
@@ -221,7 +235,7 @@ class Acro(threading.Thread):
                         if r['votes'] != 0:
                             results[r['player']]['score'] += r['votes'] * 10 
                             results[r['player']]['votes'] = r['votes']
-                            if int(r['time']) > ROUNDTIME/2:
+                            if int(r['time']) < ROUNDTIME/2:
                                 timebonus = int((ROUNDTIME/2 - int(r['time']))/TIME_FACTOR)
                             else:
                                 timebonus = 0
