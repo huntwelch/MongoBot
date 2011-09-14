@@ -2,17 +2,16 @@
  
 HOST = "irc.freenode.net"
 PORT = 6667
-NICK = "Macroctic"
-IDENT = "mongo" 
-REALNAME = "mongo"
-OWNER = "hunt"
-CHANNELINIT = "#mongotest"
+NICK = "Macrotic"
+IDENT = "macrotic" 
+REALNAME = "macrotic"
+OWNER = "chiyu"
+CHANNELINIT = "#okdrink"
 
 # Directory settings
 
 BRAIN = "mongo-brain"
-KEYS = BRAIN + "/peeps/" 
-LOG = BRAIN + "/log/mongo.log"
+LOG = BRAIN + "/mongo.log"
 DISTASTE = BRAIN + "/distaste"
 ACROSCORE = BRAIN + "/acro/"
                
@@ -24,15 +23,15 @@ SHORTENER = "http://roa.st/api.php?roast="
 
 MINLEN = 4
 MAXLEN = 7
-ROUNDS = 2
-ROUNDTIME = 10
-WARNING = 3
-VOTETIME = 10
+ROUNDS = 5
+ROUNDTIME = 90
+WARNING = 30
+VOTETIME = 30 
 MIN_PLAYERS = 3
 TIME_FACTOR = 2
 NO_ACRO_PENALTY = 2
 NO_VOTE_PENALTY = 5
-BREAK = 5
+BREAK = 15
 
 INSULTS = [
     "are little bitches",
