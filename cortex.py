@@ -2,6 +2,7 @@ import socket
 import string 
 import simplejson as json
 import os
+import re
 import random
 import threading
 import urllib2
@@ -18,6 +19,7 @@ class Cortex:
         self.acro = False
         self.values = False
         self.master = master
+        self.context = CHANNELINIT
         self.sock = master.sock
 
     def monitor(self,sock):
@@ -29,10 +31,11 @@ class Cortex:
         if line.find('PING') != -1:
             self.sock.send('PONG ' + line.split()[1] + '\n')
         elif line.find('PRIVMSG') != -1:
-            if self.acro:
-                content = line.split(' ',3)
+            content = line.split(' ',3)
+            self.context = content[2]
 
-                if content[2] == NICK:
+            if self.acro:
+                if self.context == NICK:
                     self.acro.input(content)
 
             self.parse(line)
@@ -47,18 +50,72 @@ class Cortex:
             self.values = False
 
         self.logit(sender + " sent command: " + what + "\n")
-    
+        self.lastsender = sender    
+
         {
             "help":self.showlist,    
             "distaste":self.distaste,    
-            "die":self.master.die,
+            "reboot":self.master.die,
             "reload":self.master.reload,    
             "update":self.update,    
-            "acro":self.acroengine,    
+            "roque":self.acroengine,    
             "love":self.love,    
             "hate":self.hate,    
             "boards":self.boards,    
+            "think":self.think,    
+            "settings":self.showsettings,    
+            "learnword":self.learnword,    
         }.get(what,self.default)()
+
+    def learnword(self):
+    
+        banned = []
+
+        if self.lastsender in banned:
+            self.say("My daddy says not to listen to you.",self.lastsender)
+            return
+
+        if not self.values:
+            self.say(NICK + " ponders the emptiness of meaning.",self.lastsender)
+            return
+        
+        if not re.match("^[A-Za-z]+$",self.values[0].strip()):
+            self.say(NICK + " doesn't think that's a word.",self.lastsender)
+            return
+            
+        open(BRAIN + "/wordbank",'a').write(self.values[0].strip() + '\n')
+        self.say(NICK + " learn new word!",self.lastsender)
+
+    def think(self):
+        if not self.values:
+            self.say("About what?",self.lastsender)
+            return
+
+        if not re.match("^[A-Za-z]+$",self.values[0]) and self.lastsender == "erikbeta":
+            self.say("Fuck off erik.",self.lastsender)
+            return
+
+        if not re.match("^[A-Za-z]+$",self.values[0]):
+            self.say(NICK + " no want to think about that.",self.lastsender)
+            return
+
+        acronym = list(self.values[0].upper())
+        output = []
+        
+        wordbank = []
+        for line in open(BRAIN + "/wordbank"):
+            wordbank.append(line.strip())
+
+        for letter in acronym:
+            good = False
+            while not good:
+                word = random.choice(wordbank).capitalize()
+                if word[:1] == letter:
+                    output.append(word)
+                    good = True 
+        
+        self.say(" ".join(output),self.lastsender)
+
 
     def boards(self):
 
@@ -71,14 +128,18 @@ class Cortex:
                         try:
                             player,score,toss = line.split()
                             if player in scores:
-                                scores[player] += int(score)
+                                scores[player]['score'] += int(score)
+                                scores[player]['rounds'] += 1
                             else:
-                                scores[player] = int(score)
+                                scores[player] = {'score':int(score),'rounds':1}
                         except:
                             continue
         
         for player in scores:
-            self.say(player + ": " + str(scores[player]))
+            score = scores[player]['score']
+            average = score/scores[player]['rounds']
+
+            self.say(player + ": " + str(score) + " (" + str(average) + " per round)")
 
     def acroengine(self):
   
@@ -141,7 +202,7 @@ class Cortex:
         self.say(NICK + " cannot love. " + NICK + " is only machine :'(")
 
     def hate(self):
-        self.say(NICK + " knows hate. " + NICK + " hates people.")
+        self.say(NICK + " knows hate. " + NICK + " hates many things.")
 
     def distaste(self):
 
@@ -160,11 +221,19 @@ class Cortex:
          
         self.say(random.choice(lines))
 
-    def say(self,message):
-        self.sock.send('PRIVMSG '+ CHANNELINIT +' :' + message + '\n')
+    def say(self,message,whom = False):
+        if not whom or self.context == CHANNELINIT:
+            whom = CHANNELINIT
+        self.sock.send('PRIVMSG '+ whom +' :' + message + '\n')
 
     def default(self):
         self.say(NICK + " cannot do this thing :'(")
+
+    def showsettings(self):
+        for line in open("settings.py"):
+            if line.strip() == "# STOP":
+                return
+            self.say(line.strip())
 
     def showlist(self):
         list = [
@@ -172,12 +241,18 @@ class Cortex:
             "~love <command " + NICK + " to love>",
             "~distaste <command " + NICK + " to express disastisfaction>",
             "~distaste url <expand " + NICK + "'s to disastisfaction repertoire>",
+            "~settings <show current settings>",
             "~update SETTING_NAME value <change a setting>",
-            "~acro player_1 ... player_n <start acro game>",
+            "~roque <start acro game>",
+            "~think ABC <come up with an acronym for submitted letters>",
+            "~learnword someword <add a word to bot's acronym library>",
+            "~boards <show cumulative acronym game scores>",
             "~reload <reload libraries>",
+            "~reboot <guess>",
         ]
 
-        self.say("Commands: " + ', '.join(list))
+        for command in list:
+            self.say(command)
 
 
 

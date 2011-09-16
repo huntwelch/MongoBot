@@ -80,7 +80,7 @@ class Acro(threading.Thread):
 
             if received == numplayers and self.round != 1:
                 self.bypass = True
-            else: 
+            elif self.round == 1: 
                 self.players.append(sender)
 
         elif self.voting:
