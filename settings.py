@@ -1,8 +1,10 @@
+from math import *
+
 # Connection Settings
  
 HOST = "irc.freenode.net"
 PORT = 6667
-NICK = "BotX"
+NICK = "MongoBot"
 CHANNELINIT = "#okdrink"
               
 # Misc
@@ -50,5 +52,44 @@ INSULT = [
     "is a cunt knocker",
     "is a lazy bastard",
     "is busy with dcross's mom",
+]
+
+BOREDOM = [
+    "kicks",
+    "slaps",
+    "butt rapes",
+    "offers dcross's mom to",
+    "throws feces at",
+]
+
+SAFE = [
+    ('abs', abs),
+    ('acos', acos),
+    ('asin', asin),
+    ('atan', atan),
+    ('atan2', atan2),
+    ('ceil', ceil),
+    ('cos', cos),
+    ('cosh', cosh),
+    ('degrees', degrees),
+    ('e', e),
+    ('exp', exp),
+    ('fabs', fabs),
+    ('floor', floor),
+    ('fmod', fmod),
+    ('frexp', frexp),
+    ('hypot', hypot),
+    ('ldexp', ldexp),
+    ('log', log),
+    ('log10', log10),
+    ('modf', modf),
+    ('pi', pi),
+    ('pow', pow),
+    ('radians', radians),
+    ('sin', sin),
+    ('sinh', sinh),
+    ('sqrt', sqrt),
+    ('tan', tan),
+    ('tanh',tanh),
 ]
 

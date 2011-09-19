@@ -11,6 +11,7 @@ from time import *
 
 import acro,settings
 from acro import Acro
+from math import * 
 from settings import *
 
 class Cortex:
@@ -21,16 +22,30 @@ class Cortex:
         self.master = master
         self.context = CHANNELINIT
         self.sock = master.sock
+        self.gettingnames = True 
+        self.members = [] 
+        self.boredom = int(mktime(localtime())) 
+        self.namecheck = int(mktime(localtime())) 
+        self.safe_calc = dict([ (k, locals().get(k, f)) for k,f in SAFE])
 
     def monitor(self,sock):
         line = self.sock.recv(500)
         line = line.strip()
+        
+        currenttime = int(mktime(localtime())) 
         if line != '':
             self.logit(line + '\n')
         
+        if self.gettingnames:
+            if line.find("* " + CHANNELINIT) != -1:
+                all = line.split(":")[2]
+                self.gettingnames = False
+                self.members = all.split()
+
         if line.find('PING') != -1:
             self.sock.send('PONG ' + line.split()[1] + '\n')
         elif line.find('PRIVMSG') != -1:
+            self.boredom = int(mktime(localtime())) 
             content = line.split(' ',3)
             self.context = content[2]
 
@@ -39,6 +54,15 @@ class Cortex:
                     self.acro.input(content)
 
             self.parse(line)
+        
+        if currenttime - self.namecheck > 60:
+            self.namecheck = int(mktime(localtime())) 
+            self.getnames()
+
+        if currenttime - self.boredom > 600:
+            self.boredom = int(mktime(localtime())) 
+            self.bored()
+
     
     def command(self,sender,cmd):
         components = cmd.split()
@@ -65,7 +89,40 @@ class Cortex:
             "think":self.think,    
             "settings":self.showsettings,    
             "learnword":self.learnword,    
+            "cry":self.cry,    
+            "calc":self.calc,    
+            "bored":self.bored,    
+            "register":self.getnames,    
         }.get(what,self.default)()
+
+    def getnames(self):
+        self.gettingnames = True
+        self.sock.send('NAMES '+ CHANNELINIT + '\n')
+
+    def calc(self):
+        if not self.values:
+            printout = []
+            for n,f in SAFE:
+                printout.append(n)
+            self.say("Available functions: " + ", ".join(printout))
+            return
+        try:
+            result = eval(' '.join(self.values),{"__builtins__":None},self.safe_calc)
+        except:
+            result = NICK + " not smart enough to to that."
+
+        self.say(result,self.lastsender)
+
+    def bored(self):
+        return
+        if not self.members:
+            return
+
+        self.say("\001ACTION is bored.\001")
+        self.say("\001ACTION " + random.choice(BOREDOM) + " " + random.choice(self.members)  + ".\001")
+
+    def cry(self):
+        self.say("\001ACTION cries.\001")
 
     def learnword(self):
     
@@ -224,7 +281,7 @@ class Cortex:
     def say(self,message,whom = False):
         if not whom or self.context == CHANNELINIT:
             whom = CHANNELINIT
-        self.sock.send('PRIVMSG '+ whom +' :' + message + '\n')
+        self.sock.send('PRIVMSG '+ whom +' :' + str(message) + '\n')
 
     def default(self):
         self.say(NICK + " cannot do this thing :'(")
