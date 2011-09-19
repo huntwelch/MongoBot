@@ -83,6 +83,7 @@ class Cortex:
             "reload":self.master.reload,    
             "update":self.update,    
             "roque":self.acroengine,    
+            "endit":self.endacro,    
             "love":self.love,    
             "hate":self.hate,    
             "boards":self.boards,    
@@ -99,6 +100,10 @@ class Cortex:
         self.gettingnames = True
         self.sock.send('NAMES '+ CHANNELINIT + '\n')
 
+    def endacro(self):
+        if self.acro:
+            self.acro.endgame()
+
     def calc(self):
         if not self.values:
             printout = []
@@ -109,7 +114,7 @@ class Cortex:
         try:
             result = eval(' '.join(self.values),{"__builtins__":None},self.safe_calc)
         except:
-            result = NICK + " not smart enough to to that."
+            result = NICK + " not smart enough to do that."
 
         self.say(result,self.lastsender)
 

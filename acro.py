@@ -13,6 +13,17 @@ class Acro(threading.Thread):
         threading.Thread.__init__(self)
         self.mongo = mongo
     
+    def endgame(self):
+        # clear data
+        self.contenders = []
+        self.voters = []
+
+        # shut 'er down
+        self.mongo.say("Game over.")
+        self.mongo.acro = False
+        sys.exit()
+
+
     def gimper(self,check,action,penalty):
  
         gimps = []
@@ -67,6 +78,17 @@ class Acro(threading.Thread):
                     return
 
             TIME = int(mktime(localtime()) - self.mark)
+            
+            words = entry.split()
+            temp = []
+            for word in words:
+                if word[:1] == "-":
+                    temp.append(word[1:])
+                else:
+                    temp.append(word.capitalize())
+            
+            entry = ' '.join(temp)
+
             er = str(self.round) + ":" + sender + ":" + str(TIME) + ":" + entry + "\n"
             open(self.record,'a').write(er)
             numplayers = len(self.players)
@@ -264,15 +286,7 @@ class Acro(threading.Thread):
 
                     if self.round == ROUNDS:
                         # calculate victor have battle vs. war
-
-                        # clear data
-                        self.contenders = []
-                        self.voters = []
-
-                        # shut 'er down
-                        self.mongo.say("Game over.")
-                        self.mongo.acro = False
-                        sys.exit()
+                        self.endgame()
 
                     self.voters = []
                     self.contenders = []
