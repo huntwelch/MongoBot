@@ -54,10 +54,14 @@ class Acro(threading.Thread):
 
             self.mongo.say(target + " " + random.choice(use) + " and will be docked " + str(penalty) + " points for not " + action + ".")
                     
-    def input(self,message):
+    def input(self,message,SelfSub=False):
 
-        sender = message[0][1:].split('!')[0]
-        entry = message[3][1:]
+        if not SelfSub:
+            sender = message[0][1:].split('!')[0]
+            entry = message[3][1:]
+        else:
+            sender = NICK 
+            entry = self.mongo.acronymit(self.currentacronym)
 
         if sender not in self.players and self.round != 1:
             return
@@ -77,7 +81,10 @@ class Acro(threading.Thread):
                 if int(current) == self.round and sender == subber:
                     return
 
-            TIME = int(mktime(localtime()) - self.mark)
+            if not SelfSub:
+                TIME = int(mktime(localtime()) - self.mark)
+            else:
+                TIME = int(ROUNDTIME/2)
             
             words = entry.split()
             temp = []
@@ -98,7 +105,8 @@ class Acro(threading.Thread):
             if self.round != 1:
                 addition = str(numplayers - received) + " more to go."
 
-            self.mongo.say("Entry recieved at " + str(TIME) + " seconds. " + addition) 
+            if not SelfSub:
+                self.mongo.say("Entry recieved at " + str(TIME) + " seconds. " + addition) 
 
             if received == numplayers and self.round != 1:
                 self.bypass = True
@@ -106,6 +114,8 @@ class Acro(threading.Thread):
                 self.players.append(sender)
 
         elif self.voting:
+            if BOTPLAY and NICK not in self.voters:
+                self.voters.append(NICK)
 
             if len(self.players) < MIN_PLAYERS:
                 self.mongo.say("Need at least" + str(MIN_PLAYERS) + " players. Sorry.") 
@@ -129,8 +139,6 @@ class Acro(threading.Thread):
 
     def run(self):
 
-        # TODO: make sure all players are present
-
         self.record = ACROSCORE + strftime('%Y-%m-%d-%H%M')
         open(self.record ,'w')
         self.round = 1
@@ -146,6 +154,8 @@ class Acro(threading.Thread):
         self.voters = []
         self.players = []
         self.gimps = {}
+        BOTPLAY = True 
+        self.SelfSubbed = False 
 
         self.mongo.say("New game commencing in " + str(BREAK) + " seconds")
 
@@ -167,6 +177,7 @@ class Acro(threading.Thread):
                     for i in range(1,length):
                         acronym = acronym + random.choice(letters).upper()
 
+                    self.currentacronym = acronym
                     self.submit = True
                     self.mark = mktime(localtime())
                     self.mongo.say("Round " + str(self.round) + " commencing! Acronym is " + acronym)
@@ -178,6 +189,11 @@ class Acro(threading.Thread):
                     self.warned = True
                     self.mongo.say(str(WARNING) + " seconds left...")
                     continue
+
+                if BOTPLAY and not self.SelfSubbed:
+                    self.input(False,True)
+                    self.SelfSubbed = True
+                    
 
                 if self.current > self.mark + ROUNDTIME or self.bypass:
                     if self.round == 1:
@@ -288,6 +304,7 @@ class Acro(threading.Thread):
                         # calculate victor have battle vs. war
                         self.endgame()
 
+                    self.SelfSubbed = False
                     self.voters = []
                     self.contenders = []
                     self.gimps = {}

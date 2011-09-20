@@ -94,7 +94,16 @@ class Cortex:
             "calc":self.calc,    
             "bored":self.bored,    
             "register":self.getnames,    
+            "rules":self.rules,    
         }.get(what,self.default)()
+
+    def rules(self):
+        self.say("1 of 6 start game with ~roque.")
+        self.say("2 of 6 when the acronym comes up, type /msg " + NICK + " your version of what the acronym stands for.")
+        self.say("3 of 6 each word of your submission is automatically updated unless you preface it with '-', so 'do -it up' will show as 'Do it Up'.")
+        self.say("4 of 6 when the voting comes up, msg " + NICK + " with the number of your vote.")
+        self.say("5 of 6 play till the rounds are up.")
+        self.say("6 of 6 " + NICK + " plays by default. Run ~update BOTPLAY False to turn it off.")
 
     def getnames(self):
         self.gettingnames = True
@@ -108,7 +117,9 @@ class Cortex:
         if not self.values:
             printout = []
             for n,f in SAFE:
-                printout.append(n)
+                if f != None:
+                    printout.append(n)
+
             self.say("Available functions: " + ", ".join(printout))
             return
         try:
@@ -148,20 +159,9 @@ class Cortex:
         open(BRAIN + "/wordbank",'a').write(self.values[0].strip() + '\n')
         self.say(NICK + " learn new word!",self.lastsender)
 
-    def think(self):
-        if not self.values:
-            self.say("About what?",self.lastsender)
-            return
-
-        if not re.match("^[A-Za-z]+$",self.values[0]) and self.lastsender == "erikbeta":
-            self.say("Fuck off erik.",self.lastsender)
-            return
-
-        if not re.match("^[A-Za-z]+$",self.values[0]):
-            self.say(NICK + " no want to think about that.",self.lastsender)
-            return
-
-        acronym = list(self.values[0].upper())
+    def acronymit(self,base):
+ 
+        acronym = list(base.upper())
         output = []
         
         wordbank = []
@@ -175,8 +175,24 @@ class Cortex:
                 if word[:1] == letter:
                     output.append(word)
                     good = True 
-        
-        self.say(" ".join(output),self.lastsender)
+
+        return " ".join(output)
+
+    def think(self):
+        if not self.values:
+            self.say("About what?",self.lastsender)
+            return
+
+        if not re.match("^[A-Za-z]+$",self.values[0]) and self.lastsender == "erikbeta":
+            self.say("Fuck off erik.",self.lastsender)
+            return
+
+        if not re.match("^[A-Za-z]+$",self.values[0]):
+            self.say(NICK + " no want to think about that.",self.lastsender)
+            return
+
+        output = self.acronymit(self.values[0])
+        self.say(output,self.lastsender)
 
 
     def boards(self):
