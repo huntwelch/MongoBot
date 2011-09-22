@@ -93,6 +93,7 @@ class Acro(threading.Thread):
                     temp.append(word[1:])
                 else:
                     temp.append(word.capitalize())
+                    open(BRAIN + "/natwords",'a').write(word.capitalize() + "\n")
             
             entry = ' '.join(temp)
 
@@ -139,7 +140,7 @@ class Acro(threading.Thread):
 
     def run(self):
 
-        self.record = ACROSCORE + strftime('%Y-%m-%d-%H%M')
+        self.record = ACROSCORE + strftime('%Y-%m-%d-%H%M') + '.game'
         open(self.record ,'w')
         self.round = 1
         self.cumulative = {}
@@ -154,7 +155,6 @@ class Acro(threading.Thread):
         self.voters = []
         self.players = []
         self.gimps = {}
-        BOTPLAY = True 
         self.SelfSubbed = False 
 
         self.mongo.say("New game commencing in " + str(BREAK) + " seconds")
@@ -209,7 +209,6 @@ class Acro(threading.Thread):
 
                     self.contenders = []
 
-                    item = 1
                     submitters = []
                     for line in open(self.record):
                         try:
@@ -225,8 +224,12 @@ class Acro(threading.Thread):
                                 "entry":c.strip(),
                                 "votes":0,
                             })
-                            self.mongo.say(str(item) + ": " + c)
-                            item += 1
+                    
+                    random.shuffle(self.contenders)                    
+                    item = 1
+                    for submission in self.contenders: 
+                        self.mongo.say(str(item) + ": " + submission["entry"])
+                        item += 1
                     
                     if not self.contenders:
                         self.mongo.say("Don't waste my friggin time")

@@ -24,7 +24,7 @@ TIME_FACTOR = 2
 NO_ACRO_PENALTY = 2
 NO_VOTE_PENALTY = 5
 BREAK = 15
-BOTPLAY = True
+BOTPLAY = True 
 
 # STOP 
 
@@ -38,6 +38,7 @@ BRAIN = "mongo-brain"
 LOG = BRAIN + "/mongo.log"
 DISTASTE = BRAIN + "/distaste"
 ACROSCORE = BRAIN + "/acro/"
+ACROLIB = "natwords"
  
 INSULTS = [
     "are little bitches",

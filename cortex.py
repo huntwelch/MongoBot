@@ -156,7 +156,7 @@ class Cortex:
             self.say(NICK + " doesn't think that's a word.",self.lastsender)
             return
             
-        open(BRAIN + "/wordbank",'a').write(self.values[0].strip() + '\n')
+        open(BRAIN + "/natword",'a').write(self.values[0].strip() + '\n')
         self.say(NICK + " learn new word!",self.lastsender)
 
     def acronymit(self,base):
@@ -165,7 +165,7 @@ class Cortex:
         output = []
         
         wordbank = []
-        for line in open(BRAIN + "/wordbank"):
+        for line in open(BRAIN + "/" + ACROLIB):
             wordbank.append(line.strip())
 
         for letter in acronym:
@@ -277,7 +277,10 @@ class Cortex:
         self.say(NICK + " rewrite brain. Feel smarter.")
 
     def love(self):
-        self.say(NICK + " cannot love. " + NICK + " is only machine :'(")
+        if self.values and self.values[0] == "self":
+            self.say("\001ACTION masturbates vigorously.\001")
+        else:
+            self.say(NICK + " cannot love. " + NICK + " is only machine :'(")
 
     def hate(self):
         self.say(NICK + " knows hate. " + NICK + " hates many things.")
