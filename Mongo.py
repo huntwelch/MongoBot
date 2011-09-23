@@ -10,9 +10,6 @@ import acro,settings,cortex
 from acro import Acro
 from settings import *
 
-# TODO
-# force entries to match acronym (?) what kind of exceptions...
-
 class Mongo:
 
     def __init__(self):
@@ -32,7 +29,7 @@ class Mongo:
 
     def reload(self):
         self.active = False
-        self.brain.say("*strokes out*")
+        self.brain.act("strokes out.")
         reload(settings)
         from settings import *
         reload(cortex)
@@ -40,7 +37,7 @@ class Mongo:
         from acro import Acro
         self.active = True
         self.brain = cortex.Cortex(self)
-        self.brain.say("*comes to*")
+        self.brain.act("comes to.")
 
     def die(self):
         sys.exit()

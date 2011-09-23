@@ -51,6 +51,8 @@ class Acro(threading.Thread):
         # shut 'er down
         self.mongo.say("Game over.")
         self.mongo.acro = False
+        self.killgame = False
+        self.paused = False
         sys.exit()
 
     def input(self,message,SelfSub=False):
@@ -164,11 +166,11 @@ class Acro(threading.Thread):
         self.mongo.say("New game commencing in " + str(BREAK) + " seconds")
 
         while True:
-            if self.paused:
-                continue
-
             if self.killgame:
                 self.endgame()
+
+            if self.paused:
+                continue
 
             self.current = mktime(localtime())
 
@@ -314,7 +316,6 @@ class Acro(threading.Thread):
                     # record in game tally
 
                     if self.round == ROUNDS:
-                        # calculate victor have battle vs. war
                         self.endgame()
 
                     self.SelfSubbed = False

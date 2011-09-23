@@ -97,6 +97,9 @@ class Cortex:
             "register":self.getnames,    
             "rules":self.rules,    
             "mom":self.mom,    
+            "whatvinaylost":self.whine,    
+            "say":self._say,    
+            "act":self._act,    
         }.get(what,self.default)()
 
     def showlist(self):
@@ -117,6 +120,27 @@ class Cortex:
 
         for command in list:
             self.say(command)
+
+    def whine(self):
+        self.say("Yep. Vinay used to have 655 points at 16 points per round. Now they're all gone, due to technical issues. Poor, poor baby.")
+        self.act("weeps for Vinay's points.")
+        self.say("The humanity!")
+
+    def validate(self):
+        if not self.values:
+            return False
+        if self.lastsender != "chiyou":
+            return False
+
+        return True
+
+    def _say(self):
+        if self.validate():
+            self.say(" ".join(self.values))
+
+    def _act(self):
+        if self.validate():
+            self.act(" ".join(self.values))
 
     def mom(self):
         momlines = []
