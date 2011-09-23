@@ -96,6 +96,7 @@ class Cortex:
             "bored":self.bored,    
             "register":self.getnames,    
             "rules":self.rules,    
+            "mom":self.mom,    
         }.get(what,self.default)()
 
     def showlist(self):
@@ -116,6 +117,13 @@ class Cortex:
 
         for command in list:
             self.say(command)
+
+    def mom(self):
+        momlines = []
+        for line in open(BRAIN + "/mom.log"):
+            momlines.append(line)
+
+        self.say("Hey " + random.choice(self.members) + "! " + random.choice(momlines))
 
     def rules(self):
         self.say("1 of 6 start game with ~roque.")
