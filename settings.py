@@ -10,6 +10,7 @@ CHANNELINIT = "#okdrink"
 # Misc
 
 SHORTENER = "http://roa.st/api.php?roast="
+PATIENCE = 6000
 
 # Acro
 

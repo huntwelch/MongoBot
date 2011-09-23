@@ -59,9 +59,10 @@ class Cortex:
             self.namecheck = int(mktime(localtime())) 
             self.getnames()
 
-        if currenttime - self.boredom > 600:
+        if currenttime - self.boredom > PATIENCE:
             self.boredom = int(mktime(localtime())) 
-            self.bored()
+            if random.randint(1,10) == 7:
+                self.bored()
 
     
     def command(self,sender,cmd):
@@ -83,6 +84,7 @@ class Cortex:
             "reload":self.master.reload,    
             "update":self.update,    
             "roque":self.acroengine,    
+            "acro":self.acroengine,    
             "endit":self.endacro,    
             "love":self.love,    
             "hate":self.hate,    
@@ -130,12 +132,14 @@ class Cortex:
         self.say(result,self.lastsender)
 
     def bored(self):
-        return
         if not self.members:
             return
 
-        self.say("\001ACTION is bored.\001")
-        self.say("\001ACTION " + random.choice(BOREDOM) + " " + random.choice(self.members)  + ".\001")
+        self.say("Chirp chirp. Chirp Chirp.")
+
+        # The behavior below is known to be highly obnoxious
+        # self.say("\001ACTION is bored.\001")
+        # self.say("\001ACTION " + random.choice(BOREDOM) + " " + random.choice(self.members)  + ".\001")
 
     def cry(self):
         self.say("\001ACTION cries.\001")
