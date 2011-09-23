@@ -21,7 +21,7 @@ class Mongo:
         self.sock.connect((HOST, PORT))
         self.sock.send('NICK '+NICK+'\n')
         self.sock.send('USER '+IDENT+' '+HOST+' bla :'+REALNAME+'\n')
-        self.sock.send('JOIN '+CHANNELINIT+'\n')
+        self.sock.send('JOIN '+CHANNEL+'\n')
 
         self.brain = cortex.Cortex(self)
 

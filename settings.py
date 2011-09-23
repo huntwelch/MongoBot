@@ -5,7 +5,14 @@ from math import *
 HOST = "irc.freenode.net"
 PORT = 6667
 NICK = "MongoBot"
-CHANNELINIT = "#okdrink"
+CHANNEL = "#okdrink"
+ 
+# Directory settings
+
+BRAIN = "mongo-brain"
+LOG = BRAIN + "/mongo.log"
+DISTASTE = BRAIN + "/distaste"
+ACROSCORE = BRAIN + "/acro/"
               
 # Misc
 
@@ -14,6 +21,7 @@ PATIENCE = 6000
 
 # Acro
 
+ACROLIB = "natwords"
 MINLEN = 5
 MAXLEN = 7
 ROUNDS = 5
@@ -27,20 +35,34 @@ NO_VOTE_PENALTY = 5
 BREAK = 15
 BOTPLAY = True 
 
-# STOP 
-
 IDENT = "macrotic" 
 REALNAME = "macrotic"
 OWNER = "chiyu"
 
-# Directory settings
+SAFESET = [
+    ('Bot settings',''),
+    ('SHORTENER','"' + SHORTENER + '"'),
+    ('PATIENCE',PATIENCE),
+    ('NICK','"' + NICK + '"'),
+    ('CHANNEL','"' + CHANNEL + '"'),
+    ('HOST','"' + HOST + '"'),
+    ('PORT',PORT),
 
-BRAIN = "mongo-brain"
-LOG = BRAIN + "/mongo.log"
-DISTASTE = BRAIN + "/distaste"
-ACROSCORE = BRAIN + "/acro/"
-ACROLIB = "natwords"
- 
+    ('Acro settings',':'),
+    ('ACROLIB',ACROLIB),
+    ('MINLEN',MINLEN),
+    ('MAXLEN',MAXLEN),
+    ('ROUNDS',ROUNDS),
+    ('ROUNDTIME',ROUNDTIME),
+    ('WARNING',WARNING),
+    ('VOTETIME',VOTETIME),
+    ('MIN_PLAYERS',MIN_PLAYERS),
+    ('NO_ACRO_PENALTY',NO_ACRO_PENALTY),
+    ('NO_VOTE_PENALTY',NO_VOTE_PENALTY),
+    ('BREAK',BREAK),
+    ('BOTPLAY',BOTPLAY),
+]
+
 INSULTS = [
     "are little bitches",
     "are chumps",

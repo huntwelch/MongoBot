@@ -20,7 +20,7 @@ class Cortex:
         self.acro = False
         self.values = False
         self.master = master
-        self.context = CHANNELINIT
+        self.context = CHANNEL
         self.sock = master.sock
         self.gettingnames = True 
         self.members = [] 
@@ -37,7 +37,7 @@ class Cortex:
             self.logit(line + '\n')
         
         if self.gettingnames:
-            if line.find("* " + CHANNELINIT) != -1:
+            if line.find("* " + CHANNEL) != -1:
                 all = line.split(":")[2]
                 self.gettingnames = False
                 self.members = all.split()
@@ -85,7 +85,6 @@ class Cortex:
             "update":self.update,    
             "roque":self.acroengine,    
             "acro":self.acroengine,    
-            "endit":self.endacro,    
             "love":self.love,    
             "hate":self.hate,    
             "boards":self.boards,    
@@ -99,6 +98,25 @@ class Cortex:
             "rules":self.rules,    
         }.get(what,self.default)()
 
+    def showlist(self):
+        list = [
+            "~help <show this message>",
+            "~love <command " + NICK + " to love>",
+            "~distaste <command " + NICK + " to express disastisfaction>",
+            "~distaste url <expand " + NICK + "'s to disastisfaction repertoire>",
+            "~settings <show current settings>",
+            "~update SETTING_NAME value <change a setting>",
+            "~roque [pause|resume|end] <start acro game>",
+            "~think ABC <come up with an acronym for submitted letters>",
+            "~learnword someword <add a word to bot's acronym library>",
+            "~boards <show cumulative acronym game scores>",
+            "~reload <reload libraries>",
+            "~reboot <guess>",
+        ]
+
+        for command in list:
+            self.say(command)
+
     def rules(self):
         self.say("1 of 6 start game with ~roque.")
         self.say("2 of 6 when the acronym comes up, type /msg " + NICK + " your version of what the acronym stands for.")
@@ -109,11 +127,7 @@ class Cortex:
 
     def getnames(self):
         self.gettingnames = True
-        self.sock.send('NAMES '+ CHANNELINIT + '\n')
-
-    def endacro(self):
-        if self.acro:
-            self.acro.endgame()
+        self.sock.send('NAMES '+ CHANNEL + '\n')
 
     def calc(self):
         if not self.values:
@@ -138,11 +152,11 @@ class Cortex:
         self.say("Chirp chirp. Chirp Chirp.")
 
         # The behavior below is known to be highly obnoxious
-        # self.say("\001ACTION is bored.\001")
-        # self.say("\001ACTION " + random.choice(BOREDOM) + " " + random.choice(self.members)  + ".\001")
+        # self.act("is bored.")
+        # self.act(random.choice(BOREDOM) + " " + random.choice(self.members))
 
     def cry(self):
-        self.say("\001ACTION cries.\001")
+        self.act("cries.")
 
     def learnword(self):
     
@@ -226,6 +240,25 @@ class Cortex:
     def acroengine(self):
   
         if self.acro:
+            if self.values:
+                action = self.values[0]
+                if action == "pause":
+                    if self.acro.wait:
+                        self.acro.paused = True
+                        self.say("Game paused")
+                    else:
+                        self.say("You can only pause between rounds.")
+                        
+                elif action == "resume":
+                    self.acro.paused = False
+                    self.say("Game on")
+                elif action == "end": 
+                    self.acro.killgame = True
+                else:
+                    self.say("Not a valid action")
+
+                return
+            
             self.say("Already a game in progress")
             return
                    
@@ -282,7 +315,7 @@ class Cortex:
 
     def love(self):
         if self.values and self.values[0] == "self":
-            self.say("\001ACTION masturbates vigorously.\001")
+            self.act("masturbates vigorously.")
         else:
             self.say(NICK + " cannot love. " + NICK + " is only machine :'(")
 
@@ -307,38 +340,19 @@ class Cortex:
         self.say(random.choice(lines))
 
     def say(self,message,whom = False):
-        if not whom or self.context == CHANNELINIT:
-            whom = CHANNELINIT
+        if not whom or self.context == CHANNEL:
+            whom = CHANNEL
         self.sock.send('PRIVMSG '+ whom +' :' + str(message) + '\n')
+
+    def act(self,message,whom = False):
+        message = "\001ACTION " + message + "\001"
+        self.say(message,whom)
 
     def default(self):
         self.say(NICK + " cannot do this thing :'(")
 
     def showsettings(self):
-        for line in open("settings.py"):
-            if line.strip() == "# STOP":
-                return
-            self.say(line.strip())
-
-    def showlist(self):
-        list = [
-            "~help <show this message>",
-            "~love <command " + NICK + " to love>",
-            "~distaste <command " + NICK + " to express disastisfaction>",
-            "~distaste url <expand " + NICK + "'s to disastisfaction repertoire>",
-            "~settings <show current settings>",
-            "~update SETTING_NAME value <change a setting>",
-            "~roque <start acro game>",
-            "~think ABC <come up with an acronym for submitted letters>",
-            "~learnword someword <add a word to bot's acronym library>",
-            "~boards <show cumulative acronym game scores>",
-            "~reload <reload libraries>",
-            "~reboot <guess>",
-        ]
-
-        for command in list:
-            self.say(command)
-
-
+        for name,value in SAFESET:
+            self.say(name + " : " + str(value),self.lastsender)
 
 

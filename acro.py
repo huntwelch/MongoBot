@@ -13,17 +13,6 @@ class Acro(threading.Thread):
         threading.Thread.__init__(self)
         self.mongo = mongo
     
-    def endgame(self):
-        # clear data
-        self.contenders = []
-        self.voters = []
-
-        # shut 'er down
-        self.mongo.say("Game over.")
-        self.mongo.acro = False
-        sys.exit()
-
-
     def gimper(self,check,action,penalty):
  
         gimps = []
@@ -54,7 +43,20 @@ class Acro(threading.Thread):
 
             self.mongo.say(target + " " + random.choice(use) + " and will be docked " + str(penalty) + " points for not " + action + ".")
                     
+    def endgame(self):
+        # clear data
+        self.contenders = []
+        self.voters = []
+
+        # shut 'er down
+        self.mongo.say("Game over.")
+        self.mongo.acro = False
+        sys.exit()
+
     def input(self,message,SelfSub=False):
+        if self.paused:
+            self.mongo.say("Game is paused.")
+            return
 
         if not SelfSub:
             sender = message[0][1:].split('!')[0]
@@ -156,10 +158,18 @@ class Acro(threading.Thread):
         self.players = []
         self.gimps = {}
         self.SelfSubbed = False 
+        self.paused = False 
+        self.killgame = False 
 
         self.mongo.say("New game commencing in " + str(BREAK) + " seconds")
 
         while True:
+            if self.paused:
+                continue
+
+            if self.killgame:
+                self.endgame()
+
             self.current = mktime(localtime())
 
             if self.wait:
