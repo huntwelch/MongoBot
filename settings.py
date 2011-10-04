@@ -4,7 +4,7 @@ from math import *
  
 HOST = "irc.freenode.net"
 PORT = 6667
-NICK = "MongoBot"
+NICK = "GhostOfKen"
 CHANNEL = "#okdrink"
  
 # Directory settings
@@ -40,10 +40,10 @@ REALNAME = "macrotic"
 OWNER = "chiyu"
 
 SAFESET = [
-    ('Bot settings',''),
+    ('Bot settings',':'),
     ('SHORTENER','"' + SHORTENER + '"'),
     ('PATIENCE',PATIENCE),
-    ('NICK','"' + NICK + '"'),
+    ('NICK','"' + NICK + '"'),  
     ('CHANNEL','"' + CHANNEL + '"'),
     ('HOST','"' + HOST + '"'),
     ('PORT',PORT),

@@ -24,6 +24,7 @@ class Cortex:
         self.sock = master.sock
         self.gettingnames = True 
         self.members = [] 
+        self.memories = False
         self.boredom = int(mktime(localtime())) 
         self.namecheck = int(mktime(localtime())) 
         self.safe_calc = dict([ (k, locals().get(k, f)) for k,f in SAFE])
@@ -63,7 +64,6 @@ class Cortex:
             self.boredom = int(mktime(localtime())) 
             if random.randint(1,10) == 7:
                 self.bored()
-
     
     def command(self,sender,cmd):
         components = cmd.split()
@@ -100,6 +100,12 @@ class Cortex:
             "whatvinaylost":self.whine,    
             "say":self._say,    
             "act":self._act,    
+            "somethingabout":self.somethingabout,    
+            "mem":self.somethingabout,    
+            "next":self.next,    
+            "prev":self.prev,    
+            "oldest":self.oldest,    
+            "latest":self.latest,    
         }.get(what,self.default)()
 
     def showlist(self):
@@ -110,16 +116,88 @@ class Cortex:
             "~distaste url <expand " + NICK + "'s to disastisfaction repertoire>",
             "~settings <show current settings>",
             "~update SETTING_NAME value <change a setting>",
+            "~rules <print the rules for the acro game>",
             "~roque [pause|resume|end] <start acro game>",
             "~think ABC <come up with an acronym for submitted letters>",
             "~learnword someword <add a word to bot's acronym library>",
-            "~boards <show cumulative acronym game scores>",
+            "~boards <show cumulative acro game scores>",
+            "~calc <show available python math functions>",
+            "~calc equation <run a simple calculation>",
+            "~mem <search logs for phrase and print the most recent>",
+            "~next <after mem, get the next phrase memory>",
+            "~prev <after mem, get the previous phrase memory>",
+            "~latest <after mem, get the latest phrase memory>",
+            "~oldest <you see where this is going>",
+            "~mom <randomly reprint a message containing 'mom'>",
             "~reload <reload libraries>",
             "~reboot <guess>",
         ]
 
         for command in list:
-            self.say(command)
+            sleep(1)
+            self.say(command,self.lastsender)
+
+    def somethingabout(self):
+        if not self.values:
+            self.say("Something about what?")
+            return
+
+        self.say("Recalling...")
+        self.memories = []
+        thinkingof = ' '.join(self.values)
+        for line in open(LOG):
+            if line.find(thinkingof) != -1:
+                try:
+                    whom,message = line[1:].split(":",1)
+                except:
+                    continue
+                if message.find("~somethingabout") == 0:
+                    continue
+                whom = whom.split("!")[0]
+                self.memories.append(whom + ": " + message)
+        self.memories.pop()
+        self.mempoint = len(self.memories) - 1 
+        self.remember()
+
+    def remember(self):
+        self.say(self.memories[self.mempoint])
+
+    def nomem(self):
+        if not self.memories:
+            self.say("Nothing in memory.")
+            return True
+        else:
+            return False
+
+    def next(self):
+        if self.nomem():
+            return
+        if self.mempoint == len(self.memories) - 1:
+            self.say("That's the most recent thing I can remember.")
+            return
+        self.mempoint += 1
+        self.remember()
+
+    def prev(self):
+        if self.nomem():
+            return
+        if self.mempoint == 0: 
+            self.say("That's as far back as I can remember.")
+            return
+        self.mempoint -= 1
+        self.remember()
+
+    def oldest(self):
+        if self.nomem():
+            return
+        self.mempoint = 0
+        self.remember()
+        
+    def latest(self):
+        if self.nomem():
+            return
+        self.mempoint = len(self.memories) - 1 
+        self.remember()
 
     def whine(self):
         self.say("Yep. Vinay used to have 655 points at 16 points per round. Now they're all gone, due to technical issues. Poor, poor baby.")
@@ -189,6 +267,14 @@ class Cortex:
 
     def cry(self):
         self.act("cries.")
+
+    def define(self):
+        if len(self.values) != 2:
+            self.say("Please submit a word and its possible parts of speech")
+            return
+
+        word = self.values[0]
+        parts = list(self.values[1])
 
     def learnword(self):
     
@@ -319,8 +405,14 @@ class Cortex:
         if content[:1] == "~":
             self.command(nick,content)
 
-        if content.find("mom") != -1:
+        if "mom" in content.translate(string.maketrans("",""), string.punctuation).split():
             open(BRAIN + "/mom.log",'a').write(content + '\n')
+
+        if content.lower().find("oh snap") != -1:
+            if nick.lower().find("cross") != -1:
+                self.say("[crickets]")
+            else:
+                self.say("yeah WHAT?? Oh yes he DID")
      
     def update(self):
 
@@ -336,7 +428,17 @@ class Cortex:
 
         setting,value = pull.split(' ',1)
 
-        rewrite = "sed 's/" + setting + ".*/" + setting + " = " + value + "/'"
+        safe = False
+        for safesetting,val in SAFESET:
+            if setting == safesetting:
+                safe = True
+                break;
+
+        if not safe:
+            self.say("That's not a safe value to change.")
+            return
+
+        rewrite = "sed 's/" + setting + " =.*/" + setting + " = " + value + "/'"
         targeting = ' <settings.py >tmp'
         reset = 'mv tmp settings.py'
 
@@ -385,6 +487,7 @@ class Cortex:
 
     def showsettings(self):
         for name,value in SAFESET:
+            sleep(1)
             self.say(name + " : " + str(value),self.lastsender)
 
 
