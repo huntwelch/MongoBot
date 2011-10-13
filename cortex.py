@@ -9,8 +9,9 @@ import urllib2
 import urllib
 from time import *
 
-import acro,settings
+import acro,settings,redmine
 from acro import Acro
+from redmine import Redmine
 from math import * 
 from settings import *
 
@@ -28,6 +29,14 @@ class Cortex:
         self.boredom = int(mktime(localtime())) 
         self.namecheck = int(mktime(localtime())) 
         self.safe_calc = dict([ (k, locals().get(k, f)) for k,f in SAFE])
+        self.redmine = Redmine(self)
+
+    def reload(self):
+        reload(acro)
+        reload(redmine)
+        from acro import Acro
+        from redmine import Redmine
+        self.redmine = Redmine(self)
 
     def monitor(self,sock):
         line = self.sock.recv(500)
@@ -78,16 +87,10 @@ class Cortex:
         self.lastsender = sender    
 
         {
+            # General
             "help":self.showlist,    
-            "distaste":self.distaste,    
-            "reboot":self.master.die,
-            "reload":self.master.reload,    
-            "update":self.update,    
-            "roque":self.acroengine,    
-            "acro":self.acroengine,    
             "love":self.love,    
             "hate":self.hate,    
-            "boards":self.boards,    
             "think":self.think,    
             "settings":self.showsettings,    
             "learnword":self.learnword,    
@@ -95,54 +98,86 @@ class Cortex:
             "calc":self.calc,    
             "bored":self.bored,    
             "register":self.getnames,    
-            "rules":self.rules,    
-            "mom":self.mom,    
-            "whatvinaylost":self.whine,    
             "say":self._say,    
             "act":self._act,    
+            "munroesecurity":self.password,    
+
+            # Memory
             "somethingabout":self.somethingabout,    
             "mem":self.somethingabout,    
             "next":self.next,    
             "prev":self.prev,    
             "oldest":self.oldest,    
             "latest":self.latest,    
+
+            # Acro
+            "roque":self.acroengine,    
+            "acro":self.acroengine,    
+            "boards":self.boards,    
+            "rules":self.rules,    
+
+            # System
+            "update":self.update,    
+            "reboot":self.master.die,
+            "reload":self.master.reload,    
+
+            # Redmine
+            "hot":self.redmine.showhotfix,
+            "tickets":self.redmine.showtickets,
+            "register":self.redmine.register,
+            "assign":self.redmine.assignment,
+            "snag":self.redmine.assignment,
+            "detail":self.redmine.showdetail,
+
+            # Nerf out for work bots
+            "distaste":self.distaste,    
+            "mom":self.mom,    
+            "whatvinaylost":self.whine,    
         }.get(what,self.default)()
 
     def showlist(self):
         list = [
             "~help <show this message>",
+            "~register [api key] <register your redmine api key with MongoBot>",
+            "~hot <display all unassigned hotfixes>",
+            "~detail [ticket number] <get a ticket description>",
+            "~snag [ticket number] <assign a ticket to yourself>",
+            "~assign [user nick] [ticket number] <assign a ticket to someone else>",
+            "~tickets [user; optional] <show assigned tickets for user>",
             "~love <command " + NICK + " to love>",
-            "~distaste <command " + NICK + " to express disastisfaction>",
-            "~distaste url <expand " + NICK + "'s to disastisfaction repertoire>",
             "~settings <show current settings>",
             "~update SETTING_NAME value <change a setting>",
-            "~rules <print the rules for the acro game>",
-            "~roque [pause|resume|end] <start acro game>",
             "~think ABC <come up with an acronym for submitted letters>",
             "~learnword someword <add a word to bot's acronym library>",
-            "~boards <show cumulative acro game scores>",
             "~calc <show available python math functions>",
             "~calc equation <run a simple calculation>",
-            "~mem <search logs for phrase and print the most recent>",
+            "~somethingabout <search logs for phrase and print the most recent>",
             "~next <after mem, get the next phrase memory>",
             "~prev <after mem, get the previous phrase memory>",
             "~latest <after mem, get the latest phrase memory>",
             "~oldest <you see where this is going>",
-            "~mom <randomly reprint a message containing 'mom'>",
             "~reload <reload libraries>",
             "~reboot <guess>",
+
+            # Nerf out for work bots
+            "~rules <print the rules for the acro game>",
+            "~roque [pause|resume|end] <start acro game>",
+            "~boards <show cumulative acro game scores>",
+            "~mom <randomly reprint a message containing 'mom'>",
+            "~distaste <command " + NICK + " to express disastisfaction>",
+            "~distaste url <expand " + NICK + "'s to disastisfaction repertoire>",
         ]
 
         for command in list:
             sleep(1)
-            self.say(command,self.lastsender)
+            self.chat(command,self.lastsender)
 
     def somethingabout(self):
         if not self.values:
-            self.say("Something about what?")
+            self.chat("Something about what?")
             return
 
-        self.say("Recalling...")
+        self.chat("Recalling...")
         self.memories = []
         thinkingof = ' '.join(self.values)
         for line in open(LOG):
@@ -160,11 +195,11 @@ class Cortex:
         self.remember()
 
     def remember(self):
-        self.say(self.memories[self.mempoint])
+        self.chat(self.memories[self.mempoint])
 
     def nomem(self):
         if not self.memories:
-            self.say("Nothing in memory.")
+            self.chat("Nothing in memory.")
             return True
         else:
             return False
@@ -173,7 +208,7 @@ class Cortex:
         if self.nomem():
             return
         if self.mempoint == len(self.memories) - 1:
-            self.say("That's the most recent thing I can remember.")
+            self.chat("That's the most recent thing I can remember.")
             return
         self.mempoint += 1
         self.remember()
@@ -182,7 +217,7 @@ class Cortex:
         if self.nomem():
             return
         if self.mempoint == 0: 
-            self.say("That's as far back as I can remember.")
+            self.chat("That's as far back as I can remember.")
             return
         self.mempoint -= 1
         self.remember()
@@ -200,9 +235,9 @@ class Cortex:
         self.remember()
 
     def whine(self):
-        self.say("Yep. Vinay used to have 655 points at 16 points per round. Now they're all gone, due to technical issues. Poor, poor baby.")
+        self.chat("Yep. Vinay used to have 655 points at 16 points per round. Now they're all gone, due to technical issues. Poor, poor baby.")
         self.act("weeps for Vinay's points.")
-        self.say("The humanity!")
+        self.chat("The humanity!")
 
     def validate(self):
         if not self.values:
@@ -214,26 +249,26 @@ class Cortex:
 
     def _say(self):
         if self.validate():
-            self.say(" ".join(self.values))
+            self.announce(" ".join(self.values))
 
     def _act(self):
         if self.validate():
-            self.act(" ".join(self.values))
+            self.act(" ".join(self.values),True)
 
     def mom(self):
         momlines = []
         for line in open(BRAIN + "/mom.log"):
             momlines.append(line)
 
-        self.say("Hey " + random.choice(self.members) + "! " + random.choice(momlines))
+        self.announce(random.choice(momlines))
 
     def rules(self):
-        self.say("1 of 6 start game with ~roque.")
-        self.say("2 of 6 when the acronym comes up, type /msg " + NICK + " your version of what the acronym stands for.")
-        self.say("3 of 6 each word of your submission is automatically updated unless you preface it with '-', so 'do -it up' will show as 'Do it Up'.")
-        self.say("4 of 6 when the voting comes up, msg " + NICK + " with the number of your vote.")
-        self.say("5 of 6 play till the rounds are up.")
-        self.say("6 of 6 " + NICK + " plays by default. Run ~update BOTPLAY False to turn it off.")
+        self.chat("1 of 6 start game with ~roque.")
+        self.chat("2 of 6 when the acronym comes up, type /msg " + NICK + " your version of what the acronym stands for.")
+        self.chat("3 of 6 each word of your submission is automatically updated unless you preface it with '-', so 'do -it up' will show as 'Do it Up'.")
+        self.chat("4 of 6 when the voting comes up, msg " + NICK + " with the number of your vote.")
+        self.chat("5 of 6 play till the rounds are up.")
+        self.chat("6 of 6 " + NICK + " plays by default. Run ~update BOTPLAY False to turn it off.")
 
     def getnames(self):
         self.gettingnames = True
@@ -246,20 +281,20 @@ class Cortex:
                 if f != None:
                     printout.append(n)
 
-            self.say("Available functions: " + ", ".join(printout))
+            self.chat("Available functions: " + ", ".join(printout))
             return
         try:
             result = eval(' '.join(self.values),{"__builtins__":None},self.safe_calc)
         except:
             result = NICK + " not smart enough to do that."
 
-        self.say(result,self.lastsender)
+        self.chat(result)
 
     def bored(self):
         if not self.members:
             return
 
-        self.say("Chirp chirp. Chirp Chirp.")
+        self.announce("Chirp chirp. Chirp Chirp.")
 
         # The behavior below is known to be highly obnoxious
         # self.act("is bored.")
@@ -270,7 +305,7 @@ class Cortex:
 
     def define(self):
         if len(self.values) != 2:
-            self.say("Please submit a word and its possible parts of speech")
+            self.chat("Please submit a word and its possible parts of speech")
             return
 
         word = self.values[0]
@@ -281,19 +316,19 @@ class Cortex:
         banned = []
 
         if self.lastsender in banned:
-            self.say("My daddy says not to listen to you.",self.lastsender)
+            self.chat("My daddy says not to listen to you.")
             return
 
         if not self.values:
-            self.say(NICK + " ponders the emptiness of meaning.",self.lastsender)
+            self.chat(NICK + " ponders the emptiness of meaning.")
             return
         
         if not re.match("^[A-Za-z]+$",self.values[0].strip()):
-            self.say(NICK + " doesn't think that's a word.",self.lastsender)
+            self.chat(NICK + " doesn't think that's a word.")
             return
             
         open(BRAIN + "/natword",'a').write(self.values[0].strip() + '\n')
-        self.say(NICK + " learn new word!",self.lastsender)
+        self.chat(NICK + " learn new word!",self.lastsender)
 
     def acronymit(self,base):
  
@@ -314,21 +349,36 @@ class Cortex:
 
         return " ".join(output)
 
+    def password(self):
+ 
+        output = []
+        wordbank = []
+        for line in open(BRAIN + "/" + ACROLIB):
+            wordbank.append(line.strip())
+
+        count = 0
+        while count < 4:
+            word = random.choice(wordbank).lower()
+            output.append(word)
+            count += 1
+
+        self.chat(" ".join(output))
+
     def think(self):
         if not self.values:
-            self.say("About what?",self.lastsender)
+            self.chat("About what?")
             return
 
         if not re.match("^[A-Za-z]+$",self.values[0]) and self.lastsender == "erikbeta":
-            self.say("Fuck off erik.",self.lastsender)
+            self.chat("Fuck off erik.")
             return
 
         if not re.match("^[A-Za-z]+$",self.values[0]):
-            self.say(NICK + " no want to think about that.",self.lastsender)
+            self.chat(NICK + " no want to think about that.")
             return
 
         output = self.acronymit(self.values[0])
-        self.say(output,self.lastsender)
+        self.chat(output)
 
 
     def boards(self):
@@ -353,7 +403,7 @@ class Cortex:
             score = scores[player]['score']
             average = score/scores[player]['rounds']
 
-            self.say(player + ": " + str(score) + " (" + str(average) + " per round)")
+            self.chat(player + ": " + str(score) + " (" + str(average) + " per round)")
 
     def acroengine(self):
   
@@ -363,21 +413,21 @@ class Cortex:
                 if action == "pause":
                     if self.acro.wait:
                         self.acro.paused = True
-                        self.say("Game paused")
+                        self.announce("Game paused")
                     else:
-                        self.say("You can only pause between rounds.")
+                        self.chat("You can only pause between rounds.")
                         
                 elif action == "resume":
                     self.acro.paused = False
-                    self.say("Game on")
+                    self.announce("Game on")
                 elif action == "end": 
                     self.acro.killgame = True
                 else:
-                    self.say("Not a valid action")
+                    self.chat("Not a valid action")
 
                 return
             
-            self.say("Already a game in progress")
+            self.chat("Already a game in progress")
             return
                    
         self.acro = Acro(self)
@@ -400,7 +450,7 @@ class Cortex:
             return
     
         if content.find(NICK + " sucks") != -1:
-            self.say(nick + "'s MOM sucks")
+            self.chat(nick + "'s MOM sucks")
 
         if content[:1] == "~":
             self.command(nick,content)
@@ -410,20 +460,20 @@ class Cortex:
 
         if content.lower().find("oh snap") != -1:
             if nick.lower().find("cross") != -1:
-                self.say("[crickets]")
+                self.announce("[crickets]")
             else:
-                self.say("yeah WHAT?? Oh yes he DID")
+                self.announce("yeah WHAT?? Oh yes he DID")
      
     def update(self):
 
         if not self.values or len(self.values) != 2:
-            self.say("Must name SETTING and value, please")
+            self.chat("Must name SETTING and value, please")
             return
 
         pull = ' '.join(self.values)
 
         if pull.find("'") != -1 or pull.find("\\") != -1 or pull.find("`") != -1:
-            self.say("No single quotes, backtics, or backslashes, thank you.")
+            self.chat("No single quotes, backtics, or backslashes, thank you.")
             return
 
         setting,value = pull.split(' ',1)
@@ -435,7 +485,7 @@ class Cortex:
                 break;
 
         if not safe:
-            self.say("That's not a safe value to change.")
+            self.chat("That's not a safe value to change.")
             return
 
         rewrite = "sed 's/" + setting + " =.*/" + setting + " = " + value + "/'"
@@ -445,49 +495,58 @@ class Cortex:
         os.system(rewrite + targeting)
         os.system(reset)
 
-        self.say(NICK + " rewrite brain. Feel smarter.")
+        self.chat(NICK + " rewrite brain. Feel smarter.")
 
     def love(self):
+        # Nerf out for work bots
         if self.values and self.values[0] == "self":
             self.act("masturbates vigorously.")
         else:
-            self.say(NICK + " cannot love. " + NICK + " is only machine :'(")
+            self.chat(NICK + " cannot love. " + NICK + " is only machine :'(")
 
     def hate(self):
-        self.say(NICK + " knows hate. " + NICK + " hates many things.")
+        self.chat(NICK + " knows hate. " + NICK + " hates many things.")
 
     def distaste(self):
 
         if self.values:
-            
             url = urllib.quote_plus(self.values[0])
             roasted = urllib2.urlopen(SHORTENER + url).read()
 
             open(DISTASTE,'a').write(roasted + '\n')
-            self.say("Another one rides the bus")
+            self.chat("Another one rides the bus")
             return
 
         lines = []
         for line in open(DISTASTE):
             lines.append(line)
          
-        self.say(random.choice(lines))
+        self.chat(random.choice(lines))
 
-    def say(self,message,whom = False):
-        if not whom or self.context == CHANNEL:
+    def announce(self,message,whom = False):
+        self.sock.send('PRIVMSG '+ CHANNEL +' :' + str(message) + '\n')
+
+    def chat(self,message):
+        if self.context == CHANNEL:
             whom = CHANNEL
-        self.sock.send('PRIVMSG '+ whom +' :' + str(message) + '\n')
+        else:
+            whom = self.lastsender
 
-    def act(self,message,whom = False):
+        self.sock.send('PRIVMSG '+ whom +' :' + str(message) + '\n')
+       
+    def act(self,message,public = False):
         message = "\001ACTION " + message + "\001"
-        self.say(message,whom)
+        if public:
+            self.announce(message)
+        else:
+            self.chat(message)
 
     def default(self):
-        self.say(NICK + " cannot do this thing :'(")
+        self.chat(NICK + " cannot do this thing :'(")
 
     def showsettings(self):
         for name,value in SAFESET:
             sleep(1)
-            self.say(name + " : " + str(value),self.lastsender)
+            self.chat(name + " : " + str(value))
 
 

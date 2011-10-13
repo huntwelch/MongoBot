@@ -4,7 +4,7 @@ from math import *
  
 HOST = "irc.freenode.net"
 PORT = 6667
-NICK = "GhostOfKen"
+NICK = "MongoBot"
 CHANNEL = "#okdrink"
  
 # Directory settings
@@ -21,7 +21,7 @@ PATIENCE = 6000
 
 # Acro
 
-ACROLIB = "natwords"
+ACROLIB = "wordbank"
 MINLEN = 5
 MAXLEN = 7
 ROUNDS = 5
@@ -117,4 +117,12 @@ SAFE = [
     ('tan', tan),
     ('tanh',tanh),
 ]
+
+RM_URL = ""
+RM_USERS = dict(
+    hunt={"id":"89"},
+)
+
+
+
 

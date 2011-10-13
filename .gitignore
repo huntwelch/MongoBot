@@ -2,3 +2,5 @@
 *.pyc
 *.swp
 *.game
+mongo-brain/natwords
+mongo-brain/wordbank

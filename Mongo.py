@@ -6,8 +6,7 @@ import socket
 import atexit
 import os
 
-import acro,settings,cortex
-from acro import Acro
+import settings,cortex
 from settings import *
 
 class Mongo:
@@ -29,15 +28,14 @@ class Mongo:
 
     def reload(self):
         self.active = False
-        self.brain.act("strokes out.")
+        self.brain.announce("strokes out.")
         reload(settings)
         from settings import *
         reload(cortex)
-        reload(acro)
-        from acro import Acro
         self.active = True
         self.brain = cortex.Cortex(self)
-        self.brain.act("comes to.")
+        self.brain.reload()
+        self.brain.announce("comes to.")
 
     def die(self):
         sys.exit()
