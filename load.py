@@ -3,7 +3,6 @@ import mongoengine
 from mongoengine import *
 from time import sleep
 
-WORDNIK_API = "62d747d2294f2fda6112d43604f273e0aefd2d839a2c257c9"
 wapi = wordnik.Wordnik(api_key=WORDNIK_API)
 
 mongoengine.connect('bot','bot','asdfqwer')
