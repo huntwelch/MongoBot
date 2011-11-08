@@ -7,13 +7,19 @@ import random
 import threading
 import urllib2
 import urllib
+
+from math import * 
 from time import *
 
-import acro,settings,redmine
+import acro
+import settings
+import redmine
+import broca
+
+from settings import *
 from acro import Acro
 from redmine import Redmine
-from math import * 
-from settings import *
+from broca import Broca 
 
 class Cortex:
 
@@ -30,13 +36,17 @@ class Cortex:
         self.namecheck = int(mktime(localtime())) 
         self.safe_calc = dict([ (k, locals().get(k, f)) for k,f in SAFE])
         self.redmine = Redmine(self)
+        self.broca = Broca(self)
 
     def reload(self):
         reload(acro)
         reload(redmine)
+        reload(broca)
         from acro import Acro
         from redmine import Redmine
+        from broca import Broca 
         self.redmine = Redmine(self)
+        self.broca = Broca(self)
 
     def monitor(self,sock):
         line = self.sock.recv(500)
@@ -110,12 +120,6 @@ class Cortex:
             "oldest":self.oldest,    
             "latest":self.latest,    
 
-            # Acro
-            "roque":self.acroengine,    
-            "acro":self.acroengine,    
-            "boards":self.boards,    
-            "rules":self.rules,    
-
             # System
             "update":self.update,    
             "reboot":self.master.die,
@@ -128,6 +132,16 @@ class Cortex:
             "assign":self.redmine.assignment,
             "snag":self.redmine.assignment,
             "detail":self.redmine.showdetail,
+
+            # Language
+            "whatmean":self.broca.whatmean,
+            "def":self.broca.whatmean,
+
+            # Acro
+            "roque":self.acroengine,    
+            "acro":self.acroengine,    
+            "boards":self.boards,    
+            "rules":self.rules,    
 
             # Nerf out for work bots
             "distaste":self.distaste,    
@@ -149,6 +163,7 @@ class Cortex:
             "~update SETTING_NAME value <change a setting>",
             "~think ABC <come up with an acronym for submitted letters>",
             "~learnword someword <add a word to bot's acronym library>",
+            "~whatmean someword <look up word in local database or wordnik>",
             "~calc <show available python math functions>",
             "~calc equation <run a simple calculation>",
             "~somethingabout <search logs for phrase and print the most recent>",
@@ -170,7 +185,7 @@ class Cortex:
 
         for command in list:
             sleep(1)
-            self.chat(command,self.lastsender)
+            self.chat(command)
 
     def somethingabout(self):
         if not self.values:
@@ -195,7 +210,11 @@ class Cortex:
         self.remember()
 
     def remember(self):
-        self.chat(self.memories[self.mempoint])
+        try:
+            self.chat(self.memories[self.mempoint])
+        except:
+            self.chat("Don't recall anything about that.")
+            
 
     def nomem(self):
         if not self.memories:
@@ -524,7 +543,10 @@ class Cortex:
         self.chat(random.choice(lines))
 
     def announce(self,message,whom = False):
-        self.sock.send('PRIVMSG '+ CHANNEL +' :' + str(message) + '\n')
+        try:
+            self.sock.send('PRIVMSG '+ CHANNEL +' :' + str(message) + '\n')
+        except:
+            self.sock.send('PRIVMSG '+ CHANNEL +' :Having trouble saying that for some reason\n')
 
     def chat(self,message):
         if self.context == CHANNEL:
@@ -532,7 +554,10 @@ class Cortex:
         else:
             whom = self.lastsender
 
-        self.sock.send('PRIVMSG '+ whom +' :' + str(message) + '\n')
+        try:
+            self.sock.send('PRIVMSG '+ whom +' :' + str(message) + '\n')
+        except:
+            self.sock.send('PRIVMSG '+ whom +' :Having trouble saying that for some reason\n')
        
     def act(self,message,public = False):
         message = "\001ACTION " + message + "\001"
