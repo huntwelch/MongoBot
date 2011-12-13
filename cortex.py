@@ -7,17 +7,20 @@ import random
 import threading
 import urllib2
 import urllib
+from BeautifulSoup import BeautifulSoup as soup
 
 from math import * 
 from time import *
 
-import acro
 import settings
+import acro
+import holdem 
 import redmine
 import broca
 
 from settings import *
 from acro import Acro
+from holdem import Holdem 
 from redmine import Redmine
 from broca import Broca 
 
@@ -36,16 +39,20 @@ class Cortex:
         self.namecheck = int(mktime(localtime())) 
         self.safe_calc = dict([ (k, locals().get(k, f)) for k,f in SAFE])
         self.redmine = Redmine(self)
+        self.holdem = Holdem(self)
         self.broca = Broca(self)
 
     def reload(self):
         reload(acro)
         reload(redmine)
         reload(broca)
+        reload(holdem)
         from acro import Acro
+        from holdem import Holdem 
         from redmine import Redmine
         from broca import Broca 
         self.redmine = Redmine(self)
+        self.holdem = Holdem(self)
         self.broca = Broca(self)
 
     def monitor(self,sock):
@@ -142,6 +149,15 @@ class Cortex:
             "acro":self.acroengine,    
             "boards":self.boards,    
             "rules":self.rules,    
+
+            # Holdem
+            "holdem":self.holdemengine,    
+            "bet":self.holdem.bet,    
+            "call":self.holdem.callit,    
+            "raise":self.holdem.raiseit,    
+            "pass":self.holdem.knock,    
+            "fold":self.holdem.fold,    
+            "allin":self.holdem.allin,    
 
             # Nerf out for work bots
             "distaste":self.distaste,    
@@ -424,6 +440,13 @@ class Cortex:
 
             self.chat(player + ": " + str(score) + " (" + str(average) + " per round)")
 
+    def holdemengine(self):
+        #if self.holdem:
+        #    self.chat("Already a game in progress")
+        #    return
+        
+        self.holdem.start()
+
     def acroengine(self):
   
         if self.acro:
@@ -467,6 +490,8 @@ class Cortex:
             ip = sender.split('@')[1]
         except:
             return
+
+        self.lastsender = nick
     
         if content.find(NICK + " sucks") != -1:
             self.chat(nick + "'s MOM sucks")
@@ -482,6 +507,19 @@ class Cortex:
                 self.announce("[crickets]")
             else:
                 self.announce("yeah WHAT?? Oh yes he DID")
+
+        match_urls = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+
+        urls =  match_urls.findall(content)
+        if len(urls):
+            self.linker(urls)
+             
+
+    def linker(self,urls):
+        for url in urls:
+            cont = soup(urllib.urlopen(url))
+            roasted = urllib2.urlopen(SHORTENER + url).read()
+            self.chat(cont.title.string + " @ " + roasted)
      
     def update(self):
 
@@ -548,8 +586,10 @@ class Cortex:
         except:
             self.sock.send('PRIVMSG '+ CHANNEL +' :Having trouble saying that for some reason\n')
 
-    def chat(self,message):
-        if self.context == CHANNEL:
+    def chat(self,message,target = False):
+        if target:
+            whom = target
+        elif self.context == CHANNEL:
             whom = CHANNEL
         else:
             whom = self.lastsender

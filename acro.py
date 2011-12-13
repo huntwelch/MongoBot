@@ -205,7 +205,6 @@ class Acro(threading.Thread):
                 if BOTPLAY and not self.SelfSubbed:
                     self.input(False,True)
                     self.SelfSubbed = True
-                    
 
                 if self.current > self.mark + ROUNDTIME or self.bypass:
                     if self.round == 1:
