@@ -7,6 +7,7 @@ import random
 import threading
 import urllib2
 import urllib
+import ystock 
 from BeautifulSoup import BeautifulSoup as soup
 
 from math import * 
@@ -117,6 +118,7 @@ class Cortex:
             "register":self.getnames,    
             "say":self._say,    
             "act":self._act,    
+            "q":self.stockquote,    
             "munroesecurity":self.password,    
 
             # Memory
@@ -170,6 +172,7 @@ class Cortex:
             "~help <show this message>",
             "~register [api key] <register your redmine api key with MongoBot>",
             "~hot <display all unassigned hotfixes>",
+            "~q <get stock quote>",
             "~detail [ticket number] <get a ticket description>",
             "~snag [ticket number] <assign a ticket to yourself>",
             "~assign [user nick] [ticket number] <assign a ticket to someone else>",
@@ -202,6 +205,27 @@ class Cortex:
         for command in list:
             sleep(1)
             self.chat(command)
+
+    def stockquote(self):
+        if not self.values:
+            self.chat("What stock?")
+            return
+
+        stock = self.values[0]
+        try:
+            info = ystock.get_all(stock.upper())
+        except:
+            self.chat("Couldn't find anything")
+
+        message = [stock.upper() + ": " + info["name"][1:]]
+        message.append("Current: " + str(info["price"])) 
+        message.append("Change: " + str(info["change"])) 
+        message.append("Volume: " + str(info["volume"])) 
+        message.append("Market Cap: " + str(info["market_cap"])) 
+        message.append("Dividend per Share: " + str(info["dividend_per_share"])) 
+        
+        self.chat(', '.join(message))
+
 
     def somethingabout(self):
         if not self.values:
@@ -519,7 +543,13 @@ class Cortex:
         for url in urls:
             cont = soup(urllib.urlopen(url))
             roasted = urllib2.urlopen(SHORTENER + url).read()
-            self.chat(cont.title.string + " @ " + roasted)
+
+            try:
+                title = cont.title.string
+            except:
+                title = "No page title"
+
+            self.chat(title + " @ " + roasted)
      
     def update(self):
 
