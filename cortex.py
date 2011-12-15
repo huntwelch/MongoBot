@@ -540,16 +540,21 @@ class Cortex:
              
 
     def linker(self,urls):
+
         for url in urls:
-            cont = soup(urllib.urlopen(url))
-            roasted = urllib2.urlopen(SHORTENER + url).read()
-
+            # TODO make this better
             try:
+                opener = urllib2.build_opener()
+                opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+                urlbase = opener.open(url).read()
+                urlbase = urlbase.replace("\t"," ").replace("\n"," ").strip()
+                cont = soup(urlbase)
+                roasted = urllib2.urlopen(SHORTENER + url).read()
                 title = cont.title.string
+                self.chat(title + " @ " + roasted)
             except:
-                title = "No page title"
+                self.chat("Somthin' went 'n' done fucked up")
 
-            self.chat(title + " @ " + roasted)
      
     def update(self):
 
@@ -615,6 +620,7 @@ class Cortex:
             self.sock.send('PRIVMSG '+ CHANNEL +' :' + str(message) + '\n')
         except:
             self.sock.send('PRIVMSG '+ CHANNEL +' :Having trouble saying that for some reason\n')
+
 
     def chat(self,message,target = False):
         if target:
