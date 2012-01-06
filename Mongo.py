@@ -27,15 +27,26 @@ class Mongo:
             self.brain.monitor(self.sock)
 
     def reload(self):
+
+        quiet = False
+        if not len(self.brain.values[0]):
+            self.brain.act("strokes out.")
+        else:
+            quiet = True
+            self.brain.act("strokes out.",False,OWNER)
+
         self.active = False
-        self.brain.announce("strokes out.")
         reload(settings)
         from settings import *
         reload(cortex)
         self.active = True
         self.brain = cortex.Cortex(self)
         self.brain.reload()
-        self.brain.announce("comes to.")
+
+        if not quiet:
+            self.brain.act("comes to.")
+        else:
+            self.brain.act("comes to.",False,OWNER)
 
     def die(self):
         sys.exit()

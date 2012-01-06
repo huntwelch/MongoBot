@@ -119,6 +119,8 @@ class Cortex:
             "say":self._say,    
             "act":self._act,    
             "q":self.stockquote,    
+            "g":self.google,    
+            "ety":self.ety,    
             "munroesecurity":self.password,    
 
             # Memory
@@ -173,6 +175,8 @@ class Cortex:
             "~register [api key] <register your redmine api key with MongoBot>",
             "~hot <display all unassigned hotfixes>",
             "~q <get stock quote>",
+            "~g <search google>",
+            "~ety <get etymology of word>",
             "~detail [ticket number] <get a ticket description>",
             "~snag [ticket number] <assign a ticket to yourself>",
             "~assign [user nick] [ticket number] <assign a ticket to someone else>",
@@ -205,6 +209,52 @@ class Cortex:
         for command in list:
             sleep(1)
             self.chat(command)
+
+    def ety(self):
+        if not self.values:
+            self.chat("Enter a word")
+            return
+
+        word = self.values[0]
+        url = "http://www.etymonline.com/index.php?allowed_in_frame=0&search=" + word + "&searchmode=term"
+
+        try:
+            opener = urllib2.build_opener()
+            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+            urlbase = opener.open(url).read()
+            urlbase = re.sub('\s+',' ',urlbase).strip()
+            cont = soup(urlbase)
+        except:
+            self.chat("Couldn't find anything")
+            return
+    
+        heads = cont.findAll("dt")
+        defs = cont.findAll("dd")        
+
+        if not len(defs):
+            self.chat("Couldn't find anything")
+            return
+
+        try:
+            ord = int(self.values[1])
+        except:
+            ord = 1
+
+        if ord > len(defs):
+            ord = 1
+
+        ord -= 1
+        if ord < 0:
+            ord = 0
+
+        _word = ''.join(heads[ord].findAll(text=True)).encode("utf-8")
+        _def = ''.join(defs[ord].findAll(text=True)).encode("utf-8")
+
+        self.chat("Etymology " + str(ord+1) + " of " + str(len(defs)) + " for " + _word + ": " + _def)  
+
+    def google(self):
+        
+        return
 
     def stockquote(self):
         if not self.values:
@@ -301,7 +351,7 @@ class Cortex:
     def validate(self):
         if not self.values:
             return False
-        if self.lastsender != "chiyou":
+        if self.lastsender != OWNER:
             return False
 
         return True
@@ -543,17 +593,29 @@ class Cortex:
 
         for url in urls:
             # TODO make this better
+            fubs = 0
+            title = "Couldn't get title"
+            roasted = "Couldn't roast"
+
             try:
                 opener = urllib2.build_opener()
                 opener.addheaders = [('User-agent', 'Mozilla/5.0')]
                 urlbase = opener.open(url).read()
-                urlbase = urlbase.replace("\t"," ").replace("\n"," ").strip()
+                urlbase = re.sub('\s+',' ',urlbase).strip()
                 cont = soup(urlbase)
-                roasted = urllib2.urlopen(SHORTENER + url).read()
                 title = cont.title.string
-                self.chat(title + " @ " + roasted)
             except:
-                self.chat("Somthin' went 'n' done fucked up")
+                fubs += 1
+
+            try:
+                roasted = urllib2.urlopen(SHORTENER + url).read()
+            except:
+                fubs += 1
+
+            if fubs == 2:
+                self.chat("Total fail") 
+            else:
+                self.chat(title + " @ " + roasted)
 
      
     def update(self):
@@ -635,10 +697,12 @@ class Cortex:
         except:
             self.sock.send('PRIVMSG '+ whom +' :Having trouble saying that for some reason\n')
        
-    def act(self,message,public = False):
+    def act(self,message,public = False,target = False):
         message = "\001ACTION " + message + "\001"
         if public:
             self.announce(message)
+        elif target:
+            self.chat(message,target)
         else:
             self.chat(message)
 
