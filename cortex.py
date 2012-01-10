@@ -1,4 +1,5 @@
 import socket 
+import base64
 import string 
 import simplejson as json
 import os
@@ -611,6 +612,20 @@ class Cortex:
                 roasted = urllib2.urlopen(SHORTENER + url).read()
             except:
                 fubs += 1
+
+            deli = "https://api.del.icio.us/v1/posts/add?"
+            data = urllib.urlencode({
+                "url":url,
+                "description":title,
+                "tags":"okdrink," + self.lastsender,
+            })
+            username = "okdrink"
+            password = "PGkbLJCAVfF8jhAtZD8Y"
+            base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
+
+            req = urllib2.Request(deli, data)
+            req.add_header("Authorization", "Basic %s" % base64string)
+            send = urllib2.urlopen(req)
 
             if fubs == 2:
                 self.chat("Total fail") 
