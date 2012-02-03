@@ -29,7 +29,7 @@ class Mongo:
     def reload(self):
 
         quiet = False
-        if not len(self.brain.values[0]):
+        if not self.brain.values or not len(self.brain.values[0]):
             self.brain.act("strokes out.")
         else:
             quiet = True

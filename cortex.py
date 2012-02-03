@@ -26,6 +26,8 @@ from holdem import Holdem
 from redmine import Redmine
 from broca import Broca 
 
+# TODO: standardize url grabber
+
 class Cortex:
 
     def __init__(self,master):
@@ -122,6 +124,7 @@ class Cortex:
             "q":self.stockquote,    
             "g":self.google,    
             "ety":self.ety,    
+            "anagram":self.anagram,
             "munroesecurity":self.password,    
 
             # Memory
@@ -178,6 +181,7 @@ class Cortex:
             "~q <get stock quote>",
             "~g <search google>",
             "~ety <get etymology of word>",
+            "~anagram <get anagrams of phrase>",
             "~detail [ticket number] <get a ticket description>",
             "~snag [ticket number] <assign a ticket to yourself>",
             "~assign [user nick] [ticket number] <assign a ticket to someone else>",
@@ -252,6 +256,29 @@ class Cortex:
         _def = ''.join(defs[ord].findAll(text=True)).encode("utf-8")
 
         self.chat("Etymology " + str(ord+1) + " of " + str(len(defs)) + " for " + _word + ": " + _def)  
+
+    def anagram(self):
+        if not self.values:
+            self.chat("Enter a word or phrase")
+            return
+
+        word = '+'.join(self.values)
+
+        url = "http://wordsmith.org/anagram/anagram.cgi?anagram=" + word + "&t=50&a=n"
+        try:
+            opener = urllib2.build_opener()
+            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+            urlbase = opener.open(url).read()
+            urlbase = re.sub('\s+',' ',urlbase).strip()
+            cont = soup(urlbase)
+        except:
+            self.chat("Couldn't find anything")
+            return
+            
+        paragraph = cont.findAll("p")[4]
+        content = ''.join(paragraph.findAll()).replace("<br/>",", ").encode("utf-8")
+        self.chat(content)
+
 
     def google(self):
         
@@ -693,6 +720,9 @@ class Cortex:
         self.chat(random.choice(lines))
 
     def announce(self,message,whom = False):
+
+        message = message.encode("utf-8") 
+
         try:
             self.sock.send('PRIVMSG '+ CHANNEL +' :' + str(message) + '\n')
         except:
@@ -706,6 +736,8 @@ class Cortex:
             whom = CHANNEL
         else:
             whom = self.lastsender
+
+        message = message.encode("utf-8") 
 
         try:
             self.sock.send('PRIVMSG '+ whom +' :' + str(message) + '\n')
