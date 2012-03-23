@@ -124,6 +124,7 @@ class Cortex:
             "q":self.stockquote,    
             "g":self.google,    
             "ety":self.ety,    
+            "buzz":self.buzz,    
             "anagram":self.anagram,
             "munroesecurity":self.password,    
 
@@ -181,6 +182,7 @@ class Cortex:
             "~q <get stock quote>",
             "~g <search google>",
             "~ety <get etymology of word>",
+            "~buzz <generate buzzword bullshit>",
             "~anagram <get anagrams of phrase>",
             "~detail [ticket number] <get a ticket description>",
             "~snag [ticket number] <assign a ticket to yourself>",
@@ -399,6 +401,28 @@ class Cortex:
 
         self.announce(random.choice(momlines))
 
+    def buzz(self):
+        bsv = []
+        bsa = []
+        bsn = []
+        for verb in open(BRAIN + "/bs-v"):
+            bsv.append(str(verb).strip())
+
+        for adj in open(BRAIN + "/bs-a"):
+            bsa.append(str(adj).strip())
+
+        for noun in open(BRAIN + "/bs-n"):
+            bsn.append(str(noun).strip())
+        
+        buzzed = [
+            random.choice(bsv),
+            random.choice(bsa),
+            random.choice(bsn),
+        ]
+
+        self.chat(' '.join(buzzed))
+        
+
     def rules(self):
         self.chat("1 of 6 start game with ~roque.")
         self.chat("2 of 6 when the acronym comes up, type /msg " + NICK + " your version of what the acronym stands for.")
@@ -610,9 +634,15 @@ class Cortex:
             else:
                 self.announce("yeah WHAT?? Oh yes he DID")
 
-        match_urls = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+        if content.lower().find("rimshot") != -1:
+            self.announce("*ting*")
 
-        urls =  match_urls.findall(content)
+        if content.lower().find("stop") == len(content) - 4 and len(content) != 3:
+            self.announce("Hammertime")
+
+        match_urls = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+
+        urls = match_urls.findall(content)
         if len(urls):
             self.linker(urls)
              
@@ -640,6 +670,20 @@ class Cortex:
             except:
                 fubs += 1
 
+            ext = url.split(".")[-1]
+            images = [
+                "gif",
+                "png",
+                "jpg",
+                "jpeg",
+            ]
+
+            if ext in images:
+                title = "Image"
+
+            if ext == "pdf":
+                title = "PDF Document"
+
             deli = "https://api.del.icio.us/v1/posts/add?"
             data = urllib.urlencode({
                 "url":url,
@@ -650,9 +694,13 @@ class Cortex:
             password = "PGkbLJCAVfF8jhAtZD8Y"
             base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
 
-            req = urllib2.Request(deli, data)
-            req.add_header("Authorization", "Basic %s" % base64string)
-            send = urllib2.urlopen(req)
+            try:
+                req = urllib2.Request(deli, data)
+                req.add_header("Authorization", "Basic %s" % base64string)
+                send = urllib2.urlopen(req)
+            except:
+                self.chat("(delicious is down)") 
+                
 
             if fubs == 2:
                 self.chat("Total fail") 
