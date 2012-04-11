@@ -1,28 +1,30 @@
 #!/usr/local/bin/python
 
-import sys 
-import string 
-import socket 
+import sys
+import string
+import socket
 import atexit
 import os
 
-import settings,cortex
+import settings
+import cortex
 from settings import *
+
 
 class Mongo:
 
     def __init__(self):
 
-        self.sock = socket.socket( )
+        self.sock = socket.socket()
         self.sock.connect((HOST, PORT))
-        self.sock.send('NICK '+NICK+'\n')
-        self.sock.send('USER '+IDENT+' '+HOST+' bla :'+REALNAME+'\n')
-        self.sock.send('JOIN '+CHANNEL+'\n')
+        self.sock.send('NICK ' + NICK + '\n')
+        self.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
+        self.sock.send('JOIN ' + CHANNEL + '\n')
 
         self.brain = cortex.Cortex(self)
 
         self.active = True
-    
+
         while True and self.active:
             self.brain.monitor(self.sock)
 
@@ -33,7 +35,7 @@ class Mongo:
             self.brain.act("strokes out.")
         else:
             quiet = True
-            self.brain.act("strokes out.",False,OWNER)
+            self.brain.act("strokes out.", False, OWNER)
 
         self.active = False
         reload(settings)
@@ -46,7 +48,7 @@ class Mongo:
         if not quiet:
             self.brain.act("comes to.")
         else:
-            self.brain.act("comes to.",False,OWNER)
+            self.brain.act("comes to.", False, OWNER)
 
     def die(self):
         sys.exit()
