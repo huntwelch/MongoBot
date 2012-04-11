@@ -1,26 +1,27 @@
 # Le acrobot game
 
-import string 
-import sys 
+import string
+import sys
 import random
 import threading
 from time import *
 from settings import *
 
+
 class Acro(threading.Thread):
-    
-    def __init__(self,mongo):
+
+    def __init__(self, mongo):
         threading.Thread.__init__(self)
         self.mongo = mongo
-    
-    def gimper(self,check,action,penalty):
- 
+
+    def gimper(self, check, action, penalty):
+
         gimps = []
         for player in self.players:
             if player not in check:
                 gimps.append(player)
 
-        use = INSULT 
+        use = INSULT
 
         if gimps:
             trail = 0
@@ -28,7 +29,7 @@ class Acro(threading.Thread):
             for gimp in gimps:
                 post = ""
                 if trail == 1:
-                    use = INSULTS 
+                    use = INSULTS
                     post = " and "
                 elif trail > 1:
                     post = ", "
@@ -37,12 +38,14 @@ class Acro(threading.Thread):
                     self.gimps[gimp] += penalty
                 else:
                     self.gimps[gimp] = penalty
-                        
+
                 target = gimp + post + target
                 trail += 1
 
-            self.mongo.announce(target + " " + random.choice(use) + " and will be docked " + str(penalty) + " points for not " + action + ".")
-                    
+            self.mongo.announce(target + " " + random.choice(use) +
+                    " and will be docked " + str(penalty) +
+                    " points for not " + action + ".")
+
     def endgame(self):
         # clear data
         self.contenders = []
@@ -55,7 +58,7 @@ class Acro(threading.Thread):
         self.paused = False
         sys.exit()
 
-    def input(self,message,SelfSub=False):
+    def input(self, message, SelfSub=False):
         if self.paused:
             self.mongo.announce("Game is paused.")
             return
@@ -64,7 +67,7 @@ class Acro(threading.Thread):
             sender = message[0][1:].split('!')[0]
             entry = message[3][1:]
         else:
-            sender = NICK 
+            sender = NICK
             entry = self.mongo.acronymit(self.currentacronym)
 
         if sender not in self.players and self.round != 1:
@@ -76,7 +79,7 @@ class Acro(threading.Thread):
 
             for line in open(self.record):
                 try:
-                    current,subber,timed,what = line.split(":",3)
+                    current, subber, timed, what = line.split(":", 3)
                 except:
                     continue
 
@@ -88,8 +91,8 @@ class Acro(threading.Thread):
             if not SelfSub:
                 TIME = int(mktime(localtime()) - self.mark)
             else:
-                TIME = int(ROUNDTIME/2)
-            
+                TIME = int(ROUNDTIME / 2)
+
             words = entry.split()
             temp = []
             for word in words:
@@ -97,12 +100,12 @@ class Acro(threading.Thread):
                     temp.append(word[1:])
                 else:
                     temp.append(word.capitalize())
-                    open(BRAIN + "/natwords",'a').write(word.capitalize() + "\n")
-            
+                    open(BRAIN + "/natwords", 'a').write(word.capitalize() + "\n")
+
             entry = ' '.join(temp)
 
             er = str(self.round) + ":" + sender + ":" + str(TIME) + ":" + entry + "\n"
-            open(self.record,'a').write(er)
+            open(self.record, 'a').write(er)
             numplayers = len(self.players)
             received = entries + 1
 
@@ -111,11 +114,11 @@ class Acro(threading.Thread):
                 addition = str(numplayers - received) + " more to go."
 
             if not SelfSub:
-                self.mongo.announce("Entry recieved at " + str(TIME) + " seconds. " + addition) 
+                self.mongo.announce("Entry recieved at " + str(TIME) + " seconds. " + addition)
 
             if received == numplayers and self.round != 1:
                 self.bypass = True
-            elif self.round == 1: 
+            elif self.round == 1:
                 self.players.append(sender)
 
         elif self.voting:
@@ -123,19 +126,19 @@ class Acro(threading.Thread):
                 self.voters.append(NICK)
 
             if len(self.players) < MIN_PLAYERS:
-                self.mongo.announce("Need at least" + str(MIN_PLAYERS) + " players. Sorry.") 
+                self.mongo.announce("Need at least" + str(MIN_PLAYERS) + " players. Sorry.")
 
             try:
                 vote = int(entry)
             except:
-                return 
+                return
 
-            if sender == self.contenders[vote-1]["player"]:
+            if sender == self.contenders[vote - 1]["player"]:
                 self.mongo.announce(sender + " tried to vote for himself. What a bitch.")
                 return
 
             try:
-                self.contenders[vote-1]["votes"] += 1
+                self.contenders[vote - 1]["votes"] += 1
                 self.voters.append(sender)
                 if len(self.voters) == len(self.players):
                     self.bypass = True
@@ -145,7 +148,7 @@ class Acro(threading.Thread):
     def run(self):
 
         self.record = ACROSCORE + strftime('%Y-%m-%d-%H%M') + '.game'
-        open(self.record ,'w')
+        open(self.record, 'w')
         self.round = 1
         self.cumulative = {}
         self.start = mktime(localtime())
@@ -159,9 +162,9 @@ class Acro(threading.Thread):
         self.voters = []
         self.players = []
         self.gimps = {}
-        self.SelfSubbed = False 
-        self.paused = False 
-        self.killgame = False 
+        self.SelfSubbed = False
+        self.paused = False
+        self.killgame = False
 
         self.mongo.announce("New game commencing in " + str(BREAK) + " seconds")
 
@@ -185,14 +188,15 @@ class Acro(threading.Thread):
                         letters.extend(addition)
 
                     acronym = ""
-                    length = random.randint(MINLEN,MAXLEN)
-                    for i in range(1,length):
+                    length = random.randint(MINLEN, MAXLEN)
+                    for i in range(1, length):
                         acronym = acronym + random.choice(letters).upper()
 
                     self.currentacronym = acronym
                     self.submit = True
                     self.mark = mktime(localtime())
-                    self.mongo.announce("Round " + str(self.round) + " commencing! Acronym is " + acronym)
+                    self.mongo.announce("Round " + str(self.round) +
+                            " commencing! Acronym is " + acronym)
                     continue
 
             if self.submit:
@@ -203,7 +207,7 @@ class Acro(threading.Thread):
                     continue
 
                 if BOTPLAY and not self.SelfSubbed:
-                    self.input(False,True)
+                    self.input(False, True)
                     self.SelfSubbed = True
 
                 if self.current > self.mark + ROUNDTIME or self.bypass:
@@ -223,31 +227,31 @@ class Acro(threading.Thread):
                     submitters = []
                     for line in open(self.record):
                         try:
-                            r,s,t,c = line.split(":",3)
+                            r, s, t, c = line.split(":", 3)
                         except:
                             continue
 
                         if int(r) == self.round:
                             submitters.append(s)
                             self.contenders.append({
-                                "player":s,
-                                "time":t,
-                                "entry":c.strip(),
-                                "votes":0,
+                                "player": s,
+                                "time": t,
+                                "entry": c.strip(),
+                                "votes": 0,
                             })
-                    
-                    random.shuffle(self.contenders)                    
+
+                    random.shuffle(self.contenders)
                     item = 1
-                    for submission in self.contenders: 
+                    for submission in self.contenders:
                         self.mongo.announce(str(item) + ": " + submission["entry"])
                         item += 1
-                    
+
                     if not self.contenders:
                         self.mongo.announce("Don't waste my friggin time")
                         sys.exit()
-                    
+
                     if self.round != 1:
-                        self.gimper(submitters,"submitting",NO_ACRO_PENALTY)
+                        self.gimper(submitters, "submitting", NO_ACRO_PENALTY)
 
                     self.mongo.announce("You have " + str(VOTETIME) + " seconds to vote.")
                     self.mark = mktime(localtime())
@@ -262,7 +266,7 @@ class Acro(threading.Thread):
                     self.bypass = False
                     self.voting = False
                     self.mongo.announce("Votes are in. The results:")
-                            
+
                     for r in self.contenders:
                         if r['votes'] == 0:
                             note = "dick."
@@ -273,44 +277,47 @@ class Acro(threading.Thread):
 
                         self.mongo.announce(r['player'] + "'s \"" + r['entry'] + "\" got " + note)
 
-                    self.gimper(self.voters,"voting",NO_VOTE_PENALTY)
+                    self.gimper(self.voters, "voting", NO_VOTE_PENALTY)
 
                     # calculate voting and time scores
-                    
+
                     results = {}
                     for player in self.players:
-                        results[player] = {"score":0,"votes":0,"timebonus":0}
+                        results[player] = {"score": 0,
+                                "votes": 0,
+                                "timebonus": 0}
                         if player in self.gimps:
                             results[player]["score"] -= self.gimps[player]
-                        
+
                     for r in self.contenders:
                         if r['votes'] != 0:
-                            results[r['player']]['score'] += r['votes'] * 10 
+                            results[r['player']]['score'] += r['votes'] * 10
                             results[r['player']]['votes'] = r['votes']
-                            if int(r['time']) < ROUNDTIME/2:
-                                timebonus = int((ROUNDTIME/2 - int(r['time']))/TIME_FACTOR)
+                            if int(r['time']) < ROUNDTIME / 2:
+                                timebonus = int((ROUNDTIME / 2 - int(r['time'])) / TIME_FACTOR)
                             else:
                                 timebonus = 0
 
                             results[r['player']]['timebonus'] = timebonus
                             results[r['player']]['score'] += timebonus
 
-                    
-                    tally = "Round:" + str(self.round) + "\n"  
-                    
+                    tally = "Round:" + str(self.round) + "\n"
+
                     for result in results:
                         sc = results[result]
-                        
+
                         self.cumulative[result] += sc['score']
 
                         score = str(sc['score'])
                         bonus = str(sc['timebonus'])
                         total = str(self.cumulative[result])
 
-                        self.mongo.announce(result + " came in with " + score + " with a time bonus of " + bonus + ", for a total of " + total) 
+                        self.mongo.announce(result + " came in with " + score +
+                                " with a time bonus of " + bonus +
+                                ", for a total of " + total)
                         tally += result + " " + str(sc['score']) + " (" + str(sc['timebonus']) + ")\n"
 
-                    open(self.record,'a').write("\n" + tally + "\n")
+                    open(self.record, 'a').write("\n" + tally + "\n")
 
                     # record in game tally
 
@@ -326,5 +333,3 @@ class Acro(threading.Thread):
                     self.round += 1
                     self.wait = True
                     continue
-         
-

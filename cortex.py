@@ -1,6 +1,6 @@
-import socket 
+import socket
 import base64
-import string 
+import string
 import simplejson as json
 import os
 import re
@@ -8,40 +8,41 @@ import random
 import threading
 import urllib2
 import urllib
-import ystock 
+import ystock
 from BeautifulSoup import BeautifulSoup as soup
 
-from math import * 
+from math import *
 from time import *
 
 import settings
 import acro
-import holdem 
+import holdem
 import redmine
 import broca
 
 from settings import *
 from acro import Acro
-from holdem import Holdem 
+from holdem import Holdem
 from redmine import Redmine
-from broca import Broca 
+from broca import Broca
 
 # TODO: standardize url grabber
 
+
 class Cortex:
 
-    def __init__(self,master):
+    def __init__(self, master):
         self.acro = False
         self.values = False
         self.master = master
         self.context = CHANNEL
         self.sock = master.sock
-        self.gettingnames = True 
-        self.members = [] 
+        self.gettingnames = True
+        self.members = []
         self.memories = False
-        self.boredom = int(mktime(localtime())) 
-        self.namecheck = int(mktime(localtime())) 
-        self.safe_calc = dict([ (k, locals().get(k, f)) for k,f in SAFE])
+        self.boredom = int(mktime(localtime()))
+        self.namecheck = int(mktime(localtime()))
+        self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
         self.redmine = Redmine(self)
         self.holdem = Holdem(self)
         self.broca = Broca(self)
@@ -52,21 +53,21 @@ class Cortex:
         reload(broca)
         reload(holdem)
         from acro import Acro
-        from holdem import Holdem 
+        from holdem import Holdem
         from redmine import Redmine
-        from broca import Broca 
+        from broca import Broca
         self.redmine = Redmine(self)
         self.holdem = Holdem(self)
         self.broca = Broca(self)
 
-    def monitor(self,sock):
+    def monitor(self, sock):
         line = self.sock.recv(500)
         line = line.strip()
-        
-        currenttime = int(mktime(localtime())) 
+
+        currenttime = int(mktime(localtime()))
         if line != '':
             self.logit(line + '\n')
-        
+
         if self.gettingnames:
             if line.find("* " + CHANNEL) != -1:
                 all = line.split(":")[2]
@@ -76,8 +77,8 @@ class Cortex:
         if line.find('PING') != -1:
             self.sock.send('PONG ' + line.split()[1] + '\n')
         elif line.find('PRIVMSG') != -1:
-            self.boredom = int(mktime(localtime())) 
-            content = line.split(' ',3)
+            self.boredom = int(mktime(localtime()))
+            content = line.split(' ', 3)
             self.context = content[2]
 
             if self.acro:
@@ -85,94 +86,94 @@ class Cortex:
                     self.acro.input(content)
 
             self.parse(line)
-        
+
         if currenttime - self.namecheck > 60:
-            self.namecheck = int(mktime(localtime())) 
+            self.namecheck = int(mktime(localtime()))
             self.getnames()
 
         if currenttime - self.boredom > PATIENCE:
-            self.boredom = int(mktime(localtime())) 
-            if random.randint(1,10) == 7:
+            self.boredom = int(mktime(localtime()))
+            if random.randint(1, 10) == 7:
                 self.bored()
-    
-    def command(self,sender,cmd):
+
+    def command(self, sender, cmd):
         components = cmd.split()
         what = components.pop(0)[1:]
-    
+
         if components:
             self.values = components
         else:
             self.values = False
 
         self.logit(sender + " sent command: " + what + "\n")
-        self.lastsender = sender    
+        self.lastsender = sender
 
         {
             # General
-            "help":self.showlist,    
-            "love":self.love,    
-            "hate":self.hate,    
-            "think":self.think,    
-            "settings":self.showsettings,    
-            "learnword":self.learnword,    
-            "cry":self.cry,    
-            "calc":self.calc,    
-            "bored":self.bored,    
-            "register":self.getnames,    
-            "say":self._say,    
-            "act":self._act,    
-            "q":self.stockquote,    
-            "g":self.google,    
-            "ety":self.ety,    
-            "buzz":self.buzz,    
-            "anagram":self.anagram,
-            "munroesecurity":self.password,    
+            "help": self.showlist,
+            "love": self.love,
+            "hate": self.hate,
+            "think": self.think,
+            "settings": self.showsettings,
+            "learnword": self.learnword,
+            "cry": self.cry,
+            "calc": self.calc,
+            "bored": self.bored,
+            "register": self.getnames,
+            "say": self._say,
+            "act": self._act,
+            "q": self.stockquote,
+            "g": self.google,
+            "ety": self.ety,
+            "buzz": self.buzz,
+            "anagram": self.anagram,
+            "munroesecurity": self.password,
 
             # Memory
-            "somethingabout":self.somethingabout,    
-            "mem":self.somethingabout,    
-            "next":self.next,    
-            "prev":self.prev,    
-            "oldest":self.oldest,    
-            "latest":self.latest,    
+            "somethingabout": self.somethingabout,
+            "mem": self.somethingabout,
+            "next": self.next,
+            "prev": self.prev,
+            "oldest": self.oldest,
+            "latest": self.latest,
 
             # System
-            "update":self.update,    
-            "reboot":self.master.die,
-            "reload":self.master.reload,    
+            "update": self.update,
+            "reboot": self.master.die,
+            "reload": self.master.reload,
 
             # Redmine
-            "hot":self.redmine.showhotfix,
-            "tickets":self.redmine.showtickets,
-            "register":self.redmine.register,
-            "assign":self.redmine.assignment,
-            "snag":self.redmine.assignment,
-            "detail":self.redmine.showdetail,
+            "hot": self.redmine.showhotfix,
+            "tickets": self.redmine.showtickets,
+            "register": self.redmine.register,
+            "assign": self.redmine.assignment,
+            "snag": self.redmine.assignment,
+            "detail": self.redmine.showdetail,
 
             # Language
-            "whatmean":self.broca.whatmean,
-            "def":self.broca.whatmean,
+            "whatmean": self.broca.whatmean,
+            "def": self.broca.whatmean,
 
             # Acro
-            "roque":self.acroengine,    
-            "acro":self.acroengine,    
-            "boards":self.boards,    
-            "rules":self.rules,    
+            "roque": self.acroengine,
+            "acro": self.acroengine,
+            "boards": self.boards,
+            "rules": self.rules,
 
             # Holdem
-            "holdem":self.holdemengine,    
-            "bet":self.holdem.bet,    
-            "call":self.holdem.callit,    
-            "raise":self.holdem.raiseit,    
-            "pass":self.holdem.knock,    
-            "fold":self.holdem.fold,    
-            "allin":self.holdem.allin,    
+            "holdem": self.holdemengine,
+            "bet": self.holdem.bet,
+            "call": self.holdem.callit,
+            "raise": self.holdem.raiseit,
+            "pass": self.holdem.knock,
+            "fold": self.holdem.fold,
+            "allin": self.holdem.allin,
 
             # Nerf out for work bots
-            "distaste":self.distaste,    
-            "mom":self.mom,    
-            "whatvinaylost":self.whine,    
-        }.get(what,self.default)()
+            "distaste": self.distaste,
+            "mom": self.mom,
+            "whatvinaylost": self.whine,
+        }.get(what, self.default)()
 
     def showlist(self):
         list = [
@@ -229,14 +230,14 @@ class Cortex:
             opener = urllib2.build_opener()
             opener.addheaders = [('User-agent', 'Mozilla/5.0')]
             urlbase = opener.open(url).read()
-            urlbase = re.sub('\s+',' ',urlbase).strip()
+            urlbase = re.sub('\s+', ' ', urlbase).strip()
             cont = soup(urlbase)
         except:
             self.chat("Couldn't find anything")
             return
-    
+
         heads = cont.findAll("dt")
-        defs = cont.findAll("dd")        
+        defs = cont.findAll("dd")
 
         if not len(defs):
             self.chat("Couldn't find anything")
@@ -257,7 +258,8 @@ class Cortex:
         _word = ''.join(heads[ord].findAll(text=True)).encode("utf-8")
         _def = ''.join(defs[ord].findAll(text=True)).encode("utf-8")
 
-        self.chat("Etymology " + str(ord+1) + " of " + str(len(defs)) + " for " + _word + ": " + _def)  
+        self.chat("Etymology " + str(ord + 1) + " of " + str(len(defs)) +
+                " for " + _word + ": " + _def)
 
     def anagram(self):
         if not self.values:
@@ -271,19 +273,18 @@ class Cortex:
             opener = urllib2.build_opener()
             opener.addheaders = [('User-agent', 'Mozilla/5.0')]
             urlbase = opener.open(url).read()
-            urlbase = re.sub('\s+',' ',urlbase).strip()
+            urlbase = re.sub('\s+', ' ', urlbase).strip()
             cont = soup(urlbase)
         except:
             self.chat("Couldn't find anything")
             return
-            
+
         paragraph = cont.findAll("p")[4]
-        content = ''.join(paragraph.findAll()).replace("<br/>",", ").encode("utf-8")
+        content = ''.join(paragraph.findAll()).replace("<br/>", ", ").encode("utf-8")
         self.chat(content)
 
-
     def google(self):
-        
+
         return
 
     def stockquote(self):
@@ -298,14 +299,13 @@ class Cortex:
             self.chat("Couldn't find anything")
 
         message = [stock.upper() + ": " + info["name"][1:]]
-        message.append("Current: " + str(info["price"])) 
-        message.append("Change: " + str(info["change"])) 
-        message.append("Volume: " + str(info["volume"])) 
-        message.append("Market Cap: " + str(info["market_cap"])) 
-        message.append("Dividend per Share: " + str(info["dividend_per_share"])) 
-        
-        self.chat(', '.join(message))
+        message.append("Current: " + str(info["price"]))
+        message.append("Change: " + str(info["change"]))
+        message.append("Volume: " + str(info["volume"]))
+        message.append("Market Cap: " + str(info["market_cap"]))
+        message.append("Dividend per Share: " + str(info["dividend_per_share"]))
 
+        self.chat(', '.join(message))
 
     def somethingabout(self):
         if not self.values:
@@ -318,7 +318,7 @@ class Cortex:
         for line in open(LOG):
             if line.find(thinkingof) != -1:
                 try:
-                    whom,message = line[1:].split(":",1)
+                    whom, message = line[1:].split(":", 1)
                 except:
                     continue
                 if message.find("~somethingabout") == 0:
@@ -326,7 +326,7 @@ class Cortex:
                 whom = whom.split("!")[0]
                 self.memories.append(whom + ": " + message)
         self.memories.pop()
-        self.mempoint = len(self.memories) - 1 
+        self.mempoint = len(self.memories) - 1
         self.remember()
 
     def remember(self):
@@ -334,7 +334,6 @@ class Cortex:
             self.chat(self.memories[self.mempoint])
         except:
             self.chat("Don't recall anything about that.")
-            
 
     def nomem(self):
         if not self.memories:
@@ -355,7 +354,7 @@ class Cortex:
     def prev(self):
         if self.nomem():
             return
-        if self.mempoint == 0: 
+        if self.mempoint == 0:
             self.chat("That's as far back as I can remember.")
             return
         self.mempoint -= 1
@@ -366,11 +365,11 @@ class Cortex:
             return
         self.mempoint = 0
         self.remember()
-        
+
     def latest(self):
         if self.nomem():
             return
-        self.mempoint = len(self.memories) - 1 
+        self.mempoint = len(self.memories) - 1
         self.remember()
 
     def whine(self):
@@ -392,7 +391,7 @@ class Cortex:
 
     def _act(self):
         if self.validate():
-            self.act(" ".join(self.values),True)
+            self.act(" ".join(self.values), True)
 
     def mom(self):
         momlines = []
@@ -413,7 +412,7 @@ class Cortex:
 
         for noun in open(BRAIN + "/bs-n"):
             bsn.append(str(noun).strip())
-        
+
         buzzed = [
             random.choice(bsv),
             random.choice(bsa),
@@ -421,7 +420,6 @@ class Cortex:
         ]
 
         self.chat(' '.join(buzzed))
-        
 
     def rules(self):
         self.chat("1 of 6 start game with ~roque.")
@@ -433,19 +431,19 @@ class Cortex:
 
     def getnames(self):
         self.gettingnames = True
-        self.sock.send('NAMES '+ CHANNEL + '\n')
+        self.sock.send('NAMES ' + CHANNEL + '\n')
 
     def calc(self):
         if not self.values:
             printout = []
-            for n,f in SAFE:
+            for n, f in SAFE:
                 if f != None:
                     printout.append(n)
 
             self.chat("Available functions: " + ", ".join(printout))
             return
         try:
-            result = eval(' '.join(self.values),{"__builtins__":None},self.safe_calc)
+            result = eval(' '.join(self.values), {"__builtins__": None}, self.safe_calc)
         except:
             result = NICK + " not smart enough to do that."
 
@@ -473,7 +471,7 @@ class Cortex:
         parts = list(self.values[1])
 
     def learnword(self):
-    
+
         banned = []
 
         if self.lastsender in banned:
@@ -483,19 +481,19 @@ class Cortex:
         if not self.values:
             self.chat(NICK + " ponders the emptiness of meaning.")
             return
-        
-        if not re.match("^[A-Za-z]+$",self.values[0].strip()):
+
+        if not re.match("^[A-Za-z]+$", self.values[0].strip()):
             self.chat(NICK + " doesn't think that's a word.")
             return
-            
-        open(BRAIN + "/natword",'a').write(self.values[0].strip() + '\n')
-        self.chat(NICK + " learn new word!",self.lastsender)
 
-    def acronymit(self,base):
- 
+        open(BRAIN + "/natword", 'a').write(self.values[0].strip() + '\n')
+        self.chat(NICK + " learn new word!", self.lastsender)
+
+    def acronymit(self, base):
+
         acronym = list(base.upper())
         output = []
-        
+
         wordbank = []
         for line in open(BRAIN + "/" + ACROLIB):
             wordbank.append(line.strip())
@@ -506,12 +504,12 @@ class Cortex:
                 word = random.choice(wordbank).capitalize()
                 if word[:1] == letter:
                     output.append(word)
-                    good = True 
+                    good = True
 
         return " ".join(output)
 
     def password(self):
- 
+
         output = []
         wordbank = []
         for line in open(BRAIN + "/" + ACROLIB):
@@ -530,39 +528,38 @@ class Cortex:
             self.chat("About what?")
             return
 
-        if not re.match("^[A-Za-z]+$",self.values[0]) and self.lastsender == "erikbeta":
+        if not re.match("^[A-Za-z]+$", self.values[0]) and self.lastsender == "erikbeta":
             self.chat("Fuck off erik.")
             return
 
-        if not re.match("^[A-Za-z]+$",self.values[0]):
+        if not re.match("^[A-Za-z]+$", self.values[0]):
             self.chat(NICK + " no want to think about that.")
             return
 
         output = self.acronymit(self.values[0])
         self.chat(output)
 
-
     def boards(self):
 
-        scores = {} 
-        
+        scores = {}
+
         for path, dirs, files in os.walk(os.path.abspath(ACROSCORE)):
             for file in files:
                 for line in open(path + "/" + file):
                     if line.find(":") == -1:
                         try:
-                            player,score,toss = line.split()
+                            player, score, toss = line.split()
                             if player in scores:
                                 scores[player]['score'] += int(score)
                                 scores[player]['rounds'] += 1
                             else:
-                                scores[player] = {'score':int(score),'rounds':1}
+                                scores[player] = {'score': int(score), 'rounds': 1}
                         except:
                             continue
-        
+
         for player in scores:
             score = scores[player]['score']
-            average = score/scores[player]['rounds']
+            average = score / scores[player]['rounds']
 
             self.chat(player + ": " + str(score) + " (" + str(average) + " per round)")
 
@@ -570,11 +567,11 @@ class Cortex:
         #if self.holdem:
         #    self.chat("Already a game in progress")
         #    return
-        
+
         self.holdem.start()
 
     def acroengine(self):
-  
+
         if self.acro:
             if self.values:
                 action = self.values[0]
@@ -584,30 +581,30 @@ class Cortex:
                         self.announce("Game paused")
                     else:
                         self.chat("You can only pause between rounds.")
-                        
+
                 elif action == "resume":
                     self.acro.paused = False
                     self.announce("Game on")
-                elif action == "end": 
+                elif action == "end":
                     self.acro.killgame = True
                 else:
                     self.chat("Not a valid action")
 
                 return
-            
+
             self.chat("Already a game in progress")
             return
-                   
+
         self.acro = Acro(self)
         self.acro.start()
 
-    def logit(self,what):
-        open(LOG,'a').write(what)
+    def logit(self, what):
+        open(LOG, 'a').write(what)
 
-    def parse(self,msg):
-        info,content = msg[1:].split(':',1)
+    def parse(self, msg):
+        info, content = msg[1:].split(':', 1)
         try:
-            sender,type,room = info.strip().split()
+            sender, type, room = info.strip().split()
         except:
             return
 
@@ -618,15 +615,15 @@ class Cortex:
             return
 
         self.lastsender = nick
-    
+
         if content.find(NICK + " sucks") != -1:
             self.chat(nick + "'s MOM sucks")
 
         if content[:1] == "~":
-            self.command(nick,content)
+            self.command(nick, content)
 
-        if "mom" in content.translate(string.maketrans("",""), string.punctuation).split():
-            open(BRAIN + "/mom.log",'a').write(content + '\n')
+        if "mom" in content.translate(string.maketrans("", ""), string.punctuation).split():
+            open(BRAIN + "/mom.log", 'a').write(content + '\n')
 
         if content.lower().find("oh snap") != -1:
             if nick.lower().find("cross") != -1:
@@ -645,9 +642,8 @@ class Cortex:
         urls = match_urls.findall(content)
         if len(urls):
             self.linker(urls)
-             
 
-    def linker(self,urls):
+    def linker(self, urls):
 
         for url in urls:
             # TODO make this better
@@ -659,7 +655,7 @@ class Cortex:
                 opener = urllib2.build_opener()
                 opener.addheaders = [('User-agent', 'Mozilla/5.0')]
                 urlbase = opener.open(url).read()
-                urlbase = re.sub('\s+',' ',urlbase).strip()
+                urlbase = re.sub('\s+', ' ', urlbase).strip()
                 cont = soup(urlbase)
                 title = cont.title.string
             except:
@@ -686,9 +682,9 @@ class Cortex:
 
             deli = "https://api.del.icio.us/v1/posts/add?"
             data = urllib.urlencode({
-                "url":url,
-                "description":title,
-                "tags":"okdrink," + self.lastsender,
+                "url": url,
+                "description": title,
+                "tags": "okdrink," + self.lastsender,
             })
             username = "okdrink"
             password = "PGkbLJCAVfF8jhAtZD8Y"
@@ -699,15 +695,13 @@ class Cortex:
                 req.add_header("Authorization", "Basic %s" % base64string)
                 send = urllib2.urlopen(req)
             except:
-                self.chat("(delicious is down)") 
-                
+                self.chat("(delicious is down)")
 
             if fubs == 2:
-                self.chat("Total fail") 
+                self.chat("Total fail")
             else:
                 self.chat(title + " @ " + roasted)
 
-     
     def update(self):
 
         if not self.values or len(self.values) != 2:
@@ -720,13 +714,13 @@ class Cortex:
             self.chat("No single quotes, backtics, or backslashes, thank you.")
             return
 
-        setting,value = pull.split(' ',1)
+        setting, value = pull.split(' ', 1)
 
         safe = False
-        for safesetting,val in SAFESET:
+        for safesetting, val in SAFESET:
             if setting == safesetting:
                 safe = True
-                break;
+                break
 
         if not safe:
             self.chat("That's not a safe value to change.")
@@ -757,27 +751,26 @@ class Cortex:
             url = urllib.quote_plus(self.values[0])
             roasted = urllib2.urlopen(SHORTENER + url).read()
 
-            open(DISTASTE,'a').write(roasted + '\n')
+            open(DISTASTE, 'a').write(roasted + '\n')
             self.chat("Another one rides the bus")
             return
 
         lines = []
         for line in open(DISTASTE):
             lines.append(line)
-         
+
         self.chat(random.choice(lines))
 
-    def announce(self,message,whom = False):
+    def announce(self, message, whom=False):
 
-        message = message.encode("utf-8") 
+        message = message.encode("utf-8")
 
         try:
-            self.sock.send('PRIVMSG '+ CHANNEL +' :' + str(message) + '\n')
+            self.sock.send('PRIVMSG ' + CHANNEL + ' :' + str(message) + '\n')
         except:
-            self.sock.send('PRIVMSG '+ CHANNEL +' :Having trouble saying that for some reason\n')
+            self.sock.send('PRIVMSG ' + CHANNEL + ' :Having trouble saying that for some reason\n')
 
-
-    def chat(self,message,target = False):
+    def chat(self, message, target=False):
         if target:
             whom = target
         elif self.context == CHANNEL:
@@ -785,19 +778,19 @@ class Cortex:
         else:
             whom = self.lastsender
 
-        message = message.encode("utf-8") 
+        message = message.encode("utf-8")
 
         try:
-            self.sock.send('PRIVMSG '+ whom +' :' + str(message) + '\n')
+            self.sock.send('PRIVMSG ' + whom + ' :' + str(message) + '\n')
         except:
-            self.sock.send('PRIVMSG '+ whom +' :Having trouble saying that for some reason\n')
-       
-    def act(self,message,public = False,target = False):
+            self.sock.send('PRIVMSG ' + whom + ' :Having trouble saying that for some reason\n')
+
+    def act(self, message, public=False, target=False):
         message = "\001ACTION " + message + "\001"
         if public:
             self.announce(message)
         elif target:
-            self.chat(message,target)
+            self.chat(message, target)
         else:
             self.chat(message)
 
@@ -805,8 +798,6 @@ class Cortex:
         self.chat(NICK + " cannot do this thing :'(")
 
     def showsettings(self):
-        for name,value in SAFESET:
+        for name, value in SAFESET:
             sleep(1)
             self.chat(name + " : " + str(value))
-
-

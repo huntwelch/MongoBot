@@ -1,18 +1,19 @@
-import sys 
-import socket 
-import string 
+import sys
+import socket
+import string
 import simplejson as json
 import os
 import urllib2
 from settings import *
 
+
 class Redmine:
 
-    def __init__(self,mongo):
+    def __init__(self, mongo):
         self.mongo = mongo
 
-    def redmine(self,user,target,params=False,data=False):
-        
+    def redmine(self, user, target, params=False, data=False):
+
         try:
             apikey = open(KEYS + user + ".key").read().strip()
         except:
@@ -43,7 +44,7 @@ class Redmine:
                 return json.loads(result)
         except:
             self.mongo.chat("No API key.")
- 
+
     def showdetail(self):
 
         user = self.mongo.lastsender
@@ -55,10 +56,9 @@ class Redmine:
         ticket = self.mongo.values[0]
 
         self.mongo.chat("Retrieving details for ticket " + ticket + "...")
-        data = self.redmine(user,"issues/" + ticket)
+        data = self.redmine(user, "issues/" + ticket)
         self.mongo.chat("Link: " + RM_URL + "/issues/" + ticket)
-        self.mongo.chat(data["description"].replace("\n",""))
-
+        self.mongo.chat(data["description"].replace("\n", ""))
 
     def assignment(self):
 
@@ -74,24 +74,23 @@ class Redmine:
             target = self.mongo.values[1]
         else:
             target = False
-        
+
         if not target:
             target = user
-            
+
         self.mongo.chat("Assigning ticket " + ticket + " to " + target + "...")
         put = {
-            "issue":{
-                "assigned_to_id":RM_USERS[target]["id"]
+            "issue": {
+                "assigned_to_id": RM_USERS[target]["id"]
             }
-        }        
-        if self.redmine(user,"issues/" + ticket,False,put):
+        }
+        if self.redmine(user, "issues/" + ticket, False, put):
             self.mongo.chat("Ticket assigned")
- 
 
     def register(self):
 
         sender = self.mongo.lastsender
-        
+
         if sender not in RM_USERS:
             self.mongo.chat("You are not authorized to register.")
             return
@@ -101,10 +100,9 @@ class Redmine:
             return
 
         key = self.mongo.values[0]
-        nkey = open(KEYS + sender + ".key",'w')
+        nkey = open(KEYS + sender + ".key", 'w')
         nkey.write(components[0])
-        self.mongo.chat("API key registered.") 
-
+        self.mongo.chat("API key registered.")
 
     def showtickets(self):
 
@@ -120,14 +118,14 @@ class Redmine:
             return
 
         self.mongo.chat("Bringing it...")
-        data = self.redmine(user,"issues",{"assigned_to_id":RM_USERS[whom]["id"]})
+        data = self.redmine(user, "issues", {"assigned_to_id": RM_USERS[whom]["id"]})
         total = 0
         if data:
             for item in data:
                 total += 1
-                self.mongo.chat(RM_URL + "/issues/" 
-                         + str(item['id']) 
-                         + " " 
+                self.mongo.chat(RM_URL + "/issues/"
+                         + str(item['id'])
+                         + " "
                          + item['subject'])
 
             if total > 0:
@@ -135,26 +133,23 @@ class Redmine:
             else:
                 self.mongo.chat("No tickets assigned to " + whom)
 
- 
     def showhotfix(self):
 
         user = self.mongo.lastsender
 
         self.mongo.chat("Retrieving unassigned hotfixes...")
-        data = self.redmine(user,"issues",{"tracker_id":1})
+        data = self.redmine(user, "issues", {"tracker_id": 1})
         total = 0
         if data:
             for item in data:
                 if not item['assigned_to_id']:
                     total += 1
-                    self.mongo.chat(RM_URL + "/issues/" 
-                                          + str(item['id']) 
-                                          + " " 
+                    self.mongo.chat(RM_URL + "/issues/"
+                                          + str(item['id'])
+                                          + " "
                                           + item['subject'])
 
             if total > 0:
                 self.mongo.chat(str(total) + " in all.")
             else:
                 self.mongo.chat("No unassigned hotfixes")
-
- 
