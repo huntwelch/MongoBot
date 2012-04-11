@@ -5,7 +5,8 @@ from time import sleep
 
 wapi = wordnik.Wordnik(api_key=WORDNIK_API)
 
-mongoengine.connect('bot','bot','asdfqwer')
+mongoengine.connect('bot', 'bot', 'asdfqwer')
+
 
 class Words(mongoengine.Document):
     word = StringField(required=True)
@@ -16,7 +17,7 @@ class Words(mongoengine.Document):
 iter = 0
 entries = 0
 cutpoint = False
-record = True 
+record = True
 for line in open("mongo-brain/wordbank"):
     if not record:
         if cutpoint and line.strip() == cutpoint:
@@ -29,8 +30,8 @@ for line in open("mongo-brain/wordbank"):
     for item in results:
         try:
             definition = Words(word=item["word"],
-                               partofspeech=item["partOfSpeech"],  
-                               definition=item["text"],  
+                               partofspeech=item["partOfSpeech"],
+                               definition=item["text"],
                                source=item["sourceDictionary"])
             definition.save()
         except:
@@ -38,5 +39,3 @@ for line in open("mongo-brain/wordbank"):
         entries += 1
 
     print line.strip() + " defined. #" + str(iter) + " (" + str(entries) + ")"
-    
-

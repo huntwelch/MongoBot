@@ -10,7 +10,7 @@ from settings import *
 
 class Holdem(threading.Thread):
 
-    def __init__(self,mongo):
+    def __init__(self, mongo):
         threading.Thread.__init__(self)
         self.mongo = mongo
 
@@ -22,23 +22,22 @@ class Holdem(threading.Thread):
         self.cardpointer = 0
         self.playerpointer = 0
         self.players = {}
-        self.turn = False # set to player
+        self.turn = False  # set to player
 
         random.shuffle(self.order)
 
         for player in self.order:
             self.players[player] = {
-                "money":int(self.stake),
-                "hand":[],
-                "stake":0,
-                "status":"in", # in,folded,sitout,waiting
+                "money": int(self.stake),
+                "hand": [],
+                "stake": 0,
+                "status": "in",  # in,folded,sitout,waiting
             }
 
-
         # self.suits = ['s','h','d','c']
-        self.suits = [u'\u2660',u'\u2661',u'\u2662',u'\u2663']
+        self.suits = [u'\u2660', u'\u2661', u'\u2662', u'\u2663']
         # find with self.ordinal.index[what]
-        self.ordinal = ['2','3','4','5','6','7','8','9','10','J','Q','K','A']
+        self.ordinal = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
         self.cards = []
 
         for suit in self.suits:
@@ -79,7 +78,7 @@ class Holdem(threading.Thread):
         # clear hands
         return
 
-    def turn(self,jump = 0):
+    def turn(self, jump=0):
         return
 
     def deal(self):
@@ -92,10 +91,9 @@ class Holdem(threading.Thread):
                 self.cardpointer += 1
 
         for player in self.players:
-            self.mongo.chat(" ".join(self.players[player]["hand"]),player)
+            self.mongo.chat(" ".join(self.players[player]["hand"]), player)
 
         # self.pot = blind + blind*2
         # self.turn(2)
 
         return
-
