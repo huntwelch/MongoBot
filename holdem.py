@@ -1,28 +1,27 @@
 # Le holdem game
 
-import string 
-import sys 
+import string
+import sys
 import random
 import threading
 from time import *
 from settings import *
 
+
 class Holdem(threading.Thread):
-    
-    def __init__(self,mongo):
+
+    def __init__(self, mongo):
         threading.Thread.__init__(self)
         self.mongo = mongo
-        
 
     def run(self):
-        
+
         self.stake = self.mongo.values.pop(0)
         self.blind = 1
         self.order = self.mongo.values
         self.cardpointer = 0
         self.playerpointer = 0
         self.players = {}
-        #self.turn = False # set to player
         self.pot = 0
         self.bet = 0
         self.lastraised = False
@@ -46,19 +45,19 @@ class Holdem(threading.Thread):
         self.dealer = 0
         
         for player in self.order:
-            self.players[player] = { 
-                "money":int(self.stake),
-                "hand":[],
-                "stake":0,
-                "status":"in", # in,folded,sitout,waiting
+            self.players[player] = {
+                "money": int(self.stake),
+                "hand": [],
+                "stake": 0,
+                "status": "in",  # in,folded,sitout,waiting
             }
-        
         
         self.suits = ['s','h','d','c']
         self._suits = [u'\u2660',u'\u2661',u'\u2662',u'\u2663']
         # find with self.ordinal.index[what]
         self.ordinal = ['2','3','4','5','6','7','8','9','10','J','Q','K','A']
         self.cards = [] 
+
         for suit in self.suits:
             for ordinal in self.ordinal:
                 self.cards.append(ordinal + suit)
@@ -218,7 +217,7 @@ class Holdem(threading.Thread):
         self.mongo.announce(player + " goes all in.")
 
         return
-        
+
 
     def turn(self,jump = False):
 
@@ -256,7 +255,7 @@ class Holdem(threading.Thread):
 
         # handle initial states here
         for player in self.players:
-            self.mongo.chat(" ".join(self.players[player]["hand"]),player)
+            self.mongo.chat(" ".join(self.players[player]["hand"]), player)
 
         self.pot = self.blind + self.blind*2
         self._player(1)["money"] -= self.blind
@@ -315,3 +314,4 @@ class Holdem(threading.Thread):
         # change stage
 
         return
+

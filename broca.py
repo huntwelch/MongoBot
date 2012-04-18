@@ -1,12 +1,13 @@
 import wordnik
-import nltk 
+import nltk
 import mongoengine
 import wordnet
 from mongoengine import *
-from settings import * 
+from settings import *
 
 # http://www.nltk.org/documentation
 # http://osteele.com/projects/pywordnet/
+
 
 class Words(mongoengine.Document):
     word = StringField(required=True)
@@ -14,11 +15,12 @@ class Words(mongoengine.Document):
     definition = StringField(required=True)
     source = StringField(required=True)
 
+
 class Broca():
-    
-    def __init__(self,mongo):
+
+    def __init__(self, mongo):
         self.mongo = mongo
-        mongoengine.connect('bot','bot','asdfqwer')
+        mongoengine.connect('bot', 'bot', 'asdfqwer')
 
     def whatmean(self):
 
@@ -47,15 +49,15 @@ class Broca():
         self.mongo.chat(str(len(self.definitions)) + " definitions for " + word)
         self.mongo.chat("Definition " + str(which + 1) + ": " + definition)
 
-    def seekdef(self,word):
+    def seekdef(self, word):
         wapi = wordnik.Wordnik(api_key=WORDNIK_API)
         results = wapi.word_get_definitions(word.strip())
         count = 0
         for item in results:
             try:
                 definition = Words(word=item["word"],
-                                   partofspeech=item["partOfSpeech"],  
-                                   definition=item["text"],  
+                                   partofspeech=item["partOfSpeech"],
+                                   definition=item["text"],
                                    source=item["sourceDictionary"])
                 definition.save()
                 if count == 0:
@@ -69,8 +71,4 @@ class Broca():
             self.mongo.chat("Wordnik coughed up " + str(count) + " definitions.")
             self.mongo.chat("Definition 1:" + tempdef)
         else:
-            self.mongo.chat("I got nothin.") 
-            
-
-
-
+            self.mongo.chat("I got nothin.")

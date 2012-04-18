@@ -1,19 +1,19 @@
 from math import *
 
 # Connection Settings
- 
+
 HOST = "irc.freenode.net"
 PORT = 6667
 NICK = "MongoBot"
 CHANNEL = "#okdrink"
- 
+
 # Directory settings
 
 BRAIN = "mongo-brain"
 LOG = BRAIN + "/mongo.log"
 DISTASTE = BRAIN + "/distaste"
 ACROSCORE = BRAIN + "/acro/"
-              
+
 # Misc
 
 SHORTENER = "http://roa.st/api.php?roast="
@@ -28,40 +28,40 @@ MAXLEN = 7
 ROUNDS = 5
 ROUNDTIME = 120
 WARNING = 30
-VOTETIME = 30 
+VOTETIME = 30
 MIN_PLAYERS = 3
 TIME_FACTOR = 2
 NO_ACRO_PENALTY = 2
 NO_VOTE_PENALTY = 5
 BREAK = 15
-BOTPLAY = True 
+BOTPLAY = True
 
-IDENT = "macrotic" 
+IDENT = "macrotic"
 REALNAME = "macrotic"
 OWNER = "chiyou"
 
 SAFESET = [
-    ('Bot settings',':'),
-    ('SHORTENER','"' + SHORTENER + '"'),
-    ('PATIENCE',PATIENCE),
-    ('NICK','"' + NICK + '"'),  
-    ('CHANNEL','"' + CHANNEL + '"'),
-    ('HOST','"' + HOST + '"'),
-    ('PORT',PORT),
+    ('Bot settings', ':'),
+    ('SHORTENER', '"' + SHORTENER + '"'),
+    ('PATIENCE', PATIENCE),
+    ('NICK', '"' + NICK + '"'),
+    ('CHANNEL', '"' + CHANNEL + '"'),
+    ('HOST', '"' + HOST + '"'),
+    ('PORT', PORT),
 
-    ('Acro settings',':'),
-    ('ACROLIB',ACROLIB),
-    ('MINLEN',MINLEN),
-    ('MAXLEN',MAXLEN),
-    ('ROUNDS',ROUNDS),
-    ('ROUNDTIME',ROUNDTIME),
-    ('WARNING',WARNING),
-    ('VOTETIME',VOTETIME),
-    ('MIN_PLAYERS',MIN_PLAYERS),
-    ('NO_ACRO_PENALTY',NO_ACRO_PENALTY),
-    ('NO_VOTE_PENALTY',NO_VOTE_PENALTY),
-    ('BREAK',BREAK),
-    ('BOTPLAY',BOTPLAY),
+    ('Acro settings', ':'),
+    ('ACROLIB', ACROLIB),
+    ('MINLEN', MINLEN),
+    ('MAXLEN', MAXLEN),
+    ('ROUNDS', ROUNDS),
+    ('ROUNDTIME', ROUNDTIME),
+    ('WARNING', WARNING),
+    ('VOTETIME', VOTETIME),
+    ('MIN_PLAYERS', MIN_PLAYERS),
+    ('NO_ACRO_PENALTY', NO_ACRO_PENALTY),
+    ('NO_VOTE_PENALTY', NO_VOTE_PENALTY),
+    ('BREAK', BREAK),
+    ('BOTPLAY', BOTPLAY),
 ]
 
 INSULTS = [
@@ -116,14 +116,10 @@ SAFE = [
     ('sinh', sinh),
     ('sqrt', sqrt),
     ('tan', tan),
-    ('tanh',tanh),
+    ('tanh', tanh),
 ]
 
 RM_URL = ""
 RM_USERS = dict(
-    hunt={"id":"89"},
+    hunt={"id": "89"},
 )
-
-
-
-
