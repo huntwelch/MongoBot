@@ -161,16 +161,16 @@ class Cortex:
             "rules": self.rules,
 
             # Holdem
-            "holdem":self.holdemengine,    
-            "bet":self.holdem.firstbet,    
-            "call":self.holdem.callit,    
-            "raise":self.holdem.raiseit,    
-            "pass":self.holdem.knock,    
-            "knock":self.holdem.knock,    
-            "fold":self.holdem.fold,    
-            "allin":self.holdem.allin,    
-            "status":self.holdem.status,    
-            "pot":self.holdem.showpot,    
+            "holdem": self.holdemengine,
+            "bet": self.holdem.firstbet,
+            "call": self.holdem.callit,
+            "raise": self.holdem.raiseit,
+            "pass": self.holdem.knock,
+            "knock": self.holdem.knock,
+            "fold": self.holdem.fold,
+            "allin": self.holdem.allin,
+            "status": self.holdem.status,
+            "pot": self.holdem.showpot,
 
             # Nerf out for work bots
             "distaste": self.distaste,
