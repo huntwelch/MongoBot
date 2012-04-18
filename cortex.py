@@ -161,12 +161,15 @@ class Cortex:
 
             # Holdem
             "holdem":self.holdemengine,    
-            "bet":self.holdem.bet,    
+            "bet":self.holdem.firstbet,    
             "call":self.holdem.callit,    
             "raise":self.holdem.raiseit,    
             "pass":self.holdem.knock,    
+            "knock":self.holdem.knock,    
             "fold":self.holdem.fold,    
             "allin":self.holdem.allin,    
+            "status":self.holdem.status,    
+            "pot":self.holdem.showpot,    
 
             # Nerf out for work bots
             "distaste":self.distaste,    
@@ -654,9 +657,9 @@ class Cortex:
             fubs = 0
             title = "Couldn't get title"
             roasted = "Couldn't roast"
+            opener = urllib2.build_opener()
 
             try:
-                opener = urllib2.build_opener()
                 opener.addheaders = [('User-agent', 'Mozilla/5.0')]
                 urlbase = opener.open(url).read()
                 urlbase = re.sub('\s+',' ',urlbase).strip()
@@ -666,7 +669,7 @@ class Cortex:
                 fubs += 1
 
             try:
-                roasted = urllib2.urlopen(SHORTENER + url).read()
+                roasted = opener.open(SHORTENER + url).read()
             except:
                 fubs += 1
 
