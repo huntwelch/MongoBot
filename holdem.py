@@ -86,11 +86,15 @@ class Holdem(threading.Thread):
     # note this only happens at the beginning
     # of each betting phase. maybe combine
     # with raiseit
+
     def firstbet(self):
 
         # validate player turn
 
         player = self.mongo.lastsender
+        if player != self.order[self.playerpointer]:
+            self.mongo.chat("Not your turn")
+            return 
 
         try:
             money = self.mongo.values[0]
@@ -117,6 +121,9 @@ class Holdem(threading.Thread):
     def callit(self):
 
         player = self.mongo.lastsender
+        if player != self.order[self.playerpointer]:
+            self.mongo.chat("Not your turn")
+            return 
 
         if self.bet > self.players[player]["money"]:
             self.mongo.announce("You don't have enough money")
@@ -138,6 +145,9 @@ class Holdem(threading.Thread):
     def raiseit(self):
 
         player = self.mongo.lastsender
+        if player != self.order[self.playerpointer]:
+            self.mongo.chat("Not your turn")
+            return 
 
         try:
             money = self.mongo.values[0]
@@ -165,6 +175,9 @@ class Holdem(threading.Thread):
     def knock(self):
 
         player = self.mongo.lastsender
+        if player != self.order[self.playerpointer]:
+            self.mongo.chat("Not your turn")
+            return 
 
         if self.bet != 0 and player != self.lastraised:
             self.mongo.announce("You can't pass.")
@@ -179,6 +192,9 @@ class Holdem(threading.Thread):
     def fold(self):
 
         player = self.mongo.lastsender
+        if player != self.order[self.playerpointer]:
+            self.mongo.chat("Not your turn")
+            return 
 
         self.players[player]["status"] = "folded"
         self.mongo.announce(player + " folds.")
@@ -200,6 +216,9 @@ class Holdem(threading.Thread):
     def allin(self):
 
         player = self.mongo.lastsender
+        if player != self.order[self.playerpointer]:
+            self.mongo.chat("Not your turn")
+            return 
 
         # side pot calc
 
