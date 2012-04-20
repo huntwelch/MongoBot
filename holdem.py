@@ -17,6 +17,7 @@ class Holdem(threading.Thread):
 
     def run(self):
 
+        self.firstpassed = False 
         self.stake = self.mongo.values.pop(0)
         self.blind = 1
         self.order = self.mongo.values
@@ -97,12 +98,16 @@ class Holdem(threading.Thread):
 
     def sitin(self):
         player = self.mongo.lastsender
+        if player not in self.players:
+            self.mongo.announce("You ain't in this game, pardner")
+            return
+
         self.players[player]["status"] = "waiting"
         return
 
     def firstbet(self):
 
-        # validate player turn
+        self.firstpassed = False
 
         player = self.mongo.lastsender
         if player != self.order[self.playerpointer]:
@@ -125,9 +130,9 @@ class Holdem(threading.Thread):
         self.lastraised = player
         self.players[player]["money"] -= amount
 
-        self.mongo.announce(player + " raises the bet to " + str(amount))
+        message = player + " raises the bet to " + str(amount) + ". "
 
-        self.turn()
+        self.turn(False, message)
 
         return
 
@@ -145,9 +150,9 @@ class Holdem(threading.Thread):
         self.pot += self.bet
         self.players[player]["money"] -= self.bet
 
-        self.mongo.announce(player + " calls")
+        message = player + " calls. "
 
-        self.turn()
+        self.turn(False, message)
 
         return
 
@@ -159,6 +164,8 @@ class Holdem(threading.Thread):
             self.mongo.chat(str(self.players[player]["money"]) + ", " + self.players[player]["status"])
 
     def raiseit(self):
+
+        self.firstpassed = False
 
         player = self.mongo.lastsender
         if player != self.order[self.playerpointer]:
@@ -182,15 +189,19 @@ class Holdem(threading.Thread):
         self.lastraised = player
         self.players[player]["money"] -= amount
 
-        self.mongo.announce(player + " raises the bet to " + str(amount))
+        message = player + " raises the bet to " + str(amount) + ". "
 
-        self.turn()
+        self.turn(False, message)
 
         return
 
     def knock(self):
 
         player = self.mongo.lastsender
+
+        if not self.firstpassed:
+            self.firstpassed = player
+
         if player != self.order[self.playerpointer]:
             self.mongo.chat("Not your turn")
             return 
@@ -199,9 +210,11 @@ class Holdem(threading.Thread):
             self.mongo.announce("You can't pass.")
             return
 
-        self.mongo.announce(player + " passes.")
+        self.passes += 1
+        
+        message = player + " passes. "
 
-        self.turn()
+        self.turn(False, message)
 
         return
 
@@ -213,7 +226,7 @@ class Holdem(threading.Thread):
             return 
 
         self.players[player]["status"] = "folded"
-        self.mongo.announce(player + " folds.")
+        message = player + " folds. "
 
         remaining = 0
         for player in self.players:
@@ -225,7 +238,7 @@ class Holdem(threading.Thread):
             self.distribute(lastman)
             return
 
-        self.turn()
+        self.turn(False, message)
 
         return
 
@@ -234,6 +247,8 @@ class Holdem(threading.Thread):
         return
 
     def allin(self):
+
+        self.firstpassed = False
 
         player = self.mongo.lastsender
         if player != self.order[self.playerpointer]:
@@ -253,14 +268,16 @@ class Holdem(threading.Thread):
 
         return
 
-    def turn(self, jump=False):
+    def turn(self, jump=False, prepend = ""):
 
         self.playerpointer += jump or 1
         self.playerpointer = self.playerpointer % len(self.players)
 
-        # should be right; handles all ins, and last raised
-        # should always adhere to reality
-        if self.order[self.playerpointer] == self.lastraised:
+        while self.players[self.order[self.playerpointer]]["status"] != "in":
+            self.playerpointer += 1
+            self.playerpointer = self.playerpointer % len(self.players)
+
+        if self.order[self.playerpointer] == self.lastraised or self.order[self.playerpointer] == self.firstpassed:
 
             stillin = 0
             for player in self.players:
@@ -286,13 +303,9 @@ class Holdem(threading.Thread):
             self.stage += 1
             return
 
-        while self.players[self.order[self.playerpointer]]["status"] != "in":
-            self.playerpointer += 1
-            self.playerpointer = self.playerpointer % len(self.players)
-
         player = self.order[self.playerpointer]
 
-        self.mongo.announce(player + "'s turn.")
+        self.mongo.announce(prepend + player + "'s turn.")
         return
 
     def _player(self, offset=0):
