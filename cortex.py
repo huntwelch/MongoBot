@@ -169,6 +169,8 @@ class Cortex:
             "knock": self.holdem.knock,
             "fold": self.holdem.fold,
             "allin": self.holdem.allin,
+            "sitin": self.holdem.sitin,
+            "sitout": self.holdem.sitout,
             "status": self.holdem.status,
             "pot": self.holdem.showpot,
 

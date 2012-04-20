@@ -4,6 +4,7 @@ import string
 import sys
 import random
 import threading
+import hand
 from time import *
 from settings import *
 
@@ -22,6 +23,7 @@ class Holdem(threading.Thread):
         self.cardpointer = 0
         self.playerpointer = 0
         self.players = {}
+        self.burncards = "" 
         self.pot = 0
         self.bet = 0
         self.lastraised = False
@@ -50,7 +52,7 @@ class Holdem(threading.Thread):
                 "hand": [],
                 "stake": 0,
                 "winlimit": False,
-                "status": "in",  # in,folded,sitout,waiting,allin
+                "status": "in",  # in,folded,sitout,waiting,allin,done
             }
 
         self.suits = ['s', 'h', 'd', 'c']
@@ -87,6 +89,16 @@ class Holdem(threading.Thread):
     # note this only happens at the beginning
     # of each betting phase. maybe combine
     # with raiseit
+
+    def sitout(self):
+        player = self.mongo.lastsender
+        self.players[player]["status"] = "sitout"
+        return
+
+    def sitin(self):
+        player = self.mongo.lastsender
+        self.players[player]["status"] = "waiting"
+        return
 
     def firstbet(self):
 
@@ -284,14 +296,23 @@ class Holdem(threading.Thread):
         return self.players[self.order[self.playerpointer + offset]]
 
     def deal(self):
+
+        self.bet = 0
+        self.pot = 0
+        self.burncards = ""
+        self.stage = 0
         self.cardpointer = 0
+
+        # increment dealer
+
         random.shuffle(self.cards)
 
         for card in range(2):
             for player in self.players:
-                if self.players[player]["status"] != "sitout":
-                    self.players[player]["status"] = "in"
-                    self.players[player]["hand"].append(self.cards[self.cardpointer])
+                p = self.players[player]
+                if p["status"] != "sitout" and p["status"] != "done":
+                    p["status"] = "in"
+                    p["hand"].append(self.cards[self.cardpointer])
                     self.cardpointer += 1
 
         # handle initial states here
@@ -323,33 +344,64 @@ class Holdem(threading.Thread):
         self.stage += 1
         self.turn()
 
+    def burn(self):
+        self.burncards += self.cards[self.cardpointer]
+        self.cardpointer += 1
+        
     def flop(self):
+        self.burn()
         for card in range(3):
             self.hand += self.cards[self.cardpointer]
             self.cardpointer += 1
         self.nextbet()
 
     def turncard(self):
+        self.burn()
         self.hand += self.cards[self.cardpointer]
         self.cardpointer += 1
         self.nextbet()
 
     def river(self):
+        self.burn()
         self.hand += self.cards[self.cardpointer]
         self.cardpointer += 1
         self.nextbet()
 
+    def translator(handstring):
+        base = list(handstring)
+        handobjects = []
+
+        while len(base):
+            ordinal = self.ordinal.index(base.pop(0)) + 1
+            suit = self.suits.index(base.pop(0)) + 1
+            handobjects.append(hand.card(suit,ordinal))
+
+        return handobjects
+
+
     def distribute(self, lastman=False):
+
+        if lastman:
+            self.players[lastman]["money"] += self.pot
+            self.mongo.announce(lastman + " takes it because everyone else folded.")
+            self.deal()
+            return
+
+        for player in self.players:
+            p = self.players[player]
+            if p["status"] == "in" or p["status"] == "allin":
+                cardstock = self.translator("".join(p["hand"]) + self.hand)
+                p["besthand"] = hand.find_best_hand(cardstock) 
+                
+
+
+
+        
 
         # sort out pots
         # increment dealer
         # remove losers
-        # reset pot
-        # reset bet
-        # deal
 
-        self.mongo.announce("Well, you got through a round. Happy fucking birthday, slacker.")
-
-        # change stage
+        self.deal() 
 
         return
