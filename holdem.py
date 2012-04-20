@@ -49,7 +49,8 @@ class Holdem(threading.Thread):
                 "money": int(self.stake),
                 "hand": [],
                 "stake": 0,
-                "status": "in",  # in,folded,sitout,waiting
+                "winlimit": False,
+                "status": "in",  # in,folded,sitout,waiting,allin
             }
 
         self.suits = ['s', 'h', 'd', 'c']
@@ -213,6 +214,10 @@ class Holdem(threading.Thread):
 
         return
 
+    def whatbet(self):
+        self.mongo.chat("The bet is " + str(self.bet))
+        return
+
     def allin(self):
 
         player = self.mongo.lastsender
@@ -220,13 +225,14 @@ class Holdem(threading.Thread):
             self.mongo.chat("Not your turn")
             return 
 
-        # side pot calc
-
         if self.bet < self.players[player]["money"]:
             self.bet = self.players[player]["money"]
 
-        self.pot = self.players[player]["money"]
+        self.lastraised = player # I think this works...
+
+        self.allins.append({player: self.players[player]["money"]})
         self.players[player]["money"] = 0
+        self.players[player]["status"] = "allin"
 
         self.mongo.announce(player + " goes all in.")
 
@@ -237,15 +243,39 @@ class Holdem(threading.Thread):
         self.playerpointer += jump or 1
         self.playerpointer = self.playerpointer % len(self.players)
 
+        # should be right; handles all ins, and last raised
+        # should always adhere to reality
+        if self.order[self.playerpointer] == self.lastraised:
+
+            stillin = 0
+            for player in self.players:
+                p = self.players[player]
+                if p["status"] == "in" or (p["status"] = "allin" and p["money"] > 0):
+                    stillin += 1
+                
+            potbuffer = 0
+            for player in self.players:
+                p = self.players[player]
+                if p["status"] == "allin" and p["money"] <= self.bet:
+                    p["winlimit"] = self.pot + p["money"]*stillin
+                    potbuffer += p["money"]
+                    p["money"] = 0
+                     
+                if p["status"] == "allin" and p["money"] > self.bet:
+                    p["money"] -= self.bet
+                    p["status"] = "in"
+                    potbuffer += self.bet                    
+
+            self.pot += potbuffer
+
+            self.stage += 1
+            return
+
         while self.players[self.order[self.playerpointer]]["status"] != "in":
             self.playerpointer += 1
             self.playerpointer = self.playerpointer % len(self.players)
 
         player = self.order[self.playerpointer]
-
-        if player == self.lastraised:
-            self.stage += 1
-            return
 
         self.mongo.announce(player + "'s turn.")
         return
@@ -282,6 +312,10 @@ class Holdem(threading.Thread):
         self.mongo.chat("Pot is " + str(self.pot))
 
     def nextbet(self):
+
+        for player in self.players:
+            
+
         self.mongo.announce(self.hand)
         self.bet = 0
         self.lastraised = False
