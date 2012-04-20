@@ -33,6 +33,7 @@ class Cortex:
 
     def __init__(self, master):
         self.acro = False
+        self.playingholdem = False
         self.values = False
         self.master = master
         self.context = CHANNEL
@@ -173,12 +174,17 @@ class Cortex:
             "sitout": self.holdem.sitout,
             "status": self.holdem.status,
             "pot": self.holdem.showpot,
+            "mymoney": self.holdem.mymoney,
+            "holdemhelp": self.holdemhelp,
 
             # Nerf out for work bots
             "distaste": self.distaste,
             "mom": self.mom,
             "whatvinaylost": self.whine,
         }.get(what, self.default)()
+
+    def holdemhelp(self):
+        self.chat("~holdem <start>, ~bet [amount] <opening bet>, ~call, ~raise [amount], ~pass, ~fold, ~allin, ~sitout <temporarily remove yourself from the game>, ~sitin <return for next hand>, ~status <show all players' money and status>, ~pot <display amount in pot>, ~mymoney <show how much money you have>")
 
     def showlist(self):
         list = [
@@ -569,10 +575,11 @@ class Cortex:
             self.chat(player + ": " + str(score) + " (" + str(average) + " per round)")
 
     def holdemengine(self):
-        #if self.holdem:
-        #    self.chat("Already a game in progress")
-        #    return
+        if self.playingholdem:
+            self.chat("Already a game in progress")
+            return
 
+        self.playingholdem = True
         self.holdem.start()
 
     def acroengine(self):

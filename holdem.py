@@ -151,6 +151,9 @@ class Holdem(threading.Thread):
 
         return
 
+    def mymoney(self):
+        self.chat(self.players[self.mongo.lastsender]["money"])
+
     def status(self):
         for player in self.players:
             self.mongo.chat(str(self.players[player]["money"]) + ", " + self.players[player]["status"])
@@ -262,7 +265,7 @@ class Holdem(threading.Thread):
             stillin = 0
             for player in self.players:
                 p = self.players[player]
-                if p["status"] == "in" or (p["status"] = "allin" and p["money"] > 0):
+                if p["status"] == "in" or (p["status"] == "allin" and p["money"] > 0):
                     stillin += 1
                 
             potbuffer = 0
@@ -312,6 +315,7 @@ class Holdem(threading.Thread):
                 p = self.players[player]
                 if p["status"] not in ["sitout","done"]:
                     p["status"] = "in"
+                    p["winlimit"] = False 
                     p["hand"].append(self.cards[self.cardpointer])
                     self.cardpointer += 1
 
@@ -333,9 +337,6 @@ class Holdem(threading.Thread):
         self.mongo.chat("Pot is " + str(self.pot))
 
     def nextbet(self):
-
-        for player in self.players:
-            
 
         self.mongo.announce(self.hand)
         self.bet = 0
@@ -447,6 +448,8 @@ class Holdem(threading.Thread):
 
         if left == 1:
             self.mongo.announce("Game over, bitches. Bow to " + last)
+            self.mongo.playingholdem = False
+            sys.exit()
             return
         
         self.deal()
