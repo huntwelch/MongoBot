@@ -157,7 +157,7 @@ class Holdem(threading.Thread):
         return
 
     def mymoney(self):
-        self.chat(self.players[self.mongo.lastsender]["money"])
+        self.mongo.chat(self.players[self.mongo.lastsender]["money"])
 
     def status(self):
         for player in self.players:
@@ -210,8 +210,6 @@ class Holdem(threading.Thread):
             self.mongo.announce("You can't pass.")
             return
 
-        self.passes += 1
-        
         message = player + " passes. "
 
         self.turn(False, message)
@@ -406,7 +404,7 @@ class Holdem(threading.Thread):
         for player in self.players:
             p = self.players[player]
             if p["status"] in ["in","allin"]:
-                self.mongo.announce(player + ": " + p["hand"])
+                self.mongo.announce(player + ": " + "".join(p["hand"]))
                 cardstock = self.translator("".join(p["hand"]) + self.hand)
                 (hand_type, hand, kicker) = hand.find_best_hand(cardstock) 
                 p["besthand"] = hand 
