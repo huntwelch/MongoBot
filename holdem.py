@@ -310,7 +310,7 @@ class Holdem(threading.Thread):
         for card in range(2):
             for player in self.players:
                 p = self.players[player]
-                if p["status"] != "sitout" and p["status"] != "done":
+                if p["status"] not in ["sitout","done"]:
                     p["status"] = "in"
                     p["hand"].append(self.cards[self.cardpointer])
                     self.cardpointer += 1
@@ -387,21 +387,69 @@ class Holdem(threading.Thread):
             self.deal()
             return
 
+        contenders = []
+        reveal = []
         for player in self.players:
             p = self.players[player]
-            if p["status"] == "in" or p["status"] == "allin":
+            if p["status"] in ["in","allin"]:
+                self.mongo.announce(player + ": " + p["hand"])
                 cardstock = self.translator("".join(p["hand"]) + self.hand)
-                p["besthand"] = hand.find_best_hand(cardstock) 
-                
-
-
-
+                (hand_type, hand, kicker) = hand.find_best_hand(cardstock) 
+                p["besthand"] = hand 
+                contenders.append((hand_type, hand, kicker,player))
         
+        winners = hand.find_winners(contenders)
+        if len(winners) == 1:
+            winner = winners[0][3]
+            p = self.players[winner]
+            if not p["winlimit"]:
+                p["money"] += self.pot
+                self.mongo.announce(winner + " wins with a " + p["besthand"])
+                self.deal()
+                return
+            else:
+                p["money"] += p["winlimit"] 
+                p["status"] = "waiting"
+                self.pot -= p["winlimit"]
+                self.mongo.announce(winner + " wins main pot with a " + p["besthand"])
+                self.distribute()
+                return
+        else:
+            self.mongo.announce("Split pot ...")
+            for winner in winners:
+                p = self.players[winner[3]]
+                if p["winlimit"]:
+                    amount = math.floor(p["winlimit"]/len(winners))
+                    p["money"] += math.floor(p["winlimit"]/len(winners))
+                    p["status"] = "waiting"
+                    self.pot -= p["winlimit"]
+                    self.mongo.announce(winner[3] + " takes " + str(amount))
+                    self.distribute()
+                    return
+            
+            amount = math.floor(self.pot/len(winners))
+            for winner in winners:
+                p = self.players[winner[3]]
+                p["money"] += amount
+                self.pot -= amount
+                self.mongo.announce(winner[3] + " takes " + str(amount))
+                                
+        left = 0
+        last = False
+        for player in self.players:
+            p = self.players[player]
+            if p["money"] == 0:
+                p["status"] = "done"
+                self.mongo.announce(player + " is out.")
+            else:
+                left += 1
+                last = player 
 
-        # sort out pots
-        # increment dealer
-        # remove losers
-
-        self.deal() 
-
+        if left == 1:
+            self.mongo.announce("Game over, bitches. Bow to " + last)
+            return
+        
+        self.deal()
         return
+          
+
