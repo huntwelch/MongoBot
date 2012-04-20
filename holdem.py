@@ -24,11 +24,11 @@ class Holdem(threading.Thread):
         self.cardpointer = 0
         self.playerpointer = 0
         self.players = {}
-        self.burncards = "" 
+        self.burncards = [] 
         self.pot = 0
         self.bet = 0
         self.lastraised = False
-        self.hand = ""
+        self.hand = [] 
 
         self.stages = [
             'blind',
@@ -51,6 +51,7 @@ class Holdem(threading.Thread):
             self.players[player] = {
                 "money": int(self.stake),
                 "hand": [],
+                "besthand": False, 
                 "stake": 0,
                 "winlimit": False,
                 "status": "in",  # in,folded,sitout,waiting,allin,done
@@ -228,7 +229,7 @@ class Holdem(threading.Thread):
 
         remaining = 0
         for player in self.players:
-            if self.players[player]["status"] == "in":
+            if self.players[player]["status"] in ["in","allin"]:
                 remaining += 1
                 lastman = player
 
@@ -277,6 +278,9 @@ class Holdem(threading.Thread):
 
         if self.order[self.playerpointer] == self.lastraised or self.order[self.playerpointer] == self.firstpassed:
 
+            self.firstpassed = False
+            self.lastraised = False
+
             stillin = 0
             for player in self.players:
                 p = self.players[player]
@@ -313,9 +317,17 @@ class Holdem(threading.Thread):
 
         self.bet = 0
         self.pot = 0
-        self.burncards = ""
+        self.burncards = [] 
         self.stage = 0
         self.cardpointer = 0
+        self.hand = []
+
+        for player in self.players:
+            p = self.players[player]
+            p["winlimit"] = False 
+            p["hand"] = [] 
+            p["besthand"] = False 
+            
 
         # increment dealer
 
@@ -326,7 +338,6 @@ class Holdem(threading.Thread):
                 p = self.players[player]
                 if p["status"] not in ["sitout","done"]:
                     p["status"] = "in"
-                    p["winlimit"] = False 
                     p["hand"].append(self.cards[self.cardpointer])
                     self.cardpointer += 1
 
@@ -335,8 +346,14 @@ class Holdem(threading.Thread):
             self.mongo.chat(" ".join(self.players[player]["hand"]), player)
 
         self.pot = self.blind + self.blind * 2
+    
+        if len(self.players) == 2:
+            offset = 0
+        else:
+            offset = 2
+
         self._player(1)["money"] -= self.blind
-        self._player(2)["money"] -= self.blind * 2
+        self._player(offset)["money"] -= self.blind * 2
 
         self.stage = 1
 
@@ -347,9 +364,9 @@ class Holdem(threading.Thread):
     def showpot(self):
         self.mongo.chat("Pot is " + str(self.pot))
 
-    def nextbet(self):
+    def nextbet(self,type = ""):
 
-        self.mongo.announce(self.hand)
+        self.mongo.announce(type + ": " + " ".join(self.hand))
         self.bet = 0
         self.lastraised = False
         self.playerpointer = self.dealer
@@ -357,29 +374,29 @@ class Holdem(threading.Thread):
         self.turn()
 
     def burn(self):
-        self.burncards += self.cards[self.cardpointer]
+        self.burncards.append(self.cards[self.cardpointer])
         self.cardpointer += 1
         
     def flop(self):
         self.burn()
         for card in range(3):
-            self.hand += self.cards[self.cardpointer]
+            self.hand.append(self.cards[self.cardpointer])
             self.cardpointer += 1
-        self.nextbet()
+        self.nextbet("Flop")
 
     def turncard(self):
         self.burn()
-        self.hand += self.cards[self.cardpointer]
+        self.hand.append(self.cards[self.cardpointer])
         self.cardpointer += 1
-        self.nextbet()
+        self.nextbet("Turn")
 
     def river(self):
         self.burn()
-        self.hand += self.cards[self.cardpointer]
+        self.hand.append(self.cards[self.cardpointer])
         self.cardpointer += 1
-        self.nextbet()
+        self.nextbet("River")
 
-    def translator(handstring):
+    def translator(self,handstring):
         base = list(handstring)
         handobjects = []
 
@@ -400,12 +417,11 @@ class Holdem(threading.Thread):
             return
 
         contenders = []
-        reveal = []
         for player in self.players:
             p = self.players[player]
             if p["status"] in ["in","allin"]:
-                self.mongo.announce(player + ": " + "".join(p["hand"]))
-                cardstock = self.translator("".join(p["hand"]) + self.hand)
+                self.mongo.announce(player + ": " + " ".join(p["hand"]))
+                cardstock = self.translator("".join(p["hand"]) + "".join(self.hand))
                 (hand_type, hand, kicker) = hand.find_best_hand(cardstock) 
                 p["besthand"] = hand 
                 contenders.append((hand_type, hand, kicker,player))
@@ -456,6 +472,8 @@ class Holdem(threading.Thread):
             else:
                 left += 1
                 last = player 
+
+        self.mongo.announce("Burn cards were: " + " " + " ".join(self.burncards))
 
         if left == 1:
             self.mongo.announce("Game over, bitches. Bow to " + last)
