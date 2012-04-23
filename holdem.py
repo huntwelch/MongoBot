@@ -70,8 +70,8 @@ class Holdem(threading.Thread):
                 "status": "in",  # in,folded,sitout,waiting,allin,done
             }
 
-        self.suits = ['s', 'h', 'd', 'c']
-        self._suits = [u'\u2660', u'\u2661', u'\u2662', u'\u2663']
+        self._suits = ['s', 'h', 'd', 'c']
+        self.suits = [u'\u2660', u'\u2661', u'\u2662', u'\u2663']
         self.ordinal = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
         self.cards = []
 
@@ -343,6 +343,8 @@ class Holdem(threading.Thread):
         self._player(1)["money"] -= self.blind
         self._player(offset)["money"] -= self.blind * 2
 
+        self.lastraised = self.order[offset]
+
         self.stage = 1
 
         self.turn(3)
@@ -416,7 +418,7 @@ class Holdem(threading.Thread):
         
         winners = hand.find_winners(contenders)
         if len(winners) == 1:
-            winner = winners[0][3]
+            winner = winners[0]
             p = self.players[winner]
             if not p["winlimit"]:
                 p["money"] += self.pot
@@ -433,22 +435,22 @@ class Holdem(threading.Thread):
         else:
             self.mongo.announce("Split pot ...")
             for winner in winners:
-                p = self.players[winner[3]]
+                p = self.players[winner]
                 if p["winlimit"]:
                     amount = math.floor(p["winlimit"]/len(winners))
                     p["money"] += math.floor(p["winlimit"]/len(winners))
                     p["status"] = "waiting"
                     self.pot -= p["winlimit"]
-                    self.mongo.announce(winner[3] + " takes " + str(amount))
+                    self.mongo.announce(winner + " takes " + str(amount))
                     self.distribute()
                     return
             
             amount = math.floor(self.pot/len(winners))
             for winner in winners:
-                p = self.players[winner[3]]
+                p = self.players[winner]
                 p["money"] += amount
                 self.pot -= amount
-                self.mongo.announce(winner[3] + " takes " + str(amount))
+                self.mongo.announce(winner + " takes " + str(amount))
                                 
         left = 0
         last = False
