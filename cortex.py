@@ -163,11 +163,12 @@ class Cortex:
 
             # Holdem
             "holdem": self.holdemengine,
-            "bet": self.holdem.firstbet,
+            "bet": self.holdem.raiseit,
             "call": self.holdem.callit,
             "raise": self.holdem.raiseit,
             "pass": self.holdem.knock,
             "knock": self.holdem.knock,
+            "check": self.holdem.knock,
             "fold": self.holdem.fold,
             "allin": self.holdem.allin,
             "sitin": self.holdem.sitin,

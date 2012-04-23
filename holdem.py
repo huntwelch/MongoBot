@@ -17,8 +17,21 @@ class Holdem(threading.Thread):
 
     def run(self):
 
+
+        try: 
+            self.stake = int(self.mongo.values.pop(0))
+        except:
+            self.mongo.announce("First entry must be a number.")
+            self.mongo.playingholdem = False 
+            self.stop()
+            sys.exit()
+
+        if len(self.mongo.values) < 2:
+            self.mongo.announce("You must have at least two players.")
+            self.mongo.playingholdem = False 
+            sys.exit()
+        
         self.firstpassed = False 
-        self.stake = self.mongo.values.pop(0)
         self.blind = 1
         self.order = self.mongo.values
         self.cardpointer = 0
@@ -59,7 +72,6 @@ class Holdem(threading.Thread):
 
         self.suits = ['s', 'h', 'd', 'c']
         self._suits = [u'\u2660', u'\u2661', u'\u2662', u'\u2663']
-        # find with self.ordinal.index[what]
         self.ordinal = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
         self.cards = []
 
@@ -88,10 +100,6 @@ class Holdem(threading.Thread):
 
     # player actions
 
-    # note this only happens at the beginning
-    # of each betting phase. maybe combine
-    # with raiseit
-
     def sitout(self):
         player = self.mongo.lastsender
         self.players[player]["status"] = "sitout"
@@ -106,7 +114,9 @@ class Holdem(threading.Thread):
         self.players[player]["status"] = "waiting"
         return
 
-    def firstbet(self):
+    def raiseit(self):
+
+        # needs to be higher than bet
 
         self.firstpassed = False
 
@@ -122,17 +132,26 @@ class Holdem(threading.Thread):
             self.mongo.announce("That's not money")
             return
 
+        if amount < self.bet:
+            self.mongo.announce("You can't bet less than the current bet.")
+            return
+            
         if amount > self.players[player]["money"]:
             self.mongo.announce("You don't have enough money")
             return
 
-        self.bet = amount
         self.pot += amount
         self.lastraised = player
         self.players[player]["money"] -= amount
 
-        message = player + " raises the bet to " + str(amount) + ". "
+        if self.bet == 0:
+            message = player + " bets " + str(amount) + ". "
+        if amount == self.bet:
+            message = player + " calls. "
+        if amount > self.bet:
+            message = player + " raises the bet to " + str(amount) + ". "
 
+        self.bet = amount
         self.turn(False, message)
 
         return
@@ -162,39 +181,7 @@ class Holdem(threading.Thread):
 
     def status(self):
         for player in self.players:
-            self.mongo.chat(str(self.players[player]["money"]) + ", " + self.players[player]["status"])
-
-    def raiseit(self):
-
-        self.firstpassed = False
-
-        player = self.mongo.lastsender
-        if player != self.order[self.playerpointer]:
-            self.mongo.chat("Not your turn")
-            return 
-
-        try:
-            money = self.mongo.values[0]
-            amount = int(money)
-        except:
-            self.mongo.announce("That's not money")
-            return
-
-        amount += self.bet
-        if amount > self.players[player]["money"]:
-            self.mongo.announce("You don't have enough money")
-            return
-
-        self.bet = amount
-        self.pot += amount
-        self.lastraised = player
-        self.players[player]["money"] -= amount
-
-        message = player + " raises the bet to " + str(amount) + ". "
-
-        self.turn(False, message)
-
-        return
+            self.mongo.chat(player + ": " + str(self.players[player]["money"]) + ", " + self.players[player]["status"])
 
     def knock(self):
 
@@ -346,6 +333,7 @@ class Holdem(threading.Thread):
             self.mongo.chat(" ".join(self.players[player]["hand"]), player)
 
         self.pot = self.blind + self.blind * 2
+        self.bet = self.blind * 2
     
         if len(self.players) == 2:
             offset = 0
@@ -422,9 +410,9 @@ class Holdem(threading.Thread):
             if p["status"] in ["in","allin"]:
                 self.mongo.announce(player + ": " + " ".join(p["hand"]))
                 cardstock = self.translator("".join(p["hand"]) + "".join(self.hand))
-                (hand_type, hand, kicker) = hand.find_best_hand(cardstock) 
-                p["besthand"] = hand 
-                contenders.append((hand_type, hand, kicker,player))
+                (hand_type, besthand, kicker) = hand.find_best_hand(cardstock) 
+                p["besthand"] = besthand 
+                contenders.append((hand_type, besthand, kicker,player))
         
         winners = hand.find_winners(contenders)
         if len(winners) == 1:
