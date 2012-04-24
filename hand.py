@@ -20,7 +20,7 @@ def main():
 
 class card:
     #SUITS = ['s', 'h', 'd', 'c']    
-    SUITS = [u"\u2660", u"\u2661", u"\u2662", u"\u2663"]
+    SUITS = [u"\u2660", u"\u2665", u"\u2666", u"\u2663"]
     RANKS = "A23456789TJQKA"
     
     def __init__(self, suit, rank):

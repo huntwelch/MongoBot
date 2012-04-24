@@ -78,7 +78,7 @@ class Holdem(threading.Thread):
             }
 
         self._suits = ['s', 'h', 'd', 'c']
-        self.suits = [u'\u2660', u'\u2661', u'\u2662', u'\u2663']
+        self.suits = [u'\u2660', u'\u2665', u'\u2666', u'\u2663']
         self.ordinal = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
         self.cards = []
 
@@ -263,7 +263,9 @@ class Holdem(threading.Thread):
         self.players[player]["money"] = 0
         self.players[player]["status"] = "allin"
 
-        self.mongo.announce(player + " goes all in.")
+        message = player + " goes all in. "
+
+        self.turn(False, message)
 
         return
 

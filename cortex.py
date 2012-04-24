@@ -178,6 +178,7 @@ class Cortex:
             "mymoney": self.holdem.mymoney,
             "thebet": self.holdem.thebet,
             "holdemhelp": self.holdemhelp,
+            "testcolor": self.testcolor,
 
             # Nerf out for work bots
             "distaste": self.distaste,
@@ -187,6 +188,9 @@ class Cortex:
 
     def holdemhelp(self):
         self.chat("~holdem <start>, ~bet [amount] <opening bet>, ~current <shows current bet>, ~call, ~raise [amount], ~pass, ~fold, ~allin, ~sitout <temporarily remove yourself from the game>, ~sitin <return for next hand>, ~status <show all players' money and status>, ~pot <display amount in pot>, ~mymoney <show how much money you have>")
+
+    def testcolor(self):
+        self.chat(u'\u2660' + "\x034" + u'\u2665' + u'\u2666' + "\x03" + u'\u2663')
 
     def showlist(self):
         list = [
@@ -775,7 +779,24 @@ class Cortex:
 
         self.chat(random.choice(lines))
 
+    def colortext(self, message):
+
+        colors = {
+            u'\u2665':4,
+            u'\u2666':4,
+        }
+
+        for character in colors:
+            if character in message:
+                messgae = message.split(character)
+                "\x03" + str(colors[character]) + character + "\x03".join(message)
+
+        return message
+
+
     def announce(self, message, whom=False):
+
+        message = self.colortext(message)
 
         message = message.encode("utf-8")
 
@@ -785,6 +806,9 @@ class Cortex:
             self.sock.send('PRIVMSG ' + CHANNEL + ' :Having trouble saying that for some reason\n')
 
     def chat(self, message, target=False):
+
+        message = self.colortext(message)
+
         if target:
             whom = target
         elif self.context == CHANNEL:
