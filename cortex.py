@@ -176,6 +176,7 @@ class Cortex:
             "status": self.holdem.status,
             "pot": self.holdem.showpot,
             "mymoney": self.holdem.mymoney,
+            "thebet": self.holdem.thebet,
             "holdemhelp": self.holdemhelp,
 
             # Nerf out for work bots
@@ -185,7 +186,7 @@ class Cortex:
         }.get(what, self.default)()
 
     def holdemhelp(self):
-        self.chat("~holdem <start>, ~bet [amount] <opening bet>, ~call, ~raise [amount], ~pass, ~fold, ~allin, ~sitout <temporarily remove yourself from the game>, ~sitin <return for next hand>, ~status <show all players' money and status>, ~pot <display amount in pot>, ~mymoney <show how much money you have>")
+        self.chat("~holdem <start>, ~bet [amount] <opening bet>, ~current <shows current bet>, ~call, ~raise [amount], ~pass, ~fold, ~allin, ~sitout <temporarily remove yourself from the game>, ~sitin <return for next hand>, ~status <show all players' money and status>, ~pot <display amount in pot>, ~mymoney <show how much money you have>")
 
     def showlist(self):
         list = [

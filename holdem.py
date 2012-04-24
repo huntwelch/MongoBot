@@ -354,6 +354,9 @@ class Holdem(threading.Thread):
 
         return
 
+    def thebet(self):
+        self.mongo.chat("Bet is " + str(self.bet))
+
     def showpot(self):
         self.mongo.chat("Pot is " + str(self.pot))
 
