@@ -8,6 +8,11 @@ import hand
 from time import *
 from settings import *
 
+# TODO:
+# bets don't add up
+# blind doesn't register right player
+# eternal passing still?
+
 
 class Holdem(threading.Thread):
 
@@ -16,7 +21,6 @@ class Holdem(threading.Thread):
         self.mongo = mongo
 
     def run(self):
-
 
         try: 
             self.stake = int(self.mongo.values.pop(0))
@@ -29,10 +33,13 @@ class Holdem(threading.Thread):
         if len(self.mongo.values) < 2:
             self.mongo.announce("You must have at least two players.")
             self.mongo.playingholdem = False 
+            self.stop()
             sys.exit()
         
         self.firstpassed = False 
         self.blind = 1
+        self.littleblind = False
+        self.bigblind = False
         self.order = self.mongo.values
         self.cardpointer = 0
         self.playerpointer = 0
@@ -187,6 +194,15 @@ class Holdem(threading.Thread):
 
         player = self.mongo.lastsender
 
+        # feels a little awkward, but it's logical.
+        if self.bet == self.blind * 2 and player == self.bigblind:
+            self.bigblind = False
+            self.littleblind = False
+            message = player + " passes. "
+            self.turn(False, message)
+            return
+            
+
         if not self.firstpassed:
             self.firstpassed = player
 
@@ -199,9 +215,7 @@ class Holdem(threading.Thread):
             return
 
         message = player + " passes. "
-
         self.turn(False, message)
-
         return
 
     def fold(self):
@@ -246,7 +260,6 @@ class Holdem(threading.Thread):
 
         self.lastraised = player # I think this works...
 
-        self.allins.append({player: self.players[player]["money"]})
         self.players[player]["money"] = 0
         self.players[player]["status"] = "allin"
 
@@ -329,24 +342,18 @@ class Holdem(threading.Thread):
         for player in self.players:
             self.mongo.chat(" ".join(self.players[player]["hand"]), player)
 
-        self.pot = self.blind + self.blind * 2
+        self.pot = self.blind * 3
         self.bet = self.blind * 2
     
 
-        littleblind = self.order[(self.dealer + 1) % len(players)]        
-        initialpos = (self.dealer + 2) % len(players) 
-        bigblind = self.order[initialpos]        
+        self.littleblind = self.order[(self.dealer + 1) % len(self.players)]        
+        self.bigblind = self.order[(self.dealer + 2) % len(self.players)]        
+
+        self.players[self.littleblind]["money"] -= self.blind
+        self.players[self.bigblind]["money"] -= self.blind * 2
         
-
-        self.players[littleblind]["money"] -= self.blind
-        self.players[bigblind]["money"] -= self.blind * 2
-        
-        message = littleblind + " puts in little blind for " + str(blind) + ", "
-        message += bigblind + " puts in big blind for " + str(blind * 2) + ". "
-
-        self.mongo.announce(
-
-        self.lastraised = self.order[initialpos]
+        message = self.littleblind + " puts in little blind for " + str(self.blind) + ", "
+        message += self.bigblind + " puts in big blind for " + str(self.blind * 2) + ". "
 
         self.stage = 1
 
@@ -397,6 +404,7 @@ class Holdem(threading.Thread):
         handobjects = []
 
         while len(base):
+            self.mongo.chat("".join(base), "chiyou")
             ordinal = self.ordinal.index(base.pop(0)) + 1
             suit = self.suits.index(base.pop(0)) + 1
             handobjects.append(hand.card(suit,ordinal))
