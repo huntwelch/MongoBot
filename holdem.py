@@ -260,8 +260,7 @@ class Holdem(threading.Thread):
         self.playerpointer = self.playerpointer % len(self.players)
 
         while self.players[self.order[self.playerpointer]]["status"] != "in":
-            self.playerpointer += 1
-            self.playerpointer = self.playerpointer % len(self.players)
+            self.playerpointer = (self.playerpointer + 1) % len(self.players)
 
         if self.order[self.playerpointer] == self.lastraised or self.order[self.playerpointer] == self.firstpassed:
 
@@ -297,9 +296,6 @@ class Holdem(threading.Thread):
         self.mongo.announce(prepend + player + "'s turn.")
         return
 
-    def _player(self, offset=0):
-        return self.players[self.order[self.playerpointer + offset]]
-
     def deal(self):
 
         self.bet = 0
@@ -316,7 +312,8 @@ class Holdem(threading.Thread):
             p["besthand"] = False 
             
 
-        # increment dealer
+        self.dealer = (self.dealer + 1) % len(self.players)
+        self.playerpointer = self.dealer
 
         random.shuffle(self.cards)
 
@@ -335,19 +332,25 @@ class Holdem(threading.Thread):
         self.pot = self.blind + self.blind * 2
         self.bet = self.blind * 2
     
-        if len(self.players) == 2:
-            offset = 0
-        else:
-            offset = 2
 
-        self._player(1)["money"] -= self.blind
-        self._player(offset)["money"] -= self.blind * 2
+        littleblind = self.order[(self.dealer + 1) % len(players)]        
+        initialpos = (self.dealer + 2) % len(players) 
+        bigblind = self.order[initialpos]        
+        
 
-        self.lastraised = self.order[offset]
+        self.players[littleblind]["money"] -= self.blind
+        self.players[bigblind]["money"] -= self.blind * 2
+        
+        message = littleblind + " puts in little blind for " + str(blind) + ", "
+        message += bigblind + " puts in big blind for " + str(blind * 2) + ". "
+
+        self.mongo.announce(
+
+        self.lastraised = self.order[initialpos]
 
         self.stage = 1
 
-        self.turn(3)
+        self.turn(3,message)
 
         return
 
@@ -459,6 +462,8 @@ class Holdem(threading.Thread):
             if p["money"] == 0:
                 p["status"] = "done"
                 self.mongo.announce(player + " is out.")
+                self.order.remove(player)
+                self.players.remove(player)
             else:
                 left += 1
                 last = player 
