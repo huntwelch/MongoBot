@@ -9,6 +9,9 @@ import threading
 import urllib2
 import urllib
 import ystock
+import MySQLdb
+from xml.dom import minidom as dom
+
 from BeautifulSoup import BeautifulSoup as soup
 
 from math import *
@@ -21,6 +24,7 @@ import redmine
 import broca
 
 from settings import *
+from secrets import *
 from acro import Acro
 from holdem import Holdem
 from redmine import Redmine
@@ -127,6 +131,7 @@ class Cortex:
             "g": self.google,
             "ety": self.ety,
             "buzz": self.buzz,
+            "fml": self.fml,
             "anagram": self.anagram,
             "munroesecurity": self.password,
 
@@ -185,6 +190,25 @@ class Cortex:
             "mom": self.mom,
             "whatvinaylost": self.whine,
         }.get(what, self.default)()
+
+    def fml(self):
+        db = MySQLdb.connect("localhost","peter",SQL_PASSWORD,"peter_stilldrinking") 
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM fmls ORDER BY RAND() LIMIT 0,1;")
+        entry = cursor.fetchone()
+        # id
+        # fid
+        # entry
+        # agree
+        # ydi
+        # calc
+        # gender
+        # date
+        # time
+        # location
+        # intimate
+        fml = entry[2]
+        self.chat(fml)
 
     def holdemhelp(self):
         self.chat("~holdem <start>, ~bet [amount] <opening bet>, ~current <shows current bet>, ~call, ~raise [amount], ~pass, ~fold, ~allin, ~sitout <temporarily remove yourself from the game>, ~sitin <return for next hand>, ~status <show all players' money and status>, ~pot <display amount in pot>, ~mymoney <show how much money you have>")
@@ -305,22 +329,68 @@ class Cortex:
         return
 
     def stockquote(self):
+
         if not self.values:
             self.chat("What stock?")
             return
 
         stock = self.values[0]
+        url = "http://www.google.com/ig/api?stock=" + stock 
+
         try:
-            info = ystock.get_all(stock.upper())
+            opener = urllib2.build_opener()
+            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+            urlbase = opener.open(url).read()
+            
         except:
             self.chat("Couldn't find anything")
 
-        message = [stock.upper() + ": " + info["name"][1:]]
-        message.append("Current: " + str(info["price"]))
-        message.append("Change: " + str(info["change"]))
-        message.append("Volume: " + str(info["volume"]))
-        message.append("Market Cap: " + str(info["market_cap"]))
-        message.append("Dividend per Share: " + str(info["dividend_per_share"]))
+        cont = dom.parse(urllib.urlopen(url)) 
+        elements = cont.childNodes[0].childNodes[0].childNodes
+
+        items = [
+            "company",
+            "last",
+            "change",
+            "perc_change",
+            "symbol",
+            "exchange",
+            "volume",
+            "market_cap",
+            "symbol_lookup_url",
+        ]   
+
+        message = []
+        roasted = False
+
+        for E in elements:
+            if E.tagName in items:
+                title = E.tagName.replace("_", " ").capitalize()
+                data = E.getAttribute("data")
+
+                if E.tagName == "company" and data == "":
+                    self.chat("No such company.")
+                    return
+
+                if E.tagName == "perc_change":
+                    title = "Percent change"   
+                    data += "%"
+
+                if E.tagName == "change" or E.tagName == "perc_change":
+                    if data != "" and float(data[:-1]) < 0:
+                        data = "\x034" + data + "\x03"
+                    else:
+                        data = "\x033" + data + "\x03"
+                
+                if E.tagName == "symbol_lookup_url":
+                    # not really roasted
+                    roasted = "http://www.google.com" + data
+                    continue
+
+                message.append(title + ": " + data)
+                
+        if roasted:
+            message.append(roasted)
 
         self.chat(', '.join(message))
 
@@ -788,7 +858,7 @@ class Cortex:
 
         for character in colors:
             if character in message:
-                messgae = message.split(character)
+                message = message.split(character)
                 "\x03" + str(colors[character]) + character + "\x03".join(message)
 
         return message
