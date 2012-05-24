@@ -8,7 +8,6 @@ import random
 import threading
 import urllib2
 import urllib
-import ystock
 import MySQLdb
 from xml.dom import minidom as dom
 
@@ -22,6 +21,7 @@ import acro
 import holdem
 import redmine
 import broca
+import stocks
 
 from settings import *
 from secrets import *
@@ -29,6 +29,7 @@ from acro import Acro
 from holdem import Holdem
 from redmine import Redmine
 from broca import Broca
+from stocks import Stock 
 
 # TODO: standardize url grabber
 
@@ -52,15 +53,18 @@ class Cortex:
         self.holdem = Holdem(self)
         self.broca = Broca(self)
 
+    # a lot of this doesn't seem to work :/
     def reload(self):
         reload(acro)
         reload(redmine)
         reload(broca)
         reload(holdem)
+        reload(stocks)
         from acro import Acro
         from holdem import Holdem
         from redmine import Redmine
         from broca import Broca
+        from stocks import Stock 
         self.redmine = Redmine(self)
         self.holdem = Holdem(self)
         self.broca = Broca(self)
@@ -191,6 +195,21 @@ class Cortex:
             "whatvinaylost": self.whine,
         }.get(what, self.default)()
 
+    def stockquote(self):
+        if not self.values:
+            self.chat("Enter a symbol")
+            return
+        
+        symbol = self.values[0]
+        stock = Stock(symbol)
+        showit = stock.showquote()
+
+        if not showit:
+            self.chat("Couldn't find company.")
+            return
+
+        self.chat(showit)
+        
     def fml(self):
         db = MySQLdb.connect("localhost","peter",SQL_PASSWORD,"peter_stilldrinking") 
         cursor = db.cursor()
@@ -327,72 +346,6 @@ class Cortex:
     def google(self):
 
         return
-
-    def stockquote(self):
-
-        if not self.values:
-            self.chat("What stock?")
-            return
-
-        stock = self.values[0]
-        url = "http://www.google.com/ig/api?stock=" + stock 
-
-        try:
-            opener = urllib2.build_opener()
-            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-            urlbase = opener.open(url).read()
-            
-        except:
-            self.chat("Couldn't find anything")
-
-        cont = dom.parse(urllib.urlopen(url)) 
-        elements = cont.childNodes[0].childNodes[0].childNodes
-
-        items = [
-            "company",
-            "last",
-            "change",
-            "perc_change",
-            "symbol",
-            "exchange",
-            "volume",
-            "market_cap",
-            "symbol_lookup_url",
-        ]   
-
-        message = []
-        roasted = False
-
-        for E in elements:
-            if E.tagName in items:
-                title = E.tagName.replace("_", " ").capitalize()
-                data = E.getAttribute("data")
-
-                if E.tagName == "company" and data == "":
-                    self.chat("No such company.")
-                    return
-
-                if E.tagName == "perc_change":
-                    title = "Percent change"   
-                    data += "%"
-
-                if E.tagName == "change" or E.tagName == "perc_change":
-                    if data != "" and float(data[:-1]) < 0:
-                        data = "\x034" + data + "\x03"
-                    else:
-                        data = "\x033" + data + "\x03"
-                
-                if E.tagName == "symbol_lookup_url":
-                    # not really roasted
-                    roasted = "http://www.google.com" + data
-                    continue
-
-                message.append(title + ": " + data)
-                
-        if roasted:
-            message.append(roasted)
-
-        self.chat(', '.join(message))
 
     def somethingabout(self):
         if not self.values:
