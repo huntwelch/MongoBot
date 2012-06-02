@@ -85,20 +85,34 @@ class Stock:
         if not self.stock:
             return False
     
-        name = self.stock["company"] + " (" + self.stock["symbol"] + ")" 
-        change = self.stock["change"] + " (" + self.stock["perc_change"] + "%)"
+        value = float(self.stock["last"])
+        change = float(self.stock["change"])
+        perc_change = float(self.stock["perc_change"])
 
-        if float(self.stock["change"][:-1]) < 0:
+        # Check for after hours
+
+        afterhours = False 
+        time = self.stock["current_time_utc"] 
+        if self.stock["isld_last"]: 
+            afterhours = True
+            value = float(self.stock["isld_last"])
+            change = value - float(self.stock["last"])
+            perc_change = (change / float(self.stock["last"])) * 100
+
+        name = self.stock["company"] + " (" + self.stock["symbol"] + ")" 
+        changestring = str(change) + " (" + ("%.2f" % perc_change) + "%)"
+
+        if change < 0:
             color = "4" 
         else:
             color = "3" 
 
-        change = "\x03" + color + " " + change + "\x03"
+        changestring = "\x03" + color + " " + changestring + "\x03"
 
         message = [
             name,
-            self.stock["last"],
-            change,
+            str(value),
+            changestring,
         ]
 
         otherinfo = [
@@ -117,6 +131,10 @@ class Stock:
         link = "http://www.google.com/finance?client=ig&q=" + self.stock["symbol"]
         message.append(link)
 
-        return ', '.join(message)
+        output = ', '.join(message) 
+        if afterhours:
+            output = "After hours: " + output 
+
+        return output
 
 
