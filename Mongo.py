@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-import string
 import socket
-import atexit
-import os
 
 import settings
 import cortex

@@ -1,6 +1,5 @@
 # Le acrobot game
 
-import string
 import sys
 import random
 import threading

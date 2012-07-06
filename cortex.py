@@ -1,22 +1,17 @@
-import socket
 import base64
 import string
-import simplejson as json
 import os
 import re
 import random
-import threading
 import urllib2
 import urllib
 import MySQLdb
-from xml.dom import minidom as dom
 
 from BeautifulSoup import BeautifulSoup as soup
 
 from math import *
 from time import *
 
-import settings
 import acro
 import holdem
 import redmine
@@ -29,7 +24,7 @@ from acro import Acro
 from holdem import Holdem
 from redmine import Redmine
 from broca import Broca
-from stocks import Stock 
+from stocks import Stock
 
 # TODO: standardize url grabber
 

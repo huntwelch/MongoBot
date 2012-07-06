@@ -1,12 +1,12 @@
 # Le holdem game
 
-import string
-import sys
-import random
-import threading
-import hand
-from time import *
 from settings import *
+from time import *
+import hand
+import math
+import random
+import sys
+import threading
 
 # TODO:
 # bets don't add up
