@@ -306,15 +306,12 @@ class Cortex:
         word = self.values[0]
         url = "http://www.etymonline.com/index.php?allowed_in_frame=0&search=" + word + "&searchmode=term"
 
-        try:
-            opener = urllib2.build_opener()
-            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-            urlbase = opener.open(url).read()
-            urlbase = re.sub('\s+', ' ', urlbase).strip()
-            cont = soup(urlbase)
-        except:
+        urlbase = self.pageopen(url)
+        if not urlbase:
             self.chat("Couldn't find anything")
             return
+
+        cont = soup(urlbase)
 
         heads = cont.findAll("dt")
         defs = cont.findAll("dd")
@@ -349,15 +346,14 @@ class Cortex:
         word = '+'.join(self.values)
 
         url = "http://wordsmith.org/anagram/anagram.cgi?anagram=" + word + "&t=50&a=n"
-        try:
-            opener = urllib2.build_opener()
-            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-            urlbase = opener.open(url).read()
-            urlbase = re.sub('\s+', ' ', urlbase).strip()
-            cont = soup(urlbase)
-        except:
+
+
+        urlbase = self.pageopen(url)
+        if not urlbase:
             self.chat("Couldn't find anything")
             return
+
+        cont = soup(urlbase)
 
         paragraph = cont.findAll("p")[4]
         content = ''.join(paragraph.findAll()).replace("<br/>", ", ").encode("utf-8")
@@ -708,18 +704,16 @@ class Cortex:
             fubs = 0
             title = "Couldn't get title"
             roasted = "Couldn't roast"
-            opener = urllib2.build_opener()
 
-            try:
-                opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-                urlbase = opener.open(url).read()
-                urlbase = re.sub('\s+', ' ', urlbase).strip()
-                cont = soup(urlbase)
-                title = cont.title.string
-            except:
+            urlbase = self.pageopen(url)
+            if not urlbase:
                 fubs += 1
 
+            cont = soup(urlbase)
+            title = cont.title.string
+
             try:
+                opener = urllib2.build_opener()
                 roasted = opener.open(SHORTENER + url).read()
             except:
                 fubs += 1
@@ -892,3 +886,15 @@ class Cortex:
         for name, value in SAFESET:
             sleep(1)
             self.chat(name + " : " + str(value))
+
+    def pageopen(self,url):
+        try:
+            opener = urllib2.build_opener()
+            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+            urlbase = opener.open(url).read()
+            urlbase = re.sub('\s+', ' ', urlbase).strip()
+        except:
+            return False
+
+        return urlbase
+        
