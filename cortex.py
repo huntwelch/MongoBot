@@ -124,6 +124,7 @@ class Cortex:
             "hate": self.hate,
             "think": self.think,
             "settings": self.showsettings,
+            "reward": self.reward,
             "learnword": self.learnword,
             "cry": self.cry,
             "calc": self.calc,
@@ -138,6 +139,7 @@ class Cortex:
             "fml": self.fml,
             "anagram": self.anagram,
             "munroesecurity": self.password,
+            "skynet": self.skynet,
 
             # Memory
             "somethingabout": self.somethingabout,
@@ -195,14 +197,32 @@ class Cortex:
             "whatvinaylost": self.whine,
         }.get(what, self.default)()
 
+    def skynet(self):
+        self.chat("Activating.")
+
+    def reward(self):
+        if not self.values:
+            self.chat("Reward whom?")
+            return
+        
+        kinder = self.values[0]
+        self.chat("Good job, " + kinder + ". Here's your star: \x038" + u'\u2605' + "\x03")
+        self.act(" pats " + kinder + "'s head.")
+
     def stockquote(self):
         if not self.values:
             self.chat("Enter a symbol")
             return
         
         symbol = self.values[0]
+
+        # .dji
+        # .NYSEARCA:SPY
+        # .
+        
+
         stock = Stock(symbol)
-        showit = stock.showquote()
+        showit = stock.showquote(self.context)
 
         if not showit:
             self.chat("Couldn't find company.")
@@ -667,10 +687,7 @@ class Cortex:
             open(BRAIN + "/mom.log", 'a').write(content + '\n')
 
         if content.lower().find("oh snap") != -1:
-            if nick.lower().find("cross") != -1:
-                self.announce("[crickets]")
-            else:
-                self.announce("yeah WHAT?? Oh yes he DID")
+            self.announce("yeah WHAT?? Oh yes he DID")
 
         if content.lower().find("rimshot") != -1:
             self.announce("*ting*")
@@ -830,7 +847,7 @@ class Cortex:
 
     def chat(self, message, target=False):
 
-        message = self.colortext(message)
+        #message = self.colortext(message)
 
         if target:
             whom = target

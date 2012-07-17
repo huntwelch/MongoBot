@@ -1,5 +1,6 @@
 import urllib2
 import urllib
+from settings import *
 from xml.dom import minidom as dom
 
 class Stock:
@@ -80,7 +81,7 @@ class Stock:
 
         return extracted
 
-    def showquote(self):
+    def showquote(self,context):
 
         if not self.stock:
             return False
@@ -92,8 +93,8 @@ class Stock:
         # Check for after hours
 
         afterhours = False 
-        time = self.stock["current_time_utc"] 
-        if self.stock["isld_last"]: 
+        time = int(self.stock["current_time_utc"])
+        if self.stock["isld_last"] and (time < 133000 or time > 200000): 
             afterhours = True
             value = float(self.stock["isld_last"])
             change = value - float(self.stock["last"])
@@ -122,14 +123,15 @@ class Stock:
             ("Market cap","market_cap"),
         ]   
 
-        for item in otherinfo:
-            pretty,id = item
-            addon = pretty + ": " + self.stock[id]
-            message.append(addon)
+        if context != CHANNEL: 
+            for item in otherinfo:
+                pretty,id = item
+                addon = pretty + ": " + self.stock[id]
+                message.append(addon)
             
-        # this should work even after the api goes down
-        link = "http://www.google.com/finance?client=ig&q=" + self.stock["symbol"]
-        message.append(link)
+            # this should work even after the api goes down
+            link = "http://www.google.com/finance?client=ig&q=" + self.stock["symbol"]
+            message.append(link)
 
         output = ', '.join(message) 
         if afterhours:
