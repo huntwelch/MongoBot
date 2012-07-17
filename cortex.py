@@ -206,7 +206,7 @@ class Cortex:
             return
         
         kinder = self.values[0]
-        self.chat("Good job, " + kinder + ". Here's your star: \x038" + u'\u2605' + "\x03")
+        self.chat("Good job, " + kinder + ". Here's your star: " + self.colorize(u'\u2605',"yellow"))
         self.act(" pats " + kinder + "'s head.")
 
     def stockquote(self):
@@ -819,24 +819,37 @@ class Cortex:
 
         self.chat(random.choice(lines))
 
-    def colortext(self, message):
-
+    # instead of presuming to predict what
+    # will be colored, make it easy to prep 
+    # string elements
+    def colorize(self, text, color):
+        
         colors = {
-            u'\u2665':4,
-            u'\u2666':4,
+            "white":0, 
+            "black":1, 
+            "blue":2,       #(navy)
+            "green":3, 
+            "red":4, 
+            "brown":5,      #(maroon)
+            "purple":6, 
+            "orange":7,     #(olive)
+            "yellow":8, 
+            "lightgreen":9, #(lime)
+            "teal":10,      #(a green/blue cyan)
+            "lightcyan":11, #(cyan) (aqua)
+            "lightblue":12, #(royal)
+            "pink":13,      #(light purple) (fuchsia)
+            "grey":14, 
+            "lightgrey":15, #(silver)
         }
 
-        for character in colors:
-            if character in message:
-                message = message.split(character)
-                "\x03" + str(colors[character]) + character + "\x03".join(message)
+        if isinstance(color,str):
+            color = colors[color]
 
-        return message
+        return "\x03" + str(color) + text + "\x03"
 
 
     def announce(self, message, whom=False):
-
-        message = self.colortext(message)
 
         message = message.encode("utf-8")
 
