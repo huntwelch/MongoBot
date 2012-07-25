@@ -116,6 +116,7 @@ class Cortex:
 
         self.logit(sender + " sent command: " + what + "\n")
         self.lastsender = sender
+        self.lastcommand = what 
 
         {
             # General
@@ -209,26 +210,29 @@ class Cortex:
         self.chat("Good job, " + kinder + ". Here's your star: " + self.colorize(u'\u2605',"yellow"))
         self.act(" pats " + kinder + "'s head.")
 
-    def stockquote(self):
-        if not self.values:
+    def stockquote(self, symbol = False, default = False):
+        if not symbol:
+            symbol = self.values
+        
+        if not symbol:
             self.chat("Enter a symbol")
             return
-        
-        symbol = self.values[0]
 
-        # .dji
-        # .NYSEARCA:SPY
-        # .
-        
+        if not default:
+            symbol = symbol[0] 
 
         stock = Stock(symbol)
         showit = stock.showquote(self.context)
 
+        if not showit and default:
+            return False
+        
         if not showit:
             self.chat("Couldn't find company.")
             return
 
         self.chat(showit)
+        return True
         
     def fml(self):
         db = MySQLdb.connect("localhost","peter",SQL_PASSWORD,"peter_stilldrinking") 
@@ -709,8 +713,6 @@ class Cortex:
             if not urlbase:
                 fubs += 1
 
-            cont = soup(urlbase)
-            title = cont.title.string
 
             try:
                 opener = urllib2.build_opener()
@@ -728,9 +730,11 @@ class Cortex:
 
             if ext in images:
                 title = "Image"
-
-            if ext == "pdf":
+            elif ext == "pdf":
                 title = "PDF Document"
+            else:
+                cont = soup(urlbase)
+                title = cont.title.string
 
             deli = "https://api.del.icio.us/v1/posts/add?"
             data = urllib.urlencode({
@@ -880,7 +884,8 @@ class Cortex:
             self.chat(message)
 
     def default(self):
-        self.chat(NICK + " cannot do this thing :'(")
+        if not self.stockquote(self.lastcommand,True):
+            self.chat(NICK + " cannot do this thing :'(")
 
     def showsettings(self):
         for name, value in SAFESET:
