@@ -1,0 +1,6 @@
+Getting Started
+===============
+
+    mkvirtualenv MongoBot
+    pip install -r requirements.txt
+    python Mongo.py
