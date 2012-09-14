@@ -15,7 +15,7 @@ class Broca():
 
     def __init__(self, mongo):
         self.mongo = mongo
-        mongoengine.connect('bot', 'bot', 'asdfqwer')
+        mongoengine.connect('bot', 'bot')
 
     def whatmean(self):
 
