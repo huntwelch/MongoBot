@@ -1,12 +1,7 @@
 import wordnik
-import nltk
 import mongoengine
-import wordnet
 from mongoengine import *
 from settings import *
-
-# http://www.nltk.org/documentation
-# http://osteele.com/projects/pywordnet/
 
 
 class Words(mongoengine.Document):
