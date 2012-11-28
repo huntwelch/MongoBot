@@ -90,7 +90,8 @@ class Cortex:
             content = line.split(' ', 3)
             self.context = content[2]
 
-            if self.acro:
+            # TODO: this check could be better
+            if self.acro and line.find('~') == -1:
                 if self.context == NICK:
                     self.acro.input(content)
 
@@ -173,6 +174,9 @@ class Cortex:
             "boards": self.boards,
             "rules": self.rules,
 
+            # Chess
+            "chess": self.chess,
+
             # Holdem
             "holdem": self.holdemengine,
             "bet": self.holdem.raiseit,
@@ -197,6 +201,13 @@ class Cortex:
             "mom": self.mom,
             "whatvinaylost": self.whine,
         }.get(what, self.default)()
+
+    def chess(self):
+        self.chat(u'\u265C\u265E\u265D\u265A\u265B\u265D\u265E\u265C')
+        self.chat(u'\u265F\u265F\u265F\u265F\u265F\u265F\u265F\u265F')
+        self.chat(u'\u2659\u2659\u2659\u2659\u2659\u2659\u2659\u2659')
+        self.chat(u'\u2656\u2658\u2657\u2654\u2655\u2657\u2658\u2656')
+
 
     def skynet(self):
         self.chat("Activating.")
