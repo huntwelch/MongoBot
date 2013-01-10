@@ -1,12 +1,7 @@
 import wordnik
-import nltk
 import mongoengine
-import wordnet
 from mongoengine import *
 from settings import *
-
-# http://www.nltk.org/documentation
-# http://osteele.com/projects/pywordnet/
 
 
 class Words(mongoengine.Document):
@@ -20,7 +15,7 @@ class Broca():
 
     def __init__(self, mongo):
         self.mongo = mongo
-        mongoengine.connect('bot', 'bot', 'asdfqwer')
+        mongoengine.connect('bot', 'bot')
 
     def whatmean(self):
 
