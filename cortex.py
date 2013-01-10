@@ -4,6 +4,7 @@ import string
 import simplejson as json
 import os
 import re
+import htmlentitydefs 
 import random
 import threading
 import urllib2
@@ -32,6 +33,29 @@ from broca import Broca
 from stocks import Stock 
 
 # TODO: standardize url grabber
+
+# utility, should probably have a utils file
+def unescape(text):
+    def fixup(m):
+        text = m.group(0)
+        if text[:2] == "&#":
+            # character reference
+            try:
+                if text[:3] == "&#x":
+                    return unichr(int(text[3:-1], 16))
+                else:
+                    return unichr(int(text[2:-1]))
+            except ValueError:
+                pass
+        else:
+            # named entity
+            try:
+                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+            except KeyError:
+                pass
+        return text # leave as is
+    return re.sub("&#?\w+;", fixup, text)
+
 
 
 class Cortex:
@@ -145,6 +169,8 @@ class Cortex:
             "anagram": self.anagram,
             "munroesecurity": self.password,
             "skynet": self.skynet,
+            "table": self.table,
+            "intros": self.intros,
 
             # Memory
             "somethingabout": self.somethingabout,
@@ -208,6 +234,28 @@ class Cortex:
         }.get(what, self.default)()
 
     
+    def table(self):
+        self.chat(u'\u0028' + u'\u256F' + u'\u00B0' + u'\u25A1' + u'\u00B0' + u'\uFF09' + u'\u256F' + u'\uFE35' + u'\u0020' + u'\u253B' + u'\u2501' + u'\u253B')
+
+    def intros(self):
+        text = ""
+        try:
+            file = open("introductions")
+        except:
+            self.chat("No introductions file")
+            return
+
+        for line in file:
+            if line.strip() == "---":
+                self.chat(text)
+                text = ""
+                continue
+
+            text += " " + line.strip()
+
+        self.chat(text)
+
+
     def resetchess(self):
 
         self.pieces = dict(
@@ -845,7 +893,7 @@ class Cortex:
             if fubs == 2:
                 self.chat("Total fail")
             else:
-                self.chat(title + " @ " + roasted)
+                self.chat(unescape(title) + " @ " + roasted)
 
     def update(self):
 
