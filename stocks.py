@@ -1,4 +1,3 @@
-import urllib2
 import urllib
 from settings import *
 from xml.dom import minidom as dom

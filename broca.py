@@ -1,7 +1,5 @@
 import wordnik
-import nltk
 import mongoengine
-import wordnet
 from mongoengine import *
 from settings import *
 

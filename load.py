@@ -2,6 +2,7 @@ import wordnik
 import mongoengine
 from mongoengine import *
 from time import sleep
+from settings import WORDNIK_API
 
 wapi = wordnik.Wordnik(api_key=WORDNIK_API)
 

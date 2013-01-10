@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-import random
-import sys
-
 STRAIGHT_FLUSH=8
 FOUR_OF_A_KIND=7
 FULL_HOUSE=6
