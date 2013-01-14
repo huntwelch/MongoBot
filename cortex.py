@@ -13,6 +13,7 @@ from BeautifulSoup import BeautifulSoup as soup
 
 from math import *
 from time import *
+from random import choice
 
 import acro
 import holdem
@@ -168,6 +169,7 @@ class Cortex:
             "table": self.table,
             "intros": self.intros,
             "source": self.source,
+            "aleksey": self.shitalekseysays,
 
             # Memory
             "somethingabout": self.somethingabout,
@@ -388,6 +390,19 @@ class Cortex:
         # intimate
         fml = entry[2]
         self.chat(fml)
+
+    def shitalekseysays(self):
+        url = 'https://spreadsheets.google.com/feeds/list/0Auy4L1ZnQpdYdERZOGV1bHZrMEFYQkhKVHc4eEE3U0E/od6/public/basic?alt=json'
+
+        try:
+            response = urllib2.urlopen(url).read()
+            json = simplejson.loads(response)
+        except:
+            self.chat('Somethin dun goobied.')
+            return
+
+        entry = choice(json['feed']['entry'])
+        self.chat(entry['title']['$t'])
 
     def holdemhelp(self):
         self.chat("~holdem <start>, ~bet [amount] <opening bet>, ~current <shows current bet>, ~call, ~raise [amount], ~pass, ~fold, ~allin, ~sitout <temporarily remove yourself from the game>, ~sitin <return for next hand>, ~status <show all players' money and status>, ~pot <display amount in pot>, ~mymoney <show how much money you have>")
