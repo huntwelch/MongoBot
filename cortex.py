@@ -7,6 +7,7 @@ import random
 import urllib2
 import urllib
 import MySQLdb
+import simplejson
 
 from BeautifulSoup import BeautifulSoup as soup
 
@@ -157,7 +158,7 @@ class Cortex:
             "say": self._say,
             "act": self._act,
             "q": self.stockquote,
-            "g": self.google,
+            "g": self.goog,
             "ety": self.ety,
             "buzz": self.buzz,
             "fml": self.fml,
@@ -434,6 +435,35 @@ class Cortex:
             sleep(1)
             self.chat(command)
 
+    def goog(self):
+        if not self.values:
+            self.chat("Enter a word")
+            return
+        
+        query = "+".join(self.values)
+        url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=large&q=%s&start=0" % (query)
+
+        # Google no likey pageopen func
+
+        try: 
+            results = urllib.urlopen(url)
+            json = simplejson.loads(results.read())
+        except:
+            self.chat("Something's buggered up")
+            return
+        
+        if json["responseStatus"] != 200:
+            self.chat("Bad status")
+            return
+
+        result = json["responseData"]["results"][0]
+        title = result["titleNoFormatting"]
+        link = result["url"]
+
+        self.chat(title + " @ " + link)
+
+        return
+
     def ety(self):
         if not self.values:
             self.chat("Enter a word")
@@ -494,10 +524,6 @@ class Cortex:
         paragraph = cont.findAll("p")[4]
         content = ''.join(paragraph.findAll()).replace("<br/>", ", ").encode("utf-8")
         self.chat(content)
-
-    def google(self):
-
-        return
 
     def somethingabout(self):
         if not self.values:
@@ -845,7 +871,6 @@ class Cortex:
             if not urlbase:
                 fubs += 1
 
-
             try:
                 opener = urllib2.build_opener()
                 roasted = opener.open(SHORTENER + url).read()
@@ -865,8 +890,12 @@ class Cortex:
             elif ext == "pdf":
                 title = "PDF Document"
             else:
-                cont = soup(urlbase)
-                title = cont.title.string
+                try:
+                    cont = soup(urlbase)
+                    title = cont.title.string
+                except:
+                    self.chat("Page parsing error")
+                    return
 
             deli = "https://api.del.icio.us/v1/posts/add?"
             data = urllib.urlencode({
