@@ -1,11 +1,15 @@
 from math import *
+from secrets import *
 
 # Connection Settings
 
 HOST = "irc.freenode.net"
 PORT = 6667
 NICK = "MongoBot"
-CHANNEL = "#mongobottest"
+
+# These settings are set in secrets.py
+# CHANNEL = (str) irc channel
+# SQL_PASSWORD = fucking guess 
 
 # Directory settings
 
@@ -19,6 +23,7 @@ ACROSCORE = BRAIN + "/acro/"
 SHORTENER = "http://roa.st/api.php?roast="
 PATIENCE = 6000
 WORDNIK_API = "62d747d2294f2fda6112d43604f273e0aefd2d839a2c257c9"
+REPO = "huntwelch/MongoBot · GitHub @ https://github.com/huntwelch/MongoBot"
 
 # Acro
 

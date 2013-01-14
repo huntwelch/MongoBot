@@ -167,6 +167,7 @@ class Cortex:
             "skynet": self.skynet,
             "table": self.table,
             "intros": self.intros,
+            "source": self.source,
 
             # Memory
             "somethingabout": self.somethingabout,
@@ -229,6 +230,8 @@ class Cortex:
             "whatvinaylost": self.whine,
         }.get(what, self.default)()
 
+    def source(self):
+        self.chat(REPO)
     
     def table(self):
         self.chat(u'\u0028' + u'\u256F' + u'\u00B0' + u'\u25A1' + u'\u00B0' + u'\uFF09' + u'\u256F' + u'\uFE35' + u'\u0020' + u'\u253B' + u'\u2501' + u'\u253B')
