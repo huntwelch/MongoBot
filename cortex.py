@@ -2,17 +2,19 @@ import base64
 import string
 import os
 import re
-import htmlentitydefs 
+import htmlentitydefs
 import random
 import urllib2
 import urllib
 import MySQLdb
 import simplejson
+import shutil
 
-from BeautifulSoup import BeautifulSoup as soup
-
+from datetime import date, timedelta
 from math import *
 from time import *
+
+from BeautifulSoup import BeautifulSoup as soup
 
 import acro
 import holdem
@@ -31,6 +33,8 @@ from stocks import Stock
 # TODO: standardize url grabber
 
 # utility, should probably have a utils file
+
+
 def unescape(text):
     def fixup(m):
         text = m.group(0)
@@ -49,9 +53,8 @@ def unescape(text):
                 text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
             except KeyError:
                 pass
-        return text # leave as is
+        return text  # leave as is
     return re.sub("&#?\w+;", fixup, text)
-
 
 
 class Cortex:
@@ -87,7 +90,7 @@ class Cortex:
         from holdem import Holdem
         from redmine import Redmine
         from broca import Broca
-        from stocks import Stock 
+        from stocks import Stock
         self.redmine = Redmine(self)
         self.holdem = Holdem(self)
         self.broca = Broca(self)
@@ -97,7 +100,9 @@ class Cortex:
         line = line.strip()
 
         currenttime = int(mktime(localtime()))
-        if line != '':
+        scan = re.search("^:\w+\.freenode\.net", line)
+        ping = re.search("^PING", line)
+        if line != '' and not scan and not ping:
             self.logit(line + '\n')
 
         if self.gettingnames:
@@ -140,7 +145,7 @@ class Cortex:
 
         self.logit(sender + " sent command: " + what + "\n")
         self.lastsender = sender
-        self.lastcommand = what 
+        self.lastcommand = what
 
         {
             # General
@@ -232,7 +237,7 @@ class Cortex:
 
     def source(self):
         self.chat(REPO)
-    
+
     def table(self):
         self.chat(u'\u0028' + u'\u256F' + u'\u00B0' + u'\u25A1' + u'\u00B0' + u'\uFF09' + u'\u256F' + u'\uFE35' + u'\u0020' + u'\u253B' + u'\u2501' + u'\u253B')
 
@@ -254,7 +259,6 @@ class Cortex:
 
         self.chat(text)
 
-
     def resetchess(self):
 
         self.pieces = dict(
@@ -271,21 +275,20 @@ class Cortex:
             wk=u'\u2654',
             wp=u'\u2659',
         )
-        
         self.chessgrid = [
-            ['br','bn','bb','bq','bk','bb','bn','br'],
-            ['bp','bp','bp','bp','bp','bp','bp','bp'],
-            ['','','','','','','',''],
-            ['','','','','','','',''],
-            ['','','','','','','',''],
-            ['','','','','','','',''],
-            ['wp','wp','wp','wp','wp','wp','wp','wp'],
-            ['wr','wn','wb','wq','wk','wb','wn','wr'],
+            ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
+            ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
+            ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr'],
         ]
 
     def chess(self):
-        squares = [u'\u25fc',u'\u25fb']
-        flip = 0 
+        squares = [u'\u25fc', u'\u25fb']
+        flip = 0
         count = 8
         for row in self.chessgrid:
             rowset = [str(count)]
@@ -294,9 +297,9 @@ class Cortex:
                     rowset.append(self.pieces[space])
                 else:
                     rowset.append(squares[flip])
-                flip = (flip+1)%2
+                flip = (flip + 1) % 2
 
-            flip = (flip+1)%2
+            flip = (flip + 1) % 2
             count -= 1
 
             self.chat(' '.join(rowset))
@@ -307,17 +310,17 @@ class Cortex:
         if not self.values:
             self.chat("Bad format")
             return
-        
+
         if len(self.values) < 2:
             self.chat("Not enough values")
             return
-        
-        start = self.values[0] 
-        finis = self.values[1] 
-        trans = dict(a=0,b=1,c=2,d=3,e=4,f=5,g=6,h=7)
+
+        start = self.values[0]
+        finis = self.values[1]
+        trans = dict(a=0, b=1, c=2, d=3, e=4, f=5, g=6, h=7)
 
         if start in self.pieces:
-            piece = self.pieces[start] 
+            piece = self.pieces[start]
         else:
             x = 8 - int(start[1:])
             y = trans[start[:1]]
@@ -823,6 +826,18 @@ class Cortex:
     def logit(self, what):
         open(LOG, 'a').write(what)
 
+        now = date.today() 
+        if now.day != 1:
+            return
+
+        prev = date.today() - timedelta(days=1)
+        backlog = BRAIN + prev.strftime("%Y%m") + "-mongo.log"
+        if os.path.isfile(backlog):
+            return
+        
+        shutil.move(LOG, backlog)
+
+
     def parse(self, msg):
         info, content = msg[1:].split(':', 1)
         try:
@@ -1022,6 +1037,7 @@ class Cortex:
 
     def chat(self, message, target=False):
 
+        # TODO: why is this commented?
         #message = self.colortext(message)
 
         if target:
