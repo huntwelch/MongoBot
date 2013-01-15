@@ -9,7 +9,9 @@ import urllib
 import MySQLdb
 import simplejson
 import shutil
+import mongoengine
 
+from mongoengine import *
 from datetime import date, timedelta
 from math import *
 from time import *
@@ -33,10 +35,12 @@ from stocks import Stock
 
 # TODO: standardize url grabber
 
-# utility, should probably have a utils file
 
+class Drinker(mongoengine.Document):  # should be moved elsewhere
+    name = StringField(required = True)
+    company = StringField()
 
-def unescape(text):
+def unescape(text):  # utility, should probably have a utils file
     def fixup(m):
         text = m.group(0)
         if text[:2] == "&#":
@@ -77,8 +81,12 @@ class Cortex:
         self.holdem = Holdem(self)
         self.broca = Broca(self)
 
+        # chess stuff
         self.chessgrid = []
         self.resetchess()
+
+        # connet the bot
+        mongoengine.connect('bot', 'bot')
 
     # a lot of this doesn't seem to work :/
     def reload(self):
@@ -175,6 +183,8 @@ class Cortex:
             "intros": self.intros,
             "source": self.source,
             "aleksey": self.shitalekseysays,
+            "workat": self.workat,
+            "companies": self.companies,
 
             # Memory
             "somethingabout": self.somethingabout,
@@ -228,7 +238,6 @@ class Cortex:
             "pot": self.holdem.showpot,
             "mymoney": self.holdem.mymoney,
             "thebet": self.holdem.thebet,
-            "holdemhelp": self.holdemhelp,
             "testcolor": self.testcolor,
 
             # Nerf out for work bots
@@ -236,6 +245,115 @@ class Cortex:
             "mom": self.mom,
             "whatvinaylost": self.whine,
         }.get(what, self.default)()
+
+    def showlist(self):
+        list = { 
+            "g":[
+                "~q [stock symbol]<get stock quote>",
+                "~g [what]<search google>",
+                "~love <command " + NICK + " to love>",
+                "~hate <command " + NICK + " to hate>",
+                "~settings <show current settings>",
+                "~reload <reload libraries>",
+                "~reboot <guess>",
+                "~reward <give someone a reward>",
+                "~cry <make " + NICK + " cry>",
+                "~bored <make " + NICK + " bored>",
+                "~update SETTING_NAME [value] <change a setting>",
+                "~mom <randomly reprint a message containing 'mom'>",
+                "~distaste <command " + NICK + " to express disastisfaction>",
+                "~distaste [url] <expand " + NICK + "'s to disastisfaction repertoire>",
+                "~fml <grab random fml entry>",
+                "~munroesecurity <generate passward according to http://xkcd.com/936/>",
+                "~skynet <launch skynet>",
+                "~table <throw table>",
+                "~intros <show history of " + CHANNEL + ">",
+                "~source <link to repo for " + NICK + ">",
+                "~aleksey <pull a quote from shitalekseysays.com>",
+                "~workat <register what company you work at>",
+                "~companies <show who works where>",
+            ],
+            "h":[
+                "~holdem <start holdem game>",
+                "~bet [amount] <>",
+                "~call <match bet, if able>",
+                "~raise [amount] <raise the bet>",
+                "~pass/~knock/~check  <pass bet>",
+                "~fold <leave hand>",
+                "~allin <bet everything>",
+                "~sitout <leave game temporarily>",
+                "~sitin <rejoin game>",
+                "~status <show all players' money and status>",
+                "~pot <show amount in pot>",
+                "~mymoney <show how much money you have>",
+                "~thebet <show current bet>",
+            ],
+            "a":[
+                "~roque/~acro [pause|resume|end] <start acro game>",
+                "~rules <print the rules for the acro game>",
+                "~learnword someword <add a word to bot's acronym library>",
+                "~boards <show cumulative acro game scores>",
+            ],
+            "l":[
+                "~anagram [phrase] <get anagrams of phrase>",
+                "~think [abc] <come up with an acronym for submitted letters>",
+                "~ety <get etymology of word>",
+                "~buzz <generate buzzword bullshit>",
+                "~whatmean/~def [someword] <look up word in local database or wordnik>",
+                "~calc <show available python math functions>",
+                "~calc equation <run a simple calculation>",
+            ],
+            "m":[
+                "~somethingabout/~mem <search logs for phrase and print the most recent>",
+                "~next <after mem, get the next phrase memory>",
+                "~prev <after mem, get the previous phrase memory>",
+                "~latest <after mem, get the latest phrase memory>",
+                "~oldest <you see where this is going>",
+            ],
+            "c":[
+                "~chess <show chessboard>",
+                "~move [a-f][1-8] [a-f][1-8] <move piece [from] [to]>",
+                "~resetchess <reset chessboard>",
+            ],
+            "r":[
+                "~register [api key] <register your redmine api key with MongoBot>",
+                "~hot <display all unassigned hotfixes>",
+                "~detail [ticket number] <get a ticket description>",
+                "~snag [ticket number] <assign a ticket to yourself>",
+                "~assign [user nick] [ticket number] <assign a ticket to someone else>",
+                "~tickets [user; optional] <show assigned tickets for user>",
+            ],
+        }
+
+        if not self.values or self.values[0] not in list: 
+            self.chat("Use ~help [what] where what is (g)eneral, (l)anguage and math, (m)emory, (a)cro, (h)oldem, (c)hess, (r)edmine")
+            return
+
+        which = self.values[0]
+
+        for command in list[which]:
+            sleep(1)
+            self.chat(command)
+
+    def workat(self):
+        if not self.values: 
+            self.chat("If you're unemployed, that's cool, just don't abuse the bot")
+            return
+        
+        name = self.lastsender  
+        company = " ".join(self.values)
+
+        drinker = Drinker.objects(name = name)[0]
+        if drinker:
+            drinker.company = company
+        else:
+            drinker = Drinker(name = name, company = company) 
+
+        drinker.save()
+
+    def companies(self):
+        for drinker in Drinker.objects:
+            self.chat(drinker.name + ": " + drinker.company)
 
     def source(self):
         self.chat(REPO)
@@ -407,54 +525,8 @@ class Cortex:
         entry = choice(json['feed']['entry'])
         self.chat(entry['title']['$t'])
 
-    def holdemhelp(self):
-        self.chat("~holdem <start>, ~bet [amount] <opening bet>, ~current <shows current bet>, ~call, ~raise [amount], ~pass, ~fold, ~allin, ~sitout <temporarily remove yourself from the game>, ~sitin <return for next hand>, ~status <show all players' money and status>, ~pot <display amount in pot>, ~mymoney <show how much money you have>")
-
     def testcolor(self):
         self.chat(u'\u2660' + "\x034" + u'\u2665' + u'\u2666' + "\x03" + u'\u2663')
-
-    def showlist(self):
-        list = [
-            "~help <show this message>",
-            "~register [api key] <register your redmine api key with MongoBot>",
-            "~hot <display all unassigned hotfixes>",
-            "~q <get stock quote>",
-            "~g <search google>",
-            "~ety <get etymology of word>",
-            "~buzz <generate buzzword bullshit>",
-            "~anagram <get anagrams of phrase>",
-            "~detail [ticket number] <get a ticket description>",
-            "~snag [ticket number] <assign a ticket to yourself>",
-            "~assign [user nick] [ticket number] <assign a ticket to someone else>",
-            "~tickets [user; optional] <show assigned tickets for user>",
-            "~love <command " + NICK + " to love>",
-            "~settings <show current settings>",
-            "~update SETTING_NAME value <change a setting>",
-            "~think ABC <come up with an acronym for submitted letters>",
-            "~learnword someword <add a word to bot's acronym library>",
-            "~whatmean someword <look up word in local database or wordnik>",
-            "~calc <show available python math functions>",
-            "~calc equation <run a simple calculation>",
-            "~somethingabout <search logs for phrase and print the most recent>",
-            "~next <after mem, get the next phrase memory>",
-            "~prev <after mem, get the previous phrase memory>",
-            "~latest <after mem, get the latest phrase memory>",
-            "~oldest <you see where this is going>",
-            "~reload <reload libraries>",
-            "~reboot <guess>",
-
-            # Nerf out for work bots
-            "~rules <print the rules for the acro game>",
-            "~roque [pause|resume|end] <start acro game>",
-            "~boards <show cumulative acro game scores>",
-            "~mom <randomly reprint a message containing 'mom'>",
-            "~distaste <command " + NICK + " to express disastisfaction>",
-            "~distaste url <expand " + NICK + "'s to disastisfaction repertoire>",
-        ]
-
-        for command in list:
-            sleep(1)
-            self.chat(command)
 
     def goog(self):
         if not self.values:
