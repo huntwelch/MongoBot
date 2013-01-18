@@ -113,11 +113,12 @@ class Cortex:
         ping = re.search("^PING", line)
         if line != '' and not scan and not ping:
             self.logit(line + '\n')
-
+        
         if self.gettingnames:
             if line.find("* " + CHANNEL) != -1:
                 all = line.split(":")[2]
                 self.gettingnames = False
+                all = re.sub(NICK + ' ', '', all)
                 self.members = all.split()
 
         if line.find('PING') != -1:
@@ -134,7 +135,7 @@ class Cortex:
 
             self.parse(line)
 
-        if currenttime - self.namecheck > 60:
+        if currenttime - self.namecheck > 300:
             self.namecheck = int(mktime(localtime()))
             self.getnames()
 
@@ -168,7 +169,7 @@ class Cortex:
             "cry": self.cry,
             "calc": self.calc,
             "bored": self.bored,
-            "register": self.getnames,
+            "names": self.getnames,
             "say": self._say,
             "act": self._act,
             "q": self.stockquote,
@@ -185,6 +186,7 @@ class Cortex:
             "aleksey": self.shitalekseysays,
             "workat": self.workat,
             "companies": self.companies,
+            "all": self.all,
 
             # Memory
             "somethingabout": self.somethingabout,
@@ -343,8 +345,9 @@ class Cortex:
         name = self.lastsender  
         company = " ".join(self.values)
 
-        drinker = Drinker.objects(name = name)[0]
+        drinker = Drinker.objects(name = name)
         if drinker:
+            drinker = drinker[0]
             drinker.company = company
         else:
             drinker = Drinker(name = name, company = company) 
@@ -760,6 +763,17 @@ class Cortex:
 
         self.chat(result)
 
+    def all(self):
+        peeps = self.members
+        try:
+            peeps.remove(self.lastsender)
+        except:
+            self.chat('List incoherrent')
+            return
+
+        peeps = ', '.join(peeps)
+        self.chat(peeps + ', ' + self.lastsender + ' has something very important to say.')
+
     def bored(self):
         if not self.members:
             return
@@ -926,7 +940,7 @@ class Cortex:
 
 
     def parse(self, msg):
-        info, content = msg[1:].split(':', 1)
+        info, content = msg[1:].split(' :', 1)
         try:
             sender, type, room = info.strip().split()
         except:
