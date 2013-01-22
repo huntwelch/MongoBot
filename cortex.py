@@ -187,6 +187,7 @@ class Cortex:
             "workat": self.workat,
             "companies": self.companies,
             "all": self.all,
+            "btc": self.btc,
 
             # Memory
             "somethingabout": self.somethingabout,
@@ -274,6 +275,7 @@ class Cortex:
                 "~aleksey <pull a quote from shitalekseysays.com>",
                 "~workat <register what company you work at>",
                 "~companies <show who works where>",
+                "~btc <get current Bitcoin trading information>",
             ],
             "h":[
                 "~holdem <start holdem game>",
@@ -527,6 +529,26 @@ class Cortex:
 
         entry = choice(json['feed']['entry'])
         self.chat(entry['title']['$t'])
+
+    def btc(self):
+        url = 'https://mtgox.com/api/1/BTCUSD/ticker'
+
+        response = self.pageopen(url)
+        if not response:
+            self.chat("Couldn't retrieve BTC data.")
+            return
+
+        try:
+            json = simplejson.loads(response)
+        except:
+            self.chat("Couldn't parse BTC data.")
+            return
+
+        last = json['return']['last_all']['display_short']
+        low = json['return']['low']['display_short']
+        high = json['return']['high']['display_short']
+
+        self.chat('Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high))        
 
     def testcolor(self):
         self.chat(u'\u2660' + "\x034" + u'\u2665' + u'\u2666' + "\x03" + u'\u2663')
