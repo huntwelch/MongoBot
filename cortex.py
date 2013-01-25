@@ -148,6 +148,11 @@ class Cortex:
         components = cmd.split()
         what = components.pop(0)[1:]
 
+        # Ignore ~[0-9]+ commands
+        is_invalid = re.search("^[0-9]+$", what)
+        if is_invalid:
+            return
+
         if components:
             self.values = components
         else:
@@ -186,6 +191,7 @@ class Cortex:
             "aleksey": self.shitalekseysays,
             "workat": self.workat,
             "companies": self.companies,
+            "company": self.company,
             "all": self.all,
             "btc": self.btc,
 
@@ -275,6 +281,7 @@ class Cortex:
                 "~aleksey <pull a quote from shitalekseysays.com>",
                 "~workat <register what company you work at>",
                 "~companies <show who works where>",
+                "~company <show the company a specific person works for>",
                 "~btc <get current Bitcoin trading information>",
             ],
             "h":[
@@ -359,6 +366,18 @@ class Cortex:
     def companies(self):
         for drinker in Drinker.objects:
             self.chat(drinker.name + ": " + drinker.company)
+
+    def company(self):
+        if not self.values:
+            search_for = self.lastsender
+        else:
+            search_for = self.values[0]
+
+        user = Drinker.objects(name=search_for)
+        if user:
+            self.chat(user.name + ": " + user.company)
+        else:
+            self.chat("Tell that deadbeat %s to get a damn job already..." % search_for)
 
     def source(self):
         self.chat(REPO)
