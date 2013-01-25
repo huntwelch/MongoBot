@@ -373,7 +373,7 @@ class Cortex:
         else:
             search_for = self.values[0]
 
-        user = Drinker.objects(name=search_for)
+        user = Drinker.objects(name = search_for)[0]
         if user:
             self.chat(user.name + ": " + user.company)
         else:
