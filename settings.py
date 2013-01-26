@@ -1,6 +1,9 @@
 from math import *
 from secrets import *
 
+# Note the WEATHER from secrets is an api key
+# from wunderground.com
+
 # Connection Settings
 
 HOST = "irc.freenode.net"
