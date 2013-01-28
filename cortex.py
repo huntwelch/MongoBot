@@ -1052,7 +1052,7 @@ class Cortex:
 
     def tweet(self, urls):
         for url in urls:
-            response = self.pageopen(url)
+            response = self.pageopen('https://api.twitter.com/1/statuses/show.json?id=%s' % url[1])
             if not response:
                 self.chat("Couldn't retrieve Tweet.")
                 return
