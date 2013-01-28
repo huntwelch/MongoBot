@@ -370,13 +370,14 @@ class Cortex:
         json = json['current_observation']
 
         location = json['display_location']['full']
+        condition = json['weather']
         temp = json['temperature_string']
         humid = json['relative_humidity']
         wind = json['wind_string']
         feels = json['feelslike_string']
 
-        base = "%s, %s, Humidity: %s, Wind: %s, Feels like: %s"
-        self.chat( base % (location, temp, humid, wind, feels) )
+        base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s"
+        self.chat( base % (location, condition, temp, humid, wind, feels) )
 
     def workat(self):
         if not self.values: 
