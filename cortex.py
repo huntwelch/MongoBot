@@ -1026,12 +1026,18 @@ class Cortex:
 
         self.lastsender = nick
 
-        if content.find(NICK + " sucks") != -1:
-            self.chat(nick + "'s MOM sucks")
-            return
-
         if content[:1] == "~":
             self.command(nick, content)
+            return
+
+        match_urls = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+        urls = match_urls.findall(content)
+        if len(urls):
+            self.linker(urls)
+            return
+
+        if content.find(NICK + " sucks") != -1:
+            self.chat(nick + "'s MOM sucks")
             return
 
         if "mom" in content.translate(string.maketrans("", ""), string.punctuation).split():
@@ -1049,12 +1055,6 @@ class Cortex:
         if content.lower().find("stop") == len(content) - 4 and len(content) != 3:
             self.announce("Hammertime")
             return
-
-        match_urls = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
-
-        urls = match_urls.findall(content)
-        if len(urls):
-            self.linker(urls)
 
     def tweet(self, urls):
         for url in urls:
