@@ -1028,21 +1028,27 @@ class Cortex:
 
         if content.find(NICK + " sucks") != -1:
             self.chat(nick + "'s MOM sucks")
+            return
 
         if content[:1] == "~":
             self.command(nick, content)
+            return
 
         if "mom" in content.translate(string.maketrans("", ""), string.punctuation).split():
             open(BRAIN + "/mom.log", 'a').write(content + '\n')
+            return
 
         if content.lower().find("oh snap") != -1:
             self.announce("yeah WHAT?? Oh yes he DID")
+            return
 
         if content.lower().find("rimshot") != -1:
             self.announce("*ting*")
+            return
 
         if content.lower().find("stop") == len(content) - 4 and len(content) != 3:
             self.announce("Hammertime")
+            return
 
         match_urls = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
 
