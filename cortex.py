@@ -148,6 +148,11 @@ class Cortex:
         components = cmd.split()
         what = components.pop(0)[1:]
 
+        # Ignore ~[0-9]+ commands
+        is_invalid = re.search("^[0-9]+", what)
+        if is_invalid:
+            return
+
         if components:
             self.values = components
         else:
@@ -186,8 +191,10 @@ class Cortex:
             "aleksey": self.shitalekseysays,
             "workat": self.workat,
             "companies": self.companies,
+            "company": self.company,
             "all": self.all,
             "btc": self.btc,
+            "weather": self.weather,
 
             # Memory
             "somethingabout": self.somethingabout,
@@ -275,7 +282,9 @@ class Cortex:
                 "~aleksey <pull a quote from shitalekseysays.com>",
                 "~workat <register what company you work at>",
                 "~companies <show who works where>",
+                "~company <show the company a specific person works for>",
                 "~btc <get current Bitcoin trading information>",
+                "~weather <get weather by zip code>",
             ],
             "h":[
                 "~holdem <start holdem game>",
@@ -339,6 +348,36 @@ class Cortex:
             sleep(1)
             self.chat(command)
 
+    def weather(self):
+        if not self.values or not re.search("^\d{5}", self.values[0]): 
+            self.chat("Please enter a zip code.")
+            return
+        
+        zip = self.values[0]
+        url = "http://api.wunderground.com/api/%s/conditions/q/%s.json" % (WEATHER, zip)
+ 
+        response = self.pageopen(url)
+        if not response:
+            self.chat("Couldn't get weather.")
+            return
+
+        try:
+            json = simplejson.loads(response)
+        except:
+            self.chat("Couldn't parse weather.")
+            return
+       
+        json = json['current_observation']
+
+        location = json['display_location']['full']
+        temp = json['temperature_string']
+        humid = json['relative_humidity']
+        wind = json['wind_string']
+        feels = json['feelslike_string']
+
+        base = "%s, %s, Humidity: %s, Wind: %s, Feels like: %s"
+        self.chat( base % (location, temp, humid, wind, feels) )
+
     def workat(self):
         if not self.values: 
             self.chat("If you're unemployed, that's cool, just don't abuse the bot")
@@ -359,6 +398,18 @@ class Cortex:
     def companies(self):
         for drinker in Drinker.objects:
             self.chat(drinker.name + ": " + drinker.company)
+
+    def company(self):
+        if not self.values:
+            search_for = self.lastsender
+        else:
+            search_for = self.values[0]
+
+        user = Drinker.objects(name = search_for)[0]
+        if user:
+            self.chat(user.name + ": " + user.company)
+        else:
+            self.chat("Tell that deadbeat %s to get a damn job already..." % search_for)
 
     def source(self):
         self.chat(REPO)
@@ -628,9 +679,7 @@ class Cortex:
             return
 
         word = '+'.join(self.values)
-
         url = "http://wordsmith.org/anagram/anagram.cgi?anagram=" + word + "&t=50&a=n"
-
 
         urlbase = self.pageopen(url)
         if not urlbase:
