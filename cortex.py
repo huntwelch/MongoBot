@@ -1050,9 +1050,36 @@ class Cortex:
         if len(urls):
             self.linker(urls)
 
+    def tweet(self, urls):
+        for url in urls:
+            response = self.pageopen(url)
+            if not response:
+                self.chat("Couldn't retrieve Tweet.")
+                return
+    
+            try:
+                json = simplejson.loads(response)
+            except:
+                self.chat("Couldn't parse Tweet.")
+                return
+    
+            name = json['user']['name']
+            screen_name = json['user']['screen_name']
+            text = json['text']
+    
+            self.chat('%s (%s) tweeted: %s' % (name, screen_name, text)) 
+
     def linker(self, urls):
 
         for url in urls:
+            # Special behaviour for Twitter URLs
+            match_twitter_urls = re.compile('http[s]?://(www.)?twitter.com/.+/status/([0-9]+)')
+ 
+            twitter_urls = match_twitter_urls.findall(url)
+            if len(twitter_urls):
+                 self.tweet(twitter_urls)
+                 return
+
             # TODO make this better
             fubs = 0
             title = "Couldn't get title"
