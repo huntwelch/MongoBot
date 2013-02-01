@@ -2,5 +2,5 @@
 
 while [ true ]
 do
-    ./medulla.py >> hippocampus/log/sys.log &
+    ./medulla.py >> hippocampus/log/sys.log
 done
