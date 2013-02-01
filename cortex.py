@@ -367,7 +367,7 @@ class Cortex:
             return
         
         zip = self.values[0]
-        url = "http://api.wunderground.com/api/%s/conditions/q/%s.json" % (WEATHER, zip)
+        url = "http://api.wunderground.com/api/%s/conditions/q/%s.json" % (WEATHER_API, zip)
  
         response = self.pageopen(url)
         if not response:

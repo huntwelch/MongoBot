@@ -1,9 +1,6 @@
 from math import *
 from secrets import *
 
-# Note the WEATHER from secrets is an api key
-# from wunderground.com
-
 # Connection Settings
 
 HOST = "irc.freenode.net"
@@ -11,8 +8,11 @@ PORT = 6667
 NICK = "MongoBot"
 
 # These settings are set in secrets.py
+
 # CHANNEL = (str) irc channel
-# SQL_PASSWORD = fucking guess 
+# WORDNIK_API = (str) for wordnik calls 
+# WEATHER_API = (str) for weather calls to wunderground.com 
+# SQL_PASSWORD = duh 
 
 # Directory settings
 
