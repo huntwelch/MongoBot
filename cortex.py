@@ -825,7 +825,7 @@ class Cortex:
 
     def mom(self):
         momlines = []
-        for line in open(STORAGE + "/mom.log"):
+        for line in open(LOGDIR + "/mom.log"):
             momlines.append(line)
 
         self.announce(random.choice(momlines))
@@ -834,13 +834,13 @@ class Cortex:
         bsv = []
         bsa = []
         bsn = []
-        for verb in open(STORAGE + "/bs-v"):
+        for verb in open(STORAGE + "/buzz/bs-v"):
             bsv.append(str(verb).strip())
 
-        for adj in open(STORAGE + "/bs-a"):
+        for adj in open(STORAGE + "/buzz/bs-a"):
             bsa.append(str(adj).strip())
 
-        for noun in open(STORAGE + "/bs-n"):
+        for noun in open(STORAGE + "/buzz/bs-n"):
             bsn.append(str(noun).strip())
 
         buzzed = [
@@ -1085,7 +1085,7 @@ class Cortex:
             return
 
         if "mom" in content.translate(string.maketrans("", ""), string.punctuation).split():
-            open(STORAGE + "/mom.log", 'a').write(content + '\n')
+            open(LOGDIR + "/mom.log", 'a').write(content + '\n')
             return
 
         if content.lower().find("oh snap") != -1:
