@@ -1,21 +1,14 @@
 import wordnik
 import mongoengine
-from mongoengine import *
+import nltk 
 from settings import *
-
-
-class Words(mongoengine.Document):
-    word = StringField(required=True)
-    partofspeech = StringField(required=True)
-    definition = StringField(required=True)
-    source = StringField(required=True)
+from datastore import Words, Learned, Structure
 
 
 class Broca():
 
     def __init__(self, mongo):
         self.mongo = mongo
-        mongoengine.connect('bot', 'bot')
 
     def whatmean(self):
 
@@ -67,3 +60,21 @@ class Broca():
             self.mongo.chat("Definition 1:" + tempdef)
         else:
             self.mongo.chat("I got nothin.")
+
+    def parse(self, sentence):
+        tokens = nltk.word_tokenize(sentence)
+        tagged = nltk.pos_tag(tokens)
+
+        structure = [] 
+        contents = [] 
+        for word, type in tagged:
+            records = Learned.objects(word = word)
+            if not records:
+                record = Learned(word = word, partofspeech = type)
+                record.save()
+
+            structure.append(type)
+            contents.append(word)
+
+        struct = Structure(structure = structure, contents = contents)
+        struct.save()

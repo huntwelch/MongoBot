@@ -1080,6 +1080,8 @@ class Cortex:
             self.linker(urls)
             return
 
+        self.broca.parse(content)
+
         if content.find(NICK + " sucks") != -1:
             self.chat(nick + "'s MOM sucks")
             return
