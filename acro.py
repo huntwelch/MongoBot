@@ -99,7 +99,7 @@ class Acro(threading.Thread):
                     temp.append(word[1:])
                 else:
                     temp.append(word.capitalize())
-                    open(BRAIN + "/natwords", 'a').write(word.capitalize() + "\n")
+                    open(STORAGE + "/natwords", 'a').write(word.capitalize() + "\n")
 
             entry = ' '.join(temp)
 
@@ -181,7 +181,7 @@ class Acro(threading.Thread):
                     self.wait = False
 
                     letters = []
-                    for line in open(BRAIN + "/letters"):
+                    for line in open(STORAGE + "/letters"):
                         addition = line.split()
                         addition.pop()
                         letters.extend(addition)

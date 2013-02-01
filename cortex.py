@@ -434,7 +434,7 @@ class Cortex:
     def intros(self):
         text = ""
         try:
-            file = open("introductions")
+            file = open(STORAGE + "/introductions")
         except:
             self.chat("No introductions file")
             return
@@ -825,7 +825,7 @@ class Cortex:
 
     def mom(self):
         momlines = []
-        for line in open(BRAIN + "/mom.log"):
+        for line in open(STORAGE + "/mom.log"):
             momlines.append(line)
 
         self.announce(random.choice(momlines))
@@ -834,13 +834,13 @@ class Cortex:
         bsv = []
         bsa = []
         bsn = []
-        for verb in open(BRAIN + "/bs-v"):
+        for verb in open(STORAGE + "/bs-v"):
             bsv.append(str(verb).strip())
 
-        for adj in open(BRAIN + "/bs-a"):
+        for adj in open(STORAGE + "/bs-a"):
             bsa.append(str(adj).strip())
 
-        for noun in open(BRAIN + "/bs-n"):
+        for noun in open(STORAGE + "/bs-n"):
             bsn.append(str(noun).strip())
 
         buzzed = [
@@ -927,7 +927,7 @@ class Cortex:
             self.chat(NICK + " doesn't think that's a word.")
             return
 
-        open(BRAIN + "/natword", 'a').write(self.values[0].strip() + '\n')
+        open(STORAGE + "/natword", 'a').write(self.values[0].strip() + '\n')
         self.chat(NICK + " learn new word!", self.lastsender)
 
     def acronymit(self, base):
@@ -936,7 +936,7 @@ class Cortex:
         output = []
 
         wordbank = []
-        for line in open(BRAIN + "/" + ACROLIB):
+        for line in open(STORAGE + "/" + ACROLIB):
             wordbank.append(line.strip())
 
         for letter in acronym:
@@ -953,7 +953,7 @@ class Cortex:
 
         output = []
         wordbank = []
-        for line in open(BRAIN + "/" + ACROLIB):
+        for line in open(STORAGE + "/" + ACROLIB):
             wordbank.append(line.strip())
 
         count = 0
@@ -1048,7 +1048,7 @@ class Cortex:
             return
 
         prev = date.today() - timedelta(days=1)
-        backlog = BRAIN + "/" + prev.strftime("%Y%m") + "-mongo.log"
+        backlog = LOGDIR + "/" + prev.strftime("%Y%m") + "-mongo.log"
         if os.path.isfile(backlog):
             return
         
@@ -1085,7 +1085,7 @@ class Cortex:
             return
 
         if "mom" in content.translate(string.maketrans("", ""), string.punctuation).split():
-            open(BRAIN + "/mom.log", 'a').write(content + '\n')
+            open(STORAGE + "/mom.log", 'a').write(content + '\n')
             return
 
         if content.lower().find("oh snap") != -1:

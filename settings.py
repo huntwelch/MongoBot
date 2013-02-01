@@ -16,16 +16,16 @@ NICK = "MongoBot"
 
 # Directory settings
 
-BRAIN = "mongo-brain"
-LOG = BRAIN + "/mongo.log"
-DISTASTE = BRAIN + "/distaste"
-ACROSCORE = BRAIN + "/acro/"
+STORAGE = "hippocampus"
+LOGDIR = STORAGE + "/log"
+LOG = LOGDIR + "/mongo.log"
+DISTASTE = STORAGE + "/distaste"
+ACROSCORE = STORAGE + "/acro/"
 
 # Misc
 
 SHORTENER = "http://roa.st/api.php?roast="
 PATIENCE = 6000
-WORDNIK_API = "62d747d2294f2fda6112d43604f273e0aefd2d839a2c257c9"
 REPO = "https://github.com/huntwelch/MongoBot"
 
 # Acro
