@@ -3,6 +3,7 @@ import mongoengine
 import nltk 
 from settings import *
 from datastore import Words, Learned, Structure
+from random import choice
 
 
 class Broca():
@@ -71,10 +72,25 @@ class Broca():
             records = Learned.objects(word = word)
             if not records:
                 record = Learned(word = word, partofspeech = type)
-                record.save()
+                try:
+                    record.save()
+                except:
+                    pass
 
-            structure.append(type)
-            contents.append(word)
+            try:
+                structure.append(type)
+                contents.append(word)
+            except:                    
+                pass
 
         struct = Structure(structure = structure, contents = contents)
         struct.save()
+
+    def speak(self):
+        sentence = []
+        struct = choice(Structure.objects())
+        for pos in struct.structure:
+            _word = choice(Learned.objects(partofspeech = pos)) 
+            sentence.append(_word.word)
+
+        self.mongo.chat(" ".join(sentence))

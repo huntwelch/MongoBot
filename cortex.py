@@ -218,6 +218,7 @@ class Cortex:
             # Language
             "whatmean": self.broca.whatmean,
             "def": self.broca.whatmean,
+            "speak": self.broca.speak,
 
             # Acro
             "roque": self.acroengine,
