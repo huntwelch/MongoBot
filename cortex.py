@@ -9,9 +9,8 @@ import urllib
 import MySQLdb
 import simplejson
 import shutil
-import mongoengine
 
-from mongoengine import *
+from datastore import Drinker, connectdb
 from datetime import date, timedelta
 from math import *
 from time import *
@@ -35,10 +34,6 @@ from stocks import Stock
 
 # TODO: standardize url grabber
 
-
-class Drinker(mongoengine.Document):  # should be moved elsewhere
-    name = StringField(required = True)
-    company = StringField()
 
 def unescape(text):  # utility, should probably have a utils file
     def fixup(m):
@@ -85,8 +80,8 @@ class Cortex:
         self.chessgrid = []
         self.resetchess()
 
-        # connet the bot
-        mongoengine.connect('bot', 'bot')
+        # connect the bot
+        connectdb()  
 
     # a lot of this doesn't seem to work :/
     def reload(self):
@@ -167,9 +162,9 @@ class Cortex:
             "help": self.showlist,
             "love": self.love,
             "hate": self.hate,
-            "think": self.think,
             "settings": self.showsettings,
             "reward": self.reward,
+            "think": self.think,
             "learnword": self.learnword,
             "cry": self.cry,
             "calc": self.calc,
@@ -177,7 +172,6 @@ class Cortex:
             "names": self.getnames,
             "say": self._say,
             "act": self._act,
-            "q": self.stockquote,
             "g": self.goog,
             "ety": self.ety,
             "buzz": self.buzz,
@@ -193,8 +187,12 @@ class Cortex:
             "companies": self.companies,
             "company": self.company,
             "all": self.all,
-            "btc": self.btc,
             "weather": self.weather,
+
+            # Finance
+            "q": self.stockquote,
+            "portfolio": self.portfolio,
+            "btc": self.btc,
 
             # Memory
             "somethingabout": self.somethingabout,
@@ -259,7 +257,6 @@ class Cortex:
     def showlist(self):
         list = { 
             "g":[
-                "~q [stock symbol]<get stock quote>",
                 "~g [what]<search google>",
                 "~love <command " + NICK + " to love>",
                 "~hate <command " + NICK + " to hate>",
@@ -283,8 +280,14 @@ class Cortex:
                 "~workat <register what company you work at>",
                 "~companies <show who works where>",
                 "~company <show the company a specific person works for>",
-                "~btc <get current Bitcoin trading information>",
                 "~weather <get weather by zip code>",
+            ],
+            "f":[
+                "~q [stock symbol]<get stock quote>",
+                "~portfolio [stock symbol]<add stock to your portfolio>",
+                "~portfolio <show your portfolio>",
+                "~portfolio clear <empty your portfolio>",
+                "~btc <get current Bitcoin trading information>",
             ],
             "h":[
                 "~holdem <start holdem game>",
@@ -339,7 +342,17 @@ class Cortex:
         }
 
         if not self.values or self.values[0] not in list: 
-            self.chat("Use ~help [what] where what is (g)eneral, (l)anguage and math, (m)emory, (a)cro, (h)oldem, (c)hess, (r)edmine")
+            categories = [
+                "(g)eneral", 
+                "(l)anguage and math", 
+                "(m)emory", 
+                "(a)cro", 
+                "(h)oldem", 
+                "(c)hess", 
+                "(r)edmine",
+                "(f)inance",
+            ]
+            self.chat("Use ~help [what] where what is " + ", ".join(categories))
             return
 
         which = self.values[0]
@@ -407,7 +420,7 @@ class Cortex:
             search_for = self.values[0]
 
         user = Drinker.objects(name = search_for)[0]
-        if user:
+        if user and user.company:
             self.chat(user.name + ": " + user.company)
         else:
             self.chat("Tell that deadbeat %s to get a damn job already..." % search_for)
@@ -525,6 +538,37 @@ class Cortex:
         kinder = self.values[0]
         self.chat("Good job, " + kinder + ". Here's your star: " + self.colorize(u'\u2605',"yellow"))
         self.act(" pats " + kinder + "'s head.")
+
+    def portfolio(self):
+
+        whom = self.lastsender
+
+        if self.values and self.values[0] == 'clear':
+            drinker = Drinker.objects(name = whom)[0]
+            if drinker and drinker.portfolio:
+                drinker.portfolio = []
+                drinker.save()
+
+            return
+
+        if self.values:
+            for symbol in self.values:
+                stock = Stock(symbol)
+                if not stock or len(symbol) > 8:
+                    self.chat("Could not add '" + symbol + "'")
+                    continue
+                
+                stock.save(whom)
+            return
+
+        drinker = Drinker.objects(name = whom)[0]
+        if drinker and drinker.portfolio:
+            for symbol in drinker.portfolio:
+                stock = Stock(symbol)
+                showit = stock.showquote(self.context)
+                self.chat(showit)
+        else:
+            self.chat("No stocks saved")
 
     def stockquote(self, symbol = False, default = False):
         if not symbol:
@@ -1004,7 +1048,7 @@ class Cortex:
             return
 
         prev = date.today() - timedelta(days=1)
-        backlog = BRAIN + prev.strftime("%Y%m") + "-mongo.log"
+        backlog = BRAIN + "/" + prev.strftime("%Y%m") + "-mongo.log"
         if os.path.isfile(backlog):
             return
         

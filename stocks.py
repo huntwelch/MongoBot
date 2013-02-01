@@ -1,6 +1,7 @@
 import urllib
 from settings import *
 from xml.dom import minidom as dom
+from datastore import Drinker
 
 class Stock:
 
@@ -18,11 +19,30 @@ class Stock:
         try:
             raw = dom.parse(urllib.urlopen(url)) 
         except:
-            return
+            return False
 
         self.stock = self.extract(raw)
+        self.symbol = symbol 
         
-    # Extracts from google model, will fail in october
+    # should be in a Stocks or Portfolio or something class
+    def save(self, whom):
+        drinker = Drinker.objects(name = whom) 
+        if drinker:
+            drinker = drinker[0]
+            portfolio = drinker.portfolio
+            
+            if self.symbol in portfolio:
+                return
+            
+            portfolio.append(self.symbol)
+            drinker.portfolio = portfolio
+        else:
+            drinker = Drinker(name = whom, portfolio = [self.symbol])
+
+        drinker.save()
+
+
+    # Extracts from google api 
     def extract(self, raw):
         
         elements = raw.childNodes[0].childNodes[0].childNodes

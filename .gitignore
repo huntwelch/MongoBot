@@ -2,8 +2,8 @@
 *.pyc
 *.swp
 *.game
-mongo-brain/natwords
-mongo-brain/wordbank
+natwords
+wordbank
 secrets.py
 introductions
 .project
