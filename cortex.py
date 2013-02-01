@@ -828,7 +828,7 @@ class Cortex:
         for line in open(LOGDIR + "/mom.log"):
             momlines.append(line)
 
-        self.announce(random.choice(momlines))
+        self.chat(random.choice(momlines))
 
     def buzz(self):
         bsv = []
@@ -1089,15 +1089,15 @@ class Cortex:
             return
 
         if content.lower().find("oh snap") != -1:
-            self.announce("yeah WHAT?? Oh yes he DID")
+            self.chat("yeah WHAT?? Oh yes he DID")
             return
 
         if content.lower().find("rimshot") != -1:
-            self.announce("*ting*")
+            self.chat("*ting*")
             return
 
         if content.lower().find("stop") == len(content) - 4 and len(content) != 3:
-            self.announce("Hammertime")
+            self.chat("Hammertime")
             return
 
     def tweet(self, urls):
