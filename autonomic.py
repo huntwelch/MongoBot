@@ -20,7 +20,7 @@ def serotonin(cortex, expansion):
         cortex.commands[name] = method
         if len(helps):
             cortex.helpmenu[letter] = helps
-            cortex.helpcategories = "(" + letter ")" + word
+            cortex.helpcategories = "(" + letter + ")" + word
         
 def category(text):
     def add(cls):

@@ -34,7 +34,7 @@ class Chess:
         self.chessgrid = self.basegrid 
 
     # TODO: make this automatic
-    def chat(what):
+    def chat(self, what):
         self.cx.chat(what)
 
     @axon

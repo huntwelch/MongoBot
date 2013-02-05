@@ -207,11 +207,6 @@ class Cortex:
             "boards": self.boards,
             "rules": self.rules,
 
-            # Chess
-            "chess": self.chess,
-            "move": self.move,
-            "resetchess": self.resetchess,
-
             # Holdem
             "holdem": self.holdemengine,
             "bet": self.holdem.raiseit,
@@ -316,7 +311,7 @@ class Cortex:
         what = components.pop(0)[1:]
 
         is_nums = re.search("^[0-9]+", what)
-        is_breaky = re.search("^~*", what)
+        is_breaky = re.search("^~+", what)
         if is_nums or is_breaky:
             return
 
