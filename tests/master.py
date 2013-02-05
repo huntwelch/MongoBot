@@ -4,9 +4,9 @@ from util import serotonin
 class Master:
     def __init__(self):
 
-        self.commands = {
-            "doit": self.doit,
-        }
+        self.commands = {}
+        self.helpmenu = {}
+        self.helpcategories = [] 
 
         self.expand = [
             Expand(self),
