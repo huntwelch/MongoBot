@@ -3,4 +3,6 @@ Getting Started
 
     mkvirtualenv MongoBot
     pip install -r requirements.txt
-    python Mongo.py
+    
+    to run bot: python medulla.py
+    to run bot persistently so it will recover from crashes: ./lighting.sh 
