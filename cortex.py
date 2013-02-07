@@ -31,7 +31,6 @@ from acro import Acro
 from holdem import Holdem
 from redmine import Redmine
 from broca import Broca
-from stocks import Stock
 from chess import Chess
 from finance import Finance 
 

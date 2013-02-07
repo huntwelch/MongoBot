@@ -57,8 +57,3 @@ def help(text):
         return fn
     return add 
 
-# TODO: make implicit?
-def snag(expansion, cortex):
-    expansion.values = cortex.values
-    expansion.lastsender = cortex.lastsender
-

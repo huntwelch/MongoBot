@@ -3,7 +3,7 @@ from autonomic import axon, category, help, Dendrite
 @category("chess")
 class Chess(Dendrite):
     def __init__(self, cortex):
-        super(Finance, self).__init__(cortex) 
+        super(Chess, self).__init__(cortex) 
 
         self.pieces = dict(
             br=u'\u265c',
