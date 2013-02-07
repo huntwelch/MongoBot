@@ -24,7 +24,6 @@ import acro
 import holdem
 import redmine
 import broca
-import stocks
 
 from settings import *
 from secrets import *
@@ -34,6 +33,7 @@ from redmine import Redmine
 from broca import Broca
 from stocks import Stock
 from chess import Chess
+from finance import Finance 
 
 # TODO: standardize url grabber
 
@@ -83,13 +83,6 @@ class Cortex:
                 "~companies <show who works where>",
                 "~company <show the company a specific person works for>",
                 "~weather <get weather by zip code>",
-            ],
-            "f":[
-                "~q [stock symbol]<get stock quote>",
-                "~portfolio [stock symbol]<add stock to your portfolio>",
-                "~portfolio <show your portfolio>",
-                "~portfolio clear <empty your portfolio>",
-                "~btc <get current Bitcoin trading information>",
             ],
             "h":[
                 "~holdem <start holdem game>",
@@ -170,11 +163,6 @@ class Cortex:
             "all": self.all,
             "weather": self.weather,
 
-            # Finance
-            "q": self.stockquote,
-            "portfolio": self.portfolio,
-            "btc": self.btc,
-
             # Memory
             "somethingabout": self.somethingabout,
             "mem": self.somethingabout,
@@ -238,11 +226,11 @@ class Cortex:
             "(a)cro", 
             "(h)oldem", 
             "(r)edmine",
-            "(f)inance",
         ] 
 
         expansions = [
             Chess(self),
+            Finance(self),
         ]
 
         for expansion in expansions:
@@ -327,7 +315,7 @@ class Cortex:
         self.commands.get(what, self.default)()
 
     def showlist(self):
-        if not self.values or self.values[0] not in list: 
+        if not self.values or self.values[0] not in self.helpmenu: 
             self.chat("Use ~help [what] where what is " + ", ".join(self.helpcategories))
             return
 
@@ -436,62 +424,7 @@ class Cortex:
         kinder = self.values[0]
         self.chat("Good job, " + kinder + ". Here's your star: " + self.colorize(u'\u2605',"yellow"))
         self.act(" pats " + kinder + "'s head.")
-
-    def portfolio(self):
-
-        whom = self.lastsender
-
-        if self.values and self.values[0] == 'clear':
-            drinker = Drinker.objects(name = whom)[0]
-            if drinker and drinker.portfolio:
-                drinker.portfolio = []
-                drinker.save()
-
-            return
-
-        if self.values:
-            for symbol in self.values:
-                stock = Stock(symbol)
-                if not stock or len(symbol) > 8:
-                    self.chat("Could not add '" + symbol + "'")
-                    continue
-                
-                stock.save(whom)
-            return
-
-        drinker = Drinker.objects(name = whom)[0]
-        if drinker and drinker.portfolio:
-            for symbol in drinker.portfolio:
-                stock = Stock(symbol)
-                showit = stock.showquote(self.context)
-                self.chat(showit)
-        else:
-            self.chat("No stocks saved")
-
-    def stockquote(self, symbol = False, default = False):
-        if not symbol:
-            symbol = self.values
-        
-        if not symbol:
-            self.chat("Enter a symbol")
-            return
-
-        if not default:
-            symbol = symbol[0] 
-
-        stock = Stock(symbol)
-        showit = stock.showquote(self.context)
-
-        if not showit and default:
-            return False
-        
-        if not showit:
-            self.chat("Couldn't find company.")
-            return
-
-        self.chat(showit)
-        return True
-        
+       
     def fml(self):
         db = MySQLdb.connect("localhost","peter",SQL_PASSWORD,"peter_stilldrinking") 
         cursor = db.cursor()

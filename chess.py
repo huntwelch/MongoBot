@@ -1,9 +1,9 @@
-from autonomic import axon, category, help
+from autonomic import axon, category, help, Dendrite
 
 @category("chess")
-class Chess:
+class Chess(Dendrite):
     def __init__(self, cortex):
-        self.cx = cortex
+        super(Finance, self).__init__(cortex) 
 
         self.pieces = dict(
             br=u'\u265c',
@@ -32,10 +32,6 @@ class Chess:
         ]
 
         self.chessgrid = self.basegrid 
-
-    # TODO: make this automatic
-    def chat(self, what):
-        self.cx.chat(what)
 
     @axon
     @help("<reset chessboard>")

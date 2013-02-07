@@ -1,5 +1,20 @@
 import inspect
 
+# TODO: decorator to support command aliases
+
+class Dendrite(object):
+    def __init__(self, cortex):
+        self.cx = cortex
+    
+    def chat(self, what):
+        self.cx.chat(what)
+
+    def snag(self):
+        self.values = self.cx.values
+        self.lastsender = self.cx.lastsender
+        self.context = self.cx.context
+
+
 def serotonin(cortex, expansion):
     methods = inspect.getmembers(expansion)
     letter = expansion.category[:1]
@@ -18,9 +33,13 @@ def serotonin(cortex, expansion):
             print "Warning: overwriting " + name
 
         cortex.commands[name] = method
-        if len(helps):
-            cortex.helpmenu[letter] = helps
-            cortex.helpcategories = "(" + letter + ")" + word
+
+    if len(helps):
+        if letter in cortex.helpmenu:
+            print "Warning: overwriting category " + letter + " in help menu"
+
+        cortex.helpmenu[letter] = helps
+        cortex.helpcategories.append("(" + letter + ")" + word)
         
 def category(text):
     def add(cls):
