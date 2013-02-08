@@ -33,6 +33,8 @@ from redmine import Redmine
 from broca import Broca
 from chess import Chess
 from finance import Finance 
+from memory import Memory
+from nonsense import Nonsense
 
 # TODO: standardize url grabber
 
@@ -64,20 +66,13 @@ class Cortex:
                 "~settings <show current settings>",
                 "~reload <reload libraries>",
                 "~reboot <guess>",
-                "~reward <give someone a reward>",
-                "~cry <make " + NICK + " cry>",
                 "~bored <make " + NICK + " bored>",
                 "~update SETTING_NAME [value] <change a setting>",
                 "~mom <randomly reprint a message containing 'mom'>",
                 "~distaste <command " + NICK + " to express disastisfaction>",
                 "~distaste [url] <expand " + NICK + "'s to disastisfaction repertoire>",
-                "~fml <grab random fml entry>",
-                "~munroesecurity <generate passward according to http://xkcd.com/936/>",
-                "~skynet <launch skynet>",
-                "~table <throw table>",
                 "~intros <show history of " + CHANNEL + ">",
                 "~source <link to repo for " + NICK + ">",
-                "~aleksey <pull a quote from shitalekseysays.com>",
                 "~workat <register what company you work at>",
                 "~companies <show who works where>",
                 "~company <show the company a specific person works for>",
@@ -113,13 +108,6 @@ class Cortex:
                 "~calc <show available python math functions>",
                 "~calc equation <run a simple calculation>",
             ],
-            "m":[
-                "~somethingabout/~mem <search logs for phrase and print the most recent>",
-                "~next <after mem, get the next phrase memory>",
-                "~prev <after mem, get the previous phrase memory>",
-                "~latest <after mem, get the latest phrase memory>",
-                "~oldest <you see where this is going>",
-            ],
             "r":[
                 "~register [api key] <register your redmine api key with MongoBot>",
                 "~hot <display all unassigned hotfixes>",
@@ -133,42 +121,22 @@ class Cortex:
         self.commands = {
             # General
             "help": self.showlist,
-            "love": self.love,
-            "hate": self.hate,
             "settings": self.showsettings,
-            "reward": self.reward,
             "think": self.think,
             "learnword": self.learnword,
-            "cry": self.cry,
             "calc": self.calc,
             "bored": self.bored,
             "names": self.getnames,
-            "say": self._say,
-            "act": self._act,
             "g": self.goog,
             "ety": self.ety,
-            "buzz": self.buzz,
-            "fml": self.fml,
             "anagram": self.anagram,
-            "munroesecurity": self.password,
-            "skynet": self.skynet,
-            "table": self.table,
             "intros": self.intros,
             "source": self.source,
-            "aleksey": self.shitalekseysays,
             "workat": self.workat,
             "companies": self.companies,
             "company": self.company,
             "all": self.all,
             "weather": self.weather,
-
-            # Memory
-            "somethingabout": self.somethingabout,
-            "mem": self.somethingabout,
-            "next": self.next,
-            "prev": self.prev,
-            "oldest": self.oldest,
-            "latest": self.latest,
 
             # System
             "update": self.update,
@@ -211,11 +179,6 @@ class Cortex:
             "mymoney": self.holdem.mymoney,
             "thebet": self.holdem.thebet,
             "testcolor": self.testcolor,
-
-            # Nerf out for work bots
-            "distaste": self.distaste,
-            "mom": self.mom,
-            "whatvinaylost": self.whine,
         }
         
         self.helpcategories = [
@@ -230,6 +193,8 @@ class Cortex:
         expansions = [
             Chess(self),
             Finance(self),
+            Memory(self),
+            Nonsense(self),
         ]
 
         for expansion in expansions:
@@ -391,9 +356,6 @@ class Cortex:
     def source(self):
         self.chat(REPO)
 
-    def table(self):
-        self.chat(u'\u0028' + u'\u256F' + u'\u00B0' + u'\u25A1' + u'\u00B0' + u'\uFF09' + u'\u256F' + u'\uFE35' + u'\u0020' + u'\u253B' + u'\u2501' + u'\u253B')
-
     def intros(self):
         text = ""
         try:
@@ -411,50 +373,6 @@ class Cortex:
             text += " " + line.strip()
 
         self.chat(text)
-
-    def skynet(self):
-        self.chat("Activating.")
-
-    def reward(self):
-        if not self.values:
-            self.chat("Reward whom?")
-            return
-        
-        kinder = self.values[0]
-        self.chat("Good job, " + kinder + ". Here's your star: " + self.colorize(u'\u2605',"yellow"))
-        self.act(" pats " + kinder + "'s head.")
-       
-    def fml(self):
-        db = MySQLdb.connect("localhost","peter",SQL_PASSWORD,"peter_stilldrinking") 
-        cursor = db.cursor()
-        cursor.execute("SELECT * FROM fmls ORDER BY RAND() LIMIT 0,1;")
-        entry = cursor.fetchone()
-        # id
-        # fid
-        # entry
-        # agree
-        # ydi
-        # calc
-        # gender
-        # date
-        # time
-        # location
-        # intimate
-        fml = entry[2]
-        self.chat(fml)
-
-    def shitalekseysays(self):
-        url = 'https://spreadsheets.google.com/feeds/list/0Auy4L1ZnQpdYdERZOGV1bHZrMEFYQkhKVHc4eEE3U0E/od6/public/basic?alt=json'
-
-        try:
-            response = urllib2.urlopen(url).read()
-            json = simplejson.loads(response)
-        except:
-            self.chat('Somethin dun goobied.')
-            return
-
-        entry = choice(json['feed']['entry'])
-        self.chat(entry['title']['$t'])
 
     def btc(self):
         url = 'https://mtgox.com/api/1/BTCUSD/ticker'
@@ -567,76 +485,6 @@ class Cortex:
         content = ''.join(paragraph.findAll()).replace("<br/>", ", ").encode("utf-8")
         self.chat(content)
 
-    def somethingabout(self):
-        if not self.values:
-            self.chat("Something about what?")
-            return
-
-        self.chat("Recalling...")
-        self.memories = []
-        thinkingof = ' '.join(self.values)
-        for line in open(LOG):
-            if line.find(thinkingof) != -1:
-                try:
-                    whom, message = line[1:].split(":", 1)
-                except:
-                    continue
-                if message.find("~somethingabout") == 0:
-                    continue
-                whom = whom.split("!")[0]
-                self.memories.append(whom + ": " + message)
-        self.memories.pop()
-        self.mempoint = len(self.memories) - 1
-        self.remember()
-
-    def remember(self):
-        try:
-            self.chat(self.memories[self.mempoint])
-        except:
-            self.chat("Don't recall anything about that.")
-
-    def nomem(self):
-        if not self.memories:
-            self.chat("Nothing in memory.")
-            return True
-        else:
-            return False
-
-    def next(self):
-        if self.nomem():
-            return
-        if self.mempoint == len(self.memories) - 1:
-            self.chat("That's the most recent thing I can remember.")
-            return
-        self.mempoint += 1
-        self.remember()
-
-    def prev(self):
-        if self.nomem():
-            return
-        if self.mempoint == 0:
-            self.chat("That's as far back as I can remember.")
-            return
-        self.mempoint -= 1
-        self.remember()
-
-    def oldest(self):
-        if self.nomem():
-            return
-        self.mempoint = 0
-        self.remember()
-
-    def latest(self):
-        if self.nomem():
-            return
-        self.mempoint = len(self.memories) - 1
-        self.remember()
-
-    def whine(self):
-        self.chat("Yep. Vinay used to have 655 points at 16 points per round. Now they're all gone, due to technical issues. Poor, poor baby.")
-        self.act("weeps for Vinay's points.")
-        self.chat("The humanity!")
-
     def validate(self):
         if not self.values:
             return False
@@ -644,42 +492,6 @@ class Cortex:
             return False
 
         return True
-
-    def _say(self):
-        if self.validate():
-            self.announce(" ".join(self.values))
-
-    def _act(self):
-        if self.validate():
-            self.act(" ".join(self.values), True)
-
-    def mom(self):
-        momlines = []
-        for line in open(LOGDIR + "/mom.log"):
-            momlines.append(line)
-
-        self.chat(random.choice(momlines))
-
-    def buzz(self):
-        bsv = []
-        bsa = []
-        bsn = []
-        for verb in open(STORAGE + "/buzz/bs-v"):
-            bsv.append(str(verb).strip())
-
-        for adj in open(STORAGE + "/buzz/bs-a"):
-            bsa.append(str(adj).strip())
-
-        for noun in open(STORAGE + "/buzz/bs-n"):
-            bsn.append(str(noun).strip())
-
-        buzzed = [
-            random.choice(bsv),
-            random.choice(bsa),
-            random.choice(bsn),
-        ]
-
-        self.chat(' '.join(buzzed))
 
     def rules(self):
         self.chat("1 of 6 start game with ~roque.")
@@ -730,9 +542,6 @@ class Cortex:
         # self.act("is bored.")
         # self.act(random.choice(BOREDOM) + " " + random.choice(self.members))
 
-    def cry(self):
-        self.act("cries.")
-
     def define(self):
         if len(self.values) != 2:
             self.chat("Please submit a word and its possible parts of speech")
@@ -778,21 +587,6 @@ class Cortex:
                     good = True
 
         return " ".join(output)
-
-    def password(self):
-
-        output = []
-        wordbank = []
-        for line in open(STORAGE + "/" + ACROLIB):
-            wordbank.append(line.strip())
-
-        count = 0
-        while count < 4:
-            word = random.choice(wordbank).lower()
-            output.append(word)
-            count += 1
-
-        self.chat(" ".join(output))
 
     def think(self):
         if not self.values:
@@ -1052,66 +846,8 @@ class Cortex:
 
         self.chat(NICK + " rewrite brain. Feel smarter.")
 
-    def love(self):
-        # Nerf out for work bots
-        if self.values and self.values[0] == "self":
-            self.act("masturbates vigorously.")
-        else:
-            self.chat(NICK + " cannot love. " + NICK + " is only machine :'(")
-
-    def hate(self):
-        self.chat(NICK + " knows hate. " + NICK + " hates many things.")
-
-    def distaste(self):
-
-        if self.values:
-            url = urllib.quote_plus(self.values[0])
-            roasted = urllib2.urlopen(SHORTENER + url).read()
-
-            open(DISTASTE, 'a').write(roasted + '\n')
-            self.chat("Another one rides the bus")
-            return
-
-        lines = []
-        for line in open(DISTASTE):
-            lines.append(line)
-
-        self.chat(random.choice(lines))
-
-    # instead of presuming to predict what
-    # will be colored, make it easy to prep 
-    # string elements
-    def colorize(self, text, color):
-        
-        colors = {
-            "white":0, 
-            "black":1, 
-            "blue":2,       #(navy)
-            "green":3, 
-            "red":4, 
-            "brown":5,      #(maroon)
-            "purple":6, 
-            "orange":7,     #(olive)
-            "yellow":8, 
-            "lightgreen":9, #(lime)
-            "teal":10,      #(a green/blue cyan)
-            "lightcyan":11, #(cyan) (aqua)
-            "lightblue":12, #(royal)
-            "pink":13,      #(light purple) (fuchsia)
-            "grey":14, 
-            "lightgrey":15, #(silver)
-        }
-
-        if isinstance(color,str):
-            color = colors[color]
-
-        return "\x03" + str(color) + text + "\x03"
-
-
     def announce(self, message, whom=False):
-
         message = message.encode("utf-8")
-
         try:
             self.sock.send('PRIVMSG ' + CHANNEL + ' :' + str(message) + '\n')
         except:

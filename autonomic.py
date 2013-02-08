@@ -9,6 +9,12 @@ class Dendrite(object):
     def chat(self, what):
         self.cx.chat(what)
 
+    def act(self, what, public = False, target = False):
+        self.cx.act(what, public, target)
+
+    def validate(self, what):
+        self.cx.validate(what)
+
     def snag(self):
         self.values = self.cx.values
         self.lastsender = self.cx.lastsender
