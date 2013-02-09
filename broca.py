@@ -210,6 +210,7 @@ class Broca(Dendrite):
         self.chat("Etymology " + str(ord + 1) + " of " + str(len(defs)) +
                 " for " + _word + ": " + _def)
 
+    # TODO: broken, not sure why
     @axon
     @help("word_or_phrase <look up anagram>")
     def anagram(self):

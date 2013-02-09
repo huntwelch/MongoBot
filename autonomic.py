@@ -51,7 +51,9 @@ def serotonin(cortex, expansion):
             print "Warning: overwriting category " + letter + " in help menu"
 
         cortex.helpmenu[letter] = helps
-        cortex.helpcategories.append("(" + letter + ")" + word)
+        newcat = "(" + letter + ")" + word
+        if newcat not in cortex.helpcategories:
+            cortex.helpcategories.append(newcat)
         
 def category(text):
     def add(cls):

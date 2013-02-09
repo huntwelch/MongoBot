@@ -6,6 +6,7 @@ import urllib2
 import urllib
 import simplejson
 import shutil
+import settings
 
 from BeautifulSoup import BeautifulSoup as soup
 from settings import SAFE, NICK, CONTROL_KEY, LOG, PATIENCE, \
@@ -13,7 +14,7 @@ from settings import SAFE, NICK, CONTROL_KEY, LOG, PATIENCE, \
 from secrets import DELICIOUS_PASS, DELICIOUS_USER
 from datastore import Drinker, connectdb
 from datetime import date, timedelta
-from time import mktime, localtime 
+from time import mktime, localtime, sleep
 from random import choice, randint
 from util import unescape, pageopen
 from autonomic import serotonin
@@ -106,6 +107,11 @@ class Cortex:
             "(h)oldem", 
         ] 
 
+        self.loadexpansions()
+
+        connectdb()  
+
+    def loadexpansions(self):
         self.expansions = {
             "chess": Chess(self),
             "finance": Finance(self),
@@ -117,11 +123,8 @@ class Cortex:
             "reference": Reference(self),
             "system": System(self),
         }
-
         for expansion in self.expansions:
             serotonin(self, self.expansions[expansion])
-
-        connectdb()  
 
     def monitor(self, sock):
         line = self.sock.recv(500)
@@ -181,6 +184,10 @@ class Cortex:
         self.lastcommand = what
         
         self.commands.get(what, self.default)()
+
+    # TODO: still broken
+    def reload(self):
+        reload(settings)
 
     def showlist(self):
         if not self.values or self.values[0] not in self.helpmenu: 
@@ -393,8 +400,7 @@ class Cortex:
             self.chat(message)
 
     def default(self):
-        if not self.stockquote(self.lastcommand,True):
-            self.chat(NICK + " cannot do this thing :'(")
+        self.chat(NICK + " cannot do this thing :'(")
 
 
     # Not necessary to keep in cortex, to be moved out

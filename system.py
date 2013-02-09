@@ -1,3 +1,6 @@
+import os
+
+from time import sleep
 from autonomic import axon, category, help, Dendrite
 from settings import SAFESET, NICK
 

@@ -9,7 +9,6 @@ from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER
 class Mongo:
 
     def __init__(self):
-
         self.sock = socket.socket()
         self.sock.connect((HOST, PORT))
         self.sock.send('NICK ' + NICK + '\n')
@@ -17,14 +16,13 @@ class Mongo:
         self.sock.send('JOIN ' + CHANNEL + '\n')
 
         self.brain = cortex.Cortex(self)
-
         self.active = True
 
         while True and self.active:
             self.brain.monitor(self.sock)
 
+    # TODO: broken
     def reload(self):
-
         quiet = False
         if not self.brain.values or not len(self.brain.values[0]):
             self.brain.act("strokes out.")
@@ -37,6 +35,7 @@ class Mongo:
         reload(cortex)
         self.active = True
         self.brain = cortex.Cortex(self)
+        self.brain.reload()
 
         if not quiet:
             self.brain.act("comes to.")

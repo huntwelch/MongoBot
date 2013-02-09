@@ -1,8 +1,10 @@
 import simplejson
 import urllib
+import re
 
 from autonomic import axon, category, help, Dendrite
 from settings import REPO, NICK, SAFE
+from secrets import WEATHER_API
 from util import pageopen
 
 
@@ -81,9 +83,12 @@ class Reference(Dendrite):
         base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s"
         self.chat( base % (location, condition, temp, humid, wind, feels) )
 
+    # TODO: This is totally broken for some reason
     @axon
     @help("equation <run simple equation in python>")
     def calc(self):
+        self.snag()
+
         if not self.values:
             printout = []
             for n, f in SAFE:

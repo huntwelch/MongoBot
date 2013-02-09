@@ -2,11 +2,11 @@ import MySQLdb
 import simplejson
 import urllib
 import urllib2
-import random 
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, SQL_PASSWORD
 from util import colorize
+from random import choice
 
 
 @category("nonsense")
@@ -30,9 +30,9 @@ class Nonsense(Dendrite):
             bsn.append(str(noun).strip())
 
         buzzed = [
-            random.choice(bsv),
-            random.choice(bsa),
-            random.choice(bsn),
+            choice(bsv),
+            choice(bsa),
+            choice(bsn),
         ]
 
         self.chat(' '.join(buzzed))
@@ -58,7 +58,7 @@ class Nonsense(Dendrite):
 
         count = 0
         while count < 4:
-            word = random.choice(wordbank).lower()
+            word = choice(wordbank).lower()
             output.append(word)
             count += 1
 
@@ -73,11 +73,11 @@ class Nonsense(Dendrite):
             return
         kinder = self.values[0]
         self.chat("Good job, " + kinder + ". Here's your star: " + colorize(u'\u2605',"yellow"))
-        self.act(" pats " + kinder + "'s head.")
+        self._act(" pats " + kinder + "'s head.")
         
     @axon
     def cry(self):
-        self.act("cries.")
+        self._act("cries.")
 
     @axon
     def skynet(self):
@@ -96,7 +96,7 @@ class Nonsense(Dendrite):
     def love(self):
         self.snag()
         if self.values and self.values[0] == "self":
-            self.act("masturbates vigorously.")
+            self._act("masturbates vigorously.")
         else:
             self.chat(NICK + " cannot love. " + NICK + " is only machine :'(")
 
@@ -118,15 +118,19 @@ class Nonsense(Dendrite):
     @help("<pull up a mom quote>")
     def mom(self):
         momlines = []
-        for line in open(LOGDIR + "/mom.log"):
-            momlines.append(line)
+        try:
+            for line in open(LOGDIR + "/mom.log"):
+                momlines.append(line)
+        except:
+            self.chat("Can't open mom.log")
+            return
 
-        self.chat(random.choice(momlines))
+        self.chat(choice(momlines))
 
     @axon
     def whatvinaylost(self):
         self.chat("Yep. Vinay used to have 655 points at 16 points per round. Now they're all gone, due to technical issues. Poor, poor baby.")
-        self.act("weeps for Vinay's points.")
+        self._act("weeps for Vinay's points.")
         self.chat("The humanity!")
 
     @axon
@@ -156,5 +160,5 @@ class Nonsense(Dendrite):
         for line in open(DISTASTE):
             lines.append(line)
 
-        self.chat(random.choice(lines))
+        self.chat(choice(lines))
 
