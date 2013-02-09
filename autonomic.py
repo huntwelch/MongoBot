@@ -1,4 +1,5 @@
 import inspect
+from settings import CONTROL_KEY
 
 # TODO: decorator to support command aliases
 
@@ -37,7 +38,7 @@ def serotonin(cortex, expansion):
             continue
 
         if hasattr(method, "help"):
-            helps.append("~" + name + " " + method.help)
+            helps.append(CONTROL_KEY + name + " " + method.help)
 
         if name in cortex.commands:
             print "Warning: overwriting " + name
