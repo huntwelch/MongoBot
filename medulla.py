@@ -3,7 +3,7 @@ import socket
 
 import settings
 import cortex
-from settings import *
+from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER 
 
 
 class Mongo:
@@ -34,11 +34,9 @@ class Mongo:
 
         self.active = False
         reload(settings)
-        from settings import *
         reload(cortex)
         self.active = True
         self.brain = cortex.Cortex(self)
-        self.brain.reload()
 
         if not quiet:
             self.brain.act("comes to.")

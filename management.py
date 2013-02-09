@@ -10,10 +10,10 @@ from settings import *
 
 # TODO: set up redmine settings and locations, make sure they're secret
 
-@category("redmine")
-class Redmine(Dendrite):
+@category("organize")
+class Management(Dendrite):
     def __init__(self, cortex):
-        super(Redmine, self).__init__(cortex) 
+        super(Management, self).__init__(cortex) 
 
     def redmine(self, user, target, params=False, data=False):
         try:
