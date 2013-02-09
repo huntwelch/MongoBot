@@ -15,29 +15,30 @@ from datetime import date, timedelta
 from math import *
 from time import *
 from random import choice
-from util import unescape
+from util import unescape, pageopen
 from autonomic import serotonin
 
 from BeautifulSoup import BeautifulSoup as soup
 
 import acro
 import holdem
-import redmine
 import broca
 
 from settings import *
 from secrets import *
 from acro import Acro
 from holdem import Holdem
-from redmine import Redmine
 from broca import Broca
+
 from chess import Chess
 from finance import Finance 
 from memory import Memory
 from nonsense import Nonsense
+from peeps import Peeps 
+from redmine import Redmine
 
 # TODO: standardize url grabber
-
+# TODO: move out live responses to something?
 
 class Cortex:
 
@@ -54,28 +55,18 @@ class Cortex:
         self.boredom = int(mktime(localtime()))
         self.namecheck = int(mktime(localtime()))
         self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
-        self.redmine = Redmine(self)
         self.holdem = Holdem(self)
         self.broca = Broca(self)
 
         self.helpmenu = { 
             "g":[
                 "~g [what]<search google>",
-                "~love <command " + NICK + " to love>",
-                "~hate <command " + NICK + " to hate>",
                 "~settings <show current settings>",
                 "~reload <reload libraries>",
                 "~reboot <guess>",
                 "~bored <make " + NICK + " bored>",
                 "~update SETTING_NAME [value] <change a setting>",
-                "~mom <randomly reprint a message containing 'mom'>",
-                "~distaste <command " + NICK + " to express disastisfaction>",
-                "~distaste [url] <expand " + NICK + "'s to disastisfaction repertoire>",
-                "~intros <show history of " + CHANNEL + ">",
                 "~source <link to repo for " + NICK + ">",
-                "~workat <register what company you work at>",
-                "~companies <show who works where>",
-                "~company <show the company a specific person works for>",
                 "~weather <get weather by zip code>",
             ],
             "h":[
@@ -108,53 +99,34 @@ class Cortex:
                 "~calc <show available python math functions>",
                 "~calc equation <run a simple calculation>",
             ],
-            "r":[
-                "~register [api key] <register your redmine api key with MongoBot>",
-                "~hot <display all unassigned hotfixes>",
-                "~detail [ticket number] <get a ticket description>",
-                "~snag [ticket number] <assign a ticket to yourself>",
-                "~assign [user nick] [ticket number] <assign a ticket to someone else>",
-                "~tickets [user; optional] <show assigned tickets for user>",
-            ],
         }
 
         self.commands = {
             # General
             "help": self.showlist,
-            "settings": self.showsettings,
-            "think": self.think,
-            "learnword": self.learnword,
-            "calc": self.calc,
             "bored": self.bored,
             "names": self.getnames,
+
+            # Reference
             "g": self.goog,
-            "ety": self.ety,
-            "anagram": self.anagram,
-            "intros": self.intros,
             "source": self.source,
-            "workat": self.workat,
-            "companies": self.companies,
-            "company": self.company,
-            "all": self.all,
             "weather": self.weather,
+            "calc": self.calc,
 
             # System
             "update": self.update,
+            "settings": self.showsettings,
             "reboot": self.master.die,
             "reload": self.master.reload,
-
-            # Redmine
-            "hot": self.redmine.showhotfix,
-            "tickets": self.redmine.showtickets,
-            "register": self.redmine.register,
-            "assign": self.redmine.assignment,
-            "snag": self.redmine.assignment,
-            "detail": self.redmine.showdetail,
 
             # Language
             "whatmean": self.broca.whatmean,
             "def": self.broca.whatmean,
             "speak": self.broca.speak,
+            "learnword": self.learnword,
+            "think": self.think,
+            "ety": self.ety,
+            "anagram": self.anagram,
 
             # Acro
             "roque": self.acroengine,
@@ -178,16 +150,13 @@ class Cortex:
             "pot": self.holdem.showpot,
             "mymoney": self.holdem.mymoney,
             "thebet": self.holdem.thebet,
-            "testcolor": self.testcolor,
         }
         
         self.helpcategories = [
             "(g)eneral", 
             "(l)anguage and math", 
-            "(m)emory", 
             "(a)cro", 
             "(h)oldem", 
-            "(r)edmine",
         ] 
 
         expansions = [
@@ -195,6 +164,8 @@ class Cortex:
             Finance(self),
             Memory(self),
             Nonsense(self),
+            Peeps(self),
+            Redmine(self),
         ]
 
         for expansion in expansions:
@@ -202,22 +173,10 @@ class Cortex:
 
         connectdb()  
 
-    # a lot of this doesn't seem to work :/
+    # TODO: figure out better reloading
     def reload(self):
-        reload(acro)
-        reload(redmine)
-        reload(broca)
-        reload(holdem)
-        reload(stocks)
-        from acro import Acro
-        from holdem import Holdem
-        from redmine import Redmine
-        from broca import Broca
-        from stocks import Stock
-        self.redmine = Redmine(self)
-        self.holdem = Holdem(self)
-        self.broca = Broca(self)
-
+        return
+        
     def monitor(self, sock):
         line = self.sock.recv(500)
         line = line.strip()
@@ -297,7 +256,7 @@ class Cortex:
         zip = self.values[0]
         url = "http://api.wunderground.com/api/%s/conditions/q/%s.json" % (WEATHER_API, zip)
  
-        response = self.pageopen(url)
+        response = pageopen(url)
         if not response:
             self.chat("Couldn't get weather.")
             return
@@ -320,82 +279,8 @@ class Cortex:
         base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s"
         self.chat( base % (location, condition, temp, humid, wind, feels) )
 
-    def workat(self):
-        if not self.values: 
-            self.chat("If you're unemployed, that's cool, just don't abuse the bot")
-            return
-        
-        name = self.lastsender  
-        company = " ".join(self.values)
-
-        drinker = Drinker.objects(name = name)
-        if drinker:
-            drinker = drinker[0]
-            drinker.company = company
-        else:
-            drinker = Drinker(name = name, company = company) 
-
-        drinker.save()
-
-    def companies(self):
-        for drinker in Drinker.objects:
-            self.chat(drinker.name + ": " + drinker.company)
-
-    def company(self):
-        if not self.values:
-            search_for = self.lastsender
-        else:
-            search_for = self.values[0]
-
-        user = Drinker.objects(name = search_for)[0]
-        if user and user.company:
-            self.chat(user.name + ": " + user.company)
-        else:
-            self.chat("Tell that deadbeat %s to get a damn job already..." % search_for)
-
     def source(self):
         self.chat(REPO)
-
-    def intros(self):
-        text = ""
-        try:
-            file = open(STORAGE + "/introductions")
-        except:
-            self.chat("No introductions file")
-            return
-
-        for line in file:
-            if line.strip() == "---":
-                self.chat(text)
-                text = ""
-                continue
-
-            text += " " + line.strip()
-
-        self.chat(text)
-
-    def btc(self):
-        url = 'https://mtgox.com/api/1/BTCUSD/ticker'
-
-        response = self.pageopen(url)
-        if not response:
-            self.chat("Couldn't retrieve BTC data.")
-            return
-
-        try:
-            json = simplejson.loads(response)
-        except:
-            self.chat("Couldn't parse BTC data.")
-            return
-
-        last = json['return']['last_all']['display_short']
-        low = json['return']['low']['display_short']
-        high = json['return']['high']['display_short']
-
-        self.chat('Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high))        
-
-    def testcolor(self):
-        self.chat(u'\u2660' + "\x034" + u'\u2665' + u'\u2666' + "\x03" + u'\u2663')
 
     def goog(self):
         if not self.values:
@@ -434,7 +319,7 @@ class Cortex:
         word = self.values[0]
         url = "http://www.etymonline.com/index.php?allowed_in_frame=0&search=" + word + "&searchmode=term"
 
-        urlbase = self.pageopen(url)
+        urlbase = pageopen(url)
         if not urlbase:
             self.chat("Couldn't find anything")
             return
@@ -474,7 +359,7 @@ class Cortex:
         word = '+'.join(self.values)
         url = "http://wordsmith.org/anagram/anagram.cgi?anagram=" + word + "&t=50&a=n"
 
-        urlbase = self.pageopen(url)
+        urlbase = pageopen(url)
         if not urlbase:
             self.chat("Couldn't find anything")
             return
@@ -520,17 +405,6 @@ class Cortex:
             result = NICK + " not smart enough to do that."
 
         self.chat(result)
-
-    def all(self):
-        peeps = self.members
-        try:
-            peeps.remove(self.lastsender)
-        except:
-            self.chat('List incoherrent')
-            return
-
-        peeps = ', '.join(peeps)
-        self.chat(peeps + ', ' + self.lastsender + ' has something very important to say.')
 
     def bored(self):
         if not self.members:
@@ -728,7 +602,7 @@ class Cortex:
 
     def tweet(self, urls):
         for url in urls:
-            response = self.pageopen('https://api.twitter.com/1/statuses/show.json?id=%s' % url[1])
+            response = pageopen('https://api.twitter.com/1/statuses/show.json?id=%s' % url[1])
             if not response:
                 self.chat("Couldn't retrieve Tweet.")
                 return
@@ -761,7 +635,7 @@ class Cortex:
             title = "Couldn't get title"
             roasted = "Couldn't roast"
 
-            urlbase = self.pageopen(url)
+            urlbase = pageopen(url)
             if not urlbase:
                 fubs += 1
 
@@ -854,19 +728,15 @@ class Cortex:
             self.sock.send('PRIVMSG ' + CHANNEL + ' :Having trouble saying that for some reason\n')
 
     def chat(self, message, target=False):
-
         # TODO: why is this commented?
         #message = self.colortext(message)
-
         if target:
             whom = target
         elif self.context == CHANNEL:
             whom = CHANNEL
         else:
             whom = self.lastsender
-
         message = message.encode("utf-8")
-
         try:
             self.sock.send('PRIVMSG ' + whom + ' :' + str(message) + '\n')
         except:
@@ -890,14 +760,5 @@ class Cortex:
             sleep(1)
             self.chat(name + " : " + str(value))
 
-    def pageopen(self,url):
-        try:
-            opener = urllib2.build_opener()
-            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-            urlbase = opener.open(url).read()
-            urlbase = re.sub('\s+', ' ', urlbase).strip()
-        except:
-            return False
+    # move to util
 
-        return urlbase
-        

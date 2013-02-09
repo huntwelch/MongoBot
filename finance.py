@@ -1,6 +1,9 @@
+import simplejson
+
 from autonomic import axon, category, help, Dendrite
 from datastore import Drinker
 from stocks import Stock
+from util import pageopen
 
 #"f":[
 #    "~portfolio [stock symbol]<add stock to your portfolio>",
@@ -73,6 +76,21 @@ class Finance(Dendrite):
     @axon
     @help("<get current Bitcoin trading information>")
     def btc(self):
-        return
+        url = 'https://mtgox.com/api/1/BTCUSD/ticker'
 
+        response = pageopen(url)
+        if not response:
+            self.chat("Couldn't retrieve BTC data.")
+            return
 
+        try:
+            json = simplejson.loads(response)
+        except:
+            self.chat("Couldn't parse BTC data.")
+            return
+
+        last = json['return']['last_all']['display_short']
+        low = json['return']['low']['display_short']
+        high = json['return']['high']['display_short']
+
+        self.chat('Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high))        

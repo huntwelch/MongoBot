@@ -1,3 +1,6 @@
+import urllib2
+import re
+
 def unescape(text):
     def fixup(m):
         text = m.group(0)
@@ -20,7 +23,7 @@ def unescape(text):
 # instead of presuming to predict what
 # will be colored, make it easy to prep 
 # string elements
-def colorize(self, text, color):
+def colorize(text, color):
     colors = {
         "white":0, 
         "black":1, 
@@ -44,4 +47,15 @@ def colorize(self, text, color):
 
     return "\x03" + str(color) + text + "\x03"
 
+def pageopen(url):
+    try:
+        opener = urllib2.build_opener()
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        urlbase = opener.open(url).read()
+        urlbase = re.sub('\s+', ' ', urlbase).strip()
+    except:
+        return False
+
+    return urlbase
+        
 

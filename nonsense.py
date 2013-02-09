@@ -2,6 +2,7 @@ import MySQLdb
 import simplejson
 import urllib
 import urllib2
+import random 
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, SQL_PASSWORD
@@ -129,16 +130,16 @@ class Nonsense(Dendrite):
         self.chat("The humanity!")
 
     @axon
-    def _say(self):
+    def say(self):
         self.snag()
         if self.validate():
             self.announce(" ".join(self.values))
 
     @axon
-    def _act(self):
+    def act(self):
         self.snag()
         if self.validate():
-            self.act(" ".join(self.values), True)
+            self._act(" ".join(self.values), True)
 
     @axon
     def distaste(self):

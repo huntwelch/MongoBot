@@ -9,7 +9,10 @@ class Dendrite(object):
     def chat(self, what):
         self.cx.chat(what)
 
-    def act(self, what, public = False, target = False):
+    def announce(self, what):
+        self.cx.announce(what)
+
+    def _act(self, what, public = False, target = False):
         self.cx.act(what, public, target)
 
     def validate(self, what):
@@ -19,6 +22,7 @@ class Dendrite(object):
         self.values = self.cx.values
         self.lastsender = self.cx.lastsender
         self.context = self.cx.context
+        self.members = self.cx.members
 
 
 def serotonin(cortex, expansion):
