@@ -202,7 +202,7 @@ class Cortex:
             self.context = content[2]
 
             # TODO: this check could be better
-            if self.acro and line.find('~') == -1:
+            if self.acro and line.find(CONTROL_KEY) == -1:
                 if self.context == NICK:
                     self.acro.input(content)
 
@@ -222,7 +222,7 @@ class Cortex:
         what = components.pop(0)[1:]
 
         is_nums = re.search("^[0-9]+", what)
-        is_breaky = re.search("^~+", what)
+        is_breaky = re.search("^" + COTROL_KEY + "+", what)
         if is_nums or is_breaky:
             return
 
@@ -239,7 +239,7 @@ class Cortex:
 
     def showlist(self):
         if not self.values or self.values[0] not in self.helpmenu: 
-            self.chat("Use ~help [what] where what is " + ", ".join(self.helpcategories))
+            self.chat("Use " + CONTROL_KEY + "help [what] where what is " + ", ".join(self.helpcategories))
             return
 
         which = self.values[0]
@@ -568,7 +568,7 @@ class Cortex:
 
         self.lastsender = nick
 
-        if content[:1] == "~":
+        if content[:1] == CONTROL_KEY:
             self.command(nick, content)
             return
 

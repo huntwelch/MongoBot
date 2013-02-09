@@ -24,6 +24,7 @@ ACROSCORE = STORAGE + "/acro/"
 
 # Misc
 
+CONTROL_KEY = "~"
 SHORTENER = "http://roa.st/api.php?roast="
 PATIENCE = 6000
 REPO = "https://github.com/huntwelch/MongoBot"
