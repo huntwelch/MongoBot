@@ -6,3 +6,6 @@ Getting Started
     
     to run bot: python medulla.py
     to run bot persistently so it will recover from crashes: ./lighting.sh 
+
+    TODO: script for creating new category bundle
+    TODO: move out auto responses?
