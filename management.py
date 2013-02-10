@@ -95,7 +95,7 @@ class Management(Dendrite):
             self.chat("Ticket assigned")
 
     @axon
-    @help("[api key] <register your redmine api key with MongoBot>")
+    @help("[api key] <register your redmine api key with " + NICK + ">")
     def register(self):
         self.snag()
 

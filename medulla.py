@@ -6,7 +6,7 @@ import cortex
 from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER 
 
 
-class Mongo:
+class Medulla:
 
     def __init__(self):
         self.sock = socket.socket()
@@ -21,7 +21,6 @@ class Mongo:
         while True and self.active:
             self.brain.monitor(self.sock)
 
-    # TODO: broken
     def reload(self):
         quiet = False
         if not self.brain.values or not len(self.brain.values[0]):
@@ -51,4 +50,4 @@ class Mongo:
     def die(self):
         sys.exit()
 
-connect = Mongo()
+connect = Medulla()
