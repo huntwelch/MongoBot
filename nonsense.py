@@ -4,7 +4,7 @@ import urllib
 import urllib2
 
 from autonomic import axon, category, help, Dendrite
-from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, SQL_PASSWORD
+from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, SQL_PASSWORD, NICK
 from util import colorize
 from random import choice
 
@@ -81,7 +81,7 @@ class Nonsense(Dendrite):
 
     @axon
     def skynet(self):
-        self.chat("Activating.")
+        self.chat("Activating, bitches.")
 
     @axon
     @help("<throw table>")

@@ -31,11 +31,17 @@ class Mongo:
             self.brain.act("strokes out.", False, OWNER)
 
         self.active = False
-        reload(settings)
-        reload(cortex)
+
+        # Could be better
+        for mod in sys.modules.keys():
+            try:
+                __import__(mod)
+                dreload(sys.modules[mod])
+                print mod
+            except:
+                continue
+        
         self.active = True
-        self.brain = cortex.Cortex(self)
-        self.brain.reload()
 
         if not quiet:
             self.brain.act("comes to.")

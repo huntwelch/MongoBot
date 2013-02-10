@@ -1,3 +1,5 @@
+#System
+
 import base64
 import string
 import os
@@ -6,16 +8,17 @@ import urllib2
 import urllib
 import simplejson
 import shutil
-import settings
 
 from BeautifulSoup import BeautifulSoup as soup
-from settings import SAFE, NICK, CONTROL_KEY, LOG, PATIENCE, \
-                     ACROSCORE, CHANNEL, SHORTENER, OWNER
-from secrets import DELICIOUS_PASS, DELICIOUS_USER
-from datastore import Drinker, connectdb
 from datetime import date, timedelta
 from time import mktime, localtime, sleep
 from random import choice, randint
+
+# Local
+from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
+                     ACROSCORE, CHANNEL, SHORTENER, OWNER
+from secrets import DELICIOUS_PASS, DELICIOUS_USER
+from datastore import Drinker, connectdb
 from util import unescape, pageopen
 from autonomic import serotonin
 from acro import Acro
@@ -162,7 +165,7 @@ class Cortex:
 
         if currenttime - self.boredom > PATIENCE:
             self.boredom = int(mktime(localtime()))
-            if random.randint(1, 10) == 7:
+            if randint(1, 10) == 7:
                 self.bored()
 
     def command(self, sender, cmd):
@@ -187,7 +190,7 @@ class Cortex:
 
     # TODO: still broken
     def reload(self):
-        reload(settings)
+        return
 
     def showlist(self):
         if not self.values or self.values[0] not in self.helpmenu: 
@@ -220,7 +223,7 @@ class Cortex:
 
         # The behavior below is known to be highly obnoxious
         # self.act("is bored.")
-        # self.act(random.choice(BOREDOM) + " " + random.choice(self.members))
+        # self.act(choice(BOREDOM) + " " + choice(self.members))
 
     def logit(self, what):
         open(LOG, 'a').write(what)
