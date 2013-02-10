@@ -8,7 +8,7 @@ import urllib2
 import urllib
 import simplejson
 import shutil
-import settings 
+import settings
 
 from BeautifulSoup import BeautifulSoup as soup
 from datetime import date, timedelta
@@ -17,7 +17,7 @@ from random import choice, randint
 
 # Local
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-                     ACROSCORE, CHANNEL, SHORTENER, OWNER
+    ACROSCORE, CHANNEL, SHORTENER, OWNER
 from secrets import DELICIOUS_PASS, DELICIOUS_USER
 from datastore import Drinker, connectdb
 from util import unescape, pageopen
@@ -25,9 +25,9 @@ from autonomic import serotonin
 from acro import Acro
 from holdem import Holdem
 
+
 # TODO: standardize url grabber
 # TODO: move out live responses to something?
-
 class Cortex:
     def __init__(self, master):
         self.acro = False
@@ -44,8 +44,8 @@ class Cortex:
         self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
         self.holdem = Holdem(self)
 
-        self.helpmenu = { 
-            "h":[
+        self.helpmenu = {
+            "h": [
                 "~holdem <start holdem game>",
                 "~bet [amount] <>",
                 "~call <match bet, if able>",
@@ -60,7 +60,7 @@ class Cortex:
                 "~mymoney <show how much money you have>",
                 "~thebet <show current bet>",
             ],
-            "a":[
+            "a": [
                 "~roque/~acro [pause|resume|end] <start acro game>",
                 "~rules <print the rules for the acro game>",
                 "~boards <show cumulative acro game scores>",
@@ -68,7 +68,7 @@ class Cortex:
         }
 
         self.commands = {
-            # Help menu 
+            # Help menu
             "help": self.showlist,
 
             # Acro
@@ -94,17 +94,17 @@ class Cortex:
             "mymoney": self.holdem.mymoney,
             "thebet": self.holdem.thebet,
         }
-        
+
         self.helpcategories = [
-            "(a)cro", 
-            "(h)oldem", 
-        ] 
+            "(a)cro",
+            "(h)oldem",
+        ]
 
         self.loadbrains()
 
         connectdb()
 
-    def loadbrains(self, electroshock = False):
+    def loadbrains(self, electroshock=False):
 
         areas = [
             "chess",
@@ -121,7 +121,7 @@ class Cortex:
         self.brainmeats = {}
 
         for area in areas:
-            mod = __import__(area, fromlist = [])
+            mod = __import__(area, fromlist=[])
             if electroshock:
                 reload(mod)
             cls = getattr(mod, area.capitalize())
@@ -139,7 +139,7 @@ class Cortex:
         ping = re.search("^PING", line)
         if line != '' and not scan and not ping:
             self.logit(line + '\n')
-        
+
         if self.gettingnames:
             if line.find("* " + CHANNEL) != -1:
                 all = line.split(":")[2]
@@ -186,7 +186,7 @@ class Cortex:
         self.logit(sender + " sent command: " + what + "\n")
         self.lastsender = sender
         self.lastcommand = what
-        
+
         self.commands.get(what, self.default)()
 
     # TODO: still broken
@@ -194,8 +194,9 @@ class Cortex:
         return
 
     def showlist(self):
-        if not self.values or self.values[0] not in self.helpmenu: 
-            self.chat("Use " + CONTROL_KEY + "help [what] where what is " + ", ".join(self.helpcategories))
+        if not self.values or self.values[0] not in self.helpmenu:
+            cats = ", ".join(self.helpcategories)
+            self.chat(CONTROL_KEY + "help [what] where what is " + cats)
             return
 
         which = self.values[0]
@@ -229,7 +230,7 @@ class Cortex:
     def logit(self, what):
         open(LOG, 'a').write(what)
 
-        now = date.today() 
+        now = date.today()
         if now.day != 1:
             return
 
@@ -237,7 +238,7 @@ class Cortex:
         backlog = LOGDIR + "/" + prev.strftime("%Y%m") + "-mongo.log"
         if os.path.isfile(backlog):
             return
-        
+
         shutil.move(LOG, backlog)
 
     def parse(self, msg):
@@ -259,7 +260,8 @@ class Cortex:
             self.command(nick, content)
             return
 
-        match_urls = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+        ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+        match_urls = re.compile(ur)
         urls = match_urls.findall(content)
         if len(urls):
             self.linker(urls)
@@ -294,28 +296,28 @@ class Cortex:
             if not response:
                 self.chat("Couldn't retrieve Tweet.")
                 return
-    
+
             try:
                 json = simplejson.loads(response)
             except:
                 self.chat("Couldn't parse Tweet.")
                 return
-    
+
             name = json['user']['name']
             screen_name = json['user']['screen_name']
             text = json['text']
-    
-            self.chat('%s (%s) tweeted: %s' % (name, screen_name, text)) 
+
+            self.chat('%s (%s) tweeted: %s' % (name, screen_name, text))
 
     def linker(self, urls):
         for url in urls:
             # Special behaviour for Twitter URLs
             match_twitter_urls = re.compile('http[s]?://(www.)?twitter.com/.+/status/([0-9]+)')
- 
+
             twitter_urls = match_twitter_urls.findall(url)
             if len(twitter_urls):
-                 self.tweet(twitter_urls)
-                 return
+                self.tweet(twitter_urls)
+                return
 
             # TODO make this better
             fubs = 0
@@ -406,9 +408,7 @@ class Cortex:
     def default(self):
         self.chat(NICK + " cannot do this thing :'(")
 
-
     # Not necessary to keep in cortex, to be moved out
-
     def rules(self):
         self.chat("1 of 6 start game with ~roque.")
         self.chat("2 of 6 when the acronym comes up, type /msg " + NICK + " your version of what the acronym stands for.")
@@ -476,4 +476,3 @@ class Cortex:
 
         self.acro = Acro(self)
         self.acro.start()
-

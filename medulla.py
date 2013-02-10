@@ -1,15 +1,15 @@
 import sys
 import socket
-
 import settings
 import cortex
-from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER 
+
+from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER
 
 
 class Medulla:
-
     def __init__(self):
         self.sock = socket.socket()
+
         self.sock.connect((HOST, PORT))
         self.sock.send('NICK ' + NICK + '\n')
         self.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
@@ -32,8 +32,8 @@ class Medulla:
         self.active = False
 
         import cortex
-        import settings 
-        import secrets 
+        import settings
+        import secrets
         reload(cortex)
         reload(settings)
         reload(secrets)
