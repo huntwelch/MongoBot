@@ -8,6 +8,7 @@ import urllib2
 import urllib
 import simplejson
 import shutil
+import settings 
 
 from BeautifulSoup import BeautifulSoup as soup
 from datetime import date, timedelta
@@ -23,17 +24,6 @@ from util import unescape, pageopen
 from autonomic import serotonin
 from acro import Acro
 from holdem import Holdem
-
-# Expansion classes
-from broca import Broca
-from chess import Chess
-from finance import Finance 
-from memory import Memory
-from nonsense import Nonsense
-from peeps import Peeps 
-from management import Management 
-from reference import Reference
-from system import System 
 
 # TODO: standardize url grabber
 # TODO: move out live responses to something?
@@ -110,24 +100,35 @@ class Cortex:
             "(h)oldem", 
         ] 
 
-        self.loadexpansions()
+        self.loadbrains()
 
-        connectdb()  
+        connectdb()
 
-    def loadexpansions(self):
-        self.expansions = {
-            "chess": Chess(self),
-            "finance": Finance(self),
-            "memory": Memory(self),
-            "nonsense": Nonsense(self),
-            "peeps": Peeps(self),
-            "management": Management(self),
-            "broca": Broca(self),
-            "reference": Reference(self),
-            "system": System(self),
-        }
-        for expansion in self.expansions:
-            serotonin(self, self.expansions[expansion])
+    def loadbrains(self, electroshock = False):
+
+        areas = [
+            "chess",
+            "finance",
+            "memory",
+            "nonsense",
+            "peeps",
+            "management",
+            "broca",
+            "reference",
+            "system",
+        ]
+
+        self.brainmeats = {}
+
+        for area in areas:
+            mod = __import__(area, fromlist = [])
+            if electroshock:
+                reload(mod)
+            cls = getattr(mod, area.capitalize())
+            self.brainmeats[area] = cls(self)
+
+        for brainmeat in self.brainmeats:
+            serotonin(self, self.brainmeats[brainmeat])
 
     def monitor(self, sock):
         line = self.sock.recv(500)

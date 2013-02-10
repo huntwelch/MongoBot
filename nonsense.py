@@ -81,7 +81,7 @@ class Nonsense(Dendrite):
 
     @axon
     def skynet(self):
-        self.chat("Activating, bitches.")
+        self.chat("Activating, dude.")
 
     @axon
     @help("<throw table>")

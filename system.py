@@ -12,9 +12,13 @@ class System(Dendrite):
         self.master = cortex.master
 
     @axon
-    @help("<show editable " + NICK + " settings>")
+    @help("[setting]+ <show editable " + NICK + " settings>")
     def settings(self):
+        self.snag()
+
         for name, value in SAFESET:
+            if self.values and name not in self.values:
+                continue
             sleep(1)
             self.chat(name + " : " + str(value))
 

@@ -32,15 +32,15 @@ class Mongo:
 
         self.active = False
 
-        # Could be better
-        for mod in sys.modules.keys():
-            try:
-                __import__(mod)
-                dreload(sys.modules[mod])
-                print mod
-            except:
-                continue
-        
+        import cortex
+        import settings 
+        import secrets 
+        reload(cortex)
+        reload(settings)
+        reload(secrets)
+        self.brain = cortex.Cortex(self)
+        self.brain.loadbrains(True)
+
         self.active = True
 
         if not quiet:

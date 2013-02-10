@@ -5,7 +5,7 @@ from secrets import *
 
 HOST = "irc.freenode.net"
 PORT = 6667
-NICK = "MongoBot"
+NICK = "MongoTest"
 
 # These settings are set in secrets.py
 
@@ -26,7 +26,7 @@ ACROSCORE = STORAGE + "/acro/"
 
 CONTROL_KEY = "~"
 SHORTENER = "http://roa.st/api.php?roast="
-PATIENCE = 6000
+PATIENCE = 7000
 REPO = "https://github.com/huntwelch/MongoBot"
 
 # Acro
