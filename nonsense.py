@@ -4,7 +4,8 @@ import urllib
 import urllib2
 
 from autonomic import axon, category, help, Dendrite
-from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, SQL_PASSWORD, NICK
+from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
+from secrets import SQL_PASSWORD
 from util import colorize
 from random import choice
 

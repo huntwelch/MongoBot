@@ -1,8 +1,9 @@
 import os
+import re 
 
 from time import sleep
 from autonomic import axon, category, help, Dendrite
-from settings import SAFESET, NICK
+from settings import SAFESET, NICK, IDENT, HOST, REALNAME, CHANNEL
 
 
 @category("system")
@@ -24,14 +25,16 @@ class System(Dendrite):
 
     @axon
     @help("<update a " + NICK + " setting>")
-    def update(self):
-        self.snag()
+    def update(self, inhouse=False):
+        if not inhouse:
+            self.snag()
+            vals = self.values
 
-        if not self.values or len(self.values) != 2:
+        if not vals or len(vals) != 2:
             self.chat("Must name SETTING and value, please")
             return
 
-        pull = ' '.join(self.values)
+        pull = ' '.join(vals)
 
         if pull.find("'") != -1 or pull.find("\\") != -1 or pull.find("`") != -1:
             self.chat("No single quotes, backtics, or backslashes, thank you.")
@@ -68,4 +71,22 @@ class System(Dendrite):
     def reboot(self):
         self.master.die()
 
+    @axon
+    @help("<change " + NICK + "'s name>")
+    def nick(self):
+        self.snag()
 
+        if not self.values:
+            self.chat("Change name to what?")
+            return
+
+        name = self.values[0]
+        if not re.search("^\w+$", name):
+            self.chat("Invalid name")
+            return
+
+        self.cx.sock.send('NICK ' + name + '\n')
+        self.cx.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
+        self.cx.sock.send('JOIN ' + CHANNEL + '\n')
+
+        self.update(['NICK', name])
