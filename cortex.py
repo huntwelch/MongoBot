@@ -8,7 +8,6 @@ import urllib2
 import urllib
 import simplejson
 import shutil
-import settings
 
 from BeautifulSoup import BeautifulSoup as soup
 from datetime import date, timedelta
@@ -22,6 +21,8 @@ from secrets import DELICIOUS_PASS, DELICIOUS_USER
 from datastore import Drinker, connectdb
 from util import unescape, pageopen
 from autonomic import serotonin
+
+# TODO: hope to move these out
 from acro import Acro
 from holdem import Holdem
 
@@ -189,10 +190,6 @@ class Cortex:
 
         self.commands.get(what, self.default)()
 
-    # TODO: still broken
-    def reload(self):
-        return
-
     def showlist(self):
         if not self.values or self.values[0] not in self.helpmenu:
             cats = ", ".join(self.helpcategories)
@@ -210,7 +207,6 @@ class Cortex:
             return False
         if self.lastsender != OWNER:
             return False
-
         return True
 
     def getnames(self):
@@ -260,6 +256,7 @@ class Cortex:
             self.command(nick, content)
             return
 
+        # Continuous response operations 
         ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         match_urls = re.compile(ur)
         urls = match_urls.findall(content)
@@ -267,8 +264,7 @@ class Cortex:
             self.linker(urls)
             return
 
-        # TODO: figure this out
-        # self.broca.parse(content)
+        self.brainmeats['broca'].parse(content)
 
         if content.find(NICK + " sucks") != -1:
             self.chat(nick + "'s MOM sucks")
@@ -319,7 +315,6 @@ class Cortex:
                 self.tweet(twitter_urls)
                 return
 
-            # TODO make this better
             fubs = 0
             title = "Couldn't get title"
             roasted = "Couldn't roast"
@@ -382,8 +377,6 @@ class Cortex:
             self.sock.send('PRIVMSG ' + CHANNEL + ' :Having trouble saying that for some reason\n')
 
     def chat(self, message, target=False):
-        # TODO: why is this commented?
-        #message = self.colortext(message)
         if target:
             whom = target
         elif self.context == CHANNEL:
