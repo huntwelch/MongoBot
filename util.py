@@ -1,5 +1,6 @@
 import urllib2
 import re
+import htmlentitydefs
 
 def unescape(text):
     def fixup(m):
@@ -57,5 +58,3 @@ def pageopen(url):
         return False
 
     return urlbase
-        
-
