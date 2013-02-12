@@ -23,17 +23,11 @@ from datastore import Drinker, connectdb
 from util import unescape, pageopen
 from autonomic import serotonin
 
-# TODO: hope to move these out
-from acro import Acro
-from holdem import Holdem
-
 
 # TODO: standardize url grabber
 # TODO: move out live responses to something?
 class Cortex:
     def __init__(self, master):
-        self.acro = False
-        self.playingholdem = False
         self.values = False
         self.master = master
         self.context = CHANNEL
@@ -43,8 +37,6 @@ class Cortex:
         self.memories = False
         self.boredom = int(mktime(localtime()))
         self.namecheck = int(mktime(localtime()))
-        self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
-        self.holdem = Holdem(self)
 
         self.helpmenu = {
             "h": [
