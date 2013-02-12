@@ -155,6 +155,7 @@ class Cortex:
             content = line.split(' ', 3)
             self.context = content[2]
 
+            # Acro spec, move out at some point
             if self.acro and line.find(CONTROL_KEY) == -1:
                 if self.context == NICK:
                     self.acro.input(content)

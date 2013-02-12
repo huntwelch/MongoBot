@@ -92,8 +92,11 @@ class Broca(Dendrite):
             except:                    
                 pass
 
-        struct = Structure(structure = structure, contents = contents)
-        struct.save()
+        try:
+            struct = Structure(structure = structure, contents = contents)
+            struct.save()
+        except:
+            pass
 
     @axon
     @help("<command " + NICK + " to speak>")
