@@ -4,8 +4,16 @@ Getting Started
     mkvirtualenv MongoBot
     pip install -r requirements.txt
     
-    to run bot: python medulla.py
-    to run bot persistently so it will recover from crashes: ./lighting.sh 
+    To run bot: python medulla.py
+    To run bot persistently so it will recover from crashes: ./lighting.sh 
+
+    To create a new command category: python newbrains.py category_name
+    This will create a file called category_name.py in brainmeats, with
+    a class Category_name. Loading of this class will be automated, no
+    other files need to be altered.
 
     TODO: script for creating new category bundle
     TODO: move out auto responses?
+    TODO: fix acro
+    TODO: finish holdem
+    TODO: simplify stocks files

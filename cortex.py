@@ -8,6 +8,7 @@ import urllib2
 import urllib
 import simplejson
 import shutil
+import pkgutil 
 
 from BeautifulSoup import BeautifulSoup as soup
 from datetime import date, timedelta
@@ -106,30 +107,23 @@ class Cortex:
         connectdb()
 
     def loadbrains(self, electroshock=False):
-
-        areas = [
-            "chess",
-            "finance",
-            "memory",
-            "nonsense",
-            "peeps",
-            "management",
-            "broca",
-            "reference",
-            "system",
-        ]
-
         self.brainmeats = {}
+        brainmeats = __import__("brainmeats", fromlist=[])
+        if electroshock:
+            reload(brainmeats)
+
+        areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])] 
 
         for area in areas:
-            mod = __import__(area, fromlist=[])
+            mod = __import__("brainmeats", fromlist=[area])
+            mod = getattr(mod, area)
             if electroshock:
                 reload(mod)
             cls = getattr(mod, area.capitalize())
             self.brainmeats[area] = cls(self)
 
         for brainmeat in self.brainmeats:
-            serotonin(self, self.brainmeats[brainmeat])
+            serotonin(self, self.brainmeats[brainmeat], electroshock)
 
     def monitor(self, sock):
         line = self.sock.recv(500)
