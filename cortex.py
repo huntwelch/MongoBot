@@ -24,7 +24,6 @@ from util import unescape, pageopen
 from autonomic import serotonin
 
 # TODO: hope to move these out
-from acro import Acro
 from holdem import Holdem
 
 
@@ -32,7 +31,6 @@ from holdem import Holdem
 # TODO: move out live responses to something?
 class Cortex:
     def __init__(self, master):
-        self.acro = False
         self.playingholdem = False
         self.values = False
         self.master = master
@@ -64,22 +62,12 @@ class Cortex:
                 "~mymoney <show how much money you have>",
                 "~thebet <show current bet>",
             ],
-            "a": [
-                "~roque/~acro [pause|resume|end] <start acro game>",
-                "~rules <print the rules for the acro game>",
-                "~boards <show cumulative acro game scores>",
-            ],
+
         }
 
         self.commands = {
             # Help menu
             "help": self.showlist,
-
-            # Acro
-            "roque": self.acroengine,
-            "acro": self.acroengine,
-            "boards": self.boards,
-            "rules": self.rules,
 
             # Holdem
             "holdem": self.holdemengine,
@@ -100,7 +88,6 @@ class Cortex:
         }
 
         self.helpcategories = [
-            "(a)cro",
             "(h)oldem",
         ]
 
@@ -403,39 +390,7 @@ class Cortex:
     def default(self):
         self.chat(NICK + " cannot do this thing :'(")
 
-    # Not necessary to keep in cortex, to be moved out
-    def rules(self):
-        self.chat("1 of 6 start game with ~roque.")
-        self.chat("2 of 6 when the acronym comes up, type /msg " + NICK + " your version of what the acronym stands for.")
-        self.chat("3 of 6 each word of your submission is automatically updated unless you preface it with '-', so 'do -it up' will show as 'Do it Up'.")
-        self.chat("4 of 6 when the voting comes up, msg " + NICK + " with the number of your vote.")
-        self.chat("5 of 6 play till the rounds are up.")
-        self.chat("6 of 6 " + NICK + " plays by default. Run ~update BOTPLAY False to turn it off.")
-
-    # TODO: put this in acro.py
-    def boards(self):
-        scores = {}
-
-        for path, dirs, files in os.walk(os.path.abspath(ACROSCORE)):
-            for file in files:
-                for line in open(path + "/" + file):
-                    if line.find(":") == -1:
-                        try:
-                            player, score, toss = line.split()
-                            if player in scores:
-                                scores[player]['score'] += int(score)
-                                scores[player]['rounds'] += 1
-                            else:
-                                scores[player] = {'score': int(score), 'rounds': 1}
-                        except:
-                            continue
-
-        for player in scores:
-            score = scores[player]['score']
-            average = score / scores[player]['rounds']
-
-            self.chat(player + ": " + str(score) + " (" + str(average) + " per round)")
-
+    # Move to holdem
     def holdemengine(self):
         if self.playingholdem:
             self.chat("Already a game in progress")
@@ -444,30 +399,3 @@ class Cortex:
         self.playingholdem = True
         self.holdem.start()
 
-    def acroengine(self):
-
-        if self.acro:
-            if self.values:
-                action = self.values[0]
-                if action == "pause":
-                    if self.acro.wait:
-                        self.acro.paused = True
-                        self.announce("Game paused")
-                    else:
-                        self.chat("You can only pause between rounds.")
-
-                elif action == "resume":
-                    self.acro.paused = False
-                    self.announce("Game on")
-                elif action == "end":
-                    self.acro.killgame = True
-                else:
-                    self.chat("Not a valid action")
-
-                return
-
-            self.chat("Already a game in progress")
-            return
-
-        self.acro = Acro(self)
-        self.acro.start()

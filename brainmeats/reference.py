@@ -98,7 +98,8 @@ class Reference(Dendrite):
             self.chat("Available functions: " + ", ".join(printout))
             return
         try:
-            result = eval(' '.join(self.values), {"__builtins__": None}, self.safe_calc)
+            safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
+            result = eval(' '.join(self.values), {"__builtins__": None}, safe_calc)
         except:
             result = NICK + " not smart enough to do that."
 
