@@ -1,5 +1,5 @@
 import os
-import re 
+import re
 
 from time import sleep
 from autonomic import axon, category, help, Dendrite
@@ -9,7 +9,7 @@ from settings import SAFESET, NICK, IDENT, HOST, REALNAME, CHANNEL
 @category("system")
 class System(Dendrite):
     def __init__(self, cortex):
-        super(System, self).__init__(cortex) 
+        super(System, self).__init__(cortex)
         self.master = cortex.master
 
     @axon
