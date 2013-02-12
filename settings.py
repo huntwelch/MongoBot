@@ -5,14 +5,14 @@ from secrets import CHANNEL
 
 HOST = "irc.freenode.net"
 PORT = 6667
-NICK = "MongoTest"
+NICK = "MongoBot"
 
 # These settings are set in secrets.py
 
 # CHANNEL = (str) irc channel
-# WORDNIK_API = (str) for wordnik calls 
-# WEATHER_API = (str) for weather calls to wunderground.com 
-# SQL_PASSWORD = duh 
+# WORDNIK_API = (str) for wordnik calls
+# WEATHER_API = (str) for weather calls to wunderground.com
+# SQL_PASSWORD = duh
 
 # Directory settings
 

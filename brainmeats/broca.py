@@ -1,7 +1,7 @@
 import wordnik
 import mongoengine
-import nltk 
-import re 
+import nltk
+import re
 
 from autonomic import axon, category, help, Dendrite
 from secrets import WORDNIK_API
@@ -15,7 +15,7 @@ from BeautifulSoup import BeautifulSoup as soup
 @category("language")
 class Broca(Dendrite):
     def __init__(self, cortex):
-        super(Broca, self).__init__(cortex) 
+        super(Broca, self).__init__(cortex)
 
     @axon
     @help("[word] <get definition of word>")
@@ -75,12 +75,12 @@ class Broca(Dendrite):
         tokens = nltk.word_tokenize(sentence)
         tagged = nltk.pos_tag(tokens)
 
-        structure = [] 
-        contents = [] 
+        structure = []
+        contents = []
         for word, type in tagged:
-            records = Learned.objects(word = word)
+            records = Learned.objects(word=word)
             if not records:
-                record = Learned(word = word, partofspeech = type)
+                record = Learned(word=word, partofspeech=type)
                 try:
                     record.save()
                 except:
@@ -89,11 +89,14 @@ class Broca(Dendrite):
             try:
                 structure.append(type)
                 contents.append(word)
-            except:                    
+            except:
                 pass
 
-        struct = Structure(structure = structure, contents = contents)
-        struct.save()
+        try:
+            struct = Structure(structure=structure, contents=contents)
+            struct.save()
+        except:
+            pass
 
     @axon
     @help("<command " + NICK + " to speak>")
@@ -101,7 +104,7 @@ class Broca(Dendrite):
         sentence = []
         struct = choice(Structure.objects())
         for pos in struct.structure:
-            _word = choice(Learned.objects(partofspeech = pos)) 
+            _word = choice(Learned.objects(partofspeech=pos))
             sentence.append(_word.word)
 
         self.chat(" ".join(sentence))
@@ -208,7 +211,7 @@ class Broca(Dendrite):
         _def = ''.join(defs[ord].findAll(text=True)).encode("utf-8")
 
         self.chat("Etymology " + str(ord + 1) + " of " + str(len(defs)) +
-                " for " + _word + ": " + _def)
+                  " for " + _word + ": " + _def)
 
     # TODO: broken, not sure why
     @axon
@@ -233,4 +236,3 @@ class Broca(Dendrite):
         paragraph = cont.findAll("p")[4]
         content = ''.join(paragraph.findAll()).replace("<br/>", ", ").encode("utf-8")
         self.chat(content)
-

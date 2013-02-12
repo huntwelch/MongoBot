@@ -10,10 +10,11 @@ from settings import *
 
 # TODO: set up redmine settings and locations, make sure they're secret
 
+
 @category("organize")
 class Organize(Dendrite):
     def __init__(self, cortex):
-        super(Organize, self).__init__(cortex) 
+        super(Organize, self).__init__(cortex)
 
     def redmine(self, user, target, params=False, data=False):
         try:
@@ -137,9 +138,9 @@ class Organize(Dendrite):
             for item in data:
                 total += 1
                 self.chat(RM_URL + "/issues/"
-                         + str(item['id'])
-                         + " "
-                         + item['subject'])
+                          + str(item['id'])
+                          + " "
+                          + item['subject'])
 
             if total > 0:
                 self.chat(str(total) + " in all.")
@@ -150,8 +151,8 @@ class Organize(Dendrite):
     @axon
     @help("<display all unassigned hotfixes>")
     def hot(self):
-        self.snag() 
-        
+        self.snag()
+
         user = self.lastsender
 
         self.chat("Retrieving unassigned hotfixes...")
@@ -170,4 +171,3 @@ class Organize(Dendrite):
                 self.chat(str(total) + " in all.")
             else:
                 self.chat("No unassigned hotfixes")
-

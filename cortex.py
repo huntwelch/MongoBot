@@ -8,7 +8,7 @@ import urllib2
 import urllib
 import simplejson
 import shutil
-import pkgutil 
+import pkgutil
 
 from BeautifulSoup import BeautifulSoup as soup
 from datetime import date, timedelta
@@ -23,15 +23,21 @@ from datastore import Drinker, connectdb
 from util import unescape, pageopen
 from autonomic import serotonin
 
+<<<<<<< HEAD
 # TODO: hope to move these out
 from holdem import Holdem
 
+=======
+>>>>>>> a271d4d6852cf3c6b9fbea2a7b868870fd06f84e
 
 # TODO: standardize url grabber
 # TODO: move out live responses to something?
 class Cortex:
     def __init__(self, master):
+<<<<<<< HEAD
         self.playingholdem = False
+=======
+>>>>>>> a271d4d6852cf3c6b9fbea2a7b868870fd06f84e
         self.values = False
         self.master = master
         self.context = CHANNEL
@@ -43,8 +49,6 @@ class Cortex:
         self.memories = False
         self.boredom = int(mktime(localtime()))
         self.namecheck = int(mktime(localtime()))
-        self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
-        self.holdem = Holdem(self)
 
         self.helpmenu = {
             "h": [
@@ -101,7 +105,7 @@ class Cortex:
         if electroshock:
             reload(brainmeats)
 
-        areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])] 
+        areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
 
         for area in areas:
             mod = __import__("brainmeats", fromlist=[area])
@@ -138,12 +142,16 @@ class Cortex:
             content = line.split(' ', 3)
             self.context = content[2]
 
+<<<<<<< HEAD
             if self.context == NICK:
                 self.lastprivate = content
             else:
                 self.lastpublic = content
             
             # To be moved
+=======
+            # Acro spec, move out at some point
+>>>>>>> a271d4d6852cf3c6b9fbea2a7b868870fd06f84e
             if self.acro and line.find(CONTROL_KEY) == -1:
                 if self.context == NICK:
                     self.acro.input(content)
@@ -245,7 +253,7 @@ class Cortex:
             self.command(nick, content)
             return
 
-        # Continuous response operations 
+        # Continuous response operations
         ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         match_urls = re.compile(ur)
         urls = match_urls.findall(content)

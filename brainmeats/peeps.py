@@ -1,11 +1,12 @@
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, CHANNEL
-from datastore import Drinker 
+from datastore import Drinker
+
 
 @category("peeps")
 class Peeps(Dendrite):
     def __init__(self, cortex):
-        super(Peeps, self).__init__(cortex) 
+        super(Peeps, self).__init__(cortex)
 
     @axon
     @help("<show history of " + CHANNEL + ">")
@@ -31,19 +32,19 @@ class Peeps(Dendrite):
     @help("<save your current copmany>")
     def workat(self):
         self.snag()
-        if not self.values: 
+        if not self.values:
             self.chat("If you're unemployed, that's cool, just don't abuse the bot")
             return
-        
-        name = self.lastsender  
+
+        name = self.lastsender
         company = " ".join(self.values)
 
-        drinker = Drinker.objects(name = name)
+        drinker = Drinker.objects(name=name)
         if drinker:
             drinker = drinker[0]
             drinker.company = company
         else:
-            drinker = Drinker(name = name, company = company) 
+            drinker = Drinker(name=name, company=company)
 
         drinker.save()
 
@@ -63,7 +64,7 @@ class Peeps(Dendrite):
         else:
             search_for = self.values[0]
 
-        user = Drinker.objects(name = search_for)[0]
+        user = Drinker.objects(name=search_for)[0]
         if user and user.company:
             self.chat(user.name + ": " + user.company)
         else:
@@ -82,5 +83,3 @@ class Peeps(Dendrite):
 
         peeps = ', '.join(peeps)
         self.chat(peeps + ', ' + self.lastsender + ' has something very important to say.')
-
-
