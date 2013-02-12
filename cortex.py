@@ -37,6 +37,8 @@ class Cortex:
         self.values = False
         self.master = master
         self.context = CHANNEL
+        self.lastpublic = False 
+        self.lastprivate = False 
         self.sock = master.sock
         self.gettingnames = True
         self.members = []
@@ -149,6 +151,12 @@ class Cortex:
             content = line.split(' ', 3)
             self.context = content[2]
 
+            if self.context == NICK:
+                self.lastprivate = content
+            else:
+                self.lastpublic = content
+            
+            # To be moved
             if self.acro and line.find(CONTROL_KEY) == -1:
                 if self.context == NICK:
                     self.acro.input(content)
