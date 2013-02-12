@@ -33,9 +33,9 @@ class Medulla:
 
         import settings
         import secrets
-        import datastore 
-        import util 
-        import autonomic 
+        import datastore
+        import util
+        import autonomic
         import cortex
         reload(settings)
         reload(secrets)

@@ -13,7 +13,7 @@ from random import choice
 @category("nonsense")
 class Nonsense(Dendrite):
     def __init__(self, cortex):
-        super(Nonsense, self).__init__(cortex) 
+        super(Nonsense, self).__init__(cortex)
 
     @axon
     @help("<generate bullshit>")
@@ -42,7 +42,7 @@ class Nonsense(Dendrite):
     @axon
     @help("<grab random fml entry>")
     def fml(self):
-        db = MySQLdb.connect("localhost","peter",SQL_PASSWORD,"peter_stilldrinking") 
+        db = MySQLdb.connect("localhost", "peter", SQL_PASSWORD, "peter_stilldrinking")
         cursor = db.cursor()
         cursor.execute("SELECT * FROM fmls ORDER BY RAND() LIMIT 0,1;")
         entry = cursor.fetchone()
@@ -73,9 +73,9 @@ class Nonsense(Dendrite):
             self.chat("Reward whom?")
             return
         kinder = self.values[0]
-        self.chat("Good job, " + kinder + ". Here's your star: " + colorize(u'\u2605',"yellow"))
+        self.chat("Good job, " + kinder + ". Here's your star: " + colorize(u'\u2605', "yellow"))
         self._act(" pats " + kinder + "'s head.")
-        
+
     @axon
     def cry(self):
         self._act("cries.")
@@ -162,4 +162,3 @@ class Nonsense(Dendrite):
             lines.append(line)
 
         self.chat(choice(lines))
-

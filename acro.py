@@ -42,8 +42,8 @@ class Acro(threading.Thread):
                 trail += 1
 
             self.mongo.announce(target + " " + random.choice(use) +
-                    " and will be docked " + str(penalty) +
-                    " points for not " + action + ".")
+                                " and will be docked " + str(penalty) +
+                                " points for not " + action + ".")
 
     def endgame(self):
         # clear data
@@ -195,7 +195,7 @@ class Acro(threading.Thread):
                     self.submit = True
                     self.mark = mktime(localtime())
                     self.mongo.announce("Round " + str(self.round) +
-                            " commencing! Acronym is " + acronym)
+                                        " commencing! Acronym is " + acronym)
                     continue
 
             if self.submit:
@@ -283,8 +283,8 @@ class Acro(threading.Thread):
                     results = {}
                     for player in self.players:
                         results[player] = {"score": 0,
-                                "votes": 0,
-                                "timebonus": 0}
+                                           "votes": 0,
+                                           "timebonus": 0}
                         if player in self.gimps:
                             results[player]["score"] -= self.gimps[player]
 
@@ -312,8 +312,8 @@ class Acro(threading.Thread):
                         total = str(self.cumulative[result])
 
                         self.mongo.announce(result + " came in with " + score +
-                                " with a time bonus of " + bonus +
-                                ", for a total of " + total)
+                                            " with a time bonus of " + bonus +
+                                            ", for a total of " + total)
                         tally += result + " " + str(sc['score']) + " (" + str(sc['timebonus']) + ")\n"
 
                     open(self.record, 'a').write("\n" + tally + "\n")

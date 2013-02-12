@@ -8,7 +8,7 @@ import urllib2
 import urllib
 import simplejson
 import shutil
-import pkgutil 
+import pkgutil
 
 from BeautifulSoup import BeautifulSoup as soup
 from datetime import date, timedelta
@@ -112,7 +112,7 @@ class Cortex:
         if electroshock:
             reload(brainmeats)
 
-        areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])] 
+        areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
 
         for area in areas:
             mod = __import__("brainmeats", fromlist=[area])
@@ -251,7 +251,7 @@ class Cortex:
             self.command(nick, content)
             return
 
-        # Continuous response operations 
+        # Continuous response operations
         ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         match_urls = re.compile(ur)
         urls = match_urls.findall(content)
