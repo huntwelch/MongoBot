@@ -11,7 +11,7 @@ from util import pageopen
 @category("reference")
 class Reference(Dendrite):
     def __init__(self, cortex):
-        super(Reference, self).__init__(cortex) 
+        super(Reference, self).__init__(cortex)
 
     @axon
     @help("search_term <look something up in google>")
@@ -21,18 +21,18 @@ class Reference(Dendrite):
         if not self.values:
             self.chat("Enter a word")
             return
-        
+
         query = "+".join(self.values)
         url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=large&q=%s&start=0" % (query)
 
         # Google no likey pageopen func
-        try: 
+        try:
             results = urllib.urlopen(url)
             json = simplejson.loads(results.read())
         except:
             self.chat("Something's buggered up")
             return
-        
+
         if json["responseStatus"] != 200:
             self.chat("Bad status")
             return
@@ -53,13 +53,13 @@ class Reference(Dendrite):
     def weather(self):
         self.snag()
 
-        if not self.values or not re.search("^\d{5}", self.values[0]): 
+        if not self.values or not re.search("^\d{5}", self.values[0]):
             self.chat("Please enter a zip code.")
             return
-        
+
         zip = self.values[0]
         url = "http://api.wunderground.com/api/%s/conditions/q/%s.json" % (WEATHER_API, zip)
- 
+
         response = pageopen(url)
         if not response:
             self.chat("Couldn't get weather.")
@@ -70,7 +70,7 @@ class Reference(Dendrite):
         except:
             self.chat("Couldn't parse weather.")
             return
-       
+
         json = json['current_observation']
 
         location = json['display_location']['full']
@@ -81,7 +81,7 @@ class Reference(Dendrite):
         feels = json['feelslike_string']
 
         base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s"
-        self.chat( base % (location, condition, temp, humid, wind, feels) )
+        self.chat(base % (location, condition, temp, humid, wind, feels))
 
     # TODO: This is totally broken for some reason
     @axon
@@ -92,7 +92,7 @@ class Reference(Dendrite):
         if not self.values:
             printout = []
             for n, f in SAFE:
-                if f != None:
+                if f is not None:
                     printout.append(n)
 
             self.chat("Available functions: " + ", ".join(printout))
@@ -103,4 +103,3 @@ class Reference(Dendrite):
             result = NICK + " not smart enough to do that."
 
         self.chat(result)
-

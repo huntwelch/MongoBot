@@ -4,7 +4,7 @@ from autonomic import axon, category, help, Dendrite
 @category("memory")
 class Memory(Dendrite):
     def __init__(self, cortex):
-        super(Memory, self).__init__(cortex) 
+        super(Memory, self).__init__(cortex)
 
     @axon
     @help("<search logs for phrase and print the most recent>")
@@ -81,4 +81,3 @@ class Memory(Dendrite):
             return True
         else:
             return False
-

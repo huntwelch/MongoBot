@@ -1,9 +1,10 @@
 from autonomic import axon, category, help, Dendrite
 
+
 @category("chess")
 class Chess(Dendrite):
     def __init__(self, cortex):
-        super(Chess, self).__init__(cortex) 
+        super(Chess, self).__init__(cortex)
 
         self.pieces = dict(
             br=u'\u265c',
@@ -31,12 +32,12 @@ class Chess(Dendrite):
             ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr'],
         ]
 
-        self.chessgrid = self.basegrid 
+        self.chessgrid = self.basegrid
 
     @axon
     @help("<reset chessboard>")
     def resetchess(self):
-        self.chessgrid = self.basegrid 
+        self.chessgrid = self.basegrid
 
     @axon
     @help("<show chessboard>")
@@ -86,10 +87,9 @@ class Chess(Dendrite):
                 self.chat("No piece there")
                 return
             self.chessgrid[x][y] = ''
-            
+
         x = 8 - int(finis[1:])
         y = trans[finis[:1]]
 
         self.chessgrid[x][y] = piece
         self.chess()
-

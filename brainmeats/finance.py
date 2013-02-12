@@ -15,7 +15,7 @@ from util import pageopen
 @category("finance")
 class Finance(Dendrite):
     def __init__(self, cortex):
-        super(Finance, self).__init__(cortex) 
+        super(Finance, self).__init__(cortex)
 
     @axon
     @help("[stock symbol]<get stock quote>")
@@ -32,7 +32,7 @@ class Finance(Dendrite):
 
         if not showit and default:
             return False
-        
+
         if not showit:
             self.chat("Couldn't find company.")
             return
@@ -46,7 +46,7 @@ class Finance(Dendrite):
         whom = self.lastsender
 
         if self.values and self.values[0] == 'clear':
-            drinker = Drinker.objects(name = whom)[0]
+            drinker = Drinker.objects(name=whom)[0]
             if drinker and drinker.portfolio:
                 drinker.portfolio = []
                 drinker.save()
@@ -59,11 +59,11 @@ class Finance(Dendrite):
                 if not stock or len(symbol) > 8:
                     self.chat("Could not add '" + symbol + "'")
                     continue
-                
+
                 stock.save(whom)
             return
 
-        drinker = Drinker.objects(name = whom)[0]
+        drinker = Drinker.objects(name=whom)[0]
         if drinker and drinker.portfolio:
             for symbol in drinker.portfolio:
                 stock = Stock(symbol)
@@ -71,7 +71,6 @@ class Finance(Dendrite):
                 self.chat(showit)
         else:
             self.chat("No stocks saved")
-
 
     @axon
     @help("<get current Bitcoin trading information>")
@@ -93,4 +92,4 @@ class Finance(Dendrite):
         low = json['return']['low']['display_short']
         high = json['return']['high']['display_short']
 
-        self.chat('Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high))        
+        self.chat('Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high))
