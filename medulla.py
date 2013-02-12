@@ -31,12 +31,18 @@ class Medulla:
 
         self.active = False
 
-        import cortex
         import settings
         import secrets
-        reload(cortex)
+        import datastore 
+        import util 
+        import autonomic 
+        import cortex
         reload(settings)
         reload(secrets)
+        reload(datastore)
+        reload(autonomic)
+        reload(util)
+        reload(cortex)
         self.brain = cortex.Cortex(self)
         self.brain.loadbrains(True)
 

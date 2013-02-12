@@ -27,7 +27,7 @@ class Dendrite(object):
         self.members = self.cx.members
 
 
-def serotonin(cortex, expansion):
+def serotonin(cortex, expansion, electroshock):
     methods = inspect.getmembers(expansion)
     letter = expansion.category[:1]
     word = expansion.category[1:]
@@ -41,13 +41,13 @@ def serotonin(cortex, expansion):
         if hasattr(method, "help"):
             helps.append(CONTROL_KEY + name + " " + method.help)
 
-        if name in cortex.commands:
+        if name in cortex.commands and not electroshock:
             print "Warning: overwriting " + name
 
         cortex.commands[name] = method
 
     if len(helps):
-        if letter in cortex.helpmenu:
+        if letter in cortex.helpmenu and not electroshock:
             print "Warning: overwriting category " + letter + " in help menu"
 
         cortex.helpmenu[letter] = helps

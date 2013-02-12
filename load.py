@@ -1,3 +1,5 @@
+# Pure utility file, run by hand if you feel the need
+
 import wordnik
 import mongoengine
 from mongoengine import *
