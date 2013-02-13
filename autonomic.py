@@ -18,8 +18,8 @@ class Dendrite(object):
     def _act(self, what, public=False, target=False):
         self.cx.act(what, public, target)
 
-    def validate(self, what):
-        self.cx.validate(what)
+    def validate(self):
+        return self.cx.validate()
 
     def snag(self):
         self.values = self.cx.values

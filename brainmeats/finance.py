@@ -30,9 +30,6 @@ class Finance(Dendrite):
         stock = Stock(symbol)
         showit = stock.showquote(self.context)
 
-        if not showit and default:
-            return False
-
         if not showit:
             self.chat("Couldn't find company.")
             return

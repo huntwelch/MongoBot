@@ -13,6 +13,8 @@ class Reference(Dendrite):
     def __init__(self, cortex):
         super(Reference, self).__init__(cortex)
 
+        self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
+
     @axon
     @help("search_term <look something up in google>")
     def g(self):
