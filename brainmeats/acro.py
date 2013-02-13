@@ -1,9 +1,10 @@
 from autonomic import axon, category, help, Dendrite
 from random import choice, randint, shuffle
 from time import mktime, localtime, strftime
-from settings import INSULTS, INSULT, STORAGE, TIME_FACTOR, MINLEN, \
+from settings import INSULTS, INSULT, STORAGE, TIME_FACTOR, \
     MIN_PLAYERS, ROUNDS, ROUNDTIME, VOTETIME, NO_VOTE_PENALTY, \
-    NO_ACRO_PENALTY, BREAK, ACROSCORE
+    NO_ACRO_PENALTY, BREAK, ACROSCORE, MAXLEN, MINLEN, WARNING, \
+    BOTPLAY
 
 
 @category("acro")
@@ -113,9 +114,11 @@ class Acro(Dendrite):
     def endgame(self):
         self.contenders = []
         self.voters = []
+        self.active = False
         self.announce("Game over.")
         self.killgame = False
         self.paused = False
+        self.cx.droplive("ticker")
 
     def input(self, selfsub=False):
         self.snag()
@@ -180,7 +183,7 @@ class Acro(Dendrite):
             if self.round != 1:
                 addition = str(numplayers - received) + " more to go."
 
-            if not SelfSub:
+            if not selfsub:
                 self.announce("Entry recieved at " + str(_time) + " seconds. " + addition)
 
             if received == numplayers and self.round != 1:
@@ -241,24 +244,26 @@ class Acro(Dendrite):
     def run(self):
         self.setup()
         self.announce("New game commencing in " + str(BREAK) + " seconds")
+        self.cx.addlive(self.ticker)
 
-        while True:
-            if self.killgame:
-                self.endgame()
-                return
+    def ticker(self):
 
-            if self.paused:
-                continue
+        if self.killgame:
+            self.endgame()
+            return
 
-            self.input()
+        if self.paused:
+            return
 
-            self.current = mktime(localtime())
+        self.input()
 
-            {
-                "waiting": self.waiting,
-                "submit": self.submit,
-                "voting": self.voting,
-            }.get(self.stage)
+        self.current = mktime(localtime())
+
+        {
+            "waiting": self.waiting,
+            "submit": self.submit,
+            "voting": self.voting,
+        }.get(self.stage)()
 
     def waiting(self):
         if self.current <= self.mark + BREAK:

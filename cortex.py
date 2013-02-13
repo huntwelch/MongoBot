@@ -28,7 +28,6 @@ class Cortex:
     def __init__(self, master):
         
         print "* Initializing"
-        
         self.values = False
         self.master = master
         self.context = CHANNEL
@@ -40,6 +39,7 @@ class Cortex:
         self.memories = False
         self.boredom = int(mktime(localtime()))
         self.namecheck = int(mktime(localtime()))
+        self.live = {}
 
         self.helpmenu = {}
         self.commands = {
@@ -48,11 +48,17 @@ class Cortex:
         self.helpcategories = []
 
         print "* Loading brainmeats"
-
         self.loadbrains()
 
         print "* Connecting to datastore"
         connectdb()
+
+        print "* Running monitor"
+        while True and self.master.active:
+            self.monitor(self.sock)
+            for func in self.live:
+                if self.live[func]:
+                    self.live[func]()
 
     def loadbrains(self, electroshock=False):
         self.brainmeats = {}
@@ -72,6 +78,12 @@ class Cortex:
 
         for brainmeat in self.brainmeats:
             serotonin(self, self.brainmeats[brainmeat], electroshock)
+
+    def addlive(self, func):
+        self.live[func.__name__] = func
+
+    def droplive(self, name):
+        self.live[name] = False
 
     def monitor(self, sock):
         line = self.sock.recv(500)
