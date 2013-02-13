@@ -10,16 +10,15 @@ class Medulla:
     def __init__(self):
         self.sock = socket.socket()
 
+        print "* Pinging IRC"
+
         self.sock.connect((HOST, PORT))
         self.sock.send('NICK ' + NICK + '\n')
         self.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
         self.sock.send('JOIN ' + CHANNEL + '\n')
 
-        self.brain = cortex.Cortex(self)
         self.active = True
-
-        while True and self.active:
-            self.brain.monitor(self.sock)
+        self.brain = cortex.Cortex(self)
 
     def reload(self):
         quiet = False
