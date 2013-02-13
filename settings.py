@@ -5,7 +5,7 @@ from secrets import CHANNEL
 
 HOST = "irc.freenode.net"
 PORT = 6667
-NICK = "MongoBot"
+NICK = "MongoTest"
 
 # These settings are set in secrets.py
 

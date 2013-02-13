@@ -6,12 +6,53 @@ import hand
 import math
 import random
 import sys
-import threading
 
 # TODO:
 # bets don't add up
 # blind doesn't register right player
 # eternal passing still?
+
+# "h": [
+#     "~holdem <start holdem game>",
+#     "~bet [amount] <>",
+#     "~call <match bet, if able>",
+#     "~raise [amount] <raise the bet>",
+#     "~pass/~knock/~check  <pass bet>",
+#     "~fold <leave hand>",
+#     "~allin <bet everything>",
+#     "~sitout <leave game temporarily>",
+#     "~sitin <rejoin game>",
+#     "~status <show all players' money and status>",
+#     "~pot <show amount in pot>",
+#     "~mymoney <show how much money you have>",
+#     "~thebet <show current bet>",
+# ],
+# 
+# # Holdem
+# "holdem": self.holdemengine,
+# "bet": self.holdem.raiseit,
+# "call": self.holdem.callit,
+# "raise": self.holdem.raiseit,
+# "pass": self.holdem.knock,
+# "knock": self.holdem.knock,
+# "check": self.holdem.knock,
+# "fold": self.holdem.fold,
+# "allin": self.holdem.allin,
+# "sitin": self.holdem.sitin,
+# "sitout": self.holdem.sitout,
+# "status": self.holdem.status,
+# "pot": self.holdem.showpot,
+# "mymoney": self.holdem.mymoney,
+# "thebet": self.holdem.thebet,
+
+#    # Move to holdem
+#    def holdemengine(self):
+#        if self.playingholdem:
+#            self.chat("Already a game in progress")
+#            return
+#
+#        self.playingholdem = True
+#        self.holdem.start()
 
 
 class Holdem(threading.Thread):

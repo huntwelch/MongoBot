@@ -23,21 +23,12 @@ from datastore import Drinker, connectdb
 from util import unescape, pageopen
 from autonomic import serotonin
 
-<<<<<<< HEAD
-# TODO: hope to move these out
-from holdem import Holdem
 
-=======
->>>>>>> a271d4d6852cf3c6b9fbea2a7b868870fd06f84e
-
-# TODO: standardize url grabber
-# TODO: move out live responses to something?
 class Cortex:
     def __init__(self, master):
-<<<<<<< HEAD
-        self.playingholdem = False
-=======
->>>>>>> a271d4d6852cf3c6b9fbea2a7b868870fd06f84e
+        
+        print "* Initializing"
+        
         self.values = False
         self.master = master
         self.context = CHANNEL
@@ -50,53 +41,17 @@ class Cortex:
         self.boredom = int(mktime(localtime()))
         self.namecheck = int(mktime(localtime()))
 
-        self.helpmenu = {
-            "h": [
-                "~holdem <start holdem game>",
-                "~bet [amount] <>",
-                "~call <match bet, if able>",
-                "~raise [amount] <raise the bet>",
-                "~pass/~knock/~check  <pass bet>",
-                "~fold <leave hand>",
-                "~allin <bet everything>",
-                "~sitout <leave game temporarily>",
-                "~sitin <rejoin game>",
-                "~status <show all players' money and status>",
-                "~pot <show amount in pot>",
-                "~mymoney <show how much money you have>",
-                "~thebet <show current bet>",
-            ],
-
-        }
-
+        self.helpmenu = {}
         self.commands = {
-            # Help menu
             "help": self.showlist,
-
-            # Holdem
-            "holdem": self.holdemengine,
-            "bet": self.holdem.raiseit,
-            "call": self.holdem.callit,
-            "raise": self.holdem.raiseit,
-            "pass": self.holdem.knock,
-            "knock": self.holdem.knock,
-            "check": self.holdem.knock,
-            "fold": self.holdem.fold,
-            "allin": self.holdem.allin,
-            "sitin": self.holdem.sitin,
-            "sitout": self.holdem.sitout,
-            "status": self.holdem.status,
-            "pot": self.holdem.showpot,
-            "mymoney": self.holdem.mymoney,
-            "thebet": self.holdem.thebet,
         }
+        self.helpcategories = []
 
-        self.helpcategories = [
-            "(h)oldem",
-        ]
+        print "* Loading brainmeats"
 
         self.loadbrains()
 
+        print "* Connecting to datastore"
         connectdb()
 
     def loadbrains(self, electroshock=False):
@@ -142,19 +97,10 @@ class Cortex:
             content = line.split(' ', 3)
             self.context = content[2]
 
-<<<<<<< HEAD
             if self.context == NICK:
                 self.lastprivate = content
             else:
                 self.lastpublic = content
-            
-            # To be moved
-=======
-            # Acro spec, move out at some point
->>>>>>> a271d4d6852cf3c6b9fbea2a7b868870fd06f84e
-            if self.acro and line.find(CONTROL_KEY) == -1:
-                if self.context == NICK:
-                    self.acro.input(content)
 
             self.parse(line)
 
@@ -397,13 +343,3 @@ class Cortex:
 
     def default(self):
         self.chat(NICK + " cannot do this thing :'(")
-
-    # Move to holdem
-    def holdemengine(self):
-        if self.playingholdem:
-            self.chat("Already a game in progress")
-            return
-
-        self.playingholdem = True
-        self.holdem.start()
-
