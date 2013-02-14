@@ -2,6 +2,7 @@ import wordnik
 import mongoengine
 import nltk
 import re
+import string 
 
 from autonomic import axon, category, help, Dendrite
 from secrets import WORDNIK_API
@@ -71,7 +72,7 @@ class Broca(Dendrite):
         else:
             self.chat("I got nothin.")
 
-    def parse(self, sentence):
+    def parse(self, sentence, nick):
         tokens = nltk.word_tokenize(sentence)
         tagged = nltk.pos_tag(tokens)
 
@@ -97,6 +98,28 @@ class Broca(Dendrite):
             struct.save()
         except:
             pass
+
+    def tourettes(self, sentence, nick):
+        if sentence.find(NICK + " ") != -1:
+            backatcha = sentence[len(NICK):]
+            self.chat(nick + "'s MOM" + backatcha)
+            return
+
+        if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
+            open(LOGDIR + "/mom.log", 'a').write(sentence + '\n')
+            return
+
+        if sentence.lower().find("oh snap") != -1:
+            self.chat("yeah WHAT?? Oh yes he DID")
+            return
+
+        if sentence.lower().find("rimshot") != -1:
+            self.chat("*ting*")
+            return
+
+        if sentence.lower().find("stop") == len(sentence) - 4 and len(sentence) != 3:
+            self.chat("Hammertime")
+            return
 
     @axon
     @help("<command " + NICK + " to speak>")

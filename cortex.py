@@ -1,7 +1,6 @@
 #System
 
 import base64
-import string
 import os
 import re
 import urllib2
@@ -17,7 +16,7 @@ from random import choice, randint
 
 # Local
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-    ACROSCORE, CHANNEL, SHORTENER, OWNER
+    ACROSCORE, CHANNEL, SHORTENER, OWNER, REALNAME
 from secrets import DELICIOUS_PASS, DELICIOUS_USER
 from datastore import Drinker, connectdb
 from util import unescape, pageopen
@@ -81,6 +80,9 @@ class Cortex:
     def monitor(self, sock):
         line = self.sock.recv(500)
         line = line.strip()
+        
+        if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
+            print "* Joined " + CHANNEL
 
         currenttime = int(mktime(localtime()))
         scan = re.search("^:\w+\.freenode\.net", line)
@@ -208,7 +210,6 @@ class Cortex:
             self.command(nick, content)
             return
 
-        # Continuous response operations
         ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         match_urls = re.compile(ur)
         urls = match_urls.findall(content)
@@ -216,27 +217,8 @@ class Cortex:
             self.linker(urls)
             return
 
-        self.brainmeats['broca'].parse(content)
-
-        if content.find(NICK + " sucks") != -1:
-            self.chat(nick + "'s MOM sucks")
-            return
-
-        if "mom" in content.translate(string.maketrans("", ""), string.punctuation).split():
-            open(LOGDIR + "/mom.log", 'a').write(content + '\n')
-            return
-
-        if content.lower().find("oh snap") != -1:
-            self.chat("yeah WHAT?? Oh yes he DID")
-            return
-
-        if content.lower().find("rimshot") != -1:
-            self.chat("*ting*")
-            return
-
-        if content.lower().find("stop") == len(content) - 4 and len(content) != 3:
-            self.chat("Hammertime")
-            return
+        self.brainmeats['broca'].parse(content, nick)
+        self.brainmeats['broca'].tourettes(content, nick)
 
     def tweet(self, urls):
         for url in urls:

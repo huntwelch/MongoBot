@@ -18,7 +18,7 @@ NICK = "MongoBot"
 
 STORAGE = "hippocampus"
 LOGDIR = STORAGE + "/log"
-LOG = LOGDIR + "/mongo.log"
+LOG = LOGDIR + "/chat.log"
 DISTASTE = STORAGE + "/distaste"
 ACROSCORE = STORAGE + "/acro/"
 
