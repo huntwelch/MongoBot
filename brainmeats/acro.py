@@ -4,7 +4,7 @@ from time import mktime, localtime, strftime
 from settings import INSULTS, INSULT, STORAGE, TIME_FACTOR, \
     MIN_PLAYERS, ROUNDS, ROUNDTIME, VOTETIME, NO_VOTE_PENALTY, \
     NO_ACRO_PENALTY, BREAK, ACROSCORE, MAXLEN, MINLEN, WARNING, \
-    BOTPLAY
+    BOTPLAY, NICK
 
 
 @category("acro")
