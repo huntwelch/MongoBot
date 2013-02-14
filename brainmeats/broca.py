@@ -100,7 +100,7 @@ class Broca(Dendrite):
             pass
 
     def tourettes(self, sentence, nick):
-        if sentence.find(NICK + " ") != -1:
+        if re.search("^" + NICK, sentence):
             backatcha = sentence[len(NICK):]
             self.chat(nick + "'s MOM" + backatcha)
             return

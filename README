@@ -12,6 +12,6 @@ Getting Started
     a class Category_name. Loading of this class will be automated, no
     other files need to be altered.
 
-    TODO: fix acro
+    TODO: fix loop responsiveness for time based reactions 
     TODO: finish holdem
     TODO: simplify stocks files

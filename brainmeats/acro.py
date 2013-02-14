@@ -1,3 +1,5 @@
+import os
+
 from autonomic import axon, category, help, Dendrite
 from random import choice, randint, shuffle
 from time import mktime, localtime, strftime
@@ -107,7 +109,7 @@ class Acro(Dendrite):
                 target = gimp + post + target
                 trail += 1
 
-            self.announce(target + " " + random.choice(use) +
+            self.announce(target + " " + choice(use) +
                           " and will be docked " + str(penalty) +
                           " points for not " + action + ".")
 
