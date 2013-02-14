@@ -10,7 +10,6 @@ from settings import SAFESET, NICK, IDENT, HOST, REALNAME, CHANNEL
 class System(Dendrite):
     def __init__(self, cortex):
         super(System, self).__init__(cortex)
-        self.master = cortex.master
 
     @axon
     @help("[setting]+ <show editable " + NICK + " settings>")
@@ -64,12 +63,12 @@ class System(Dendrite):
     @axon
     @help("<reload " + NICK + ">")
     def reload(self):
-        self.master.reload()
+        self.cx.master.reload()
 
     @axon
     @help("<set squirrel on fire and staple it to angel. No, really>")
     def reboot(self):
-        self.master.die()
+        self.cx.master.die()
 
     @axon
     @help("<change " + NICK + "'s name>")

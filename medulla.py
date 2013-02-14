@@ -20,6 +20,10 @@ class Medulla:
         self.active = True
         self.brain = cortex.Cortex(self)
 
+        print "* Running monitor"
+        while True and self.active:
+            self.brain.monitor(self.sock)
+
     def reload(self):
         quiet = False
         if not self.brain.values or not len(self.brain.values[0]):

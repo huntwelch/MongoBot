@@ -53,13 +53,6 @@ class Cortex:
         print "* Connecting to datastore"
         connectdb()
 
-        print "* Running monitor"
-        while True and self.master.active:
-            self.monitor(self.sock)
-            for func in self.live:
-                if self.live[func]:
-                    self.live[func]()
-
     def loadbrains(self, electroshock=False):
         self.brainmeats = {}
         brainmeats = __import__("brainmeats", fromlist=[])
@@ -124,6 +117,10 @@ class Cortex:
             self.boredom = int(mktime(localtime()))
             if randint(1, 10) == 7:
                 self.bored()
+
+        for func in self.live:
+            if self.live[func]:
+                self.live[func]()
 
     def command(self, sender, cmd):
         components = cmd.split()
