@@ -77,14 +77,36 @@ class Cortex:
     def droplive(self, name):
         self.live[name] = False
 
+    def parietal(self, currenttime):
+        print currenttime
+        if currenttime - self.namecheck > 300:
+            self.namecheck = int(mktime(localtime()))
+            self.getnames()
+
+        if currenttime - self.boredom > PATIENCE:
+            self.boredom = int(mktime(localtime()))
+            if randint(1, 10) == 7:
+                self.bored()
+
+        for func in self.live:
+            if self.live[func]:
+                self.live[func]()
+
     def monitor(self, sock):
-        line = self.sock.recv(500)
+        currenttime = int(mktime(localtime()))
+        self.parietal(currenttime)
+
+        try:
+            line = self.sock.recv(500)
+        except:
+            return
+
         line = line.strip()
         
         if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
             print "* Joined " + CHANNEL
 
-        currenttime = int(mktime(localtime()))
+        # TODO: build scan check from settings
         scan = re.search("^:\w+\.freenode\.net", line)
         ping = re.search("^PING", line)
         if line != '' and not scan and not ping:
@@ -100,7 +122,7 @@ class Cortex:
         if line.find('PING') != -1:
             self.sock.send('PONG ' + line.split()[1] + '\n')
         elif line.find('PRIVMSG') != -1:
-            self.boredom = int(mktime(localtime()))
+            self.boredom = currenttime
             content = line.split(' ', 3)
             self.context = content[2]
 
@@ -110,19 +132,6 @@ class Cortex:
                 self.lastpublic = content
 
             self.parse(line)
-
-        if currenttime - self.namecheck > 300:
-            self.namecheck = int(mktime(localtime()))
-            self.getnames()
-
-        if currenttime - self.boredom > PATIENCE:
-            self.boredom = int(mktime(localtime()))
-            if randint(1, 10) == 7:
-                self.bored()
-
-        for func in self.live:
-            if self.live[func]:
-                self.live[func]()
 
     def command(self, sender, cmd):
         components = cmd.split()

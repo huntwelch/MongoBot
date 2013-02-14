@@ -2,6 +2,7 @@ import sys
 import socket
 import settings
 import cortex
+from time import sleep
 
 from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER
 
@@ -17,11 +18,14 @@ class Medulla:
         self.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
         self.sock.send('JOIN ' + CHANNEL + '\n')
 
+        self.sock.setblocking(0)
+
         self.active = True
         self.brain = cortex.Cortex(self)
 
         print "* Running monitor"
-        while True and self.active:
+        while True:
+            sleep(0.1)
             self.brain.monitor(self.sock)
 
     def reload(self):
