@@ -6,7 +6,7 @@ import string
 
 from autonomic import axon, category, help, Dendrite
 from secrets import WORDNIK_API
-from settings import NICK, STORAGE, ACROLIB
+from settings import NICK, STORAGE, ACROLIB, LOGDIR
 from datastore import Words, Learned, Structure
 from random import choice
 from util import pageopen
@@ -100,13 +100,12 @@ class Broca(Dendrite):
             pass
 
     def tourettes(self, sentence, nick):
+        if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
+            open(LOGDIR + "/mom.log", 'a').write(sentence + '\n')
+
         if re.search("^" + NICK, sentence):
             backatcha = sentence[len(NICK):]
             self.chat(nick + "'s MOM" + backatcha)
-            return
-
-        if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
-            open(LOGDIR + "/mom.log", 'a').write(sentence + '\n')
             return
 
         if sentence.lower().find("oh snap") != -1:

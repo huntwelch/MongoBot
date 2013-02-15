@@ -85,7 +85,6 @@ class Reference(Dendrite):
         base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s"
         self.chat(base % (location, condition, temp, humid, wind, feels))
 
-    # TODO: This is totally broken for some reason
     @axon
     @help("equation <run simple equation in python>")
     def calc(self):

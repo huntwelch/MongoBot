@@ -24,11 +24,33 @@ ACROSCORE = STORAGE + "/acro/"
 
 # Misc
 
-CONTROL_KEY = "~"
+CONTROL_KEY = "-"
 SHORTENER = "http://roa.st/api.php?roast="
 PATIENCE = 7000
 REPO = "https://github.com/huntwelch/MongoBot"
-
+BANNED = []
+USERS = [
+    'castr0',
+    'chiyu',
+    'chiyou',
+    'chiyou_',
+    'dcross2',
+    'digx',
+    'erikbeta',
+    'jcb',
+    'jsbronder',
+    'kenfree',
+    'loxo33',
+    'melanarchy',
+    'mirotame',
+    'realvinay',
+    'sublimnl',
+    'Viza',
+    'woxidu',
+    'woxidu_home',
+    'xtrium',
+    'Euj1',
+]
 # Acro
 
 ACROLIB = "natwords"
@@ -51,6 +73,7 @@ OWNER = "chiyou"
 
 SAFESET = [
     ('Bot settings', ':'),
+    ('CONTROL_KEY', '"' + CONTROL_KEY + '"'),
     ('SHORTENER', '"' + SHORTENER + '"'),
     ('PATIENCE', PATIENCE),
     ('NICK', '"' + NICK + '"'),

@@ -16,7 +16,7 @@ from random import choice, randint
 
 # Local
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-    ACROSCORE, CHANNEL, SHORTENER, OWNER, REALNAME
+    ACROSCORE, CHANNEL, SHORTENER, OWNER, REALNAME, BANNED, USERS
 from secrets import DELICIOUS_PASS, DELICIOUS_USER
 from datastore import Drinker, connectdb
 from util import unescape, pageopen
@@ -78,7 +78,6 @@ class Cortex:
         self.live[name] = False
 
     def parietal(self, currenttime):
-        print currenttime
         if currenttime - self.namecheck > 300:
             self.namecheck = int(mktime(localtime()))
             self.getnames()
@@ -201,6 +200,9 @@ class Cortex:
         shutil.move(LOG, backlog)
 
     def parse(self, msg):
+
+        print msg
+
         info, content = msg[1:].split(' :', 1)
         try:
             sender, type, room = info.strip().split()
@@ -208,9 +210,16 @@ class Cortex:
             return
 
         try:
-            nick = sender.split('!')[0]
-            ip = sender.split('@')[1]
+            nick, data = sender.split('!')
+            realname, ip = data.split('@')
+            realname = realname[1:]
         except:
+            return
+
+        if nick in BANNED:
+            return
+
+        if nick not in USERS:
             return
 
         self.lastsender = nick
