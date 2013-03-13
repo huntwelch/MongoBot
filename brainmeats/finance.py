@@ -1,4 +1,5 @@
 import simplejson
+import locale
 
 from autonomic import axon, category, help, Dendrite
 from datastore import Drinker
@@ -90,3 +91,27 @@ class Finance(Dendrite):
         high = json['return']['high']['display_short']
 
         self.chat('Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high))
+
+    @axon
+    @help("<get current Litecoin trading information>")
+    def ltc(self):
+        url = 'https://btc-e.com/api/2/ltc_usd/ticker'
+
+        response = pageopen(url)
+        if not response:
+            self.chat("Couldn't retrieve LTC data.")
+            return
+
+        try:
+            json = simplejson.loads(response)
+        except:
+            self.chat("Couldn't parse LTC data.")
+            return
+
+        locale.setlocale( locale.LC_ALL, '' )
+        last = locale.currency(json['ticker']['last'])
+        low = locale.currency(json['ticker']['low'])
+        high = locale.currency(json['ticker']['high'])
+
+        self.chat('Litecoin, Last: %s, Low: %s, High: %s' % (last, low, high))
+
