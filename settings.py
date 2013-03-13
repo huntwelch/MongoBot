@@ -1,8 +1,5 @@
 from math import *
-from secrets import *
-
-# Note the WEATHER from secrets is an api key
-# from wunderground.com
+from secrets import CHANNEL
 
 # Connection Settings
 
@@ -11,23 +8,49 @@ PORT = 6667
 NICK = "MongoBot"
 
 # These settings are set in secrets.py
+
 # CHANNEL = (str) irc channel
-# SQL_PASSWORD = fucking guess 
+# WORDNIK_API = (str) for wordnik calls
+# WEATHER_API = (str) for weather calls to wunderground.com
+# SQL_PASSWORD = duh
 
 # Directory settings
 
-BRAIN = "mongo-brain"
-LOG = BRAIN + "/mongo.log"
-DISTASTE = BRAIN + "/distaste"
-ACROSCORE = BRAIN + "/acro/"
+STORAGE = "hippocampus"
+LOGDIR = STORAGE + "/log"
+LOG = LOGDIR + "/chat.log"
+DISTASTE = STORAGE + "/distaste"
+ACROSCORE = STORAGE + "/acro/"
 
 # Misc
 
+CONTROL_KEY = "-"
 SHORTENER = "http://roa.st/api.php?roast="
-PATIENCE = 6000
-WORDNIK_API = "62d747d2294f2fda6112d43604f273e0aefd2d839a2c257c9"
+PATIENCE = 7000
 REPO = "https://github.com/huntwelch/MongoBot"
-
+BANNED = []
+USERS = [
+    'castr0',
+    'chiyu',
+    'chiyou',
+    'chiyou_',
+    'dcross2',
+    'digx',
+    'erikbeta',
+    'jcb',
+    'jsbronder',
+    'kenfree',
+    'loxo33',
+    'melanarchy',
+    'mirotame',
+    'realvinay',
+    'sublimnl',
+    'Viza',
+    'woxidu',
+    'woxidu_home',
+    'xtrium',
+    'Euj1',
+]
 # Acro
 
 ACROLIB = "natwords"
@@ -50,6 +73,7 @@ OWNER = "chiyou"
 
 SAFESET = [
     ('Bot settings', ':'),
+    ('CONTROL_KEY', '"' + CONTROL_KEY + '"'),
     ('SHORTENER', '"' + SHORTENER + '"'),
     ('PATIENCE', PATIENCE),
     ('NICK', '"' + NICK + '"'),
