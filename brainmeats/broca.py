@@ -4,7 +4,7 @@ import nltk
 import re
 import string 
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API
 from settings import NICK, STORAGE, ACROLIB, LOGDIR
 from datastore import Words, Learned, Structure
@@ -121,6 +121,7 @@ class Broca(Dendrite):
             return
 
     @axon
+    @alias(["waxrhapsodic"])
     @help("<command " + NICK + " to speak>")
     def speak(self):
         sentence = []

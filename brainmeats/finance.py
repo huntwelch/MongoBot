@@ -2,7 +2,7 @@ import simplejson
 
 from autonomic import axon, category, help, Dendrite
 from datastore import Drinker
-from booklearnin import Stock
+from stocks import Stock
 from util import pageopen
 
 #"f":[

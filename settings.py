@@ -34,6 +34,7 @@ USERS = [
     'chiyu',
     'chiyou',
     'chiyou_',
+    'huntwelch',
     'dcross2',
     'digx',
     'erikbeta',
@@ -42,7 +43,7 @@ USERS = [
     'kenfree',
     'loxo33',
     'melanarchy',
-    'mirotame',
+    'miroatme',
     'realvinay',
     'sublimnl',
     'Viza',
@@ -50,6 +51,7 @@ USERS = [
     'woxidu_home',
     'xtrium',
     'Euj1',
+    'dj_jrkface',
 ]
 # Acro
 

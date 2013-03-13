@@ -46,6 +46,9 @@ def serotonin(cortex, expansion, electroshock):
             print "Warning: overwriting " + name
 
         cortex.commands[name] = method
+        if hasattr(method, "aliases"):
+            for item in method.aliases:
+                cortex.commands[item] = method
 
     if len(helps):
         if letter in cortex.helpmenu and not electroshock:
@@ -72,5 +75,11 @@ def axon(fn):
 def help(text):
     def add(fn):
         fn.help = text
+        return fn
+    return add
+
+def alias(aliases):
+    def add(fn):
+        fn.aliases = aliases 
         return fn
     return add
