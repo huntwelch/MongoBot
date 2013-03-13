@@ -108,7 +108,7 @@ class Finance(Dendrite):
             self.chat("Couldn't parse LTC data.")
             return
 
-        locale.setlocale( locale.LC_ALL, '' )
+        locale.setlocale( locale.LC_ALL, 'en_US.UTF-8' )
         last = locale.currency(json['ticker']['last'])
         low = locale.currency(json['ticker']['low'])
         high = locale.currency(json['ticker']['high'])

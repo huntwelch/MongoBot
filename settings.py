@@ -1,5 +1,5 @@
 from math import *
-from secrets import CHANNEL
+from secrets import CHANNEL, BANNED, USERS
 
 # Connection Settings
 
@@ -28,31 +28,7 @@ CONTROL_KEY = "-"
 SHORTENER = "http://roa.st/api.php?roast="
 PATIENCE = 7000
 REPO = "https://github.com/huntwelch/MongoBot"
-BANNED = []
-USERS = [
-    'castr0',
-    'chiyu',
-    'chiyou',
-    'chiyou_',
-    'huntwelch',
-    'dcross2',
-    'digx',
-    'erikbeta',
-    'jcb',
-    'jsbronder',
-    'kenfree',
-    'loxo33',
-    'melanarchy',
-    'miroatme',
-    'realvinay',
-    'sublimnl',
-    'Viza',
-    'woxidu',
-    'woxidu_home',
-    'xtrium',
-    'Euj1',
-    'dj_jrkface',
-]
+
 # Acro
 
 ACROLIB = "natwords"
