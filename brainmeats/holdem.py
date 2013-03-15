@@ -28,7 +28,7 @@ import sys
 #     "~mymoney <show how much money you have>",
 #     "~thebet <show current bet>",
 # ],
-# 
+#
 # # Holdem
 # "holdem": self.holdemengine,
 # "bet": self.holdem.raiseit,

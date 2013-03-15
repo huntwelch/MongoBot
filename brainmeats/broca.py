@@ -2,7 +2,7 @@ import wordnik
 import mongoengine
 import nltk
 import re
-import string 
+import string
 
 from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API

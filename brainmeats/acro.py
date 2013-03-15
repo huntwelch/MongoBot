@@ -13,7 +13,7 @@ from settings import INSULTS, INSULT, STORAGE, TIME_FACTOR, \
 class Acro(Dendrite):
 
     def __init__(self, cortex):
-        super(Acro, self).__init__(cortex) 
+        super(Acro, self).__init__(cortex)
 
         self.active = False
 
@@ -80,7 +80,6 @@ class Acro(Dendrite):
         self.chat("4 of 6 when the voting comes up, msg " + NICK + " with the number of your vote.")
         self.chat("5 of 6 play till the rounds are up.")
         self.chat("6 of 6 " + NICK + " plays by default. Run ~update BOTPLAY False to turn it off.")
-
 
     def gimper(self, check, action, penalty):
         gimps = []
@@ -287,7 +286,7 @@ class Acro(Dendrite):
         self.announce("Round " + str(self.round) +
                       " commencing! Acronym is " + acronym)
 
-        self.stage = "submit" 
+        self.stage = "submit"
 
     def submit(self):
         if self.current > self.mark + ROUNDTIME - WARNING and not self.warned:
@@ -342,12 +341,12 @@ class Acro(Dendrite):
 
         self.announce("You have " + str(VOTETIME) + " seconds to vote.")
         self.mark = mktime(localtime())
-        self.stage = "voting" 
+        self.stage = "voting"
 
     def voting(self):
         if self.current <= self.mark + VOTETIME and not self.bypass:
             return
-            
+
         self.bypass = False
         self.announce("Votes are in. The results:")
 
