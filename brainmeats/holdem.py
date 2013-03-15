@@ -1,4 +1,5 @@
-# Le holdem game
+from autonomic import axon, category, help, Dendrite
+
 
 from settings import *
 from time import *
@@ -54,28 +55,11 @@ import sys
 #        self.playingholdem = True
 #        self.holdem.start()
 
+@category("holdem")
+class Holdem(Dendrite):
 
-class Holdem(threading.Thread):
-
-    def __init__(self, mongo):
-        threading.Thread.__init__(self)
-        self.mongo = mongo
-
-    def run(self):
-
-        try:
-            self.stake = int(self.mongo.values.pop(0))
-        except:
-            self.mongo.announce("First entry must be a number.")
-            self.mongo.playingholdem = False
-            self.stop()
-            sys.exit()
-
-        if len(self.mongo.values) < 2:
-            self.mongo.announce("You must have at least two players.")
-            self.mongo.playingholdem = False
-            self.stop()
-            sys.exit()
+    def __init__(self, cortex):
+        super(Chess, self).__init__(cortex)
 
         self.firstpassed = False
         self.blind = 1
@@ -104,6 +88,23 @@ class Holdem(threading.Thread):
         ]
 
         self.stage = 0
+
+
+    @axon
+    @help("<start holdem game>")
+    def holdem(self):
+
+        try:
+            self.stake = int(self.values.pop(0))
+        except:
+            self.announce("First entry must be a number.")
+            self.playingholdem = False
+            self.stop()
+
+        if len(self.values) < 2:
+            self.announce("You must have at least two players.")
+            self.playingholdem = False
+            self.stop()
 
         random.shuffle(self.order)
         self.dealer = 0
