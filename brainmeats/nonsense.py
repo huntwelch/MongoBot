@@ -2,6 +2,7 @@ import MySQLdb
 import simplejson
 import urllib
 import urllib2
+import datetime
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
@@ -162,3 +163,7 @@ class Nonsense(Dendrite):
             lines.append(line)
 
         self.chat(choice(lines))
+
+    @axon
+    def timeleft(self):
+        self.chat("Only " + str(datetime.date(2013, 4, 16) - datetime.date.today()).days) + " days till bonus time"
