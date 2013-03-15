@@ -25,13 +25,13 @@ from autonomic import serotonin
 
 class Cortex:
     def __init__(self, master):
-        
+
         print "* Initializing"
         self.values = False
         self.master = master
         self.context = CHANNEL
-        self.lastpublic = False 
-        self.lastprivate = False 
+        self.lastpublic = False
+        self.lastprivate = False
         self.sock = master.sock
         self.gettingnames = True
         self.members = []
@@ -101,7 +101,7 @@ class Cortex:
             return
 
         line = line.strip()
-        
+
         if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
             print "* Joined " + CHANNEL
 

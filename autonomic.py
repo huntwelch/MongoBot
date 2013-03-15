@@ -78,8 +78,9 @@ def help(text):
         return fn
     return add
 
+
 def alias(aliases):
     def add(fn):
-        fn.aliases = aliases 
+        fn.aliases = aliases
         return fn
     return add
