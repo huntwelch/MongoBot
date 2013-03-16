@@ -3,7 +3,7 @@ from autonomic import axon, category, help, Dendrite
 
 from settings import *
 from time import *
-import hand
+# import hand
 import math
 import random
 import sys
@@ -13,59 +13,15 @@ import sys
 # blind doesn't register right player
 # eternal passing still?
 
-# "h": [
-#     "~holdem <start holdem game>",
-#     "~bet [amount] <>",
-#     "~call <match bet, if able>",
-#     "~raise [amount] <raise the bet>",
-#     "~pass/~knock/~check  <pass bet>",
-#     "~fold <leave hand>",
-#     "~allin <bet everything>",
-#     "~sitout <leave game temporarily>",
-#     "~sitin <rejoin game>",
-#     "~status <show all players' money and status>",
-#     "~pot <show amount in pot>",
-#     "~mymoney <show how much money you have>",
-#     "~thebet <show current bet>",
-# ],
-#
-# # Holdem
-# "holdem": self.holdemengine,
-# "bet": self.holdem.raiseit,
-# "call": self.holdem.callit,
-# "raise": self.holdem.raiseit,
-# "pass": self.holdem.knock,
-# "knock": self.holdem.knock,
-# "check": self.holdem.knock,
-# "fold": self.holdem.fold,
-# "allin": self.holdem.allin,
-# "sitin": self.holdem.sitin,
-# "sitout": self.holdem.sitout,
-# "status": self.holdem.status,
-# "pot": self.holdem.showpot,
-# "mymoney": self.holdem.mymoney,
-# "thebet": self.holdem.thebet,
-
-#    # Move to holdem
-#    def holdemengine(self):
-#        if self.playingholdem:
-#            self.chat("Already a game in progress")
-#            return
-#
-#        self.playingholdem = True
-#        self.holdem.start()
-
 @category("holdem")
 class Holdem(Dendrite):
-
     def __init__(self, cortex):
-        super(Chess, self).__init__(cortex)
+        super(Holdem, self).__init__(cortex)
 
         self.firstpassed = False
         self.blind = 1
         self.littleblind = False
         self.bigblind = False
-        self.order = self.mongo.values
         self.cardpointer = 0
         self.playerpointer = 0
         self.players = {}
@@ -74,6 +30,7 @@ class Holdem(Dendrite):
         self.bet = 0
         self.lastraised = False
         self.hand = []
+        self.playingholdem = False
 
         self.stages = [
             'blind',
@@ -89,23 +46,26 @@ class Holdem(Dendrite):
 
         self.stage = 0
 
-
     @axon
-    @help("<start holdem game>")
+    @help("[starting funds] [player_1] ... [player_n] <start holdem game>")
     def holdem(self):
+        self.snag()
+        if self.playingholdem:
+            self.announce("Game already in progress.")
+            return
 
         try:
             self.stake = int(self.values.pop(0))
         except:
             self.announce("First entry must be a number.")
-            self.playingholdem = False
-            self.stop()
+            return
 
         if len(self.values) < 2:
             self.announce("You must have at least two players.")
-            self.playingholdem = False
-            self.stop()
+            return
 
+        self.playingholdem = True
+        self.order = self.values
         random.shuffle(self.order)
         self.dealer = 0
 
@@ -130,63 +90,54 @@ class Holdem(Dendrite):
 
         self.deal()
 
-        while True:
-            if self.stages[self.stage] == 'flop':
-                self.flop()
-                continue
+    def checkround(self):
+        {
+            "flop": self.flop(),
+            "turn": self.turncard(),
+            "river": self.river(),
+            "distribute": self.distribute(),
+        }.get(self.stages[self.stage])
 
-            if self.stages[self.stage] == 'turn':
-                self.turncard()
-                continue
-
-            if self.stages[self.stage] == 'river':
-                self.river()
-                continue
-
-            if self.stages[self.stage] == 'distribute':
-                self.distribute()
-                continue
-
-    # player actions
-
+    @axon
+    @help("<stop playing>")
     def sitout(self):
-        player = self.mongo.lastsender
+        player = self.lastsender
         self.players[player]["status"] = "sitout"
         return
 
+    @axon
+    @help("<resume playing>")
     def sitin(self):
-        player = self.mongo.lastsender
+        player = self.lastsender
         if player not in self.players:
-            self.mongo.announce("You ain't in this game, pardner")
+            self.announce("You ain't in this game, pardner")
             return
 
         self.players[player]["status"] = "waiting"
         return
 
+    @axon
+    @help("[amount] <raise the bet by [amount]>")
     def raiseit(self):
-
-        # needs to be higher than bet
 
         self.firstpassed = False
 
-        player = self.mongo.lastsender
+        player = self.lastsender
         if player != self.order[self.playerpointer]:
-            self.mongo.chat("Not your turn")
+            self.chat("Not your turn")
             return
 
         try:
-            money = self.mongo.values[0]
+            money = self.values[0]
             amount = int(money)
         except:
-            self.mongo.announce("That's not money")
+            self.announce("That's not money")
             return
 
-        if amount < self.bet:
-            self.mongo.announce("You can't bet less than the current bet.")
-            return
+        amount += self.bet
 
         if amount > self.players[player]["money"]:
-            self.mongo.announce("You don't have enough money")
+            self.announce("You don't have enough money")
             return
 
         self.pot += amount
@@ -205,15 +156,17 @@ class Holdem(Dendrite):
 
         return
 
+    @axon
+    @help("<match the current bet>")
     def callit(self):
 
-        player = self.mongo.lastsender
+        player = self.lastsender
         if player != self.order[self.playerpointer]:
-            self.mongo.chat("Not your turn")
+            self.chat("Not your turn")
             return
 
         if self.bet > self.players[player]["money"]:
-            self.mongo.announce("You don't have enough money")
+            self.announce("You don't have enough money")
             return
 
         self.pot += self.bet
@@ -225,16 +178,22 @@ class Holdem(Dendrite):
 
         return
 
+    @axon
+    @help("<show how much money you have>")
     def mymoney(self):
-        self.mongo.chat(self.players[self.mongo.lastsender]["money"])
+        self.chat(str(self.players[self.lastsender]["money"]))
 
-    def status(self):
+    @axon
+    @help("<show how much money everybody has>")
+    def allmoney(self):
         for player in self.players:
-            self.mongo.chat(player + ": " + str(self.players[player]["money"]) + ", " + self.players[player]["status"])
+            self.chat(player + ": " + str(self.players[player]["money"]) + ", " + self.players[player]["status"])
 
+    @axon
+    @help("<pass>")
     def knock(self):
 
-        player = self.mongo.lastsender
+        player = self.lastsender
 
         # feels a little awkward, but it's logical.
         if self.bet == self.blind * 2 and player == self.bigblind:
@@ -248,22 +207,24 @@ class Holdem(Dendrite):
             self.firstpassed = player
 
         if player != self.order[self.playerpointer]:
-            self.mongo.chat("Not your turn")
+            self.chat("Not your turn")
             return
 
         if self.bet != 0 and player != self.lastraised:
-            self.mongo.announce("You can't pass.")
+            self.announce("You can't pass.")
             return
 
         message = player + " passes. "
         self.turn(False, message)
         return
 
+    @axon
+    @help("<you can probably figure this one out>")
     def fold(self):
 
-        player = self.mongo.lastsender
+        player = self.lastsender
         if player != self.order[self.playerpointer]:
-            self.mongo.chat("Not your turn")
+            self.chat("Not your turn.")
             return
 
         self.players[player]["status"] = "folded"
@@ -283,17 +244,15 @@ class Holdem(Dendrite):
 
         return
 
-    def whatbet(self):
-        self.mongo.chat("The bet is " + str(self.bet))
-        return
-
+    @axon
+    @help("<go all in>")
     def allin(self):
 
         self.firstpassed = False
 
-        player = self.mongo.lastsender
+        player = self.lastsender
         if player != self.order[self.playerpointer]:
-            self.mongo.chat("Not your turn")
+            self.chat("Not your turn")
             return
 
         if self.bet < self.players[player]["money"]:
@@ -309,6 +268,16 @@ class Holdem(Dendrite):
         self.turn(False, message)
 
         return
+
+    @axon
+    @help("<show the current bet amount>")
+    def thebet(self):
+        self.chat("Bet is " + str(self.bet))
+
+    @axon
+    @help("<show the amount in the pot>")
+    def thepot(self):
+        self.chat("Pot is " + str(self.pot))
 
     def turn(self, jump=False, prepend=""):
 
@@ -345,11 +314,12 @@ class Holdem(Dendrite):
             self.pot += potbuffer
 
             self.stage += 1
+            self.checkround()
             return
 
         player = self.order[self.playerpointer]
 
-        self.mongo.announce(prepend + player + "'s turn.")
+        self.announce(prepend + player + "'s turn.")
         return
 
     def deal(self):
@@ -382,7 +352,7 @@ class Holdem(Dendrite):
 
         # handle initial states here
         for player in self.players:
-            self.mongo.chat(" ".join(self.players[player]["hand"]), player)
+            self.chat(" ".join(self.players[player]["hand"]), player)
 
         self.pot = self.blind * 3
         self.bet = self.blind * 2
@@ -402,15 +372,8 @@ class Holdem(Dendrite):
 
         return
 
-    def thebet(self):
-        self.mongo.chat("Bet is " + str(self.bet))
-
-    def showpot(self):
-        self.mongo.chat("Pot is " + str(self.pot))
-
     def nextbet(self, type=""):
-
-        self.mongo.announce(type + ": " + " ".join(self.hand))
+        self.announce(type + ": " + " ".join(self.hand))
         self.bet = 0
         self.lastraised = False
         self.playerpointer = self.dealer
@@ -445,7 +408,7 @@ class Holdem(Dendrite):
         handobjects = []
 
         while len(base):
-            self.mongo.chat("".join(base), "chiyou")
+            self.chat("".join(base), "chiyou")
             ordinal = self.ordinal.index(base.pop(0)) + 1
             suit = self.suits.index(base.pop(0)) + 1
             handobjects.append(hand.card(suit, ordinal))
@@ -456,7 +419,7 @@ class Holdem(Dendrite):
 
         if lastman:
             self.players[lastman]["money"] += self.pot
-            self.mongo.announce(lastman + " takes it because everyone else folded.")
+            self.announce(lastman + " takes it because everyone else folded.")
             self.deal()
             return
 
@@ -464,7 +427,7 @@ class Holdem(Dendrite):
         for player in self.players:
             p = self.players[player]
             if p["status"] in ["in", "allin"]:
-                self.mongo.announce(player + ": " + " ".join(p["hand"]))
+                self.announce(player + ": " + " ".join(p["hand"]))
                 cardstock = self.translator("".join(p["hand"]) + "".join(self.hand))
                 (hand_type, besthand, kicker) = hand.find_best_hand(cardstock)
                 p["besthand"] = besthand
@@ -476,18 +439,18 @@ class Holdem(Dendrite):
             p = self.players[winner]
             if not p["winlimit"]:
                 p["money"] += self.pot
-                self.mongo.announce(winner + " wins with a " + p["besthand"])
+                self.announce(winner + " wins with a " + p["besthand"])
                 self.deal()
                 return
             else:
                 p["money"] += p["winlimit"]
                 p["status"] = "waiting"
                 self.pot -= p["winlimit"]
-                self.mongo.announce(winner + " wins main pot with a " + p["besthand"])
+                self.announce(winner + " wins main pot with a " + p["besthand"])
                 self.distribute()
                 return
         else:
-            self.mongo.announce("Split pot ...")
+            self.announce("Split pot ...")
             for winner in winners:
                 p = self.players[winner]
                 if p["winlimit"]:
@@ -495,7 +458,7 @@ class Holdem(Dendrite):
                     p["money"] += math.floor(p["winlimit"] / len(winners))
                     p["status"] = "waiting"
                     self.pot -= p["winlimit"]
-                    self.mongo.announce(winner + " takes " + str(amount))
+                    self.announce(winner + " takes " + str(amount))
                     self.distribute()
                     return
 
@@ -504,7 +467,7 @@ class Holdem(Dendrite):
                 p = self.players[winner]
                 p["money"] += amount
                 self.pot -= amount
-                self.mongo.announce(winner + " takes " + str(amount))
+                self.announce(winner + " takes " + str(amount))
 
         left = 0
         last = False
@@ -512,19 +475,18 @@ class Holdem(Dendrite):
             p = self.players[player]
             if p["money"] == 0:
                 p["status"] = "done"
-                self.mongo.announce(player + " is out.")
+                self.announce(player + " is out.")
                 self.order.remove(player)
                 self.players.remove(player)
             else:
                 left += 1
                 last = player
 
-        self.mongo.announce("Burn cards were: " + " " + " ".join(self.burncards))
+        self.announce("Burn cards were: " + " " + " ".join(self.burncards))
 
         if left == 1:
-            self.mongo.announce("Game over, bitches. Bow to " + last)
-            self.mongo.playingholdem = False
-            sys.exit()
+            self.announce("Game over, bitches. Bow to " + last)
+            self.playingholdem = False
             return
 
         self.deal()

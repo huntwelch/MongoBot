@@ -1,6 +1,7 @@
 #System
 
 import base64
+import sys
 import os
 import re
 import urllib2
@@ -61,12 +62,17 @@ class Cortex:
         areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
 
         for area in areas:
-            mod = __import__("brainmeats", fromlist=[area])
-            mod = getattr(mod, area)
-            if electroshock:
-                reload(mod)
-            cls = getattr(mod, area.capitalize())
-            self.brainmeats[area] = cls(self)
+            print area
+            try:
+                mod = __import__("brainmeats", fromlist=[area])
+                mod = getattr(mod, area)
+                if electroshock:
+                    reload(mod)
+                cls = getattr(mod, area.capitalize())
+                self.brainmeats[area] = cls(self)
+            except Exception as e:
+                print "Failed to load " + area + "."
+                print e
 
         for brainmeat in self.brainmeats:
             serotonin(self, self.brainmeats[brainmeat], electroshock)
