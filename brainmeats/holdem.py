@@ -490,7 +490,7 @@ class Holdem(Dendrite):
                 p["status"] = "done"
                 self.announce(player + " is out.")
                 self.order.remove(player)
-                self.players.remove(player)
+                self.players.pop(player)
             else:
                 left += 1
                 last = player
