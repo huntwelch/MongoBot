@@ -241,8 +241,9 @@ class Cortex:
             self.linker(urls)
             return
 
-        self.brainmeats['broca'].parse(content, nick)
-        self.brainmeats['broca'].tourettes(content, nick)
+        if 'broca' in self.brainmeats:
+            self.brainmeats['broca'].parse(content, nick)
+            self.brainmeats['broca'].tourettes(content, nick)
 
     def tweet(self, urls):
         for url in urls:
