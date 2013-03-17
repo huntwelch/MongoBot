@@ -12,7 +12,7 @@ class System(Dendrite):
         super(System, self).__init__(cortex)
 
     @axon
-    @help("[setting]+ <show editable " + NICK + " settings>")
+    @help("<show editable " + NICK + " settings>")
     def settings(self):
         for name, value in SAFESET:
             if self.values and name not in self.values:
@@ -21,7 +21,7 @@ class System(Dendrite):
             self.chat(name + " : " + str(value))
 
     @axon
-    @help("<update a " + NICK + " setting>")
+    @help("SETTING=VALUE <update a " + NICK + " setting>")
     def update(self, inhouse=False):
         if not inhouse:
             vals = self.values
@@ -68,7 +68,7 @@ class System(Dendrite):
         self.cx.master.die()
 
     @axon
-    @help("<change " + NICK + "'s name>")
+    @help("NICKNAME <change " + NICK + "'s name>")
     def nick(self):
         if not self.values:
             self.chat("Change name to what?")

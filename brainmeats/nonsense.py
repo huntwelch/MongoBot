@@ -51,7 +51,7 @@ class Nonsense(Dendrite):
         self.chat(fml)
 
     @axon
-    @help("<generate passward according to http://xkcd.com/936/>")
+    @help("<generate password according to http://xkcd.com/936/>")
     def munroesecurity(self):
         output = []
         wordbank = []
@@ -67,7 +67,7 @@ class Nonsense(Dendrite):
         self.chat(" ".join(output))
 
     @axon
-    @help("[user] <reward someone>")
+    @help("USERNAME <reward someone>")
     def reward(self):
         if not self.values:
             self.chat("Reward whom?")
@@ -115,7 +115,7 @@ class Nonsense(Dendrite):
         self.chat(entry['title']['$t'])
 
     @axon
-    @help("<pull up a mom quote>")
+    @help("<pull up a mom quote from logs>")
     def mom(self):
         momlines = []
         try:
@@ -144,6 +144,7 @@ class Nonsense(Dendrite):
             self._act(" ".join(self.values), True)
 
     @axon
+    @help("URL <pull from distaste entries or add url to distate options>")
     def distaste(self):
         if self.values:
             url = urllib.quote_plus(self.values[0])

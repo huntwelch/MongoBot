@@ -6,7 +6,7 @@ import os
 import urllib2
 
 from autonomic import axon, category, help, Dendrite
-from settings import *
+from settings import KEYS, RM_USERS, RM_URL
 
 # TODO: set up redmine settings and locations, make sure they're secret
 
@@ -46,10 +46,10 @@ class Organize(Dendrite):
 
                 return json.loads(result)
         except:
-            self.chat("No API key.")
+            self.chat("No data found.")
 
     @axon
-    @help("[ticket number] <show ticket details>")
+    @help("TICKET_NUMBER <show ticket details>")
     def showdetail(self):
         user = self.lastsender
 
@@ -59,14 +59,17 @@ class Organize(Dendrite):
 
         ticket = self.values[0]
 
-        self.chat("Retrieving details for ticket " + ticket + "...")
-        data = self.redmine(user, "issues/" + ticket)
-        self.chat("Link: " + RM_URL + "/issues/" + ticket)
-        self.chat(data["description"].replace("\n", ""))
+        try:
+            self.chat("Retrieving details for ticket " + ticket + "...")
+            data = self.redmine(user, "issues/" + ticket)
+            self.chat("Link: " + RM_URL + "/issues/" + ticket)
+            self.chat(data["description"].replace("\n", ""))
+        except:
+            self.chat("Failed to access Redmine.")
 
     @axon
-    @help("[ticket_number] [assignee] <assign a ticket to a redmine user>")
-    def assignment(self):
+    @help("TICKET_NUMBER [ASSIGNEE] <assign a ticket to yourself or a redmine user>")
+    def assign(self):
         user = self.lastsender
 
         if not self.values:
@@ -93,7 +96,7 @@ class Organize(Dendrite):
             self.chat("Ticket assigned")
 
     @axon
-    @help("[api key] <register your redmine api key with " + NICK + ">")
+    @help("API_KEY <register your redmine api key with " + NICK + ">")
     def register(self):
         sender = self.lastsender
 
@@ -111,7 +114,7 @@ class Organize(Dendrite):
         self.chat("API key registered.")
 
     @axon
-    @help("[user] <show assigned tickets for user>")
+    @help("[USER] <show assigned tickets for self or redmine user>")
     def tickets(self):
         user = self.lastsender
 
@@ -140,14 +143,17 @@ class Organize(Dendrite):
             else:
                 self.chat("No tickets assigned to " + whom)
 
-    # TODO: make ticket type a variable
     @axon
-    @help("<display all unassigned hotfixes>")
+    @help("TRACKER_ID <display all unassigned tickets of a certain type>")
     def hot(self):
         user = self.lastsender
 
-        self.chat("Retrieving unassigned hotfixes...")
-        data = self.redmine(user, "issues", {"tracker_id": 1})
+        if not self.values:
+            self.chat("No id.")
+            return
+
+        self.chat("Retrieving unassigned tickets...")
+        data = self.redmine(user, "issues", {"tracker_id": self.values[0]})
         total = 0
         if data:
             for item in data:
@@ -161,4 +167,4 @@ class Organize(Dendrite):
             if total > 0:
                 self.chat(str(total) + " in all.")
             else:
-                self.chat("No unassigned hotfixes")
+                self.chat("No unassigned tickets of that type")

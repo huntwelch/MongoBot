@@ -21,6 +21,7 @@ LOGDIR = STORAGE + "/log"
 LOG = LOGDIR + "/chat.log"
 DISTASTE = STORAGE + "/distaste"
 ACROSCORE = STORAGE + "/acro/"
+KEYS = STORAGE + "/redmine/"
 
 # Misc
 

@@ -16,7 +16,7 @@ class Reference(Dendrite):
         self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
 
     @axon
-    @help("search_term <look something up in google>")
+    @help("SEARCH_TERM <look something up in google>")
     def g(self):
         if not self.values:
             self.chat("Enter a word")
@@ -49,7 +49,7 @@ class Reference(Dendrite):
         self.chat(REPO)
 
     @axon
-    @help("zip_code <get weather>")
+    @help("ZIP_CODE <get weather>")
     def weather(self):
         if not self.values or not re.search("^\d{5}", self.values[0]):
             self.chat("Please enter a zip code.")
@@ -82,7 +82,7 @@ class Reference(Dendrite):
         self.chat(base % (location, condition, temp, humid, wind, feels))
 
     @axon
-    @help("equation <run simple equation in python>")
+    @help("EQUATION <run simple equation in python>")
     def calc(self):
         if not self.values:
             printout = []

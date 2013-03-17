@@ -29,7 +29,7 @@ class Peeps(Dendrite):
         self.chat(text)
 
     @axon
-    @help("<save your current copmany>")
+    @help("COMPANY <save your current copmany>")
     def workat(self):
         if not self.values:
             self.chat("If you're unemployed, that's cool, just don't abuse the bot")
@@ -54,7 +54,7 @@ class Peeps(Dendrite):
             self.chat(drinker.name + ": " + drinker.company)
 
     @axon
-    @help("<[person] show where person works>")
+    @help("USERNAME <show where person works>")
     def company(self):
         if not self.values:
             search_for = self.lastsender

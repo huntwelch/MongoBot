@@ -19,7 +19,7 @@ class Finance(Dendrite):
         super(Finance, self).__init__(cortex)
 
     @axon
-    @help("[stock symbol]<get stock quote>")
+    @help("STOCK_SYMBOL <get stock quote>")
     def q(self):
         symbol = self.values[0]
 
@@ -37,7 +37,7 @@ class Finance(Dendrite):
         self.chat(showit)
 
     @axon
-    @help("TODO: multi-help")
+    @help("[STOCK_SYMBOL|clear] <show/add stock to/clear your portfolio>")
     def portfolio(self):
         whom = self.lastsender
 

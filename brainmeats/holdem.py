@@ -47,7 +47,7 @@ class Holdem(Dendrite):
         self.stage = 0
 
     @axon
-    @help("[starting funds] [player_1] ... [player_n] <start holdem game>")
+    @help("STARTING_FUNDS PLAYER_1 PLAYER_2 ... [PLAYER_N] <start holdem game>")
     def holdem(self):
         if self.playingholdem:
             self.announce("Game already in progress.")
@@ -119,7 +119,7 @@ class Holdem(Dendrite):
         return
 
     @axon
-    @help("[amount] <raise the bet by [amount]>")
+    @help("AMOUNT <raise the bet by [amount]>")
     def raiseit(self):
 
         self.firstpassed = False

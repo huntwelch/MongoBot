@@ -5,7 +5,7 @@ import re
 import string
 
 from autonomic import axon, alias, category, help, Dendrite
-from secrets import WORDNIK_API
+from secrets import WORDNIK_API, BANNED
 from settings import NICK, STORAGE, ACROLIB, LOGDIR
 from datastore import Words, Learned, Structure
 from random import choice
@@ -19,7 +19,7 @@ class Broca(Dendrite):
         super(Broca, self).__init__(cortex)
 
     @axon
-    @help("[word] <get definition of word>")
+    @help("WORD <get definition of word>")
     def whatmean(self):
         if not self.values:
             self.chat("Ooohhhmmmmm")
@@ -131,11 +131,9 @@ class Broca(Dendrite):
         self.chat(" ".join(sentence))
 
     @axon
-    @help("<teach " + NICK + " a word>")
+    @help("WORD <teach " + NICK + " a word>")
     def learn(self):
-        # TODO: put banned in settings
-        banned = []
-        if self.lastsender in banned:
+        if self.lastsender in BANNED:
             self.chat("My daddy says not to listen to you.")
             return
 
@@ -151,7 +149,7 @@ class Broca(Dendrite):
         self.chat(NICK + " learn new word!", self.lastsender)
 
     @axon
-    @help("<have " + NICK + " create an acronym>")
+    @help("ACRONYM <have " + NICK + " decide the words for an acronym>")
     def think(self):
         if not self.values:
             self.chat("About what?")
@@ -187,7 +185,7 @@ class Broca(Dendrite):
         return " ".join(output)
 
     @axon
-    @help("word [which def] <look up etymology of word>")
+    @help("WORD [WHICH_DEFINITION] <look up etymology of word>")
     def ety(self):
         if not self.values:
             self.chat("Enter a word")
@@ -230,7 +228,7 @@ class Broca(Dendrite):
 
     # TODO: broken, not sure why
     @axon
-    @help("word_or_phrase <look up anagram>")
+    @help("WORD_OR_PHRASE <look up anagram>")
     def anagram(self):
         if not self.values:
             self.chat("Enter a word or phrase")
