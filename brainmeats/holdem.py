@@ -3,7 +3,7 @@ from autonomic import axon, category, help, Dendrite
 
 from settings import *
 from time import *
-# import hand
+import hand
 import math
 import random
 import sys
@@ -91,12 +91,15 @@ class Holdem(Dendrite):
         self.deal()
 
     def checkround(self):
-        {
-            "flop": self.flop(),
-            "turn": self.turncard(),
-            "river": self.river(),
-            "distribute": self.distribute(),
+        fn = {
+            "flop": self.flop,
+            "turn": self.turncard,
+            "river": self.river,
+            "distribute": self.distribute,
         }.get(self.stages[self.stage])
+
+        if fn:
+            fn()
 
     @axon
     @help("<stop playing>")
@@ -280,14 +283,13 @@ class Holdem(Dendrite):
         self.chat("Pot is " + str(self.pot))
 
     def turn(self, jump=False, prepend=""):
-
         self.playerpointer += jump or 1
         self.playerpointer = self.playerpointer % len(self.players)
 
         while self.players[self.order[self.playerpointer]]["status"] != "in":
             self.playerpointer = (self.playerpointer + 1) % len(self.players)
 
-        if self.order[self.playerpointer] == self.lastraised or self.order[self.playerpointer] == self.firstpassed:
+        if self.order[self.playerpointer] in (self.lastraised, self.firstpassed):
 
             self.firstpassed = False
             self.lastraised = False
@@ -320,7 +322,6 @@ class Holdem(Dendrite):
         player = self.order[self.playerpointer]
 
         self.announce(prepend + player + "'s turn.")
-        return
 
     def deal(self):
 
@@ -404,14 +405,21 @@ class Holdem(Dendrite):
         self.nextbet("River")
 
     def translator(self, handstring):
+        "Translate the hand string to a list of Card objects."
+
         base = list(handstring)
         handobjects = []
 
         while len(base):
-            self.chat("".join(base), "chiyou")
-            ordinal = self.ordinal.index(base.pop(0)) + 1
+            # Account for the 10 card being two characters.
+            ordinal = base.pop(0)
+            if ordinal == '1':
+                base.pop(0)
+                ordinal = '10'
+
+            ordinal = self.ordinal.index(ordinal) + 1
             suit = self.suits.index(base.pop(0)) + 1
-            handobjects.append(hand.card(suit, ordinal))
+            handobjects.append(hand.Card(suit, ordinal))
 
         return handobjects
 
@@ -437,16 +445,21 @@ class Holdem(Dendrite):
         if len(winners) == 1:
             winner = winners[0]
             p = self.players[winner]
+
+            # Decode it because the card object encodes it and so does
+            # announce.
+            handstr = str(p["besthand"]).decode('utf-8')
+
             if not p["winlimit"]:
                 p["money"] += self.pot
-                self.announce(winner + " wins with a " + p["besthand"])
+                self.announce("%s wins with a %s" % (winner, handstr))
                 self.deal()
                 return
             else:
                 p["money"] += p["winlimit"]
                 p["status"] = "waiting"
                 self.pot -= p["winlimit"]
-                self.announce(winner + " wins main pot with a " + p["besthand"])
+                self.announce("%s wins main pot with a %s" % (winner, handstr))
                 self.distribute()
                 return
         else:
