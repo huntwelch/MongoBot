@@ -25,8 +25,11 @@ class Card(object):
         self.rank = rank
 
     def __repr__(self):
-        r = u"%s%s" % (self.RANKS[self.rank], self.SUITS[self.suit - 1])
-        return r.encode('utf-8')
+        rank = self.RANKS[self.rank]
+        if rank == 'T':
+            rank = '10'
+        rep = u"%s%s" % (rank, self.SUITS[self.suit - 1])
+        return rep.encode('utf-8')
 
     def encoded(self):
         return self.suit * 13 + self.rank
