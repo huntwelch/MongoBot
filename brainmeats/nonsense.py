@@ -166,4 +166,5 @@ class Nonsense(Dendrite):
 
     @axon
     def timeleft(self):
-        self.chat("Only " + str(datetime.date(2013, 4, 16) - datetime.date.today()) + " days till bonus time")
+        delta = datetime.date(2013, 4, 16) - datetime.date.today()
+        self.chat("Only %s days till bonus time" % delta.days)
