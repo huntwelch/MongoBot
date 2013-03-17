@@ -14,8 +14,6 @@ class System(Dendrite):
     @axon
     @help("[setting]+ <show editable " + NICK + " settings>")
     def settings(self):
-        self.snag()
-
         for name, value in SAFESET:
             if self.values and name not in self.values:
                 continue
@@ -26,7 +24,6 @@ class System(Dendrite):
     @help("<update a " + NICK + " setting>")
     def update(self, inhouse=False):
         if not inhouse:
-            self.snag()
             vals = self.values
 
         if not vals or len(vals) != 2:
@@ -73,8 +70,6 @@ class System(Dendrite):
     @axon
     @help("<change " + NICK + "'s name>")
     def nick(self):
-        self.snag()
-
         if not self.values:
             self.chat("Change name to what?")
             return

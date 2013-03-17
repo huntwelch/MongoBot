@@ -21,8 +21,6 @@ class Broca(Dendrite):
     @axon
     @help("[word] <get definition of word>")
     def whatmean(self):
-        self.snag()
-
         if not self.values:
             self.chat("Ooohhhmmmmm")
             return
@@ -135,8 +133,6 @@ class Broca(Dendrite):
     @axon
     @help("<teach " + NICK + " a word>")
     def learn(self):
-        self.snag()
-
         # TODO: put banned in settings
         banned = []
         if self.lastsender in banned:
@@ -157,8 +153,6 @@ class Broca(Dendrite):
     @axon
     @help("<have " + NICK + " create an acronym>")
     def think(self):
-        self.snag()
-
         if not self.values:
             self.chat("About what?")
             return
@@ -195,8 +189,6 @@ class Broca(Dendrite):
     @axon
     @help("word [which def] <look up etymology of word>")
     def ety(self):
-        self.snag()
-
         if not self.values:
             self.chat("Enter a word")
             return
@@ -240,8 +232,6 @@ class Broca(Dendrite):
     @axon
     @help("word_or_phrase <look up anagram>")
     def anagram(self):
-        self.snag()
-
         if not self.values:
             self.chat("Enter a word or phrase")
             return

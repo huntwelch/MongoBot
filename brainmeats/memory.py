@@ -9,7 +9,6 @@ class Memory(Dendrite):
     @axon
     @help("<search logs for phrase and print the most recent>")
     def mem(self):
-        self.snag()
         if not self.values:
             self.chat("Something about what?")
             return

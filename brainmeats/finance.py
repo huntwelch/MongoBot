@@ -21,7 +21,6 @@ class Finance(Dendrite):
     @axon
     @help("[stock symbol]<get stock quote>")
     def q(self):
-        self.snag()
         symbol = self.values[0]
 
         if not symbol:
@@ -40,7 +39,6 @@ class Finance(Dendrite):
     @axon
     @help("TODO: multi-help")
     def portfolio(self):
-        self.snag()
         whom = self.lastsender
 
         if self.values and self.values[0] == 'clear':

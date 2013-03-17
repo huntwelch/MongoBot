@@ -23,8 +23,7 @@ class {1}(Dendrite):
     @axon
     @help("<I am an example>")
     def function_name(self):
-        # use self.snag() when cortex variables are needed
-        self.snag()""".format(base, cls)
+        return""".format(base, cls)
 
 
 f = open(path, "w")

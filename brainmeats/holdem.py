@@ -49,7 +49,6 @@ class Holdem(Dendrite):
     @axon
     @help("[starting funds] [player_1] ... [player_n] <start holdem game>")
     def holdem(self):
-        self.snag()
         if self.playingholdem:
             self.announce("Game already in progress.")
             return

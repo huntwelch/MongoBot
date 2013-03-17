@@ -18,8 +18,6 @@ class Reference(Dendrite):
     @axon
     @help("search_term <look something up in google>")
     def g(self):
-        self.snag()
-
         if not self.values:
             self.chat("Enter a word")
             return
@@ -53,8 +51,6 @@ class Reference(Dendrite):
     @axon
     @help("zip_code <get weather>")
     def weather(self):
-        self.snag()
-
         if not self.values or not re.search("^\d{5}", self.values[0]):
             self.chat("Please enter a zip code.")
             return
@@ -88,8 +84,6 @@ class Reference(Dendrite):
     @axon
     @help("equation <run simple equation in python>")
     def calc(self):
-        self.snag()
-
         if not self.values:
             printout = []
             for n, f in SAFE:

@@ -33,6 +33,7 @@ class Cortex:
         self.context = CHANNEL
         self.lastpublic = False
         self.lastprivate = False
+        self.lastsender = False
         self.sock = master.sock
         self.gettingnames = True
         self.members = []

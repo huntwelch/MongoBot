@@ -21,9 +21,6 @@ class Dendrite(object):
     def validate(self):
         return self.cx.validate()
 
-    def snag(self):
-        pass
-
     @property
     def values(self):
         return self.cx.values

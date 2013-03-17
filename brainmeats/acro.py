@@ -20,8 +20,6 @@ class Acro(Dendrite):
     @axon
     @help("[pause|resume|end] <start/pause/resume/end acro game>")
     def acro(self):
-        self.snag()
-
         if not self.active:
             self.run()
             return
@@ -122,8 +120,6 @@ class Acro(Dendrite):
         self.cx.droplive("ticker")
 
     def input(self, selfsub=False):
-        self.snag()
-
         message = self.cx.lastprivate
         if message == self.matchlast:
             return

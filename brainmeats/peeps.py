@@ -31,7 +31,6 @@ class Peeps(Dendrite):
     @axon
     @help("<save your current copmany>")
     def workat(self):
-        self.snag()
         if not self.values:
             self.chat("If you're unemployed, that's cool, just don't abuse the bot")
             return
@@ -51,14 +50,12 @@ class Peeps(Dendrite):
     @axon
     @help("<show where everyone works>")
     def companies(self):
-        self.snag()
         for drinker in Drinker.objects:
             self.chat(drinker.name + ": " + drinker.company)
 
     @axon
     @help("<[person] show where person works>")
     def company(self):
-        self.snag()
         if not self.values:
             search_for = self.lastsender
         else:
@@ -73,7 +70,6 @@ class Peeps(Dendrite):
     @axon
     @help("<ping everyone in the room>")
     def all(self):
-        self.snag()
         peeps = self.members
         try:
             peeps.remove(self.lastsender)

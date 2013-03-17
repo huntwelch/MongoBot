@@ -51,7 +51,6 @@ class Organize(Dendrite):
     @axon
     @help("[ticket number] <show ticket details>")
     def showdetail(self):
-        self.snag()
         user = self.lastsender
 
         if not self.values:
@@ -68,8 +67,6 @@ class Organize(Dendrite):
     @axon
     @help("[ticket_number] [assignee] <assign a ticket to a redmine user>")
     def assignment(self):
-        self.snag()
-
         user = self.lastsender
 
         if not self.values:
@@ -98,8 +95,6 @@ class Organize(Dendrite):
     @axon
     @help("[api key] <register your redmine api key with " + NICK + ">")
     def register(self):
-        self.snag()
-
         sender = self.lastsender
 
         if sender not in RM_USERS:
@@ -118,8 +113,6 @@ class Organize(Dendrite):
     @axon
     @help("[user] <show assigned tickets for user>")
     def tickets(self):
-        self.snag()
-
         user = self.lastsender
 
         if not self.values:
@@ -151,8 +144,6 @@ class Organize(Dendrite):
     @axon
     @help("<display all unassigned hotfixes>")
     def hot(self):
-        self.snag()
-
         user = self.lastsender
 
         self.chat("Retrieving unassigned hotfixes...")

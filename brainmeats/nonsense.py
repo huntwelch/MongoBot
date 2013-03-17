@@ -69,7 +69,6 @@ class Nonsense(Dendrite):
     @axon
     @help("[user] <reward someone>")
     def reward(self):
-        self.snag()
         if not self.values:
             self.chat("Reward whom?")
             return
@@ -96,7 +95,6 @@ class Nonsense(Dendrite):
 
     @axon
     def love(self):
-        self.snag()
         if self.values and self.values[0] == "self":
             self._act("masturbates vigorously.")
         else:
@@ -137,19 +135,16 @@ class Nonsense(Dendrite):
 
     @axon
     def say(self):
-        self.snag()
         if self.validate():
             self.announce(" ".join(self.values))
 
     @axon
     def act(self):
-        self.snag()
         if self.validate():
             self._act(" ".join(self.values), True)
 
     @axon
     def distaste(self):
-        self.snag()
         if self.values:
             url = urllib.quote_plus(self.values[0])
             roasted = urllib2.urlopen(SHORTENER + url).read()
