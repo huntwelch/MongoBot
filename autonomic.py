@@ -22,11 +22,23 @@ class Dendrite(object):
         return self.cx.validate()
 
     def snag(self):
-        self.values = self.cx.values
-        self.lastsender = self.cx.lastsender
-        self.context = self.cx.context
-        self.members = self.cx.members
+        pass
 
+    @property
+    def values(self):
+        return self.cx.values
+
+    @property
+    def lastsender(self):
+        return self.cx.lastsender
+
+    @property
+    def context(self):
+        return self.cx.context
+
+    @property
+    def members(self):
+        return self.cx.members
 
 def serotonin(cortex, expansion, electroshock):
     methods = inspect.getmembers(expansion)
