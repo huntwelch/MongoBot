@@ -234,7 +234,7 @@ class Holdem(Dendrite):
             self.lastraised = self.bigblind
             self.bigblind = None
             self.littleblind = None
-            self.announce("%s passes. (bigblind)" % player)
+            self.announce("%s passes." % player)
             self.turn(jump=0)
             return
 
