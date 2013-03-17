@@ -482,16 +482,20 @@ class Holdem(Dendrite):
 
         left = 0
         last = False
+        players_to_pop = []
         for player in self.players:
             p = self.players[player]
             if p["money"] == 0:
                 p["status"] = "done"
                 self.announce(player + " is out.")
                 self.order.remove(player)
-                self.players.pop(player)
+                players_to_pop.append(player)
             else:
                 left += 1
                 last = player
+
+        for player in players_to_pop:
+            self.players.pop(player)
 
         self.announce("Burn cards were: " + " " + " ".join(self.burncards))
 
