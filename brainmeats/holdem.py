@@ -453,8 +453,6 @@ class Holdem(Dendrite):
             if not p["winlimit"]:
                 p["money"] += self.pot
                 self.announce("%s wins with a %s" % (winner, handstr))
-                self.deal()
-                return
             else:
                 p["money"] += p["winlimit"]
                 p["status"] = "waiting"
@@ -500,7 +498,5 @@ class Holdem(Dendrite):
         if left == 1:
             self.announce("Game over, bitches. Bow to " + last)
             self.playingholdem = False
-            return
-
-        self.deal()
-        return
+        else:
+            self.deal()
