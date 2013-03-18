@@ -15,29 +15,33 @@ import sys
 
 class Player(object):
 
-    def __init__(self, money):
+    def __init__(self, name, money):
+        self.name = name
         self.money = money
         self.hand = []
         self.besthand = None
         self.winlimit = None
         self.status = "in"
         self.round_money = 0
+        self.hand_money = 0
 
     def __repr__(self):
-        r = "Player(money=%r, round_money=%r, status=%r, "\
-            "hand=%r, winlimit=%r, besthand=%r)" % \
-            (self.money, self.round_money, self.status,
-            self.hand, self.winlimit, self.besthand)
+        r = "Player(name=%r, money=%r, round_money=%r, hand_money=%r, "\
+            "status=%r, hand=%r, winlimit=%r, besthand=%r)" % \
+            (self.name, self.money, self.round_money, self.hand_money,
+             self.status, self.hand, self.winlimit, self.besthand)
         return r
 
     def bet(self, money):
         self.money -= money
         self.round_money += money
+        self.hand_money += money
 
     def reset(self):
         self.winlimit = None
         self.besthand = None
         self.round_money = 0
+        self.hand_money = 0
         self.hand = []
 
 
@@ -46,7 +50,8 @@ class Holdem(Dendrite):
     def __init__(self, cortex):
         super(Holdem, self).__init__(cortex)
 
-        self.firstpassed = False
+        self.firstpassed = None
+        self.lastraised = None
         self.blind = 1
         self.littleblind = None
         self.bigblind = None
@@ -56,7 +61,6 @@ class Holdem(Dendrite):
         self.burncards = []
         self.pot = 0
         self.bet = 0
-        self.lastraised = False
         self.hand = []
         self.playingholdem = False
 
@@ -97,7 +101,7 @@ class Holdem(Dendrite):
         self.dealer = 0
 
         for player in self.order:
-            self.players[player] = Player(self.stake)
+            self.players[player] = Player(player, self.stake)
 
         self._suits = ['s', 'h', 'd', 'c']
         self.suits = (u'\u2660', u'\u2665', u'\u2666', u'\u2663')
@@ -124,24 +128,24 @@ class Holdem(Dendrite):
     @axon
     @help("<stop playing>")
     def sitout(self):
-        player = self.lastsender
-        self.players[player].status = "sitout"
+        self._set_status("sitout")
 
     @axon
     @help("<resume playing>")
     def sitin(self):
+        self._set_status("waiting")
+
+    def _set_status(self, status):
         player = self.lastsender
         if player not in self.players:
             self.announce("You ain't in this game, pardner")
             return
 
-        self.players[player].status = "waiting"
+        self.players[player].status = status
 
     @axon
     @help("AMOUNT <raise the bet by [amount]>")
     def raiseit(self):
-
-        self.firstpassed = False
 
         player = self.lastsender
         if player != self.order[self.playerpointer]:
@@ -166,10 +170,14 @@ class Holdem(Dendrite):
         if difference > self.players[player].money:
             self.announce("You don't have enough money")
             return
+        elif difference == self.players[player].money:
+            self.allin()
+            return
 
         self.pot += difference
         self.players[player].bet(difference)
         self.lastraised = player
+        self.firstpassed = None
 
         if self.bet == 0:
             message = player + " bets " + str(amount) + ". "
@@ -203,6 +211,9 @@ class Holdem(Dendrite):
         self.pot += difference
         self.players[player].bet(difference)
 
+        if self.players[player].money == 0:
+            self.players[player].status = "allin"
+
         message = player + " calls. "
 
         self.turn(prepend=message)
@@ -217,7 +228,8 @@ class Holdem(Dendrite):
     @help("<show how much money everybody has>")
     def allmoney(self):
         for player, p in self.players.iteritems():
-            self.chat("%s: %s, %s" % (player, p.money, p.status))
+            self.chat("%s: %d, %s" % (player, p.money, p.status))
+            print p
 
     @axon
     @help("<pass>")
@@ -275,26 +287,25 @@ class Holdem(Dendrite):
     @help("<go all in>")
     def allin(self):
 
-        self.firstpassed = False
-
         player = self.lastsender
         if player != self.order[self.playerpointer]:
             self.chat("Not your turn")
             return
 
-        if self.bet < self.players[player].money:
-            self.bet = self.players[player].money
+        money = self.players[player].money + self.players[player].round_money
+        if self.bet < money:
+            self.bet = money
 
-        self.lastraised = player  # I think this works...
-
-        self.players[player].money = 0
+        self.pot += self.players[player].money
+        self.players[player].bet(self.players[player].money)
         self.players[player].status = "allin"
+        self.lastraised = player
+        self.firstpassed = None
 
         message = player + " goes all in. "
 
         self.turn(prepend=message)
 
-        return
 
     @axon
     @help("<show the current bet amount>")
@@ -307,26 +318,45 @@ class Holdem(Dendrite):
         self.chat("Pot is " + str(self.pot))
 
     def turn(self, jump=1, prepend=""):
+        start = self.playerpointer
+
         self.playerpointer += jump
         self.playerpointer = self.playerpointer % len(self.players)
 
-        while self.players[self.order[self.playerpointer]].status != "in":
+        # This is a bit convoluted, but it's trying to determine if everyone
+        # has had a chance to play.  If we go all the way around the table
+        # without finding anyone 'in', we still move to the next round.  That
+        # means no one is 'in' or only one person is 'in'.
+        next_round = False
+        while True:
+            player = self.order[self.playerpointer]
+
+            if player in (self.lastraised, self.firstpassed):
+                next_round = True
+
+            if self.players[player].status == "in":
+                break
+
             self.playerpointer = (self.playerpointer + 1) % len(self.players)
 
-        if self.order[self.playerpointer] in (self.lastraised, self.firstpassed):
+            if start == self.playerpointer:
+                next_round = True
+                break
 
-            self.firstpassed = False
-            self.lastraised = False
+        if next_round:
+            self.firstpassed = None
+            self.lastraised = None
 
             stillin = 0
             for p in self.players.itervalues():
-                if p.status == "in" or (p.status == "allin" and p.money > 0):
+                if p.status in ("in", "allin"):
                     stillin += 1
 
             potbuffer = 0
             for p in self.players.itervalues():
                 if p.status == "allin" and p.money <= self.bet:
-                    p.winlimit = self.pot + p.money * stillin
+                    #p.winlimit = self.pot + p.money * stillin
+                    p.winlimit = p.hand_money * stillin
                     potbuffer += p.money
                     p.money = 0
 
@@ -397,7 +427,8 @@ class Holdem(Dendrite):
     def nextbet(self, type=""):
         self.announce(type + ": " + " ".join(self.hand))
         self.bet = 0
-        self.lastraised = False
+        self.lastraised = None
+        self.firstpassed = None
         self.playerpointer = self.dealer
         self.stage += 1
         self.turn()
@@ -444,7 +475,7 @@ class Holdem(Dendrite):
 
         return handobjects
 
-    def distribute(self, lastman=None):
+    def distribute(self, lastman=None, side=False):
 
         if lastman:
             self.players[lastman].money += self.pot
@@ -460,6 +491,7 @@ class Holdem(Dendrite):
                     contenders.append((hand_type, besthand, kicker, player))
 
             winners = hand.find_winners(contenders)
+
             if len(winners) == 1:
                 winner = winners[0]
                 p = self.players[winner]
@@ -468,19 +500,24 @@ class Holdem(Dendrite):
                 # announce.
                 handstr = (' '.join(str(c) for c in p.besthand)).decode('utf-8')
 
-                if not p.winlimit:
+                if not p.winlimit or p.winlimit >= self.pot:
                     p.money += self.pot
-                    self.announce("%s wins with a %s" % (winner, handstr))
+                    pot_type = ' side pot' if side else ''
+                    self.announce("%s wins%s with a %s" % \
+                            (winner, pot_type, handstr))
                 else:
                     p.money += p.winlimit
                     p.status = "waiting"
                     self.pot -= p.winlimit
                     self.announce("%s wins main pot with a %s" % (winner, handstr))
-                    self.distribute()
-                    return
+
+                    if not side and self.pot > 0:
+                        self.distribute(side=True)
+                        return
             else:
                 self.announce("Split pot ...")
                 for winner in winners:
+                    p = self.players[winner]
                     if p.winlimit:
                         amount = math.floor(p.winlimit / len(winners))
                         p.money += math.floor(p.winlimit / len(winners))
@@ -492,6 +529,7 @@ class Holdem(Dendrite):
 
                 amount = math.floor(self.pot / len(winners))
                 for winner in winners:
+                    p = self.players[winner]
                     p.money += amount
                     self.pot -= amount
                     self.announce(winner + " takes " + str(amount))
