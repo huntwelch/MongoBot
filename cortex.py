@@ -162,7 +162,7 @@ class Cortex:
     def showlist(self):
         if not self.values or self.values[0] not in self.helpmenu:
             cats = ", ".join(self.helpcategories)
-            self.chat(CONTROL_KEY + "help [what] where what is " + cats)
+            self.chat(CONTROL_KEY + "help WHAT where WHAT is " + cats)
             return
 
         which = self.values[0]

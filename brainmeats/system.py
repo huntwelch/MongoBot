@@ -1,9 +1,11 @@
+from autonomic import axon, category, help, Dendrite
+from settings import SAFESET, NICK, IDENT, HOST, REALNAME, CHANNEL
+
+
 import os
 import re
 
 from time import sleep
-from autonomic import axon, category, help, Dendrite
-from settings import SAFESET, NICK, IDENT, HOST, REALNAME, CHANNEL
 
 
 @category("system")

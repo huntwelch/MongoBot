@@ -106,8 +106,12 @@ class Stock:
             return False
 
         value = float(self.stock["last"])
-        change = float(self.stock["change"])
-        perc_change = float(self.stock["perc_change"])
+        try:
+            change = float(self.stock["change"])
+            perc_change = float(self.stock["perc_change"])
+        except:
+            change = 0
+            perc_change = 0
 
         # Check for after hours
 
