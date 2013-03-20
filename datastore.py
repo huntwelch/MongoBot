@@ -11,6 +11,7 @@ class Position(mongoengine.EmbeddedDocument):
     date = DateTimeField(required=True)
     price = FloatField(min_value=0)
     quantity = IntField(min_value=0)
+    type = StringField()
 
 
 class Drinker(mongoengine.Document):
