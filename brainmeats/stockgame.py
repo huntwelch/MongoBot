@@ -172,17 +172,25 @@ class Stockgame(Dendrite):
         else:
             drinker.positions.sort(key=lambda p: p.symbol)
 
+            self.chat("%8s %10s %10s %10s %10s %10s" % ('type', 'symbol',
+                'qty', 'price', 'last', 'gain'))
+
             total = 0
             for p in drinker.positions:
-                sign = 1 if p.type == 'long' else -1
-                value = sign * p.price * p.quantity
+                stock = Stock(p.symbol)
 
-                self.chat("%8s %10s %10d %10.02f %10.02f" % \
-                        (p.type, p.symbol, p.quantity, p.price, value))
+                if p.type == 'long':
+                    net = p.quantity * (stock.price - p.price)
+                else:
+                    net = p.quantity * (p.price - stock.price)
 
-                total += value
+                self.chat("%8s %10s %10d %10.02f %10.02f %10.02f" % \
+                        (p.type, p.symbol, p.quantity, p.price, stock.price,
+                            net))
 
-            self.chat("%8s %10s %10s %10s %10.02f" % ('', '', '', '', total))
+                total += net
+
+            self.chat("%8s %10s %10s %10s %10s %10.02f" % ('', '', '', '', '', total))
 
     @axon
     def clearstockgamepleasedontbeadickaboutthis(self):
