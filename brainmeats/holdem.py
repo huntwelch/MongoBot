@@ -250,7 +250,9 @@ class Holdem(Dendrite):
             self.turn(jump=0)
             return
 
-        if self.bet != 0 and player != self.lastraised:
+        difference = self.bet - self.players[player].round_money
+
+        if difference > 0:
             self.announce("You can't pass.")
             return
 
@@ -293,14 +295,18 @@ class Holdem(Dendrite):
             return
 
         money = self.players[player].money + self.players[player].round_money
+        difference = self.bet - self.players[player].round_money
         if self.bet < money:
             self.bet = money
 
         self.pot += self.players[player].money
         self.players[player].bet(self.players[player].money)
         self.players[player].status = "allin"
-        self.lastraised = player
-        self.firstpassed = None
+
+        # see if it was actually a raise
+        if difference > 0:
+            self.lastraised = player
+            self.firstpassed = None
 
         message = player + " goes all in. "
 
@@ -327,23 +333,32 @@ class Holdem(Dendrite):
         # has had a chance to play.  If we go all the way around the table
         # without finding anyone 'in', we still move to the next round.  That
         # means no one is 'in' or only one person is 'in'.
-        next_round = False
-        while True:
-            player = self.order[self.playerpointer]
 
-            if player in (self.lastraised, self.firstpassed):
-                next_round = True
+        in_count = len([p for p in self.players.itervalues() \
+                if p.status == "in"])
 
-            if self.players[player].status == "in":
-                break
+        if in_count > 1:
+            next_round = False
+            while True:
+                player = self.order[self.playerpointer]
 
-            self.playerpointer = (self.playerpointer + 1) % len(self.players)
+                if player in (self.lastraised, self.firstpassed):
+                    next_round = True
 
-            if start == self.playerpointer:
-                next_round = True
-                break
+                if self.players[player].status == "in":
+                    break
+
+                self.playerpointer = (self.playerpointer + 1) % len(self.players)
+
+                if start == self.playerpointer:
+                    next_round = True
+                    break
+        else:
+            next_round = True
 
         if next_round:
+            self.announce(prepend)
+
             self.firstpassed = None
             self.lastraised = None
 
@@ -372,11 +387,9 @@ class Holdem(Dendrite):
 
             self.stage += 1
             self.checkround()
-            return
-
-        player = self.order[self.playerpointer]
-
-        self.announce(prepend + player + "'s turn.")
+        else:
+            player = self.order[self.playerpointer]
+            self.announce(prepend + player + "'s turn.")
 
     def deal(self):
 
@@ -479,7 +492,8 @@ class Holdem(Dendrite):
 
         if lastman:
             self.players[lastman].money += self.pot
-            self.announce(lastman + " takes it because everyone else folded.")
+            self.announce("%s takes pot of %d because everyone else folded." %\
+                    (lastman, self.pot))
         else:
             contenders = []
             for player, p in self.players.iteritems():
@@ -502,16 +516,17 @@ class Holdem(Dendrite):
 
                 if not p.winlimit or p.winlimit >= self.pot:
                     p.money += self.pot
-                    pot_type = ' side pot' if side else ''
-                    self.announce("%s wins%s with a %s" % \
-                            (winner, pot_type, handstr))
+                    pot_type = ' side' if side else ''
+                    self.announce("%s wins%s pot of %d with a %s" % \
+                            (winner, pot_type, self.pot, handstr))
                 else:
                     p.money += p.winlimit
                     p.status = "waiting"
                     self.pot -= p.winlimit
-                    self.announce("%s wins main pot with a %s" % (winner, handstr))
+                    self.announce("%s wins main pot of %d with a %s" % \
+                            (winner, p.winlimit, handstr))
 
-                    if not side and self.pot > 0:
+                    if self.pot > 0:
                         self.distribute(side=True)
                         return
             else:
