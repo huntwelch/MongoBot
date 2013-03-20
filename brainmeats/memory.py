@@ -1,6 +1,9 @@
 from autonomic import axon, category, help, Dendrite
 
 
+from settings import LOG
+
+
 @category("memory")
 class Memory(Dendrite):
     def __init__(self, cortex):

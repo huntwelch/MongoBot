@@ -7,6 +7,10 @@ HOST = "irc.freenode.net"
 PORT = 6667
 NICK = "MongoBot"
 
+# Used to filter out pings and server responses from logs and live checks
+
+SCAN = "^:\w+\.freenode\.net"
+
 # These settings are set in secrets.py
 
 # CHANNEL = (str) irc channel

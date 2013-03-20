@@ -1,5 +1,3 @@
-#System
-
 import base64
 import sys
 import os
@@ -15,9 +13,8 @@ from datetime import date, timedelta
 from time import mktime, localtime, sleep
 from random import choice, randint
 
-# Local
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-    ACROSCORE, CHANNEL, SHORTENER, OWNER, REALNAME, BANNED, USERS
+    ACROSCORE, CHANNEL, SHORTENER, OWNER, REALNAME, BANNED, USERS, SCAN
 from secrets import DELICIOUS_PASS, DELICIOUS_USER
 from datastore import Drinker, connectdb
 from util import unescape, pageopen
@@ -113,7 +110,7 @@ class Cortex:
             print "* Joined " + CHANNEL
 
         # TODO: build scan check from settings
-        scan = re.search("^:\w+\.freenode\.net", line)
+        scan = re.search(SCAN, line)
         ping = re.search("^PING", line)
         if line != '' and not scan and not ping:
             self.logit(line + '\n')

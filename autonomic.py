@@ -1,9 +1,6 @@
 import inspect
 from settings import CONTROL_KEY
 
-# TODO: decorator to support command aliases
-# TODO: standardize help description syntax
-
 
 class Dendrite(object):
     def __init__(self, cortex):
