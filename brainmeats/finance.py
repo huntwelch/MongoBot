@@ -2,7 +2,8 @@ import simplejson
 import locale
 
 from autonomic import axon, category, help, Dendrite
-from datastore import Drinker
+from datastore import Drinker, Position
+from datetime import datetime
 from stocks import Stock
 from util import pageopen
 
@@ -11,6 +12,9 @@ from util import pageopen
 #    "~portfolio <show your portfolio>",
 #    "~portfolio clear <empty your portfolio>",
 #],
+
+
+VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ'])
 
 
 @category("finance")
@@ -37,36 +41,146 @@ class Finance(Dendrite):
         self.chat(showit)
 
     @axon
+    @help("[QUANTITY] [STOCK_SYMBOL] <buy QUANTITY shares of the stock>")
+    def buy(self):
+        whom = self.lastsender
+
+        try:
+            quantity = int(self.values[0])
+            symbol = self.values[1]
+        except:
+            self.chat("That's not right")
+            return
+
+        if quantity <= 0:
+            self.chat("Do you think this is a muthafuckin game?")
+            return
+
+        stock = Stock(symbol)
+
+        if not stock:
+            self.chat("Stock not found")
+            return
+
+        if stock.exchange.upper() not in VALID_EXCHANGES:
+            self.chat("Stock exchange %s DENIED!" % stock.exchange)
+            return
+
+        drinker = Drinker.objects(name=whom).first()
+        if not drinker:
+            drinker = Drinker(name=whom)
+
+        cost = stock.price * quantity
+
+        if cost > drinker.cash:
+            self.chat("You is poor")
+            return
+
+        position = Position(symbol=stock.symbol,
+                            price=stock.price,
+                            quantity=quantity,
+                            date=datetime.utcnow())
+
+        drinker.portfolio.append(position)
+        drinker.cash -= cost
+        drinker.save()
+
+        self.chat("%s bought %d shares of %s at %s" %\
+                (whom, position.quantity, position.symbol, position.price))
+
+    @axon
+    @help("[QUANTITY] [STOCK_SYMBOL] <sell QUANTITY shares of the stock>")
+    def sell(self):
+        whom = self.lastsender
+
+        try:
+            quantity = int(self.values[0])
+            symbol = self.values[1]
+        except:
+            self.chat("That's not right")
+            return
+
+        if quantity <= 0:
+            self.chat("Do you think this is a muthafuckin game?")
+            return
+
+        stock = Stock(symbol)
+
+        if not stock:
+            self.chat("Stock not found")
+            return
+
+        drinker = Drinker.objects(name=whom).first()
+        if not drinker:
+            self.chat("You don't have anything to sell")
+            return
+
+        check = []
+        keep = []
+        for p in drinker.portfolio:
+            if p.symbol == stock.symbol:
+                check.append(p)
+            else:
+                keep.append(p)
+
+        if not check:
+            self.chat("You don't own %s" % stock.symbol)
+            return
+
+        check.sort(key=lambda x: x.date)
+
+        for p in check:
+            if quantity <= 0:
+                keep.append(p)
+                continue
+
+            q = min(quantity, p.quantity)
+
+            basis = p.price * q
+            value = stock.price * q
+            drinker.cash += value
+
+            quantity -= q
+            p.quantity -= q
+            if p.quantity > 0:
+                keep.append(p)
+
+            self.chat("%s sold %d shares of %s at %s (net: %.02f)" % \
+                    (whom, q, stock.symbol, stock.price, value-basis))
+
+        drinker.portfolio = keep
+        drinker.save()
+
+    @axon
+    @help("<show cash money>")
+    def cashmoney(self):
+        whom = self.lastsender
+        drinker = Drinker.objects(name=whom).first()
+        if not drinker:
+            drinker = Drinker(name=whom)
+
+        self.chat("You gots $%.02f" % drinker.cash)
+
+    @axon
     @help("[STOCK_SYMBOL|clear] <show/add stock to/clear your portfolio>")
     def portfolio(self):
         whom = self.lastsender
-
-        if self.values and self.values[0] == 'clear':
-            drinker = Drinker.objects(name=whom)[0]
-            if drinker and drinker.portfolio:
-                drinker.portfolio = []
-                drinker.save()
-
+        drinker = Drinker.objects(name=whom).first()
+        if not drinker:
+            self.chat("You don't exist")
             return
 
-        if self.values:
-            for symbol in self.values:
-                stock = Stock(symbol)
-                if not stock or len(symbol) > 8:
-                    self.chat("Could not add '" + symbol + "'")
-                    continue
-
-                stock.save(whom)
-            return
-
-        drinker = Drinker.objects(name=whom)[0]
-        if drinker and drinker.portfolio:
-            for symbol in drinker.portfolio:
-                stock = Stock(symbol)
-                showit = stock.showquote(self.context)
-                self.chat(showit)
+        if not drinker.portfolio:
+            self.chat("You don't have one")
         else:
-            self.chat("No stocks saved")
+            drinker.portfolio.sort(key=lambda p: p.symbol)
+
+            total = 0
+            for p in drinker.portfolio:
+                self.chat("%10s %10d %10.02f" % (p.symbol, p.quantity, p.price))
+                total += p.price
+            self.chat("%10s %10s %10s" % ('-' * 10, '-' * 10, '-' * 10))
+            self.chat("%10s %10s %10.02f" % ('', '', total))
 
     @axon
     @help("<get current Bitcoin trading information>")

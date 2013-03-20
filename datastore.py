@@ -6,10 +6,19 @@ def connectdb():
     mongoengine.connect('bot', 'bot')
 
 
+class Position(mongoengine.EmbeddedDocument):
+    symbol = StringField(required=True)
+    date = DateTimeField(required=True)
+    price = FloatField(min_value=0)
+    quantity = IntField(min_value=0)
+
+
 class Drinker(mongoengine.Document):
     name = StringField(required=True)
     company = StringField()
-    portfolio = ListField(StringField(max_length=8))
+
+    cash = FloatField(default=100000)
+    portfolio = ListField(EmbeddedDocumentField(Position))
 
 
 class Words(mongoengine.Document):
