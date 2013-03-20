@@ -4,11 +4,12 @@ from xml.dom import minidom as dom
 from datastore import Drinker
 
 
-class Stock:
+class Stock(object):
 
     def __init__(self, symbol):
 
-        self.stock = False
+        self.stock = None
+        self.symbol = symbol
 
         if not symbol:
             return
@@ -20,27 +21,12 @@ class Stock:
         try:
             raw = dom.parse(urllib.urlopen(url))
         except:
-            return False
+            return
 
         self.stock = self.extract(raw)
-        self.symbol = symbol
 
-    # should be in a Stocks or Portfolio or something class
-    def save(self, whom):
-        drinker = Drinker.objects(name=whom)
-        if drinker:
-            drinker = drinker[0]
-            portfolio = drinker.portfolio
-
-            if self.symbol in portfolio:
-                return
-
-            portfolio.append(self.symbol)
-            drinker.portfolio = portfolio
-        else:
-            drinker = Drinker(name=whom, portfolio=[self.symbol])
-
-        drinker.save()
+    def __nonzero__(self):
+        return self.stock is not None
 
     # Extracts from google api
     def extract(self, raw):
@@ -62,7 +48,7 @@ class Stock:
             "exchange_closing": "exchange_closing",
             "divisor": "divisor",
             "currency": "currency",
-            "last": "last",
+            "last": "_last",
             "high": "high",
             "low": "low",
             "volume": "volume",
@@ -70,8 +56,8 @@ class Stock:
             "market_cap": "market_cap",
             "open": "open",
             "y_close": "y_close",
-            "change": "change",
-            "perc_change": "perc_change",
+            "change": "_change",
+            "perc_change": "_perc_change",
             "delay": "delay",
             "trade_timestamp": "trade_timestamp",
             "trade_date_utc": "trade_date_utc",
@@ -93,10 +79,30 @@ class Stock:
         extracted = {}
 
         for e in elements:
-            extracted[translation[e.tagName]] = e.getAttribute("data")
+            data = e.getAttribute("data")
+            extracted[translation[e.tagName]] = data
+            setattr(self, translation[e.tagName], data)
 
-        if extracted["company"] == "":
-            return False
+        if not self.company:
+            return None
+
+        self.price = float(self._last)
+        try:
+            self.change = float(self._change)
+            self.perc_change = float(self._perc_change)
+        except:
+            self.change = 0
+            self.perc_change = 0
+
+        # Check for after hours
+
+        self.afterhours = False
+        time = int(self.current_time_utc)
+        if self.isld_last and (time < 133000 or time > 200000):
+            self.afterhours = True
+            self.price = float(self.isld_last)
+            self.change = self.price - float(self._last)
+            self.perc_change = (self.change / float(self._last)) * 100
 
         return extracted
 
@@ -105,28 +111,10 @@ class Stock:
         if not self.stock:
             return False
 
-        value = float(self.stock["last"])
-        try:
-            change = float(self.stock["change"])
-            perc_change = float(self.stock["perc_change"])
-        except:
-            change = 0
-            perc_change = 0
+        name = "%s (%s)" % (self.company, self.symbol)
+        changestring = str(self.change) + " (" + ("%.2f" % self.perc_change) + "%)"
 
-        # Check for after hours
-
-        afterhours = False
-        time = int(self.stock["current_time_utc"])
-        if self.stock["isld_last"] and (time < 133000 or time > 200000):
-            afterhours = True
-            value = float(self.stock["isld_last"])
-            change = value - float(self.stock["last"])
-            perc_change = (change / float(self.stock["last"])) * 100
-
-        name = self.stock["company"] + " (" + self.stock["symbol"] + ")"
-        changestring = str(change) + " (" + ("%.2f" % perc_change) + "%)"
-
-        if change < 0:
+        if self.change < 0:
             color = "4"
         else:
             color = "3"
@@ -135,7 +123,7 @@ class Stock:
 
         message = [
             name,
-            str(value),
+            str(self.price),
             changestring,
         ]
 
@@ -157,7 +145,7 @@ class Stock:
             message.append(link)
 
         output = ', '.join(message)
-        if afterhours:
+        if self.afterhours:
             output = "After hours: " + output
 
         return output
