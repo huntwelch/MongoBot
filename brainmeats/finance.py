@@ -7,12 +7,6 @@ from datetime import datetime
 from stocks import Stock
 from util import pageopen
 
-#"f":[
-#    "~portfolio [stock symbol]<add stock to your portfolio>",
-#    "~portfolio <show your portfolio>",
-#    "~portfolio clear <empty your portfolio>",
-#],
-
 
 VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ'])
 
@@ -41,7 +35,7 @@ class Finance(Dendrite):
         self.chat(showit)
 
     @axon
-    @help("[QUANTITY] [STOCK_SYMBOL] <buy QUANTITY shares of the stock>")
+    @help("QUANTITY STOCK_SYMBOL <buy QUANTITY shares of the stock>")
     def buy(self):
         whom = self.lastsender
 
@@ -81,15 +75,16 @@ class Finance(Dendrite):
                             quantity=quantity,
                             date=datetime.utcnow())
 
-        drinker.portfolio.append(position)
+        drinker.positions.append(position)
         drinker.cash -= cost
         drinker.save()
 
-        self.chat("%s bought %d shares of %s at %s" %\
-                (whom, position.quantity, position.symbol, position.price))
+        self.chat("%s bought %d shares of %s (%s) at %s" %\
+                (whom, position.quantity, stock.company,
+                    position.symbol, position.price))
 
     @axon
-    @help("[QUANTITY] [STOCK_SYMBOL] <sell QUANTITY shares of the stock>")
+    @help("QUANTITY STOCK_SYMBOL <sell QUANTITY shares of the stock>")
     def sell(self):
         whom = self.lastsender
 
@@ -117,7 +112,7 @@ class Finance(Dendrite):
 
         check = []
         keep = []
-        for p in drinker.portfolio:
+        for p in drinker.positions:
             if p.symbol == stock.symbol:
                 check.append(p)
             else:
@@ -148,7 +143,7 @@ class Finance(Dendrite):
             self.chat("%s sold %d shares of %s at %s (net: %.02f)" % \
                     (whom, q, stock.symbol, stock.price, value-basis))
 
-        drinker.portfolio = keep
+        drinker.positions = keep
         drinker.save()
 
     @axon
@@ -162,7 +157,7 @@ class Finance(Dendrite):
         self.chat("You gots $%.02f" % drinker.cash)
 
     @axon
-    @help("[STOCK_SYMBOL|clear] <show/add stock to/clear your portfolio>")
+    @help("<show your portfolio>")
     def portfolio(self):
         whom = self.lastsender
         drinker = Drinker.objects(name=whom).first()
@@ -170,16 +165,15 @@ class Finance(Dendrite):
             self.chat("You don't exist")
             return
 
-        if not drinker.portfolio:
+        if not drinker.positions:
             self.chat("You don't have one")
         else:
-            drinker.portfolio.sort(key=lambda p: p.symbol)
+            drinker.positions.sort(key=lambda p: p.symbol)
 
             total = 0
-            for p in drinker.portfolio:
+            for p in drinker.positions:
                 self.chat("%10s %10d %10.02f" % (p.symbol, p.quantity, p.price))
                 total += p.price
-            self.chat("%10s %10s %10s" % ('-' * 10, '-' * 10, '-' * 10))
             self.chat("%10s %10s %10.02f" % ('', '', total))
 
     @axon
