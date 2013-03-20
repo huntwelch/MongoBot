@@ -64,7 +64,7 @@ class Finance(Dendrite):
 
         cost = stock.price * quantity
 
-        if ptype == 'long' and cost > drinker.cash:
+        if cost > drinker.cash:
             self.chat("You is poor")
             return
 
@@ -75,10 +75,7 @@ class Finance(Dendrite):
                             type=ptype)
 
         drinker.positions.append(position)
-        if ptype == 'long':
-            drinker.cash -= cost
-        else:
-            drinker.cash += cost
+        drinker.cash -= cost
         drinker.save()
 
         verb = 'bought' if ptype == 'long' else 'shorted'
@@ -141,8 +138,8 @@ class Finance(Dendrite):
                 drinker.cash += value
                 net = value - basis
             else:
-                drinker.cash -= value
                 net = basis - value
+                drinker.cash += basis + net
 
             quantity -= q
             p.quantity -= q
