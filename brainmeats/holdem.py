@@ -1,17 +1,10 @@
-from autonomic import axon, category, help, Dendrite
-
-
-from settings import *
-from time import *
 import hand
 import math
 import random
 import sys
 
-# TODO:
-# bets don't add up
-# blind doesn't register right player
-# eternal passing still?
+from autonomic import axon, category, help, Dendrite
+
 
 class Player(object):
 

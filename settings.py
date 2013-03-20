@@ -34,6 +34,10 @@ SHORTENER = "http://roa.st/api.php?roast="
 PATIENCE = 7000
 REPO = "https://github.com/huntwelch/MongoBot"
 
+# Stockgame
+
+VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ'])
+
 # Acro
 
 ACROLIB = "natwords"

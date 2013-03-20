@@ -1,10 +1,8 @@
-from autonomic import axon, category, help, Dendrite
-from settings import SAFESET, NICK, IDENT, HOST, REALNAME, CHANNEL
-
-
 import os
 import re
 
+from autonomic import axon, category, help, Dendrite
+from settings import SAFESET, NICK, IDENT, HOST, REALNAME, CHANNEL
 from time import sleep
 
 
