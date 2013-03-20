@@ -18,7 +18,7 @@ class Drinker(mongoengine.Document):
     company = StringField()
 
     cash = FloatField(default=100000)
-    portfolio = ListField(EmbeddedDocumentField(Position))
+    positions = ListField(EmbeddedDocumentField(Position))
 
 
 class Words(mongoengine.Document):
