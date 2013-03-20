@@ -61,7 +61,7 @@ class Peeps(Dendrite):
         else:
             search_for = self.values[0]
 
-        user = Drinker.objects(name=search_for)[0]
+        user = Drinker.objects(name=search_for).first()
         if user and user.company:
             self.chat(user.name + ": " + user.company)
         else:
