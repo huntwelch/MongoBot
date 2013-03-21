@@ -1,5 +1,6 @@
 import mongoengine
 from mongoengine import *
+from settings import STARTING_CASH
 
 
 def connectdb():
@@ -18,7 +19,7 @@ class Drinker(mongoengine.Document):
     name = StringField(required=True)
     company = StringField()
 
-    cash = FloatField(default=100000)
+    cash = FloatField(default=STARTING_CASH)
     positions = ListField(EmbeddedDocumentField(Position))
 
 

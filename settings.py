@@ -37,6 +37,7 @@ REPO = "https://github.com/huntwelch/MongoBot"
 # Stockgame
 
 VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ'])
+STARTING_CASH = 100000
 
 # Acro
 
