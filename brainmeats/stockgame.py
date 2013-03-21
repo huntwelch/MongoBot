@@ -1,7 +1,7 @@
 from autonomic import axon, category, help, Dendrite
 from datastore import Drinker, Position
 from datetime import datetime
-from settings import VALID_EXCHANGES
+from settings import STARTING_CASH, VALID_EXCHANGES
 from util import Stock
 
 
@@ -149,6 +149,44 @@ class Stockgame(Dendrite):
         self._create_position('short')
 
     @axon
+    @help("<stock scores of okdrinkers>")
+    def stockscore(self):
+        if self.values:
+            drinkers = Drinker.objects(name__in=self.values)
+        else:
+            drinkers = Drinker.objects
+
+        scores = []
+
+        for drinker in drinkers:
+            total = 0
+            collateral = 0
+            cash = drinker.cash
+
+            for p in drinker.positions:
+                stock = Stock(p.symbol)
+                if p.type == 'long':
+                    net = p.quantity * stock.price
+                else:
+                    net = -p.quantity * stock.price
+                    collateral += 2*p.quantity*p.price
+                total += net
+
+            scores.append((drinker.name, cash, collateral, 
+                           total, cash + collateral + total))
+
+        if not scores:
+            self.chat("can't find 'em, won't find 'em")
+        else:
+            scores.sort(key=lambda x: x[4], reverse=True)
+
+            self.chat("%15s %10s %10s %10s %10s" % \
+                    ('drinker', 'cash', 'collateral', 'value', 'total'))
+            for s in scores:
+                self.chat("%15s %10.02f %10.02f %10.02f %10.02f" % s)
+
+
+    @axon
     @help("<show cash money>")
     def cashmoney(self):
         whom = self.lastsender
@@ -159,38 +197,55 @@ class Stockgame(Dendrite):
         self.chat("You gots $%.02f" % drinker.cash)
 
     @axon
-    @help("<show your portfolio>")
+    @help("[USERNAME] <show person's portfolio>")
     def portfolio(self):
-        whom = self.lastsender
+        if not self.values:
+            whom = self.lastsender
+        else:
+            whom = self.values[0]
+
         drinker = Drinker.objects(name=whom).first()
         if not drinker:
-            self.chat("You don't exist")
+            self.chat("%s doesn't exist" % whom)
             return
 
         if not drinker.positions:
-            self.chat("You don't have one")
+            self.chat("%s doesn't have one" % whom)
         else:
             drinker.positions.sort(key=lambda p: p.symbol)
 
+            self.chat("%8s %10s %10s %10s %10s %10s" % ('type', 'symbol',
+                'qty', 'price', 'last', 'gain'))
+
             total = 0
             for p in drinker.positions:
-                sign = 1 if p.type == 'long' else -1
-                value = sign * p.price * p.quantity
+                stock = Stock(p.symbol)
 
-                self.chat("%8s %10s %10d %10.02f %10.02f" % \
-                        (p.type, p.symbol, p.quantity, p.price, value))
+                if p.type == 'long':
+                    net = p.quantity * (stock.price - p.price)
+                else:
+                    net = p.quantity * (p.price - stock.price)
 
-                total += value
+                self.chat("%8s %10s %10d %10.02f %10.02f %10.02f" % \
+                        (p.type, p.symbol, p.quantity, p.price, stock.price,
+                            net))
 
-            self.chat("%8s %10s %10s %10s %10.02f" % ('', '', '', '', total))
+                total += net
+
+            self.chat("%8s %10s %10s %10s %10s %10.02f" % ('', '', '', '', '', total))
 
     @axon
     def clearstockgamepleasedontbeadickaboutthis(self):
+        try:
+            cash = int(self.values[0])
+        except:
+            cash = STARTING_CASH
+
         if self.lastsender == 'sublimnl':
             self.chat("You are why we can't have nice things.")
             return
 
         for drinker in Drinker.objects:
-            drinker.cash = 100000
+            drinker.cash = cash
             drinker.positions = []
             drinker.save()
