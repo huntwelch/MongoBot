@@ -178,7 +178,7 @@ class Stockgame(Dendrite):
         if not scores:
             self.chat("can't find 'em, won't find 'em")
         else:
-            scores.sort(key=lambda x: x[3], reverse=True)
+            scores.sort(key=lambda x: x[4], reverse=True)
 
             self.chat("%15s %10s %10s %10s %10s" % \
                     ('drinker', 'cash', 'collateral', 'value', 'total'))
