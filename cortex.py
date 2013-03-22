@@ -301,8 +301,7 @@ class Cortex:
                 title = "PDF Document"
             else:
                 try:
-                    cont = soup(urlbase,
-                                convertEntities=BeautifulSoup.HTML_ENTITIES)
+                    cont = soup(urlbase, convertEntities=soup.HTML_ENTITIES)
                     title = cont.title.string
                 except:
                     self.chat("Page parsing error")
