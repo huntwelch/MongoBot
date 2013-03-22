@@ -159,6 +159,10 @@ class Stockgame(Dendrite):
         scores = []
 
         for drinker in drinkers:
+            # Assume these people are not playing.
+            if not drinker.positions and drinker.cash == STARTING_CASH:
+                continue
+
             total = 0
             collateral = 0
             cash = drinker.cash

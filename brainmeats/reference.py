@@ -1,8 +1,11 @@
-import simplejson
-import urllib
+import HTMLParser
 import re
+import simplejson
+import textwrap
+import urllib
 
 from autonomic import axon, category, help, Dendrite
+from BeautifulSoup import BeautifulSoup
 from settings import REPO, NICK, SAFE
 from secrets import WEATHER_API
 from util import pageopen
@@ -80,6 +83,47 @@ class Reference(Dendrite):
 
         base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s"
         self.chat(base % (location, condition, temp, humid, wind, feels))
+
+    @axon
+    @help("SEARCH_TERM <get urban dictionary entry>")
+    def ud(self):
+        term = ' '.join(self.values)
+
+        query = urllib.urlencode({'term': term})
+        url = 'http://www.urbandictionary.com/define.php?%s' % query
+        urlbase = pageopen(url)
+
+        try:
+            soup = BeautifulSoup(urlbase,
+                                 convertEntities=BeautifulSoup.HTML_ENTITIES)
+        except:
+            self.chat("parse error")
+            return
+
+        defn = []
+
+        elem = soup.find('div', {'class': 'definition'})
+        if elem:
+            if elem.string:
+                defn = [elem.string]
+            elif elem.contents:
+                defn = []
+                for c in elem.contents:
+                    if c.string and c.string.strip():
+                        defn.append(c.string.strip())
+
+        if defn:
+            # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
+            # entities like &#x27; so use the parser for any stray entities.
+            parser = HTMLParser.HTMLParser()
+
+            for paragraph in defn:
+                wrapped = textwrap.wrap(paragraph, 80)
+                for line in wrapped:
+                    self.chat(parser.unescape(line))
+        else:
+            self.chat("couldn't find anything")
+
 
     @axon
     @help("EQUATION <run simple equation in python>")

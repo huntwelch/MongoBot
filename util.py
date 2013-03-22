@@ -77,6 +77,7 @@ class Stock(object):
 
         self.stock = None
         self.symbol = symbol
+        self.price = 0
 
         if not symbol:
             return
