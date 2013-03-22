@@ -13,18 +13,17 @@ class Peeps(Dendrite):
     def history(self):
         text = ""
         try:
-            file = open(STORAGE + "/introductions")
+            with open(STORAGE + "/introductions") as file:
+                for line in file:
+                    if line.strip() == "---":
+                        self.chat(text)
+                        text = ""
+                        continue
+
+                    text += " " + line.strip()
         except:
             self.chat("No introductions file")
             return
-
-        for line in file:
-            if line.strip() == "---":
-                self.chat(text)
-                text = ""
-                continue
-
-            text += " " + line.strip()
 
         self.chat(text)
 

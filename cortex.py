@@ -190,7 +190,8 @@ class Cortex:
         # self.act(choice(BOREDOM) + " " + choice(self.members))
 
     def logit(self, what):
-        open(LOG, 'a').write(what)
+        with open(LOG, 'a') as f:
+            f.write(what)
 
         now = date.today()
         if now.day != 1:
