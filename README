@@ -12,7 +12,11 @@ Getting Started
     a class Category_name. Loading of this class will be automated, no
     other files need to be altered.
 
-    TODO: finish holdem
+To Do
+=====
+
+    TODO: finish holdem, needs testing and split pots probably don't work
     TODO: stabilize redmine
     TODO: simplify stocks files
     TODO: fix rate limiting problems with acro
+    TODO: stock game: account for splits and reverse splits
