@@ -38,3 +38,13 @@ class Learned(mongoengine.Document):
 class Structure(mongoengine.Document):
     structure = ListField(StringField())
     contents = ListField(StringField())
+
+class Quote(mongoengine.Document):
+    date = DateTimeField(required=True)
+    text = StringField(required=True)
+    adder = StringField(required=True)
+    random = FloatField()
+
+    meta = {
+        'indexes': ['random', 'text', ('text', 'random')]
+    }
