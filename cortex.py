@@ -14,8 +14,8 @@ from time import mktime, localtime, sleep
 from random import choice, randint
 
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-    ACROSCORE, CHANNEL, SHORTENER, OWNER, REALNAME, BANNED, USERS, SCAN
-from secrets import DELICIOUS_PASS, DELICIOUS_USER
+    SHORTENER, OWNER, REALNAME, SCAN
+from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
 from datastore import Drinker, connectdb
 from util import unescape, pageopen
 from autonomic import serotonin
@@ -141,8 +141,8 @@ class Cortex:
         what = components.pop(0)[1:]
 
         is_nums = re.search("^[0-9]+", what)
-        is_breaky = re.search("^" + CONTROL_KEY + "+", what)
-        if is_nums or is_breaky:
+        is_breaky = re.search("^" + CONTROL_KEY + "|[^\w]+", what)
+        if is_nums or is_breaky or not what:
             return
 
         if components:
@@ -219,9 +219,6 @@ class Cortex:
             realname, ip = data.split('@')
             realname = realname[1:]
         except:
-            return
-
-        if nick in BANNED:
             return
 
         if nick not in USERS:
