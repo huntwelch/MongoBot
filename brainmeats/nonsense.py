@@ -6,7 +6,7 @@ import datetime
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
-from secrets import SQL_PASSWORD
+from secrets import SQL_PASSWORD, FML_API
 from util import colorize
 from random import choice
 
@@ -39,7 +39,7 @@ class Nonsense(Dendrite):
 
         self.chat(' '.join(buzzed))
 
-    # TODO: Stick data in mongodb
+    # TODO: use fml api
     @axon
     @help("<grab random fml entry>")
     def fml(self):

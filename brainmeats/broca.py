@@ -47,6 +47,10 @@ class Broca(Dendrite):
         self.chat("Definition " + str(which + 1) + ": " + definition)
 
     def seekdef(self, word):
+        if not WORDNIK_API:
+            self.chat("WORDNIK_API is not set.")
+            return
+
         wapi = wordnik.Wordnik(api_key=WORDNIK_API)
         results = wapi.word_get_definitions(word.strip())
         count = 0
@@ -133,10 +137,6 @@ class Broca(Dendrite):
     @axon
     @help("WORD <teach " + NICK + " a word>")
     def learn(self):
-        if self.lastsender in BANNED:
-            self.chat("My daddy says not to listen to you.")
-            return
-
         if not self.values:
             self.chat(NICK + " ponders the emptiness of meaning.")
             return

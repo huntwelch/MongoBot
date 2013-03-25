@@ -313,14 +313,15 @@ class Cortex:
                 "description": title,
                 "tags": "okdrink," + self.lastsender,
             })
-            base64string = base64.encodestring('%s:%s' % (DELICIOUS_USER, DELICIOUS_PASS))[:-1]
 
-            try:
-                req = urllib2.Request(deli, data)
-                req.add_header("Authorization", "Basic %s" % base64string)
-                send = urllib2.urlopen(req)
-            except:
-                self.chat("(delicious is down)")
+            if DELICIOUS_USER:
+                base64string = base64.encodestring('%s:%s' % (DELICIOUS_USER, DELICIOUS_PASS))[:-1]
+                try:
+                    req = urllib2.Request(deli, data)
+                    req.add_header("Authorization", "Basic %s" % base64string)
+                    send = urllib2.urlopen(req)
+                except:
+                    self.chat("(delicious is down)")
 
             if fubs == 2:
                 self.chat("Total fail")

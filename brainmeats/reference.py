@@ -54,6 +54,10 @@ class Reference(Dendrite):
     @axon
     @help("ZIP_CODE <get weather>")
     def weather(self):
+        if not WEATHER_API:
+            self.chat("WEATHER_API is not set")
+            return
+
         if not self.values or not re.search("^\d{5}", self.values[0]):
             self.chat("Please enter a zip code.")
             return
