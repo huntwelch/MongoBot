@@ -2,7 +2,8 @@ import os
 import re
 
 from autonomic import axon, category, help, Dendrite
-from settings import SAFESET, NICK, IDENT, HOST, REALNAME, CHANNEL
+from settings import SAFESET, NICK, IDENT, HOST, REALNAME
+from secrets import CHANNEL
 from time import sleep
 
 
@@ -84,3 +85,4 @@ class System(Dendrite):
         self.cx.sock.send('JOIN ' + CHANNEL + '\n')
 
         self.update(['NICK', name])
+        self.reboot()

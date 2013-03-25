@@ -5,7 +5,7 @@ import re
 import string
 
 from autonomic import axon, alias, category, help, Dendrite
-from secrets import WORDNIK_API, BANNED
+from secrets import WORDNIK_API
 from settings import NICK, STORAGE, ACROLIB, LOGDIR
 from datastore import Words, Learned, Structure
 from random import choice

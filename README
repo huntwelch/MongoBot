@@ -54,6 +54,7 @@ New features
 To Do
 =====
 
+    TODO: link holdem to db, make persistant, open up sit/in/out functionality
     TODO: finish holdem, needs testing and split pots probably don't work
     TODO: fix rate limiting problems with acro
     TODO: stock game: account for splits and reverse splits
