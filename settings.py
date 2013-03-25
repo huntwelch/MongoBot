@@ -25,7 +25,6 @@ LOGDIR = STORAGE + "/log"
 LOG = LOGDIR + "/chat.log"
 DISTASTE = STORAGE + "/distaste"
 ACROSCORE = STORAGE + "/acro/"
-KEYS = STORAGE + "/redmine/"
 
 # Misc
 
@@ -138,8 +137,3 @@ SAFE = [
     ('tan', tan),
     ('tanh', tanh),
 ]
-
-RM_URL = ""
-RM_USERS = dict(
-    hunt={"id": "89"},
-)
