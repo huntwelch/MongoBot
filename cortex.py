@@ -221,12 +221,13 @@ class Cortex:
         except:
             return
 
-        if nick not in USERS:
-            return
-
         self.lastsender = nick
 
         if content[:1] == CONTROL_KEY:
+            if nick.rstrip('_') not in USERS:
+                self.chat("My daddy says not to listen to you.")
+                return
+
             self.command(nick, content)
             return
 

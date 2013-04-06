@@ -4,6 +4,7 @@ import random
 import sys
 
 from autonomic import axon, category, help, Dendrite
+from datastore import Drinker
 
 
 class Player(object):
