@@ -86,3 +86,8 @@ class System(Dendrite):
 
         self.update(['NICK', name])
         self.reboot()
+
+    @axon
+    @help("<update from git repo>")
+    def gitpull(self):
+        os.system("git pull origin master")

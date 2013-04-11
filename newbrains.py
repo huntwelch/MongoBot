@@ -11,7 +11,7 @@ path = "brainmeats/" + base + ".py"
 if os.path.isfile(path):
     sys.exit("command file already exists")
 
-newfile = """from autonomic import axon, category, help, Dendrite
+newfile = """from autonomic import axon, alias, category, help, Dendrite
 
 
 @category("{0}")

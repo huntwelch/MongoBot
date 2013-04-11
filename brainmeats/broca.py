@@ -123,7 +123,7 @@ class Broca(Dendrite):
             return
 
     @axon
-    @alias(["waxrhapsodic"])
+    @alias(["waxhapsodic"])
     @help("<command " + NICK + " to speak>")
     def speak(self):
         sentence = []

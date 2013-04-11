@@ -69,6 +69,7 @@ class Cortex:
                 cls = getattr(mod, area.capitalize())
                 self.brainmeats[area] = cls(self)
             except Exception as e:
+                self.chat("Failed to load " + area + ".")
                 print "Failed to load " + area + "."
                 print e
 

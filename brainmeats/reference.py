@@ -4,7 +4,7 @@ import simplejson
 import textwrap
 import urllib
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, alias, category, help, Dendrite
 from BeautifulSoup import BeautifulSoup
 from settings import REPO, NICK, SAFE
 from secrets import WEATHER_API
@@ -89,8 +89,13 @@ class Reference(Dendrite):
         self.chat(base % (location, condition, temp, humid, wind, feels))
 
     @axon
+    @alias(["urban"])
     @help("SEARCH_TERM <get urban dictionary entry>")
     def ud(self):
+        if not self.values:
+            self.chat("Whatchu wanna know, bitch?")
+            return
+
         term = ' '.join(self.values)
 
         query = urllib.urlencode({'term': term})
@@ -130,8 +135,8 @@ class Reference(Dendrite):
 
 
     @axon
-    @help("EQUATION <run simple equation in python>")
-    def calc(self):
+    @help("EQUATION <run simple equation in python>, OR ruthlessly fuck with bot's codebase.")
+    def hack(self):
         if not self.values:
             printout = []
             for n, f in SAFE:
