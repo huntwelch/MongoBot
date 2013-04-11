@@ -91,3 +91,4 @@ class System(Dendrite):
     @help("<update from git repo>")
     def gitpull(self):
         os.system("git pull origin master")
+        self.chat("Probably updated. Wait a sec and reload.")
