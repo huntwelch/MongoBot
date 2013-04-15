@@ -50,7 +50,7 @@ class Peeps(Dendrite):
     @help("<show where everyone works>")
     def companies(self):
         for drinker in Drinker.objects:
-            self.chat(drinker.name + ": " + drinker.company)
+            self.chat("%s: %s" % (drinker.name, drinker.company))
 
     @axon
     @help("USERNAME <show where person works>")
