@@ -19,10 +19,8 @@ class Broca(Dendrite):
         super(Broca, self).__init__(cortex)
 
     @axon
-    @help("[word] <get definition of word>")
+    @help("WORD <get definition of word>")
     def whatmean(self):
-        self.snag()
-
         if not self.values:
             self.chat("Ooohhhmmmmm")
             return
@@ -49,6 +47,10 @@ class Broca(Dendrite):
         self.chat("Definition " + str(which + 1) + ": " + definition)
 
     def seekdef(self, word):
+        if not WORDNIK_API:
+            self.chat("WORDNIK_API is not set.")
+            return
+
         wapi = wordnik.Wordnik(api_key=WORDNIK_API)
         results = wapi.word_get_definitions(word.strip())
         count = 0
@@ -121,7 +123,7 @@ class Broca(Dendrite):
             return
 
     @axon
-    @alias(["waxrhapsodic"])
+    @alias(["waxhapsodic"])
     @help("<command " + NICK + " to speak>")
     def speak(self):
         sentence = []
@@ -133,16 +135,8 @@ class Broca(Dendrite):
         self.chat(" ".join(sentence))
 
     @axon
-    @help("<teach " + NICK + " a word>")
+    @help("WORD <teach " + NICK + " a word>")
     def learn(self):
-        self.snag()
-
-        # TODO: put banned in settings
-        banned = []
-        if self.lastsender in banned:
-            self.chat("My daddy says not to listen to you.")
-            return
-
         if not self.values:
             self.chat(NICK + " ponders the emptiness of meaning.")
             return
@@ -155,10 +149,8 @@ class Broca(Dendrite):
         self.chat(NICK + " learn new word!", self.lastsender)
 
     @axon
-    @help("<have " + NICK + " create an acronym>")
+    @help("ACRONYM <have " + NICK + " decide the words for an acronym>")
     def think(self):
-        self.snag()
-
         if not self.values:
             self.chat("About what?")
             return
@@ -193,10 +185,8 @@ class Broca(Dendrite):
         return " ".join(output)
 
     @axon
-    @help("word [which def] <look up etymology of word>")
+    @help("WORD [WHICH_DEFINITION] <look up etymology of word>")
     def ety(self):
-        self.snag()
-
         if not self.values:
             self.chat("Enter a word")
             return
@@ -238,10 +228,8 @@ class Broca(Dendrite):
 
     # TODO: broken, not sure why
     @axon
-    @help("word_or_phrase <look up anagram>")
+    @help("WORD_OR_PHRASE <look up anagram>")
     def anagram(self):
-        self.snag()
-
         if not self.values:
             self.chat("Enter a word or phrase")
             return

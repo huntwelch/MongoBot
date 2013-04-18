@@ -1,11 +1,15 @@
 from math import *
-from secrets import CHANNEL, BANNED, USERS
+from secrets import CHANNEL, USERS
 
 # Connection Settings
 
 HOST = "irc.freenode.net"
 PORT = 6667
 NICK = "MongoBot"
+
+# Used to filter out pings and server responses from logs and live checks
+
+SCAN = "^:\w+\.freenode\.net"
 
 # These settings are set in secrets.py
 
@@ -28,6 +32,11 @@ CONTROL_KEY = "-"
 SHORTENER = "http://roa.st/api.php?roast="
 PATIENCE = 7000
 REPO = "https://github.com/huntwelch/MongoBot"
+
+# Stockgame
+
+VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ'])
+STARTING_CASH = 100000
 
 # Acro
 
@@ -128,8 +137,3 @@ SAFE = [
     ('tan', tan),
     ('tanh', tanh),
 ]
-
-RM_URL = ""
-RM_USERS = dict(
-    hunt={"id": "89"},
-)

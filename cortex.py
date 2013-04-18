@@ -1,6 +1,5 @@
-#System
-
 import base64
+import sys
 import os
 import re
 import urllib2
@@ -14,10 +13,9 @@ from datetime import date, timedelta
 from time import mktime, localtime, sleep
 from random import choice, randint
 
-# Local
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-    ACROSCORE, CHANNEL, SHORTENER, OWNER, REALNAME, BANNED, USERS
-from secrets import DELICIOUS_PASS, DELICIOUS_USER
+    SHORTENER, OWNER, REALNAME, SCAN
+from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
 from datastore import Drinker, connectdb
 from util import unescape, pageopen
 from autonomic import serotonin
@@ -32,6 +30,7 @@ class Cortex:
         self.context = CHANNEL
         self.lastpublic = False
         self.lastprivate = False
+        self.lastsender = False
         self.sock = master.sock
         self.gettingnames = True
         self.members = []
@@ -61,12 +60,18 @@ class Cortex:
         areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
 
         for area in areas:
-            mod = __import__("brainmeats", fromlist=[area])
-            mod = getattr(mod, area)
-            if electroshock:
-                reload(mod)
-            cls = getattr(mod, area.capitalize())
-            self.brainmeats[area] = cls(self)
+            print area
+            try:
+                mod = __import__("brainmeats", fromlist=[area])
+                mod = getattr(mod, area)
+                if electroshock:
+                    reload(mod)
+                cls = getattr(mod, area.capitalize())
+                self.brainmeats[area] = cls(self)
+            except Exception as e:
+                self.chat("Failed to load " + area + ".")
+                print "Failed to load " + area + "."
+                print e
 
         for brainmeat in self.brainmeats:
             serotonin(self, self.brainmeats[brainmeat], electroshock)
@@ -106,7 +111,7 @@ class Cortex:
             print "* Joined " + CHANNEL
 
         # TODO: build scan check from settings
-        scan = re.search("^:\w+\.freenode\.net", line)
+        scan = re.search(SCAN, line)
         ping = re.search("^PING", line)
         if line != '' and not scan and not ping:
             self.logit(line + '\n')
@@ -137,8 +142,8 @@ class Cortex:
         what = components.pop(0)[1:]
 
         is_nums = re.search("^[0-9]+", what)
-        is_breaky = re.search("^" + CONTROL_KEY + "+", what)
-        if is_nums or is_breaky:
+        is_breaky = re.search("^" + CONTROL_KEY + "|[^\w]+", what)
+        if is_nums or is_breaky or not what:
             return
 
         if components:
@@ -155,7 +160,7 @@ class Cortex:
     def showlist(self):
         if not self.values or self.values[0] not in self.helpmenu:
             cats = ", ".join(self.helpcategories)
-            self.chat(CONTROL_KEY + "help [what] where what is " + cats)
+            self.chat(CONTROL_KEY + "help WHAT where WHAT is " + cats)
             return
 
         which = self.values[0]
@@ -186,7 +191,8 @@ class Cortex:
         # self.act(choice(BOREDOM) + " " + choice(self.members))
 
     def logit(self, what):
-        open(LOG, 'a').write(what)
+        with open(LOG, 'a') as f:
+            f.write(what)
 
         now = date.today()
         if now.day != 1:
@@ -216,15 +222,13 @@ class Cortex:
         except:
             return
 
-        if nick in BANNED:
-            return
-
-        if nick not in USERS:
-            return
-
         self.lastsender = nick
 
         if content[:1] == CONTROL_KEY:
+            if nick.rstrip('_') not in USERS:
+                self.chat("My daddy says not to listen to you.")
+                return
+
             self.command(nick, content)
             return
 
@@ -235,8 +239,9 @@ class Cortex:
             self.linker(urls)
             return
 
-        self.brainmeats['broca'].parse(content, nick)
-        self.brainmeats['broca'].tourettes(content, nick)
+        if 'broca' in self.brainmeats:
+            self.brainmeats['broca'].parse(content, nick)
+            self.brainmeats['broca'].tourettes(content, nick)
 
     def tweet(self, urls):
         for url in urls:
@@ -295,7 +300,7 @@ class Cortex:
                 title = "PDF Document"
             else:
                 try:
-                    cont = soup(urlbase)
+                    cont = soup(urlbase, convertEntities=soup.HTML_ENTITIES)
                     title = cont.title.string
                 except:
                     self.chat("Page parsing error")
@@ -307,14 +312,15 @@ class Cortex:
                 "description": title,
                 "tags": "okdrink," + self.lastsender,
             })
-            base64string = base64.encodestring('%s:%s' % (DELICIOUS_USER, DELICIOUS_PASS))[:-1]
 
-            try:
-                req = urllib2.Request(deli, data)
-                req.add_header("Authorization", "Basic %s" % base64string)
-                send = urllib2.urlopen(req)
-            except:
-                self.chat("(delicious is down)")
+            if DELICIOUS_USER:
+                base64string = base64.encodestring('%s:%s' % (DELICIOUS_USER, DELICIOUS_PASS))[:-1]
+                try:
+                    req = urllib2.Request(deli, data)
+                    req.add_header("Authorization", "Basic %s" % base64string)
+                    send = urllib2.urlopen(req)
+                except:
+                    self.chat("(delicious is down)")
 
             if fubs == 2:
                 self.chat("Total fail")

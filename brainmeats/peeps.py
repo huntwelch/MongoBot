@@ -13,25 +13,23 @@ class Peeps(Dendrite):
     def history(self):
         text = ""
         try:
-            file = open(STORAGE + "/introductions")
+            with open(STORAGE + "/introductions") as file:
+                for line in file:
+                    if line.strip() == "---":
+                        self.chat(text)
+                        text = ""
+                        continue
+
+                    text += " " + line.strip()
         except:
             self.chat("No introductions file")
             return
 
-        for line in file:
-            if line.strip() == "---":
-                self.chat(text)
-                text = ""
-                continue
-
-            text += " " + line.strip()
-
         self.chat(text)
 
     @axon
-    @help("<save your current copmany>")
+    @help("COMPANY <save your current copmany>")
     def workat(self):
-        self.snag()
         if not self.values:
             self.chat("If you're unemployed, that's cool, just don't abuse the bot")
             return
@@ -51,20 +49,18 @@ class Peeps(Dendrite):
     @axon
     @help("<show where everyone works>")
     def companies(self):
-        self.snag()
         for drinker in Drinker.objects:
-            self.chat(drinker.name + ": " + drinker.company)
+            self.chat("%s: %s" % (drinker.name, drinker.company))
 
     @axon
-    @help("<[person] show where person works>")
+    @help("USERNAME <show where person works>")
     def company(self):
-        self.snag()
         if not self.values:
             search_for = self.lastsender
         else:
             search_for = self.values[0]
 
-        user = Drinker.objects(name=search_for)[0]
+        user = Drinker.objects(name=search_for).first()
         if user and user.company:
             self.chat(user.name + ": " + user.company)
         else:
@@ -73,7 +69,6 @@ class Peeps(Dendrite):
     @axon
     @help("<ping everyone in the room>")
     def all(self):
-        self.snag()
         peeps = self.members
         try:
             peeps.remove(self.lastsender)

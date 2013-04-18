@@ -6,7 +6,7 @@ import datetime
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
-from secrets import SQL_PASSWORD
+from secrets import SQL_PASSWORD, FML_API
 from util import colorize
 from random import choice
 
@@ -39,7 +39,7 @@ class Nonsense(Dendrite):
 
         self.chat(' '.join(buzzed))
 
-    # TODO: Stick data in mongodb
+    # TODO: use fml api
     @axon
     @help("<grab random fml entry>")
     def fml(self):
@@ -51,7 +51,7 @@ class Nonsense(Dendrite):
         self.chat(fml)
 
     @axon
-    @help("<generate passward according to http://xkcd.com/936/>")
+    @help("<generate password according to http://xkcd.com/936/>")
     def munroesecurity(self):
         output = []
         wordbank = []
@@ -67,9 +67,8 @@ class Nonsense(Dendrite):
         self.chat(" ".join(output))
 
     @axon
-    @help("[user] <reward someone>")
+    @help("USERNAME <reward someone>")
     def reward(self):
-        self.snag()
         if not self.values:
             self.chat("Reward whom?")
             return
@@ -96,7 +95,6 @@ class Nonsense(Dendrite):
 
     @axon
     def love(self):
-        self.snag()
         if self.values and self.values[0] == "self":
             self._act("masturbates vigorously.")
         else:
@@ -117,7 +115,7 @@ class Nonsense(Dendrite):
         self.chat(entry['title']['$t'])
 
     @axon
-    @help("<pull up a mom quote>")
+    @help("<pull up a mom quote from logs>")
     def mom(self):
         momlines = []
         try:
@@ -137,19 +135,17 @@ class Nonsense(Dendrite):
 
     @axon
     def say(self):
-        self.snag()
         if self.validate():
             self.announce(" ".join(self.values))
 
     @axon
     def act(self):
-        self.snag()
         if self.validate():
             self._act(" ".join(self.values), True)
 
     @axon
+    @help("URL <pull from distaste entries or add url to distate options>")
     def distaste(self):
-        self.snag()
         if self.values:
             url = urllib.quote_plus(self.values[0])
             roasted = urllib2.urlopen(SHORTENER + url).read()
@@ -166,4 +162,5 @@ class Nonsense(Dendrite):
 
     @axon
     def timeleft(self):
-        self.chat("Only " + str(datetime.date(2013, 5, 3) - datetime.date.today()).days) + " days till erikbeta's last day at Lot18"
+        delta = datetime.date(2013, 5, 3) - datetime.date.today()
+        self.chat("Only %s days till erikbeta's last day at Lot18" % delta.days)

@@ -13,11 +13,9 @@ HAND_NAMES = ("HIGH_CARD", "PAIR", "TWO_PAIR", "THREE_OF_A_KIND", "STRAIGHT",
               "FLUSH", "FULL_HOUSE", "FOUR_OF_A_KIND", "STRAIGHT_FLUSH")
 
 
-def main():
-    return
 
 
-class card:
+class Card(object):
     #SUITS = ['s', 'h', 'd', 'c']
     SUITS = [u"\u2660", u"\u2665", u"\u2666", u"\u2663"]
     RANKS = "A23456789TJQKA"
@@ -27,7 +25,11 @@ class card:
         self.rank = rank
 
     def __repr__(self):
-        return unicode("%s%s" % (self.RANKS[self.rank], self.SUITS[self.suit - 1])).encode('utf-8')
+        rank = self.RANKS[self.rank]
+        if rank == 'T':
+            rank = '10'
+        rep = u"%s%s" % (rank, self.SUITS[self.suit - 1])
+        return rep.encode('utf-8')
 
     def encoded(self):
         return self.suit * 13 + self.rank
@@ -44,12 +46,12 @@ def cmp_suit_rank(x, y):
 def initialize_deck():
     for suit in range(1, 5):
         for rank in range(1, 14):
-            deck.append(card(suit, rank))
+            deck.append(Card(suit, rank))
 
 
 def find_straight_flush(cards):
     cards_aces_high = cards
-    cards_aces_low = [card(x.suit, 0) if x.rank == 13 else x for x in cards]
+    cards_aces_low = [Card(x.suit, 0) if x.rank == 13 else x for x in cards]
 
     for cards in (cards_aces_high, cards_aces_low):
         cards.sort(cmp=cmp_suit_rank)
@@ -92,7 +94,7 @@ def find_flush(cards):
 
 def find_straight(cards):
     cards_aces_high = cards
-    cards_aces_low = [card(x.suit, 0) if x.rank == 13 else x for x in cards]
+    cards_aces_low = [Card(x.suit, 0) if x.rank == 13 else x for x in cards]
 
     for cards in (cards_aces_high, cards_aces_low):
         # Sort and remove cards with duplicated ranks
@@ -206,5 +208,3 @@ def find_winners(hands):
     hands = filter(lambda x: x[2] == best_kicker, hands)
 
     return [h[3] for h in hands]
-
-main()

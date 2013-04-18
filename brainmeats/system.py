@@ -1,9 +1,10 @@
 import os
 import re
 
-from time import sleep
 from autonomic import axon, category, help, Dendrite
-from settings import SAFESET, NICK, IDENT, HOST, REALNAME, CHANNEL
+from settings import SAFESET, NICK, IDENT, HOST, REALNAME
+from secrets import CHANNEL
+from time import sleep
 
 
 @category("system")
@@ -12,10 +13,8 @@ class System(Dendrite):
         super(System, self).__init__(cortex)
 
     @axon
-    @help("[setting]+ <show editable " + NICK + " settings>")
+    @help("<show editable " + NICK + " settings>")
     def settings(self):
-        self.snag()
-
         for name, value in SAFESET:
             if self.values and name not in self.values:
                 continue
@@ -23,10 +22,9 @@ class System(Dendrite):
             self.chat(name + " : " + str(value))
 
     @axon
-    @help("<update a " + NICK + " setting>")
+    @help("SETTING=VALUE <update a " + NICK + " setting>")
     def update(self, inhouse=False):
         if not inhouse:
-            self.snag()
             vals = self.values
 
         if not vals or len(vals) != 2:
@@ -71,10 +69,8 @@ class System(Dendrite):
         self.cx.master.die()
 
     @axon
-    @help("<change " + NICK + "'s name>")
+    @help("NICKNAME <change " + NICK + "'s name>")
     def nick(self):
-        self.snag()
-
         if not self.values:
             self.chat("Change name to what?")
             return
@@ -89,3 +85,10 @@ class System(Dendrite):
         self.cx.sock.send('JOIN ' + CHANNEL + '\n')
 
         self.update(['NICK', name])
+        self.reboot()
+
+    @axon
+    @help("<update from git repo>")
+    def gitpull(self):
+        os.system("git pull origin master")
+        self.chat("Probably updated. Wait a sec and reload.")

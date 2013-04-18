@@ -1,8 +1,11 @@
-import simplejson
-import urllib
+import HTMLParser
 import re
+import simplejson
+import textwrap
+import urllib
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, alias, category, help, Dendrite
+from BeautifulSoup import BeautifulSoup
 from settings import REPO, NICK, SAFE
 from secrets import WEATHER_API
 from util import pageopen
@@ -16,10 +19,8 @@ class Reference(Dendrite):
         self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
 
     @axon
-    @help("search_term <look something up in google>")
+    @help("SEARCH_TERM <look something up in google>")
     def g(self):
-        self.snag()
-
         if not self.values:
             self.chat("Enter a word")
             return
@@ -51,9 +52,11 @@ class Reference(Dendrite):
         self.chat(REPO)
 
     @axon
-    @help("zip_code <get weather>")
+    @help("ZIP_CODE <get weather>")
     def weather(self):
-        self.snag()
+        if not WEATHER_API:
+            self.chat("WEATHER_API is not set")
+            return
 
         if not self.values or not re.search("^\d{5}", self.values[0]):
             self.chat("Please enter a zip code.")
@@ -86,10 +89,54 @@ class Reference(Dendrite):
         self.chat(base % (location, condition, temp, humid, wind, feels))
 
     @axon
-    @help("equation <run simple equation in python>")
-    def calc(self):
-        self.snag()
+    @alias(["urban"])
+    @help("SEARCH_TERM <get urban dictionary entry>")
+    def ud(self):
+        if not self.values:
+            self.chat("Whatchu wanna know, bitch?")
+            return
 
+        term = ' '.join(self.values)
+
+        query = urllib.urlencode({'term': term})
+        url = 'http://www.urbandictionary.com/define.php?%s' % query
+        urlbase = pageopen(url)
+
+        try:
+            soup = BeautifulSoup(urlbase,
+                                 convertEntities=BeautifulSoup.HTML_ENTITIES)
+        except:
+            self.chat("parse error")
+            return
+
+        defn = []
+
+        elem = soup.find('div', {'class': 'definition'})
+        if elem:
+            if elem.string:
+                defn = [elem.string]
+            elif elem.contents:
+                defn = []
+                for c in elem.contents:
+                    if c.string and c.string.strip():
+                        defn.append(c.string.strip())
+
+        if defn:
+            # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
+            # entities like &#x27; so use the parser for any stray entities.
+            parser = HTMLParser.HTMLParser()
+
+            for paragraph in defn:
+                wrapped = textwrap.wrap(paragraph, 80)
+                for line in wrapped:
+                    self.chat(parser.unescape(line))
+        else:
+            self.chat("couldn't find anything")
+
+
+    @axon
+    @help("EQUATION <run simple equation in python>, OR ruthlessly fuck with bot's codebase.")
+    def hack(self):
         if not self.values:
             printout = []
             for n, f in SAFE:
