@@ -2,7 +2,7 @@ import urllib
 import urllib2
 import re
 import htmlentitydefs
-from settings import CHANNEL
+from settings import CHANNEL, SHORTENER
 from xml.dom import minidom as dom
 
 
@@ -207,9 +207,14 @@ class Stock(object):
                 addon = pretty + ": " + self.stock[id]
                 message.append(addon)
 
-            # this should work even after the api goes down
-            link = "http://www.google.com/finance?client=ig&q=" + self.stock["symbol"]
-            message.append(link)
+        link = urllib.quote("http://www.google.com/finance?client=ig&q=" + self.stock["symbol"])
+        try:
+            opener = urllib2.build_opener()
+            roasted = opener.open(SHORTENER + link).read()
+            message.append(roasted)
+        except:
+            message.append("Can't link")
+            
 
         output = ', '.join(message)
         if self.afterhours:
