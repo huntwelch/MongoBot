@@ -1,3 +1,5 @@
+import datetime
+
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, CHANNEL
 from datastore import Drinker
@@ -78,3 +80,44 @@ class Peeps(Dendrite):
 
         peeps = ', '.join(peeps)
         self.chat(peeps + ', ' + self.lastsender + ' has something very important to say.')
+
+    @axon
+    def awaiting(self):
+        if not self.values:
+            self.chat("Whatchu waitin fo?")
+            return
+        
+        name = self.lastsender
+        awaits = " ".join(self.values)
+
+        drinker = Drinker.objects(name=name)
+        if drinker:
+            drinker = drinker[0]
+            drinker.awaiting = awaits
+        else:
+            drinker = Drinker(name=name, awaiting=awaiting)
+
+        drinker.save()
+        self.chat("Antici..... pating.")
+       
+
+    @axon
+    def timeleft(self):
+        if not self.values:
+            search_for = self.lastsender
+        else:
+            search_for = self.values[0]
+
+        drinker = Drinker.objects(name=search_for).first()
+        if not drinker or not drinker.awaiting:
+            self.chat("%s waits for nothing." % search_for)
+            return
+
+        try:
+            moment, event = drinker.awaiting.split("=") 
+            year, month, day = moment.split("/")
+            delta = datetime.date(int(year), int(month), int(day)) - datetime.date.today()
+
+            self.chat("Only %s days till %s" % (delta.days, event))
+        except:
+            self.chat("Couldn't parse that out.")

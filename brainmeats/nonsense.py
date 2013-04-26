@@ -2,13 +2,13 @@ import MySQLdb
 import simplejson
 import urllib
 import urllib2
-import datetime
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
 from secrets import SQL_PASSWORD, FML_API
 from util import colorize
 from random import choice
+from datastore import Drinker
 
 
 @category("nonsense")
@@ -159,8 +159,3 @@ class Nonsense(Dendrite):
             lines.append(line)
 
         self.chat(choice(lines))
-
-    @axon
-    def timeleft(self):
-        delta = datetime.date(2013, 5, 3) - datetime.date.today()
-        self.chat("Only %s days till erikbeta's last day at Lot18" % delta.days)

@@ -18,7 +18,7 @@ class Position(mongoengine.EmbeddedDocument):
 class Drinker(mongoengine.Document):
     name = StringField(required=True)
     company = StringField()
-
+    awaiting = StringField()
     cash = FloatField(default=STARTING_CASH)
     positions = ListField(EmbeddedDocumentField(Position))
 
