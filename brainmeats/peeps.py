@@ -55,7 +55,7 @@ class Peeps(Dendrite):
             self.chat("%s: %s" % (drinker.name, drinker.company))
 
     @axon
-    @help("USERNAME <show where person works>")
+    @help("[USERNAME] <show where you or USERNAME works>")
     def company(self):
         if not self.values:
             search_for = self.lastsender
@@ -63,10 +63,10 @@ class Peeps(Dendrite):
             search_for = self.values[0]
 
         user = Drinker.objects(name=search_for).first()
-        if user and user.company:
-            self.chat(user.name + ": " + user.company)
-        else:
+        if not user or not user.company:
             self.chat("Tell that deadbeat %s to get a damn job already..." % search_for)
+
+        self.chat(user.name + ": " + user.company)
 
     @axon
     @help("<ping everyone in the room>")
@@ -82,6 +82,7 @@ class Peeps(Dendrite):
         self.chat(peeps + ', ' + self.lastsender + ' has something very important to say.')
 
     @axon
+    @help("YYYY/MM/DD=EVENT_DESCRIPTION <save what you're waiting for>")
     def awaiting(self):
         if not self.values:
             self.chat("Whatchu waitin fo?")
@@ -102,6 +103,7 @@ class Peeps(Dendrite):
        
 
     @axon
+    @help("[USERNAME] <show what you are or USERNAME is waiting for>")
     def timeleft(self):
         if not self.values:
             search_for = self.lastsender
