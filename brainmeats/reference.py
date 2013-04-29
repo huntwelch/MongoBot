@@ -147,7 +147,7 @@ class Reference(Dendrite):
             return
         
         string = ' '.join(self.values)
-        if "lambda" in string or "__" in string:
+        if "__" in string:
             self.chat("Rejected.")
             return
 
