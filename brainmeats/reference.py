@@ -145,8 +145,14 @@ class Reference(Dendrite):
 
             self.chat("Available functions: " + ", ".join(printout))
             return
+        
+        string = ' '.join(self.values)
+        if "lambda" in string:
+            self.chat("Get out of my HEEAD!")
+            return
+
         try:
-            result = eval(' '.join(self.values), {"__builtins__": None}, self.safe_calc)
+            result = eval(string, {"__builtins__": None}, self.safe_calc)
         except:
             result = NICK + " not smart enough to do that."
 
