@@ -4,7 +4,7 @@ from settings import STARTING_CASH
 
 
 def connectdb():
-    mongoengine.connect('bot', 'bot')
+    mongoengine.connect('bot', host='localhost')
 
 
 class Position(mongoengine.EmbeddedDocument):
@@ -48,3 +48,17 @@ class Quote(mongoengine.Document):
     meta = {
         'indexes': ['random', 'text', ('text', 'random')]
     }
+
+class Fmls(mongoengine.Document):
+    id = IntField(min_value=0)
+    fid = IntField(min_value=0)
+    entry = StringField()
+    entry = StringField()
+    agree = IntField(min_value=0)
+    ydi = IntField(min_value=0)
+    ratio = FloatField()
+    gender = StringField()
+    date = StringField()
+    time = StringField()
+    location = StringField()
+    intimate = IntField(min_value=0)

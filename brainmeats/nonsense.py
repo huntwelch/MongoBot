@@ -1,4 +1,3 @@
-import MySQLdb
 import simplejson
 import urllib
 import urllib2
@@ -8,7 +7,7 @@ from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
 from secrets import SQL_PASSWORD, FML_API
 from util import colorize
 from random import choice
-from datastore import Drinker
+from datastore import Drinker, Fmls
 
 
 @category("nonsense")
@@ -43,12 +42,10 @@ class Nonsense(Dendrite):
     @axon
     @help("<grab random fml entry>")
     def fml(self):
-        db = MySQLdb.connect("localhost", "peter", SQL_PASSWORD, "peter_stilldrinking")
-        cursor = db.cursor()
-        cursor.execute("SELECT * FROM fmls ORDER BY RAND() LIMIT 0,1;")
-        entry = cursor.fetchone()
-        fml = entry[2]
-        self.chat(fml)
+        self.chat("Done broke")
+        return
+        fml = choice(Fmls.objects)
+        self.chat(fml.entry)
 
     @axon
     @help("<generate password according to http://xkcd.com/936/>")
