@@ -52,7 +52,8 @@ class Peeps(Dendrite):
     @help("<show where everyone works>")
     def companies(self):
         for drinker in Drinker.objects:
-            self.chat("%s: %s" % (drinker.name, drinker.company))
+            if not "_" in drinker:
+                self.chat("%s: %s" % (drinker.name, drinker.company))
 
     @axon
     @help("[USERNAME] <show where you or USERNAME works>")
@@ -87,7 +88,7 @@ class Peeps(Dendrite):
         if not self.values:
             self.chat("Whatchu waitin fo?")
             return
-        
+
         name = self.lastsender
         awaits = " ".join(self.values)
 
@@ -100,7 +101,7 @@ class Peeps(Dendrite):
 
         drinker.save()
         self.chat("Antici..... pating.")
-       
+
 
     @axon
     @help("[USERNAME] <show what you are or USERNAME is waiting for>")
@@ -116,7 +117,7 @@ class Peeps(Dendrite):
             return
 
         try:
-            moment, event = drinker.awaiting.split("=") 
+            moment, event = drinker.awaiting.split("=")
             year, month, day = moment.split("/")
             delta = datetime.date(int(year), int(month), int(day)) - datetime.date.today()
 
