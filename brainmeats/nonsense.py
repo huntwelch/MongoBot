@@ -117,7 +117,8 @@ class Nonsense(Dendrite):
         momlines = []
         try:
             for line in open(LOGDIR + "/mom.log"):
-                momlines.append(line)
+                if "~mom" not in line:
+                    momlines.append(line)
         except:
             self.chat("Can't open mom.log")
             return
