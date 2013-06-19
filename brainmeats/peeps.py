@@ -52,7 +52,7 @@ class Peeps(Dendrite):
     @help("<show where everyone works>")
     def companies(self):
         for drinker in Drinker.objects:
-            if not "_" in drinker:
+            if "_" not in drinker:
                 self.chat("%s: %s" % (drinker.name, drinker.company))
 
     @axon
