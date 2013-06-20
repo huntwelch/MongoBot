@@ -19,8 +19,14 @@ class Finance(Dendrite):
             self.chat("Enter a symbol")
             return
 
-        stock = Stock(symbol)
-        showit = stock.showquote(self.context)
+        # I feel like this try shouldn't be necessary,
+        # something may have changed in the API
+        showit = False
+        try:
+            stock = Stock(symbol)
+            showit = stock.showquote(self.context)
+        except:
+            pass
 
         if not showit:
             self.chat("Couldn't find company.")

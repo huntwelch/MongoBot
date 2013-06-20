@@ -8,6 +8,7 @@ from secrets import SQL_PASSWORD, FML_API
 from util import colorize
 from random import choice
 from datastore import Drinker, Fmls
+from xml.dom import minidom as dom
 
 
 @category("nonsense")
@@ -42,10 +43,20 @@ class Nonsense(Dendrite):
     @axon
     @help("<grab random fml entry>")
     def fml(self):
-        self.chat("Done broke")
-        return
-        fml = choice(Fmls.objects)
-        self.chat(fml.entry)
+        uri = 'http://api.fmylife.com'
+        path = '/view/random'
+        lang = 'en'
+        
+        url = uri + path + '?language=' + lang + '&key=' + FML_API
+
+        try:
+            raw = dom.parse(urllib.urlopen(url))
+            fml = raw.getElementsByTagName("text")[0].firstChild.nodeValue
+            self.chat(fml)
+        except:
+            self.chat("Done broke")
+            return
+
 
     @axon
     @help("<generate password according to http://xkcd.com/936/>")
