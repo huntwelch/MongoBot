@@ -57,6 +57,18 @@ class Nonsense(Dendrite):
             self.chat("Done broke")
             return
 
+    @axon
+    @help("<generate start-up elevator pitch>")
+    def startup(self):
+        url = 'http://itsthisforthat.com/api.php?text'
+
+        try:
+            out = urllib.urlopen(url).read()
+            self.chat(out)
+        except:
+            self.chat("Done broke")
+            return
+
 
     @axon
     @help("<generate password according to http://xkcd.com/936/>")
