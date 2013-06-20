@@ -64,7 +64,7 @@ class Nonsense(Dendrite):
 
         try:
             out = urllib.urlopen(url).read()
-            self.chat(out)
+            self.chat(out.lower().capitalize())
         except:
             self.chat("Done broke")
             return
