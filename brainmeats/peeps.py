@@ -66,8 +66,8 @@ class Peeps(Dendrite):
         user = Drinker.objects(name=search_for).first()
         if not user or not user.company:
             self.chat("Tell that deadbeat %s to get a damn job already..." % search_for)
-
-        self.chat(user.name + ": " + user.company)
+        else:
+            self.chat(user.name + ": " + user.company)
 
     @axon
     @help("<ping everyone in the room>")
