@@ -357,4 +357,4 @@ class Cortex:
             self.chat(message)
 
     def default(self):
-        self._act(" cannot do this thing :'(")
+        self.act(" cannot do this thing :'(")
