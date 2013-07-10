@@ -223,6 +223,7 @@ class Cortex:
             return
 
         self.lastsender = nick
+        self.lastip = ip 
 
         if content[:1] == CONTROL_KEY:
             if nick.rstrip('_') not in USERS:

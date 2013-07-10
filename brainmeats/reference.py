@@ -52,31 +52,37 @@ class Reference(Dendrite):
         self.chat(REPO)
 
     @axon
-    @help("ZIP_CODE <get weather>")
+    @help("[ZIP|LOCATION (ru/moscow)] <get weather, defaults to geo api>")
     def weather(self):
         if not WEATHER_API:
             self.chat("WEATHER_API is not set")
             return
 
-        if not self.values or not re.search("^\d{5}", self.values[0]):
-            self.chat("Please enter a zip code.")
+        if not self.values:
+            params = "autoip.json?geo_ip=%s" % self.lastip
+        else:
+            params = "%s.json" % self.values[0]
+
+        base = "http://api.wunderground.com/api/%s/conditions/q/" % WEATHER_API
+
+        url = base + params
+
+        try:
+            response = pageopen(url)
+        except:
+            self.chat("Couldn't get weather.")
             return
 
-        zip = self.values[0]
-        url = "http://api.wunderground.com/api/%s/conditions/q/%s.json" % (WEATHER_API, zip)
-
-        response = pageopen(url)
         if not response:
             self.chat("Couldn't get weather.")
             return
 
         try:
             json = simplejson.loads(response)
+            json = json['current_observation']
         except:
             self.chat("Couldn't parse weather.")
             return
-
-        json = json['current_observation']
 
         location = json['display_location']['full']
         condition = json['weather']

@@ -27,6 +27,10 @@ class Dendrite(object):
         return self.cx.lastsender
 
     @property
+    def lastip(self):
+        return self.cx.lastip
+
+    @property
     def context(self):
         return self.cx.context
 
