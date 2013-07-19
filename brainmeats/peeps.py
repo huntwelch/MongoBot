@@ -1,7 +1,9 @@
 import datetime
+import re
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, CHANNEL
+from secrets import USERS
 from datastore import Drinker
 
 
@@ -124,3 +126,17 @@ class Peeps(Dendrite):
             self.chat("Only %s days till %s" % (delta.days, event))
         except:
             self.chat("Couldn't parse that out.")
+
+
+    @axon
+    @help("USERNAME <give temporary access to USERNAME>")
+    def guestpass(self):
+        if not self.values or not re.match("^[\w_]+$", self.values[0]):
+            self.chat("Invalid entry.")
+            return
+        else:
+            guest = self.values[0]
+
+        USERS.append(guest) 
+
+        self.chat("Hi " + guest + ". You seem okay.")

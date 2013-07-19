@@ -1,5 +1,4 @@
 import HTMLParser
-import re
 import simplejson
 import textwrap
 import urllib

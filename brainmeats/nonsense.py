@@ -7,7 +7,6 @@ from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
 from secrets import SQL_PASSWORD, FML_API
 from util import colorize
 from random import choice
-from datastore import Drinker, Fmls
 from xml.dom import minidom as dom
 
 
