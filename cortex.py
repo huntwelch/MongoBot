@@ -273,39 +273,54 @@ class Cortex:
                 self.tweet(twitter_urls)
                 return
 
-            fubs = 0
-            title = "Couldn't get title"
-            roasted = "Couldn't roast"
+            while True:
+                fubs = 0
+                title = "Couldn't get title"
+                roasted = "Couldn't roast"
 
-            urlbase = pageopen(url)
-            if not urlbase:
-                fubs += 1
+                urlbase = pageopen(url)
+                if not urlbase:
+                    fubs += 1
 
-            try:
-                opener = urllib2.build_opener()
-                roasted = opener.open(SHORTENER + url).read()
-            except:
-                fubs += 1
-
-            ext = url.split(".")[-1]
-            images = [
-                "gif",
-                "png",
-                "jpg",
-                "jpeg",
-            ]
-
-            if ext in images:
-                title = "Image"
-            elif ext == "pdf":
-                title = "PDF Document"
-            else:
                 try:
-                    cont = soup(urlbase, convertEntities=soup.HTML_ENTITIES)
-                    title = cont.title.string
+                    opener = urllib2.build_opener()
+                    roasted = opener.open(SHORTENER + url).read()
                 except:
-                    self.chat("Page parsing error")
-                    return
+                    fubs += 1
+
+                ext = url.split(".")[-1]
+                images = [
+                    "gif",
+                    "png",
+                    "jpg",
+                    "jpeg",
+                ]
+
+                if ext in images:
+                    title = "Image"
+                    break
+                elif ext == "pdf":
+                    title = "PDF Document"
+                    break
+                else:
+                    try:
+                        cont = soup(urlbase, convertEntities=soup.HTML_ENTITIES)
+                        if cont.title is None:
+                            redirect = cont.find('meta', attrs={'http-equiv': 'refresh'})
+                            if not redirect:
+                                redirect = cont.find('meta', attrs={'http-equiv': 'Refresh'})
+
+                            if redirect:
+                                url = redirect['content'].split('url=')[1]
+                                continue
+                            else:
+                                raise ValueError('Cannot find title')
+                        else:
+                            title = cont.title.string
+                            break
+                    except:
+                        self.chat("Page parsing error")
+                        return
 
             deli = "https://api.del.icio.us/v1/posts/add?"
             data = urllib.urlencode({
