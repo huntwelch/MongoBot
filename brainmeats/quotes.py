@@ -71,7 +71,6 @@ class Quotes(Dendrite):
         else:
             total = len(quotes)
             if total > 1:
-                self.chat("Found %d quotes. Picking one at random." % total)
                 q = random.choice(quotes)
             else:
                 q = quotes.first()
