@@ -75,3 +75,23 @@ class Quotes(Dendrite):
             else:
                 q = quotes.first()
             self.chat(q.text)
+    @axon
+    @help("SEARCH_TERM <returns the count of the quotes found")
+    def countquote(self):
+        if not self.values:
+            self.chat("Enter a search term")
+            return
+
+        term = ' '.join(self.values)
+
+        if len(term) <= 1:
+            self.chat("Enter a bigger search term")
+            return
+
+        quotes = Quote.objects(text__icontains=term)
+
+        if not quotes:
+            self.chat("No quotes found")
+        else:
+            total = len(quotes)
+            self.chat("Found %d quotes", total)
