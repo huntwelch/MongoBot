@@ -75,6 +75,7 @@ class Quotes(Dendrite):
             else:
                 q = quotes.first()
             self.chat(q.text)
+
     @axon
     @help("SEARCH_TERM <returns the count of the quotes found")
     def countquote(self):
