@@ -38,6 +38,20 @@ class Nonsense(Dendrite):
 
         self.chat(' '.join(buzzed))
 
+    @axon
+    @help("<grab a little advice>")
+    def advice(self):
+        url = 'http://api.adviceslip.com/advice'
+        
+        try:
+            response = urllib.urlopen(url).read()
+            json = simplejson.loads(response)
+        except:
+            self.chat('Use a rubber if you sleep with dcross2\'s mother.')
+            return
+        
+        self.chat(json['slip']['advice'])
+    
     # TODO: use fml api
     @axon
     @help("SEARCHTERM <grab random fml entry>")
