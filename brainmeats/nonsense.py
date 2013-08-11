@@ -4,7 +4,7 @@ import urllib2
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
-from secrets import SQL_PASSWORD, FML_API
+from secrets import FML_API
 from util import colorize
 from random import choice
 from xml.dom import minidom as dom
@@ -40,20 +40,31 @@ class Nonsense(Dendrite):
 
     # TODO: use fml api
     @axon
-    @help("<grab random fml entry>")
+    @help("SEARCHTERM <grab random fml entry>")
     def fml(self):
         uri = 'http://api.fmylife.com'
-        path = '/view/random'
         lang = 'en'
         
-        url = uri + path + '?language=' + lang + '&key=' + FML_API
+        if self.values and self.values[0]:
+            path = '/view/search?'
+            search = "+".join(self.values)
+            url = uri + path + 'search=' + search + '&language=' + lang + '&key=' + FML_API
+        else:
+            path = '/view/random?'
+            url = uri + path + 'language=' + lang + '&key=' + FML_API
 
         try:
             raw = dom.parse(urllib.urlopen(url))
-            fml = raw.getElementsByTagName("text")[0].firstChild.nodeValue
+            if self.values and self.values[0]:
+                fml = choice(raw.getElementsByTagName("text")).firstChild.nodeValue
+            else:
+                fml = raw.getElementsByTagName("text")[0].firstChild.nodeValue
             self.chat(fml)
         except:
-            self.chat("Done broke")
+            if self.values and self.values[0]:
+                self.chat("No results. Or done broken.")
+            else:
+                self.chat("Done broke")
             return
 
     @axon
