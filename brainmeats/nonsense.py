@@ -44,7 +44,9 @@ class Nonsense(Dendrite):
         url = 'http://api.adviceslip.com/advice'
         
         try:
-            response = urllib.urlopen(url).read()
+            headers = { 'User-Agent' : 'Mozilla/5.0' }
+            request = urllib2.Request(url, None, headers)
+            response = urllib2.urlopen(request).read()
             json = simplejson.loads(response)
         except:
             self.chat('Use a rubber if you sleep with dcross2\'s mother.')
