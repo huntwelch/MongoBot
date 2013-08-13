@@ -3,7 +3,7 @@ import re
 
 from autonomic import axon, category, help, Dendrite
 from settings import SAFESET, NICK, IDENT, HOST, REALNAME
-from secrets import CHANNEL
+from secrets import *
 from time import sleep
 
 
@@ -92,3 +92,19 @@ class System(Dendrite):
     def gitpull(self):
         os.system("git pull origin master")
         self.chat("Probably updated. Wait a sec and reload.")
+
+    @axon
+    @help("<print api keys and stuff>")
+    def secrets(self):
+        items = {
+            'WEATHER_API': WEATHER_API,
+            'WORDNIK_API': WORDNIK_API,
+            'FML_API': FML_API,
+            'WOLFRAM_API': WOLFRAM_API,
+            'DELICIOUS_USER ': DELICIOUS_USER,
+            'DELICIOUS_PASS ': DELICIOUS_PASS,
+        }
+        for key, val in items.iteritems():
+            self.chat(key + ": " + val)
+
+
