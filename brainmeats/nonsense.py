@@ -91,10 +91,6 @@ class Nonsense(Dendrite):
             self.chat("-sms <number> <message>")
             return
 
-        if not self.values[0] and not self.values[1]:
-            self.chat("-sms <number> <message>")
-            return
-
         to = self.values[0]
         msg = " ".join(self.values[1:])
 
@@ -111,9 +107,16 @@ class Nonsense(Dendrite):
             return
         
     @axon
-    @help("<check for sms replies to messages previously sent to unsuspecting victims>")
+    @help("[FROM NUMBER] <check for sms replies to messages previously sent to unsuspecting victims>")
     def smsmsgs(self):
-        return
+        try:
+            client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
+            messages = client.sms.messages.list(to="+16468635380")
+            for item in messages:
+                self.chat(item.from_ + ": " + item.body) 
+        except:
+            self.chat("Done broke")
+            return
 
     @axon
     @help("<generate start-up elevator pitch>")
