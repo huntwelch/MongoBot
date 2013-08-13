@@ -8,3 +8,4 @@ wordnik==2.1.2
 wsgiref==0.1.2
 nltk==2.0.4
 numpy==1.5.1
+twilio==3.5.1
