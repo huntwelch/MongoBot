@@ -1,14 +1,15 @@
 import simplejson
 import urllib
 import urllib2
+import twilio
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
-from secrets import FML_API
+from secrets import FML_API, TWILIO_SID, TWILIO_TOKEN, TWILIO_NUMBER 
 from util import colorize
 from random import choice
 from xml.dom import minidom as dom
-
+from twilio.rest import TwilioRestClient
 
 @category("nonsense")
 class Nonsense(Dendrite):
@@ -54,7 +55,6 @@ class Nonsense(Dendrite):
         
         self.chat(json['slip']['advice'])
     
-    # TODO: use fml api
     @axon
     @help("SEARCHTERM <grab random fml entry>")
     def fml(self):
@@ -82,6 +82,41 @@ class Nonsense(Dendrite):
             else:
                 self.chat("Done broke")
             return
+    
+    @axon
+    @help("[NUMBER] [MESSAGE] <send an sms message to unsuspecting victim>")
+    def sms(self):
+      
+        if not self.values:
+            self.chat("-sms <number> <message>")
+            return
+
+        to = self.values[0]
+        msg = " ".join(self.values[1:])
+
+        try:
+            client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
+            message = client.sms.messages.create(
+                body=msg,
+                to=to,
+                from_=TWILIO_NUMBER
+            )
+            self.chat("Message sent: " + message.sid)
+        except:
+            self.chat("Done broke")
+            return
+        
+    @axon
+    @help("[FROM NUMBER] <check for sms replies to messages previously sent to unsuspecting victims>")
+    def smsmsgs(self):
+        try:
+            client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
+            messages = client.sms.messages.list(to="+16468635380")
+            for item in messages:
+                self.chat(item.from_ + ": " + item.body) 
+        except:
+            self.chat("Done broke")
+            return
 
     @axon
     @help("<generate start-up elevator pitch>")
@@ -94,7 +129,6 @@ class Nonsense(Dendrite):
         except:
             self.chat("Done broke")
             return
-
 
     @axon
     @help("<generate password according to http://xkcd.com/936/>")
