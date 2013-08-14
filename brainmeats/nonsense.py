@@ -2,6 +2,8 @@ import simplejson
 import urllib
 import urllib2
 import twilio
+import time
+import multiprocessing
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
@@ -10,11 +12,36 @@ from util import colorize
 from random import choice
 from xml.dom import minidom as dom
 from twilio.rest import TwilioRestClient
+    
+def smsworker(self):
+    incoming = []
+    i = 0
+    n = 0 
+    
+    while True:
+        try:
+            client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
+            messages = client.sms.messages.list(to="+16468635380")
+        except:
+            n += 1
+
+        for item in messages:
+            message = item.from_ + ": " + item.body
+            if message not in incoming:
+                incoming.append(str(message))
+                if i > 0: 
+                    self.chat(message) 
+        
+        i += 1
+        time.sleep(30)
+    return
 
 @category("nonsense")
 class Nonsense(Dendrite):
     def __init__(self, cortex):
         super(Nonsense, self).__init__(cortex)
+        p = multiprocessing.Process(target=smsworker, args=(self,))
+        p.start()
 
     @axon
     @help("<generate bullshit>")
@@ -109,9 +136,16 @@ class Nonsense(Dendrite):
     @axon
     @help("[FROM NUMBER] <check for sms replies to messages previously sent to unsuspecting victims>")
     def smsmsgs(self):
+        
+        if not self.values:
+            self.chat("What number?")
+            return
+
+        num = self.values[0]
+
         try:
             client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
-            messages = client.sms.messages.list(to="+16468635380")
+            messages = client.sms.messages.list(to="+16468635380",from_=num)
             for item in messages:
                 self.chat(item.from_ + ": " + item.body) 
         except:
