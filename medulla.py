@@ -2,9 +2,11 @@ import sys
 import socket
 import settings
 import cortex
+import os
+
 from time import sleep
 
-from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER
+from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER, SMS_LOCKFILE
 
 
 class Medulla:
@@ -12,16 +14,21 @@ class Medulla:
         self.sock = socket.socket()
 
         print "* Pinging IRC"
-
+        
         self.sock.connect((HOST, PORT))
         self.sock.send('NICK ' + NICK + '\n')
         self.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
         self.sock.send('JOIN ' + CHANNEL + '\n')
 
         self.sock.setblocking(0)
+        
+        if os.path.exists(SMS_LOCKFILE):
+            os.remove(SMS_LOCKFILE)
+            print ("* Purging SMS Lockfile")
 
         self.active = True
         self.brain = cortex.Cortex(self)
+
 
         print "* Running monitor"
         while True:
