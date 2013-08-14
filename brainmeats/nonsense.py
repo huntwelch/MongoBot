@@ -4,9 +4,10 @@ import urllib2
 import twilio
 import time
 import multiprocessing
+import os
 
 from autonomic import axon, category, help, Dendrite
-from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
+from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK, SMS_LOCKFILE
 from secrets import FML_API, TWILIO_SID, TWILIO_TOKEN, TWILIO_NUMBER 
 from util import colorize
 from random import choice
@@ -33,15 +34,18 @@ def smsworker(self):
                     self.chat(message) 
         
         i += 1
-        time.sleep(30)
+        time.sleep(10)
     return
 
 @category("nonsense")
 class Nonsense(Dendrite):
     def __init__(self, cortex):
         super(Nonsense, self).__init__(cortex)
-        p = multiprocessing.Process(target=smsworker, args=(self,))
-        p.start()
+       
+        if os.path.exists(SMS_LOCKFILE) == False:
+            open(SMS_LOCKFILE, 'a').close()
+            p = multiprocessing.Process(target=smsworker, args=(self,))
+            p.start()
 
     @axon
     @help("<generate bullshit>")
