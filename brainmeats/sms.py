@@ -1,7 +1,7 @@
 from autonomic import axon, alias, category, help, Dendrite
 from time import mktime, localtime, strftime
 from secrets import TWILIO_SID, TWILIO_TOKEN, TWILIO_NUMBER, SAFE_NUMBERS
-from settings import CONTROL_KEY
+from settings import CONTROL_KEY, CHANNEL
 from twilio.rest import TwilioRestClient
 
 @category("sms")
@@ -34,8 +34,8 @@ class Sms(Dendrite):
                     self.incoming.append(sid)
                     if self.i > 0:
                         self.chat(message) 
-                        if item.body[:1] == CONTROL_KEY and item.from_ in SAFE_NUMBERS:
-                           self.cx.command(SAFE_NUMBERS[item.from_], item.body) 
+                        #if item.body[:1] == CONTROL_KEY and item.from_ in SAFE_NUMBERS:
+                        #   self.cx.command(SAFE_NUMBERS[item.from_], item.body) 
             
             self.i += 1
         return
@@ -43,6 +43,9 @@ class Sms(Dendrite):
     @axon
     @help("[NUMBER] [MESSAGE] <send an sms message to unsuspecting victim>")
     def sms(self):
+        if self.context != CHANNEL:
+            self.chat("No private sms abuse. Tsk tsk.")
+            return
 
         if not self.values:
             self.chat("-sms <number> <message>")
