@@ -91,7 +91,8 @@ class System(Dendrite):
     @help("<update from git repo>")
     def gitpull(self):
         os.system("git pull origin master")
-        self.chat("Probably updated. Wait a sec and reload.")
+        self.cx.master.reload(True)
+        self.chat("I know kung-fu.")
 
     @axon
     @help("<print api keys and stuff>")

@@ -133,6 +133,11 @@ class Broca(Dendrite):
             self.chat("Hammertime")
             return
 
+        if sentence == "oh shit its your birthday erikbeta happy birthday" and self.lastsender == "jcb":
+            self._act(" slaps jcb")
+            self.chat("LEAVE ERIK ALONE!")
+            return
+
 
     @axon
     @alias(["waxhapsodic"])

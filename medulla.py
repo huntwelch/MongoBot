@@ -35,12 +35,13 @@ class Medulla:
             sleep(0.1)
             self.brain.monitor(self.sock)
 
-    def reload(self):
-        quiet = False
-        if not self.brain.values or not len(self.brain.values[0]):
+    def reload(self, quiet=False):
+        if self.brain.values and len(self.brain.values[0]):
+            quiet = True
+
+        if not quiet:
             self.brain.act("strokes out.")
         else:
-            quiet = True
             self.brain.act("strokes out.", False, OWNER)
 
         self.active = False

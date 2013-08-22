@@ -84,7 +84,7 @@ class Nonsense(Dendrite):
             self.chat('Use a rubber if you sleep with dcross2\'s mother.')
             return
         
-        self.chat(json['slip']['advice'])
+        self.chat(json['slip']['advice'] + ".. in bed.")
     
     @axon
     @help("SEARCHTERM <grab random fml entry>")
