@@ -22,10 +22,6 @@ class Medulla:
 
         self.sock.setblocking(0)
         
-        if os.path.exists(SMS_LOCKFILE):
-            os.remove(SMS_LOCKFILE)
-            print ("* Purging SMS Lockfile")
-
         self.active = True
         self.brain = cortex.Cortex(self)
 
