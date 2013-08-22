@@ -29,7 +29,7 @@ class Sms(Dendrite):
             for item in messages:
                 message = item.from_ + ": " + item.body
                 if message not in self.incoming:
-                    self.incoming.append(str(message))
+                    self.incoming.append(message)
                     if self.i > 0:
                         self.chat(message) 
             
