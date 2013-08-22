@@ -29,8 +29,9 @@ class Sms(Dendrite):
 
             for item in messages:
                 message = item.from_ + ": " + item.body
-                if message not in self.incoming:
-                    self.incoming.append(message)
+                sid = item.sid
+                if sid not in self.incoming:
+                    self.incoming.append(sid)
                     if self.i > 0:
                         self.chat(message) 
                         if item.body[:1] == CONTROL_KEY and item.from_ in SAFE_NUMBERS:
