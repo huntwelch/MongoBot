@@ -23,18 +23,18 @@ class Sms(Dendrite):
             try:
                 client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
                 messages = client.sms.messages.list(to="+16468635380")
+                for item in messages:
+                    message = item.from_ + ": " + item.body
+                    sid = item.sid
+                    if sid not in self.incoming:
+                        self.incoming.append(sid)
+                        if self.i > 0:
+                            self.chat(message) 
+                
+                self.i += 1
             except:
                 self.errors += 1
 
-            for item in messages:
-                message = item.from_ + ": " + item.body
-                sid = item.sid
-                if sid not in self.incoming:
-                    self.incoming.append(sid)
-                    if self.i > 0:
-                        self.chat(message) 
-            
-            self.i += 1
         return
 
     @axon
