@@ -32,6 +32,7 @@ class Sms(Dendrite):
         while messages:
             item = messages.pop()
             sid = item.sid
+
             if sid in self.incoming:
                 continue
 
@@ -41,7 +42,8 @@ class Sms(Dendrite):
             if not self.loaded:
                 continue
 
-            self.chat(message) 
+            self.announce(message) 
+
             #if item.body[:1] == CONTROL_KEY and item.from_ in SAFE_NUMBERS:
             #   self.cx.command(SAFE_NUMBERS[item.from_], item.body) 
                 
