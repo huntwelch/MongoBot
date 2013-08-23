@@ -17,12 +17,14 @@ class Sms(Dendrite):
 
     def ticker(self):
         self.current = mktime(localtime())
+        messages = False
 
         if self.current == self.next_:
             self.next_ += 20
             try:
                 client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
                 messages = client.sms.messages.list(to="+16468635380")
+                
                 for item in messages:
                     message = item.from_ + ": " + item.body
                     sid = item.sid
@@ -30,11 +32,11 @@ class Sms(Dendrite):
                         self.incoming.append(sid)
                         if self.i > 0:
                             self.chat(message) 
-                
+                    
                 self.i += 1
             except:
                 self.errors += 1
-
+        
         return
 
     @axon
