@@ -22,22 +22,24 @@ class Sms(Dendrite):
         if self.current == self.next_:
             self.next_ += 20
             try:
+                messages = False
                 client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
                 messages = client.sms.messages.list(to="+16468635380")
+                
+                for item in messages:
+                    message = item.from_ + ": " + item.body
+                    sid = item.sid
+                    if sid not in self.incoming:
+                        self.incoming.append(sid)
+                        if self.i > 0:
+                            self.chat(message) 
+                            #if item.body[:1] == CONTROL_KEY and item.from_ in SAFE_NUMBERS:
+                            #   self.cx.command(SAFE_NUMBERS[item.from_], item.body) 
+                    
+                self.i += 1
             except:
                 self.errors += 1
-
-            for item in messages:
-                message = item.from_ + ": " + item.body
-                sid = item.sid
-                if sid not in self.incoming:
-                    self.incoming.append(sid)
-                    if self.i > 0:
-                        self.chat(message) 
-                        #if item.body[:1] == CONTROL_KEY and item.from_ in SAFE_NUMBERS:
-                        #   self.cx.command(SAFE_NUMBERS[item.from_], item.body) 
-            
-            self.i += 1
+        
         return
 
     @axon

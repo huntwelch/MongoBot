@@ -10,7 +10,6 @@ from secrets import FML_API
 from util import colorize
 from random import choice
 from xml.dom import minidom as dom
-from twilio.rest import TwilioRestClient
     
 @category("nonsense")
 class Nonsense(Dendrite):
