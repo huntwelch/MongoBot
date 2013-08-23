@@ -17,11 +17,11 @@ class Sms(Dendrite):
 
     def ticker(self):
         self.current = mktime(localtime())
-        messages = False
 
         if self.current == self.next_:
             self.next_ += 20
             try:
+                messages = False
                 client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
                 messages = client.sms.messages.list(to="+16468635380")
                 
