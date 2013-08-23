@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>MongoBot by huntwelch</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>MongoBot</h1>
+        <p>IRC bot for screwing around. Named not for MongoDB, but after Mongo from Blazing Saddles.</p>
+
+        <p class="view"><a href="https://github.com/huntwelch/MongoBot">View the Project on GitHub <small>huntwelch/MongoBot</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/huntwelch/MongoBot/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/huntwelch/MongoBot/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/huntwelch/MongoBot">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><img src="http://huntwelch.com/mongo-100px.png" alt="Mongo"></p>
+
+<h1>
+<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h1>
+
+<pre><code>mkvirtualenv MongoBot
+pip install -r requirements.txt
+
+To run bot: python medulla.py
+To run bot persistently so it will recover from crashes: ./lighting.sh 
+</code></pre>
+
+<h1>
+<a name="secret-settings" class="anchor" href="#secret-settings"><span class="octicon octicon-link"></span></a>Secret settings</h1>
+
+<pre><code>You will need to create a file in the root folder called secrets.py,
+containing the following variables:
+
+CHANNEL = "#room_for_bot_to_join"
+USERS = ['nickname_allowed_to_use_bot1', ...]
+
+IMPORTANT: For the following items, if you do NOT want to use them,
+set them up in the secrets file anyway, set to empty strings.
+
+If you want the bot to automatically post to delicious:
+
+DELICIOUS_USER = "username"
+DELICIOUS_PASS = "password"
+
+To use the -weather command. Accesses http://api.wunderground.com
+
+WEATHER_API = "weather_api_key" 
+
+To use wordnik:
+
+WORDNIK_API = "wordnik_api_key"
+
+To use the -fml command: (pending support for this)
+
+FML_API = "fml_api_key"
+</code></pre>
+
+<h1>
+<a name="new-features" class="anchor" href="#new-features"><span class="octicon octicon-link"></span></a>New features</h1>
+
+<pre><code>To create a new command in an existing brainmeat category, add the
+function to the class and add the decorator @axon. To add a help entry
+for the function, add @help("Help message.")
+
+To create a new command category, run this from the root directory: 
+
+python newbrains.py category_name
+
+This will create a file called category_name.py in brainmeats, with
+a class Category_name. Loading of this class will be automated, no
+other files need to be altered.
+</code></pre>
+
+<h1>
+<a name="to-do" class="anchor" href="#to-do"><span class="octicon octicon-link"></span></a>To Do</h1>
+
+<pre><code>TODO: link holdem to db, make persistant, open up sit/in/out functionality
+TODO: finish holdem, needs testing and split pots probably don't work
+TODO: fix rate limiting problems with acro
+TODO: stock game: account for splits and reverse splits
+</code></pre>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/huntwelch">huntwelch</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
