@@ -3,6 +3,7 @@
 *.swp
 *.game
 natwords
+killbot
 wordbank
 secrets.py
 introductions

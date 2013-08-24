@@ -21,20 +21,54 @@ Secret settings
 
     If you want the bot to automatically post to delicious:
 
-    DELICIOUS_USER = "username"
-    DELICIOUS_PASS = "password"
+    DELICIOUS_USER = ""
+    DELICIOUS_PASS = ""
 
     To use the -weather command. Accesses http://api.wunderground.com
 
-    WEATHER_API = "weather_api_key" 
+    WEATHER_API = "" 
 
     To use wordnik:
 
-    WORDNIK_API = "wordnik_api_key"
+    WORDNIK_API = ""
 
-    To use the -fml command: (pending support for this)
+    To use the -fml command:
 
-    FML_API = "fml_api_key"
+    FML_API = ""
+
+    To enable sms messaging via Twilio:
+
+    TWILIO_SID = ""
+    TWILIO_TOKEN = ""
+    TWILIO_NUMBER = ""
+
+Social Secret Settings
+======================
+
+    You will need to host a website to properly setup apis.
+
+    The following settings should be set for google/twitter/facebook functionality.
+
+    Note it's not necessary to recycle GOOGLE_USER in this fashion but works for simplicity.
+
+    GOOGLE_USER = ""
+    GOOGLE_PASS = ""
+    
+    FB_USER = GOOGLE_USER + "@gmail.com"
+    FB_PASS = ""
+    FB_PAGE = ""
+    
+    FB_MONGOBOT_APPID = ""
+    FB_MONGOBOT_SECRET = ""
+    
+    TWIT_USER = GOOGLE_USER + "@gmail.com"
+    TWIT_PASS = ""
+    TWIT_PAGE = ""
+    
+    TWIT_CONSUMER_KEY = ""
+    TWIT_CONSUMER_SECRET = ""
+    TWIT_ACCESS_TOKEN = ""
+    TWIT_ACCESS_SECRET = ""
 
 New features
 ============

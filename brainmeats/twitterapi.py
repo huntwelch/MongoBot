@@ -31,4 +31,3 @@ class Twitterapi(Dendrite):
         message = ' '.join(self.values)
         status = self.api.PostUpdate(message)
         self.chat('Tweeted "' + status.text + '"')
-

@@ -31,6 +31,7 @@ class Sms(Dendrite):
             client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
             messages = client.sms.messages.list(to="+16468635380")
         except:
+            print messages
             return
 
         while messages:
