@@ -25,8 +25,8 @@ class Medulla:
         self.active = True
         self.brain = cortex.Cortex(self)
 
-
         print "* Running monitor"
+
         while True:
             sleep(0.1)
             self.brain.monitor(self.sock)
