@@ -9,3 +9,5 @@ wsgiref==0.1.2
 nltk==2.0.4
 numpy==1.5.1
 twilio==3.5.1
+facepy==0.8.4
+python-twitter==1.0

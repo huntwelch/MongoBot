@@ -4,7 +4,7 @@ import re
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, CHANNEL
 from secrets import USERS
-from datastore import Drinker
+from datastore import simpleupdate, Drinker
 
 
 @category("peeps")
@@ -41,14 +41,11 @@ class Peeps(Dendrite):
         name = self.lastsender
         company = " ".join(self.values)
 
-        drinker = Drinker.objects(name=name)
-        if drinker:
-            drinker = drinker[0]
-            drinker.company = company
-        else:
-            drinker = Drinker(name=name, company=company)
+        if not simpleupdate(name, "company", company):
+            self.chat("Busto, bro.")
+            return
 
-        drinker.save()
+        self.chat("Company updated.")
 
     @axon
     @help("<show where everyone works>")

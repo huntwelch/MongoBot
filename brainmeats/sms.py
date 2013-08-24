@@ -1,8 +1,12 @@
+import re
+
 from autonomic import axon, alias, category, help, Dendrite
 from time import mktime, localtime, strftime
 from secrets import TWILIO_SID, TWILIO_TOKEN, TWILIO_NUMBER, SAFE_NUMBERS
 from settings import CONTROL_KEY, CHANNEL
 from twilio.rest import TwilioRestClient
+from secrets import USERS
+from datastore import simpleupdate, Drinker
 
 @category("sms")
 class Sms(Dendrite):
@@ -21,7 +25,7 @@ class Sms(Dendrite):
         if self.current != self.next_:
             return
 
-        self.next_ += 20
+        self.next_ += 10
 
         try:
             client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
@@ -39,6 +43,8 @@ class Sms(Dendrite):
             self.incoming.append(sid)
             message = item.from_ + ": " + item.body
 
+            print "New SMS recieved"
+
             if not self.loaded:
                 continue
 
@@ -50,7 +56,7 @@ class Sms(Dendrite):
         self.loaded = True
 
     @axon
-    @help("[NUMBER] [MESSAGE] <send an sms message to unsuspecting victim>")
+    @help("NUMBER|USERNAME MESSAGE <send an sms message to unsuspecting victim>")
     def sms(self):
         if self.context != CHANNEL:
             self.chat("No private sms abuse. Tsk tsk.")
@@ -62,6 +68,14 @@ class Sms(Dendrite):
 
         to = self.values[0]
         msg = " ".join(self.values[1:])
+
+        if not re.search("^[+0-9]+$", to):
+            user = Drinker.objects(name=to).first()
+            if not user or not user.phone:
+                self.chat('No num found')
+                return
+            else:
+                to = user.phone
 
         try:
             client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
@@ -78,7 +92,6 @@ class Sms(Dendrite):
     @axon
     @help("[FROM NUMBER] <check for sms replies to messages previously sent to unsuspecting victims>")
     def smsmsgs(self):
-
         if not self.values:
             self.chat("What number?")
             return
@@ -94,3 +107,38 @@ class Sms(Dendrite):
             self.chat("Done broke")
             return
 
+    @axon
+    @help("PHONE_NUMBER <add your phone number to your profile for sms access>")
+    def addphone(self):
+        if not self.values:
+            self.chat("What number?")
+            return
+
+        phone = self.values[0]
+
+        if not re.search("^[0-9]{10}$", phone):
+            self.chat("Just one good ol'merican ten-digit number, thank ya kindly.")
+            return
+
+        name = self.lastsender
+
+        if not simpleupdate(name, "phone", phone):       
+            self.chat("Some shit borked.")
+            return
+
+        self.chat("Number updated.")
+
+    @axon
+    @help("[USERNAME] <view your own phone number or another drinker's>")
+    def digits(self):
+        if not self.values:
+            search_for = self.lastsender
+        else:
+            search_for = self.values[0]
+
+        user = Drinker.objects(name=search_for).first()
+        if not user or not user.phone:
+            self.chat("No such numba. No such zone.")
+        else:
+            self.chat(user.name + ': ' + user.phone)
+        

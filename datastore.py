@@ -6,6 +6,20 @@ from settings import STARTING_CASH
 def connectdb():
     mongoengine.connect('bot', host='localhost')
 
+def simpleupdate(whom, key, val):
+    try:
+        drinker = Drinker.objects(name=whom)
+        if drinker:
+            drinker = drinker[0]
+        else:
+            drinker = Drinker(name=whom)
+
+        drinker[key] = val
+        drinker.save()
+    except:
+        return False
+
+    return True
 
 class Position(mongoengine.EmbeddedDocument):
     symbol = StringField(required=True)
@@ -18,6 +32,7 @@ class Position(mongoengine.EmbeddedDocument):
 class Drinker(mongoengine.Document):
     name = StringField(required=True)
     company = StringField()
+    phone = StringField()
     awaiting = StringField()
     cash = FloatField(default=STARTING_CASH)
     positions = ListField(EmbeddedDocumentField(Position))
