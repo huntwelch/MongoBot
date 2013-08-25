@@ -1,5 +1,6 @@
 import datetime
 import re
+import hashlib
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, CHANNEL
@@ -137,3 +138,64 @@ class Peeps(Dendrite):
         USERS.append(guest) 
 
         self.chat("Hi " + guest + ". You seem okay.")
+
+    @axon  
+    @help("PASSWORD <set admin password>")
+    def passwd(self):
+        if not self.values:
+            self.chat("Enter a password.")
+            return
+
+        if self.context == CHANNEL:
+            self.chat("Not in the main channel, you twit.")
+            return
+
+        whom = self.lastsender
+
+        h = hashlib.sha1()
+        h.update(' '.join(self.values))
+        pwd = h.hexdigest()
+
+        if not simpleupdate(whom, "password", pwd):
+            self.chat("Fail.")
+            return
+        
+        self.chat("Password set.")
+
+    @axon
+    @help("PHONE_NUMBER <add your phone number to your profile for sms access>")
+    def addphone(self):
+        if not self.values:
+            self.chat("What number?")
+            return
+
+        phone = self.values[0]
+
+        if not re.search("^[0-9]{10}$", phone):
+            self.chat("Just one good ol'merican ten-digit number, thank ya kindly.")
+            return
+
+        name = self.lastsender
+
+        if not simpleupdate(name, "phone", phone):       
+            self.chat("Some shit borked.")
+            return
+
+        self.chat("Number updated.")
+
+    @axon
+    @help("[USERNAME] <view your own phone number or another drinker's>")
+    def digits(self):
+        if not self.values:
+            search_for = self.lastsender
+        else:
+            search_for = self.values[0]
+
+        user = Drinker.objects(name=search_for).first()
+        if not user or not user.phone:
+            self.chat("No such numba. No such zone.")
+        else:
+            self.chat(user.name + ': ' + user.phone)
+        
+
+

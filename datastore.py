@@ -31,6 +31,7 @@ class Position(mongoengine.EmbeddedDocument):
 
 class Drinker(mongoengine.Document):
     name = StringField(required=True)
+    password = StringField(min_length=40, max_length=40)
     company = StringField()
     phone = StringField()
     awaiting = StringField()

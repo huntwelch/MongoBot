@@ -113,7 +113,8 @@ class Cortex:
         # TODO: build scan check from settings
         scan = re.search(SCAN, line)
         ping = re.search("^PING", line)
-        if line != '' and not scan and not ping:
+        pwd = re.search(":-passwd", line)
+        if line != '' and not scan and not ping and not pwd:
             self.logit(line + '\n')
 
         if self.gettingnames:
@@ -206,8 +207,9 @@ class Cortex:
         shutil.move(LOG, backlog)
 
     def parse(self, msg):
-
-        print msg
+        pwd = re.search(":-passwd", msg)
+        if not pwd:
+            print msg
 
         info, content = msg[1:].split(' :', 1)
         try:
