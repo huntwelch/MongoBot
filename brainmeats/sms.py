@@ -17,19 +17,15 @@ class Sms(Dendrite):
         self.loaded = False
         self.current = mktime(localtime())
         self.next_ = self.current + 10
-        self.cx.addlive(self.ticker)
-        self.numbers = {}
-
-        for drinker in Drinker.objects:
-            if drinker.phone:
-                self.numbers['+1' + drinker.phone] = drinker.name
+        self.cx.addlive(self.smsticker)
 
         return
 
-    def ticker(self):
+    def smsticker(self):
+
         self.current = mktime(localtime())
 
-        if self.current != self.next_:
+        if self.current < self.next_:
             return
 
         self.next_ += 10
@@ -37,6 +33,7 @@ class Sms(Dendrite):
         try:
             messages = self.client.sms.messages.list(to="+16468635380")
         except:
+            print "Error fetching" 
             print messages
             return
 
@@ -47,6 +44,9 @@ class Sms(Dendrite):
             if sid in self.incoming:
                 continue
 
+            if self.loaded:
+                print "New message"
+
             self.incoming.append(sid)
             message = item.from_ + ": " + item.body
 
@@ -55,8 +55,11 @@ class Sms(Dendrite):
 
             self.announce(message) 
 
-            if item.body[:1] == CONTROL_KEY and item.from_ in self.numbers:
-               self.cx.command(self.numbers[item.from_], item.body) 
+            clipped = item.from_[2:]
+            drinker = Drinker.objects(phone=clipped)
+            if item.body[:1] == CONTROL_KEY and drinker:
+                self.cx.context = CHANNEL 
+                self.cx.command(drinker[0].name, item.body) 
                 
         self.loaded = True
 
