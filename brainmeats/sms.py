@@ -44,19 +44,23 @@ class Sms(Dendrite):
             if sid in self.incoming:
                 continue
 
-            if self.loaded:
-                print "New message"
-
             self.incoming.append(sid)
-            message = item.from_ + ": " + item.body
 
             if not self.loaded:
                 continue
 
-            self.announce(message) 
-
             clipped = item.from_[2:]
             drinker = Drinker.objects(phone=clipped)
+
+            if drinker:
+                from_ = drinker[0].name
+            else:
+                from_ = item.from_
+
+            message = "SMS from " + from_ + ": " + item.body
+
+            self.announce(message) 
+
             if item.body[:1] == CONTROL_KEY and drinker:
                 self.cx.context = CHANNEL 
                 self.cx.command(drinker[0].name, item.body) 
