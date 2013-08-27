@@ -31,7 +31,7 @@ class Sms(Dendrite):
         self.next_ += 10
 
         try:
-            messages = self.client.sms.messages.list(to="+16468635380")
+            messages = self.client.sms.messages.list(to=TWILIO_NUMBER)
         except:
             print "Error fetching" 
             print messages
@@ -61,7 +61,7 @@ class Sms(Dendrite):
 
             self.announce(message) 
 
-            if item.body[:1] == CONTROL_KEY and drinker:
+            if item.body[:1] == CONTROL_KEY and drinker and item.from_ != TWILIO_NUMBER:
                 self.cx.context = CHANNEL 
                 self.cx.command(drinker[0].name, item.body) 
                 
