@@ -2,6 +2,7 @@ import HTMLParser
 import simplejson
 import textwrap
 import urllib
+import os
 
 from autonomic import axon, alias, category, help, Dendrite
 from BeautifulSoup import BeautifulSoup
@@ -174,3 +175,13 @@ class Reference(Dendrite):
             result = NICK + " not smart enough to do that."
 
         self.chat(str(result))
+
+    @axon
+    @help("URL <get whois information>")
+    def whois(self):
+        if not self.values:
+            self.chat("The Doctor")
+            return
+
+    
+
