@@ -1,25 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>MongoBot Rule World Soon</title>
-<style>
-    p#mongo {
-        text-align: center;
-        height: 100%;
-    }
-    p#mongo img {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-top: -150px;
-        margin-left: -150px;
-    }
-</style>
-</head>
-<body>
+{% extends "base.html" %}
+{% block head %}
+    {{ super() }}
+    <style>
+        p#mongo {
+            text-align: center;
+            height: 100%;
+        }
+        p#mongo img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -150px;
+            margin-left: -150px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
 <p id="mongo">
-    <img src="img/mongobot.png" alt="MongoBot live..." />
-    <p>Is werk?</p>
+    <img src="{{ url_for('static', filename='img/mongobot.png') }}" alt="MongoBot live..." />
 </p>
-</body>
-</html>
+{% endblock %}

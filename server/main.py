@@ -3,11 +3,14 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
 
 app = Flask(__name__)
 
-print __name__
-
 @app.route("/")
 def index():
-    return "Hello Phil."
+    return render_template('index.html')
 
-    if __name__ == "__main__":
-        app.run()
+@app.route("/callback")
+@app.route("/callback.html")
+def callback():
+    return render_template('callback.html')
+
+if __name__ == "__main__":
+    app.run()
