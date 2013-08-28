@@ -34,6 +34,7 @@ class Drinker(mongoengine.Document):
     password = StringField(min_length=40, max_length=40)
     company = StringField()
     phone = StringField()
+    rewards = IntField(default=0)
     awaiting = StringField()
     cash = FloatField(default=STARTING_CASH)
     positions = ListField(EmbeddedDocumentField(Position))

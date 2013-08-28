@@ -33,6 +33,7 @@ SHORTENER = "http://roa.st/api.php?roast="
 PATIENCE = 7000
 REPO = "https://github.com/huntwelch/MongoBot"
 SMS_LOCKFILE = "/tmp/sms.lock"
+PULSE = "/tmp/bot.pulse"
 
 # Stockgame
 

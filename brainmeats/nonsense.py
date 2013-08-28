@@ -9,6 +9,7 @@ from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
 from secrets import FML_API 
 from util import colorize
 from random import choice
+from datastore import Drinker 
 from xml.dom import minidom as dom
     
 @category("nonsense")
@@ -118,6 +119,18 @@ class Nonsense(Dendrite):
             self.chat("Reward whom?")
             return
         kinder = self.values[0]
+
+        drinker = Drinker.objects(name=kinder)
+        if drinker:
+            drinker = drinker[0] 
+            rewards = drinker.rewards + 1
+        else:
+            drinker = Drinker(name=kinder)
+            rewards = 1
+        
+        drinker.rewards = rewards
+        drinker.save()
+
         self.chat("Good job, " + kinder + ". Here's your star: " + colorize(u'\u2605', "yellow"))
         self._act(" pats " + kinder + "'s head.")
 

@@ -3,10 +3,10 @@ import socket
 import settings
 import cortex
 import os
+import thread
 
-from time import sleep
-
-from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER, SMS_LOCKFILE
+from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER, SMS_LOCKFILE, PULSE
+from time import sleep, mktime, localtime
 
 
 class Medulla:
@@ -25,11 +25,16 @@ class Medulla:
         self.active = True
         self.brain = cortex.Cortex(self)
 
+        print "* Establishing pulse"
+        self.setpulse()
+
         print "* Running monitor"
 
         while True:
             sleep(0.1)
             self.brain.monitor(self.sock)
+            if mktime(localtime()) - self.lastpulse > 10:
+               self.setpulse() 
 
     def reload(self, quiet=False):
         if self.brain.values and len(self.brain.values[0]):
@@ -63,6 +68,12 @@ class Medulla:
             self.brain.act("comes to.")
         else:
             self.brain.act("comes to.", False, OWNER)
+
+    def setpulse(self):
+        self.lastpulse = mktime(localtime())
+        pulse = open(PULSE, 'w')
+        pulse.write(str(self.lastpulse))
+        pulse.close()
 
     def die(self):
         sys.exit()
