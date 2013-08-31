@@ -18,6 +18,9 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route("/api/chat", methods=['GET', 'POST'])
+def api_chat():
+    return False
 
 @app.route("/chatlogs", methods=['GET', 'POST'])
 @app.route("/chatlogs/<offset>", methods=['GET'])

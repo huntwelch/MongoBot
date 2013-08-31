@@ -4,16 +4,13 @@
     <style>
         #log {
             position: relative;
-            width: 654px;
-            left: 50%;
-            margin-left: -327px;
         }
         p {
             clear: both;
             margin: 0;
-            padding: 5px;
+            padding: 5px 5px 6px;
         }
-        span, p {
+        span {
             float: left;
             display: block;
         }
@@ -29,7 +26,8 @@
             color: #ccc;
         }
         span.message {
-            width: 500px;
+            float: none;
+            margin-left: 144px;
         }
         p.odd {
             background: #f2f2f2;
@@ -43,8 +41,13 @@
             border: 1px solid #ccc;
             font-size: 16px;
             padding: 10px;
-            margin: 10px 0;
-            width: 632px;
+            width: 500px;
+        }
+        #search-bar {
+            top: 45%;
+            width: 522px;
+            left: 50%;
+            margin-left: -261px; 
         }
         p.entry {
             /* for text selection later cursor: pointer; */
@@ -66,20 +69,21 @@
                 var target = $(this).children('.index').text();
                 window.location = '/chatlogs/' + (parseInt(target) - 10) + "?fade=" + target;
             });
+            $('body').on('keyup', function(e) {
+                if( e.keyCode == 83 ) {
+                    $('#search-bar, #overlay').show();
+                    $('#search-bar input').focus();
+                }
+            });
        });
     </script>
 {% endblock %}
 {% block content %}
 
 <!-- todo: date? / total / offset / search / index -->
+
+{% include 'nav.html' %}
 <div id="log">
-    <h1>Chatlog</h1>
-    <p class="note">
-        Navigate to /chatlogs/[int ###] to retrieve older logs.
-    </p>
-    <form action="/chatlogs" method="post">
-        <input class="search" placeholder="Search logs" name="search" />
-    </form>
     {% for chat in chats %}
         <p class="entry {{ loop.cycle('odd', 'even') }} {{ chat.fader }} {{ chat.interface }}">
             <span class="index">{{ chat.index }}</span>
@@ -92,4 +96,9 @@
         </p>
     {% endfor %}
 </div>
+<modal id="search-bar">
+    <form action="/chatlogs" method="post">
+        <input class="search" placeholder="Search logs" name="search" />
+    </form>
+</modal>
 {% endblock %}
