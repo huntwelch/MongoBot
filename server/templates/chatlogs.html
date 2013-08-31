@@ -50,7 +50,7 @@
             margin-left: -261px; 
         }
         p.entry {
-            /* for text selection later cursor: pointer; */
+            cursor: pointer;
         }
         p.search {
             cursor: pointer;
@@ -61,9 +61,40 @@
         p.search:hover span {
             color: #fff;
         }
+        p.selected {
+            background: #99f;
+        }
+        p.selected span {
+            color: #fff;
+        }
     </style>
     <script>
        $(function() {
+            $(document).on('copy', function() {
+                var temp = $('<div/>').prop('id', 'selector');
+                $('p.selected').each(function() {
+                    var item = $(this);
+                    var nick = item.find(".nick").text();
+                    var message = item.find(".message").text();
+                    var chat = $("<p/>").text('<' + nick + '> ' + message);
+                    temp.append(chat);
+                });
+                var selection = window.getSelection();
+                $('body').append(temp);
+                selection.selectAllChildren(document.getElementById('selector')); 
+                window.setTimeout(function() {
+                    $('#selector').remove();
+                },0);
+            });
+            $('#log').on('click', function(e) {
+                var item = $(e.target);
+                if( item.context.localName != "p" ) {
+                    item = item.parent();
+                }
+                if( item.hasClass('search') ) return;
+
+                item.toggleClass('selected');
+            });
             $('#log').on('click', function(e) {
                 var item = $(e.target);
                 if( item.context.localName != "p" ) {
