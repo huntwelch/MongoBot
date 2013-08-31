@@ -108,17 +108,6 @@ def chatlogs(offset="0"):
 def callback():
     return render_template('callback.html')
 
-@app.route("/killbot", methods=['GET', 'POST'])
-@requires_auth
-def killbot():
-    dead = False
-    if request.method == 'POST':
-        os.system('./killbot')
-        subprocess.Popen('./lightning.sh', stdout=PIPE, bufsize=1)
-        dead = True
-
-    return render_template('killbot.html', nick=NICK, dead=dead)
-
 if __name__ == "__main__":
     app.debug = True
     app.run()
