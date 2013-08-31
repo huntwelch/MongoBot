@@ -64,17 +64,163 @@
     </style>
     <script>
        $(function() {
-            $('p.fader').effect( "bounce", "slow" );
-            $('p.search').on('click', function() {
-                var target = $(this).children('.index').text();
-                window.location = '/chatlogs/' + (parseInt(target) - 10) + "?fade=" + target;
+            $('#log').on('click', function(e) {
+                var item = $(e.target);
+                if( item.context.localName != "p" ) {
+                    item = item.parent();
+                }
+                if( !item.hasClass('search') ) return;
+                var target = item.children('.index').text();
+                $.ajax(
+                    "/api/chat",
+                    {
+                        dataType: "json",
+                        method: "get",
+                        data: {
+                            offset: parseInt(target) - 10,
+                            fade: target
+                        },
+                        success: function(data) {
+                            $('#log').html('');
+                            $(window).scrollTop(0);
+                            render(data);
+                        }
+                    }
+                );
             });
             $('body').on('keyup', function(e) {
-                if( e.keyCode == 83 ) {
+                if( e.keyCode == 191 ) {
                     $('#search-bar, #overlay').show();
                     $('#search-bar input').focus();
                 }
             });
+
+            $(window).on('scroll', function(e) {
+                if( info.searching ) return;
+
+                var height = $(document).height() - $(window).height();
+                var scroll = $(document).scrollTop();
+
+                var offset = false;
+                var back = false;
+                if( scroll >= height ) {
+                    offset = info.end;
+                }
+                if( scroll <= 0 ) {
+                    offset = info.start - 200;
+                    back = true;
+                }
+
+                if( !offset || info.lock ) return;
+
+                info.lock = true;
+
+                $.ajax(
+                    "/api/chat",
+                    {
+                        dataType: "json",
+                        method: "get",
+                        data: {
+                            offset: offset
+                        },
+                        success: function(data) {
+                            render(data, back);
+                            info.lock = false;
+                        }
+                    }
+                );
+            });
+
+            var info = {
+                lock: false,
+                searching: false,
+                start: Infinity,
+                end: 0
+            };
+
+            var render = function(data, back, search) {
+
+                info.searching = false;
+                if( search == "searching" ) info.searching = true;
+
+                if( data[data.length - 1].index == info.end && !info.searching ) return;
+
+                data.shift();
+
+                if( !info.searching ) {
+                    if( data[0].index < info.start ) {
+                        info.start = data[0].index;
+                    }
+                    if( data[data.length - 1].index > info.end ) {
+                        info.end = data[data.length - 1].index;
+                    }
+                } else {
+                    info.start = Infinity,
+                    info.end = 0
+                }
+
+                var attachment = $("<div/>");
+
+                for(iter=0; iter < data.length; iter++) {
+                    var chat = data[iter];
+                    var p = $("<p class='entry' />");
+                    var loop = (iter % 2 ? "odd" : "even");
+                    p.addClass(loop) 
+                     .addClass(chat.interface)
+                     .addClass(chat.fader);
+                    var index = $("<span class='index' />").text(chat.index);
+                    var nick = $("<span class='nick' />").text(chat.nick);
+                    var message = $("<span class='message' />").text(chat.message);
+
+                    p.append(index)
+                     .append(nick)
+                     .append(message);
+
+                    attachment.append(p);
+
+                }
+                if( back ) {
+                    $("#log").prepend(attachment);
+                } else {
+                    $("#log").append(attachment);
+                }
+                $('p.fader').effect( "bounce", "slow" );
+            };
+            $('#search-bar input').on('keypress', function(e) {
+                if( e.keyCode != 13 ) return;
+
+                var search = $(e.target);
+
+                search.blur();
+                $('modal, #overlay').hide();
+                $.ajax(
+                    "/api/chat",
+                    {
+                        dataType: "json",
+                        method: "get",
+                        data: {
+                            search: search.val()
+                        },
+                        success: function(data) {
+                            $("#log").html('');
+                            render(data, false, "searching");
+                        },
+                        error: function(e) {
+                            console.log(e);
+                        }
+                    }
+                );
+
+                return false;
+            });
+            $.ajax(
+                "/api/chat",
+                {
+                    dataType: "json",
+                    method: "get",
+                    success: render
+                }
+            );
        });
     </script>
 {% endblock %}
@@ -83,22 +229,8 @@
 <!-- todo: date? / total / offset / search / index -->
 
 {% include 'nav.html' %}
-<div id="log">
-    {% for chat in chats %}
-        <p class="entry {{ loop.cycle('odd', 'even') }} {{ chat.fader }} {{ chat.interface }}">
-            <span class="index">{{ chat.index }}</span>
-            {% if not chat.action %}
-            <span class="nick">{{ chat.nick }}:</span>
-            {% else %}
-            <span class="nick action">&bull; {{ chat.nick }}</span>
-            {% endif %}
-            <span class="message">{{ chat.msg }}</span>
-        </p>
-    {% endfor %}
-</div>
+<div id="log"></div>
 <modal id="search-bar">
-    <form action="/chatlogs" method="post">
-        <input class="search" placeholder="Search logs" name="search" />
-    </form>
+    <input class="search" placeholder="Search logs" name="search" />
 </modal>
 {% endblock %}

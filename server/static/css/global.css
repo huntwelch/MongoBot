@@ -77,3 +77,12 @@ navigation icon a {
   background: transparent url(/static/img/mongo-50px.png) 0 0 no-repeat;
 }
 
+navigation hint {
+  color: #999;
+  height: 60px;
+  line-height: 60px;
+  position: absolute;
+  right: 20px;
+  top: 0;
+  font-size: 14px;
+}

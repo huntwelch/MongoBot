@@ -7,4 +7,11 @@ $(function() {
 
   $('body').on('keydown', hidemodal); 
   $('#overlay').on('click', hidemodal); 
+  $(document).ajaxStart(function() {
+    $("loader").show();
+  });
+  $(document).ajaxComplete(function() {
+    $("loader").hide();
+  });
 });
+
