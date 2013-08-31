@@ -248,7 +248,7 @@ class Cortex:
 
     def tweet(self, urls):
         for url in urls:
-            response = pageopen('https://api.twitter.com/1/statuses/show.json?id=%s' % url[1])
+            response = pageopen('https://api.twitter.com/1.1/statuses/show.json?id=%s' % url[1])
             if not response:
                 self.chat("Couldn't retrieve Tweet.")
                 return
@@ -360,6 +360,7 @@ class Cortex:
         else:
             whom = self.lastsender
         message = message.encode("utf-8")
+        self.logit("___" + NICK + ": " + str(message) + '\n')
         try:
             self.sock.send('PRIVMSG ' + whom + ' :' + str(message) + '\n')
         except:

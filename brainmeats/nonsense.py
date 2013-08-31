@@ -59,6 +59,7 @@ class Nonsense(Dendrite):
     @axon
     @help("SEARCHTERM <grab random fml entry>")
     def fml(self):
+
         uri = 'http://api.fmylife.com'
         lang = 'en'
         
@@ -77,11 +78,12 @@ class Nonsense(Dendrite):
             else:
                 fml = raw.getElementsByTagName("text")[0].firstChild.nodeValue
             self.chat(fml)
-        except:
+        except Exception as e:
             if self.values and self.values[0]:
                 self.chat("No results. Or done broken.")
             else:
                 self.chat("Done broke")
+                self.chat("Exception: " + e)
             return
 
     @axon

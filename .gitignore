@@ -2,11 +2,11 @@
 *.pyc
 *.swp
 *.game
+*.notes
+.project
+.pydevproject
 natwords
-killbot
 wordbank
 secrets.py
 introductions
-.project
-.pydevproject
 python.core

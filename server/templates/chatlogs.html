@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block head %}
+    {{ super() }}
+    <style>
+        #log {
+            position: relative;
+            width: 654px;
+            left: 50%;
+            margin-left: -327px;
+        }
+        p {
+            clear: both;
+            margin: 0;
+            padding: 5px;
+        }
+        span, p {
+            float: left;
+            display: block;
+        }
+        span.nick {
+            font-weight: bold;
+            color: #f90;
+            width: 90px;
+            text-align: right;
+            margin-right: 4px;
+        }
+        span.index {
+            width: 50px; 
+            color: #ccc;
+        }
+        span.message {
+            width: 500px;
+        }
+        p.odd {
+            background: #f2f2f2;
+        }
+        p.note {
+            margin: 10px 0;
+            color: #888;
+        }
+        input.search {
+            color: #666;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            padding: 10px;
+            margin: 10px 0;
+            width: 632px;
+        }
+        p.entry {
+            /* for text selection later cursor: pointer; */
+        }
+        p.search {
+            cursor: pointer;
+        }
+        p.search:hover {
+            background: #f90;
+        }
+        p.search:hover span {
+            color: #fff;
+        }
+    </style>
+    <script>
+       $(function() {
+            $('p.fader').effect( "bounce", "slow" );
+            $('p.search').on('click', function() {
+                var target = $(this).children('.index').text();
+                window.location = '/chatlogs/' + (parseInt(target) - 10) + "?fade=" + target;
+            });
+       });
+    </script>
+{% endblock %}
+{% block content %}
+
+<!-- todo: date? / total / offset / search / index -->
+<div id="log">
+    <h1>Chatlog</h1>
+    <p class="note">
+        Navigate to /chatlogs/[int ###] to retrieve older logs.
+    </p>
+    <form action="/chatlogs" method="post">
+        <input class="search" placeholder="Search logs" name="search" />
+    </form>
+    {% for chat in chats %}
+        <p class="entry {{ loop.cycle('odd', 'even') }} {{ chat.fader }} {{ chat.interface }}">
+            <span class="index">{{ chat.index }}</span>
+            {% if not chat.action %}
+            <span class="nick">{{ chat.nick }}:</span>
+            {% else %}
+            <span class="nick action">&bull; {{ chat.nick }}</span>
+            {% endif %}
+            <span class="message">{{ chat.msg }}</span>
+        </p>
+    {% endfor %}
+</div>
+{% endblock %}
