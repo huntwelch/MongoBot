@@ -30,6 +30,7 @@ def api_chat():
 @app.route("/chatlogs")
 @requires_auth
 def chatlogs():
+
     hint = 'Press "/" to search logs.'
     return render_template('chatlogs.html', hint=hint)
     
@@ -95,10 +96,14 @@ def fetchchats(request, offset):
     offset = int(offset)
     total = len(chats)
 
+    # account for zero start in js
+
     if total <= lim:
         chats = chats
     elif offset == 0:
         chats = chats[-lim:]
+    elif offset < 0:
+        chats = chats[0:offset + lim]
     else:
         chats = chats[offset:offset + lim]
 

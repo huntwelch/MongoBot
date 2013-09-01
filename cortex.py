@@ -110,19 +110,18 @@ class Cortex:
         if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
             print "* Joined " + CHANNEL
 
-        # TODO: build scan check from settings
-        scan = re.search(SCAN, line)
-        ping = re.search("^PING", line)
-        pwd = re.search(":-passwd", line)
-        if line != '' and not scan and not ping and not pwd:
-            self.logit(line + '\n')
-
         if self.gettingnames:
             if line.find("* " + CHANNEL) != -1:
                 all = line.split(":")[2]
                 self.gettingnames = False
                 all = re.sub(NICK + ' ', '', all)
                 self.members = all.split()
+
+        scan = re.search(SCAN, line)
+        ping = re.search("^PING", line)
+        pwd = re.search(":-passwd", line)
+        if line != '' and not scan and not ping and not pwd:
+            self.logit(line + '\n')
 
         if line.find('PING') != -1:
             self.sock.send('PONG ' + line.split()[1] + '\n')

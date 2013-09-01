@@ -35,7 +35,12 @@ REPO = "https://github.com/huntwelch/MongoBot"
 SMS_LOCKFILE = "/tmp/sms.lock"
 PULSE = "/tmp/bot.pulse"
 
-# Stockgame
+# Web server
+
+WEBSITE = "http://mongobot.com"
+ONETIME = '/tmp/bot.pass'
+
+# Stock game
 
 VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ'])
 STARTING_CASH = 100000
