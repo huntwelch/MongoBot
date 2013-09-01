@@ -44,7 +44,8 @@ def twilio_sms():
 @app.route("/callback")
 @app.route("/callback.html")
 def callback():
-    return render_template('callback.html')
+    text = "Gettin jiggy wid it"
+    return render_template('callback.html', text=text)
 
 
 if __name__ == "__main__":

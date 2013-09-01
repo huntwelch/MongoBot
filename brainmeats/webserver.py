@@ -1,7 +1,8 @@
 import random
+import os
 
 from autonomic import axon, alias, category, help, Dendrite
-from settings import ONETIME, WEBSITE
+from settings import ONETIME, WEBSITE, SERVER_RELOAD
 
 
 @category("webserver")
@@ -21,3 +22,9 @@ class Webserver(Dendrite):
         num = self._setaccess()
         link = WEBSITE + "/chatlogs?onetime=" + str(num)
         self.chat(link)
+
+    @axon
+    @help("<Reload uwsgi server>")
+    def reloadserver(self):
+        os.system('touch ' + SERVER_RELOAD)
+        self.chat("Reloaded uswgi")
