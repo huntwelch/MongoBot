@@ -23,11 +23,17 @@ class Twitterapi(Dendrite):
 
     @axon
     @help("MESSAGE <post to " + NICK + "'s twitter feed>")
-    def tweet(self):
-        if not self.values:
+    def tweet(self, _message=False):
+        if not self.values and not _message:
             self.chat("Tweet what?")
             return
         
-        message = ' '.join(self.values)
+        if not _message:
+            message = ' '.join(self.values)
+        else:
+            message = _message
+
         status = self.api.PostUpdate(message)
-        self.chat('Tweeted "' + status.text + '"')
+
+        if not _message:
+            self.chat('Tweeted "' + status.text + '"')

@@ -34,7 +34,6 @@ class Sms(Dendrite):
             messages = self.client.sms.messages.list(to=TWILIO_NUMBER)
         except:
             print "Error fetching" 
-            print messages
             return
 
         while messages:
@@ -63,6 +62,7 @@ class Sms(Dendrite):
 
             if item.body[:1] == CONTROL_KEY and drinker and item.from_ != TWILIO_NUMBER:
                 self.cx.context = CHANNEL 
+                self.cx.replysms = from_
                 self.cx.command(drinker[0].name, item.body) 
                 
         self.loaded = True

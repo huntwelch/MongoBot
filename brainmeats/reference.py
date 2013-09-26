@@ -19,6 +19,13 @@ class Reference(Dendrite):
         self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
 
     @axon
+    @help("SEARCH_METHOD SEARCH_TERM <look something up in saved search path>")
+    def s(self):
+        if not self.values or len(self.values) < 2:
+            self.chat("Search with -s METHOD TERM(S)")
+            return
+
+    @axon
     @help("SEARCH_TERM <look something up in google>")
     def g(self):
         if not self.values:

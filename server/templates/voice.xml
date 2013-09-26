@@ -2,7 +2,7 @@
 <Response>
     <Say>Thanks for calling.</Say>
     <Pause length="1"/>
-    <Say>If you have a question, please stay on the line for the next available representative.</Say>
+    <Say>If you have an inquiry, please stay on the line for the next available representative.</Say>
     <Pause length="10"/>
     <Say>We're sorry, but nobody actually works here. Goodbye.</Say>
 </Response>

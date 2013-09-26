@@ -3,6 +3,7 @@
 *.swp
 *.game
 *.notes
+*.html
 .project
 .pydevproject
 natwords
@@ -10,3 +11,4 @@ wordbank
 secrets.py
 introductions
 python.core
+raw

@@ -24,7 +24,13 @@ class Webserver(Dendrite):
         self.chat(link)
 
     @axon
+    @help("<get link to appropriate [sic] http codes for describing dating>")
+    def pigs(self):
+        link = WEBSITE + "/codez"
+        self.chat(link)
+
+    @axon
     @help("<Reload uwsgi server>")
     def reloadserver(self):
         os.system('touch ' + SERVER_RELOAD)
-        self.chat("Reloaded uswgi")
+        self.chat("Reloaded uwsgi")

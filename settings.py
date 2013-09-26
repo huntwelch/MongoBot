@@ -23,6 +23,7 @@ SCAN = "^:\w+\.freenode\.net"
 STORAGE = "hippocampus"
 LOGDIR = STORAGE + "/log"
 LOG = LOGDIR + "/chat.log"
+RAW_TEXT = 'booklearnin/raw'
 DISTASTE = STORAGE + "/distaste"
 ACROSCORE = STORAGE + "/acro/"
 

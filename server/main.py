@@ -31,12 +31,17 @@ def chatlogs():
     return render_template('chatlogs.html', hint=hint)
 
 
-@app.route("/voice.xml")
+@app.route("/codez")
+def codez():
+    return render_template('codez.html')
+
+
+@app.route("/voice.xml", methods=['GET', 'POST'])
 def twilio_voice():
     return render_xml('voice.xml')
 
 
-@app.route("/sms.xml")
+@app.route("/sms.xml", methods=['GET', 'POST'])
 def twilio_sms():
     return render_xml('sms.xml')
 

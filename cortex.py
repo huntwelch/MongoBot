@@ -29,6 +29,7 @@ class Cortex:
         self.master = master
         self.context = CHANNEL
         self.lastpublic = False
+        self.replysms = False
         self.lastprivate = False
         self.lastsender = False
         self.sock = master.sock
@@ -274,6 +275,12 @@ class Cortex:
                 self.tweet(twitter_urls)
                 return
 
+            if url.find('gist.github') != -1:
+                return 
+                
+            if randint(1,5) == 1:
+                self.commands.get("tweet", self.default)(url)
+
             while True:
                 fubs = 0
                 title = "Couldn't get title"
@@ -362,6 +369,11 @@ class Cortex:
         self.logit("___" + NICK + ": " + str(message) + '\n')
         try:
             self.sock.send('PRIVMSG ' + whom + ' :' + str(message) + '\n')
+            if self.replysms:
+                to = self.replysms
+                self.replysms = False
+                self.values = [to, str(message)]
+                self.commands.get('sms')()
         except:
             self.sock.send('PRIVMSG ' + whom + ' :Having trouble saying that for some reason\n')
 
@@ -373,6 +385,11 @@ class Cortex:
             self.chat(message, target)
         else:
             self.chat(message)
+            if self.replysms:
+                to = self.replysms
+                self.replysms = False
+                self.values = [to, str(message)]
+                self.commands.get('sms')()
 
     def default(self):
         self.act(" cannot do this thing :'(")

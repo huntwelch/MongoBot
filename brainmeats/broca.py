@@ -5,9 +5,9 @@ import string
 
 from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API
-from settings import NICK, STORAGE, ACROLIB, LOGDIR
+from settings import NICK, STORAGE, ACROLIB, LOGDIR, RAW_TEXT
 from datastore import Words, Learned, Structure
-from random import choice
+from random import choice, randint
 from util import pageopen
 from BeautifulSoup import BeautifulSoup as soup
 from wordnik import swagger, WordApi
@@ -17,6 +17,43 @@ from wordnik import swagger, WordApi
 class Broca(Dendrite):
     def __init__(self, cortex):
         super(Broca, self).__init__(cortex)
+
+        self.readstuff = False
+        self.knowledge = False
+
+
+    @axon
+    @help("<Make " + NICK + " read books>")
+    def readup(self):
+        if self.knowledge:
+            self.chat("Already read today.")
+            return
+
+        self.chat("This may take a minute.")
+        books = open(RAW_TEXT, 'r')
+        data = books.read().replace('\n', ' ')
+        tokens = nltk.word_tokenize(data)
+        self.knowledge = nltk.Text(tokens)
+
+        self.chat("Okay, read all the things.")
+
+
+    @axon
+    @help("<command " + NICK + " to speak>")
+    def speak2(self):
+        if not self.knowledge:
+            self.chat("Can't speak good yet. Must read.")
+            return
+
+        if not self.readstuff:
+            self.chat("Just one sec...")
+            self.knowledge.generate()
+
+        length = randint(10, 100)
+        text = ' '.join(self.knowledge._trigram_model.generate(length))
+
+        self.readstuff = True
+        self.chat(text)
 
 
     @axon
@@ -123,6 +160,10 @@ class Broca(Dendrite):
 
         if sentence.lower().find("oh snap") != -1:
             self.chat("yeah WHAT?? Oh yes he DID")
+            return
+
+        if sentence.lower().find("'murican") != -1:
+            self.chat("fuck yeah")
             return
 
         if sentence.lower().find("rimshot") != -1:
