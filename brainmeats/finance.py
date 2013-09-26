@@ -37,7 +37,7 @@ class Finance(Dendrite):
     @axon
     @help("<get current Bitcoin trading information>")
     def btc(self):
-        url = 'https://mtgox.com/api/1/BTCUSD/ticker'
+        url = 'https://btc-e.com/api/2/btc_usd/ticker'
 
         response = pageopen(url)
         if not response:
@@ -50,9 +50,10 @@ class Finance(Dendrite):
             self.chat("Couldn't parse BTC data.")
             return
 
-        last = json['return']['last_all']['display_short']
-        low = json['return']['low']['display_short']
-        high = json['return']['high']['display_short']
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+        last = locale.currency(json['ticker']['last'])
+        low = locale.currency(json['ticker']['low'])
+        high = locale.currency(json['ticker']['high'])
 
         self.chat('Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high))
 
