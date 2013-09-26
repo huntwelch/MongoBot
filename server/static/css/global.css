@@ -1,0 +1,88 @@
+/* Utils */
+
+.ir {
+  display: block;
+  text-indent: -10000em;
+}
+
+/* Basics */
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0px;
+  font: 400 12px Roboto;
+}
+
+/* Struct */
+
+#foot {
+  clear: both;
+  height: 61px;
+}
+
+#overlay {
+  z-index: 1;
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  top: 0;
+  left: 0;
+}
+
+loader {
+  position: fixed;
+  display: none;
+  top: 0;
+  right: 0;
+  text-align: center;
+  z-index: 3;
+}
+
+loader span {
+  padding: 5px 10px 7px;
+  font-weight: bold;
+  background: #44f;
+  color: white;
+}
+
+modal {
+  position: fixed;
+  display: none;
+  z-index: 2;
+}
+
+navigation {
+  height: 60px;
+  width: 100%;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 99;
+  background: rgba(255, 255, 255, 0.9);
+  border-top: 1px solid #ccc;
+}
+
+navigation icon a {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  width: 50px;
+  height: 50px;
+  background: transparent url(/static/img/mongo-50px.png) 0 0 no-repeat;
+}
+
+navigation hint {
+  color: #999;
+  height: 60px;
+  line-height: 60px;
+  position: absolute;
+  right: 20px;
+  top: 0;
+  font-size: 14px;
+}

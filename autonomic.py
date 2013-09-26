@@ -1,16 +1,13 @@
 import inspect
 from settings import CONTROL_KEY
 
-# TODO: decorator to support command aliases
-# TODO: standardize help description syntax
-
 
 class Dendrite(object):
     def __init__(self, cortex):
         self.cx = cortex
 
-    def chat(self, what):
-        self.cx.chat(what)
+    def chat(self, what, target=False):
+        self.cx.chat(what, target)
 
     def announce(self, what):
         self.cx.announce(what)
@@ -21,12 +18,25 @@ class Dendrite(object):
     def validate(self):
         return self.cx.validate()
 
-    def snag(self):
-        self.values = self.cx.values
-        self.lastsender = self.cx.lastsender
-        self.context = self.cx.context
-        self.members = self.cx.members
+    @property
+    def values(self):
+        return self.cx.values
 
+    @property
+    def lastsender(self):
+        return self.cx.lastsender
+
+    @property
+    def lastip(self):
+        return self.cx.lastip
+
+    @property
+    def context(self):
+        return self.cx.context
+
+    @property
+    def members(self):
+        return self.cx.members
 
 def serotonin(cortex, expansion, electroshock):
     methods = inspect.getmembers(expansion)
@@ -46,6 +56,9 @@ def serotonin(cortex, expansion, electroshock):
             print "Warning: overwriting " + name
 
         cortex.commands[name] = method
+        if hasattr(method, "aliases"):
+            for item in method.aliases:
+                cortex.commands[item] = method
 
     if len(helps):
         if letter in cortex.helpmenu and not electroshock:
@@ -72,5 +85,12 @@ def axon(fn):
 def help(text):
     def add(fn):
         fn.help = text
+        return fn
+    return add
+
+
+def alias(aliases):
+    def add(fn):
+        fn.aliases = aliases
         return fn
     return add

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<html>
+<head>
+    {% block head %}
+    <title>MongoBot Rule World Soon</title>
+    <link href="//fonts.googleapis.com/css?family=Roboto:400,300,100,700&subset=latin,cyrillic-ext" rel="stylesheet" type="text/css">
+    <link href="{{ url_for('static', filename='css/global.css') }}" rel="stylesheet" type="text/css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script src="{{ url_for('static', filename='js/global.js') }}"></script>
+
+    {% endblock %}
+</head>
+<body>
+    <div id="head"></div>
+    <div id="cont">{% block content %}{% endblock %}</div>
+    <div id="foot">
+        {% block footer %}{% endblock %}
+    </div>
+    <loader>
+        <span>Loading...</span>
+    </loader>
+    <div id="overlay"></div>
+</body>
+</html>

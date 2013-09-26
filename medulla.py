@@ -2,9 +2,11 @@ import sys
 import socket
 import settings
 import cortex
-from time import sleep
+import os
+import thread
 
-from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER
+from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER, SMS_LOCKFILE, PULSE
+from time import sleep, mktime, localtime
 
 
 class Medulla:
@@ -12,28 +14,35 @@ class Medulla:
         self.sock = socket.socket()
 
         print "* Pinging IRC"
-
+        
         self.sock.connect((HOST, PORT))
         self.sock.send('NICK ' + NICK + '\n')
         self.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
         self.sock.send('JOIN ' + CHANNEL + '\n')
 
         self.sock.setblocking(0)
-
+        
         self.active = True
         self.brain = cortex.Cortex(self)
 
+        print "* Establishing pulse"
+        self.setpulse()
+
         print "* Running monitor"
+
         while True:
             sleep(0.1)
             self.brain.monitor(self.sock)
+            if mktime(localtime()) - self.lastpulse > 10:
+               self.setpulse() 
 
-    def reload(self):
-        quiet = False
-        if not self.brain.values or not len(self.brain.values[0]):
+    def reload(self, quiet=False):
+        if self.brain.values and len(self.brain.values[0]):
+            quiet = True
+
+        if not quiet:
             self.brain.act("strokes out.")
         else:
-            quiet = True
             self.brain.act("strokes out.", False, OWNER)
 
         self.active = False
@@ -59,6 +68,12 @@ class Medulla:
             self.brain.act("comes to.")
         else:
             self.brain.act("comes to.", False, OWNER)
+
+    def setpulse(self):
+        self.lastpulse = mktime(localtime())
+        pulse = open(PULSE, 'w')
+        pulse.write(str(self.lastpulse))
+        pulse.close()
 
     def die(self):
         sys.exit()

@@ -2,15 +2,7 @@ import simplejson
 import locale
 
 from autonomic import axon, category, help, Dendrite
-from datastore import Drinker
-from booklearnin import Stock
-from util import pageopen
-
-#"f":[
-#    "~portfolio [stock symbol]<add stock to your portfolio>",
-#    "~portfolio <show your portfolio>",
-#    "~portfolio clear <empty your portfolio>",
-#],
+from util import pageopen, Stock
 
 
 @category("finance")
@@ -19,56 +11,28 @@ class Finance(Dendrite):
         super(Finance, self).__init__(cortex)
 
     @axon
-    @help("[stock symbol]<get stock quote>")
+    @help("STOCK_SYMBOL <get stock quote>")
     def q(self):
-        self.snag()
         symbol = self.values[0]
 
         if not symbol:
             self.chat("Enter a symbol")
             return
 
-        stock = Stock(symbol)
-        showit = stock.showquote(self.context)
+        # I feel like this try shouldn't be necessary,
+        # something may have changed in the API
+        showit = False
+        try:
+            stock = Stock(symbol)
+            showit = stock.showquote(self.context)
+        except:
+            pass
 
         if not showit:
             self.chat("Couldn't find company.")
             return
 
         self.chat(showit)
-
-    @axon
-    @help("TODO: multi-help")
-    def portfolio(self):
-        self.snag()
-        whom = self.lastsender
-
-        if self.values and self.values[0] == 'clear':
-            drinker = Drinker.objects(name=whom)[0]
-            if drinker and drinker.portfolio:
-                drinker.portfolio = []
-                drinker.save()
-
-            return
-
-        if self.values:
-            for symbol in self.values:
-                stock = Stock(symbol)
-                if not stock or len(symbol) > 8:
-                    self.chat("Could not add '" + symbol + "'")
-                    continue
-
-                stock.save(whom)
-            return
-
-        drinker = Drinker.objects(name=whom)[0]
-        if drinker and drinker.portfolio:
-            for symbol in drinker.portfolio:
-                stock = Stock(symbol)
-                showit = stock.showquote(self.context)
-                self.chat(showit)
-        else:
-            self.chat("No stocks saved")
 
     @axon
     @help("<get current Bitcoin trading information>")
@@ -108,10 +72,9 @@ class Finance(Dendrite):
             self.chat("Couldn't parse LTC data.")
             return
 
-        locale.setlocale( locale.LC_ALL, '' )
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
         last = locale.currency(json['ticker']['last'])
         low = locale.currency(json['ticker']['low'])
         high = locale.currency(json['ticker']['high'])
 
         self.chat('Litecoin, Last: %s, Low: %s, High: %s' % (last, low, high))
-

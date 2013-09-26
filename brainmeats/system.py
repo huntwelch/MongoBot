@@ -1,9 +1,10 @@
 import os
 import re
 
-from time import sleep
 from autonomic import axon, category, help, Dendrite
-from settings import SAFESET, NICK, IDENT, HOST, REALNAME, CHANNEL
+from settings import SAFESET, NICK, IDENT, HOST, REALNAME
+from secrets import *
+from time import sleep
 
 
 @category("system")
@@ -12,10 +13,8 @@ class System(Dendrite):
         super(System, self).__init__(cortex)
 
     @axon
-    @help("[setting]+ <show editable " + NICK + " settings>")
+    @help("<show editable " + NICK + " settings>")
     def settings(self):
-        self.snag()
-
         for name, value in SAFESET:
             if self.values and name not in self.values:
                 continue
@@ -23,10 +22,9 @@ class System(Dendrite):
             self.chat(name + " : " + str(value))
 
     @axon
-    @help("<update a " + NICK + " setting>")
+    @help("SETTING=VALUE <update a " + NICK + " setting>")
     def update(self, inhouse=False):
         if not inhouse:
-            self.snag()
             vals = self.values
 
         if not vals or len(vals) != 2:
@@ -71,10 +69,8 @@ class System(Dendrite):
         self.cx.master.die()
 
     @axon
-    @help("<change " + NICK + "'s name>")
+    @help("NICKNAME <change " + NICK + "'s name>")
     def nick(self):
-        self.snag()
-
         if not self.values:
             self.chat("Change name to what?")
             return
@@ -89,3 +85,27 @@ class System(Dendrite):
         self.cx.sock.send('JOIN ' + CHANNEL + '\n')
 
         self.update(['NICK', name])
+        self.reboot()
+
+    @axon
+    @help("<update from git repo>")
+    def gitpull(self):
+        os.system("git pull origin master")
+        self.cx.master.reload(True)
+        self.chat("I know kung-fu.")
+
+    @axon
+    @help("<print api keys and stuff>")
+    def secrets(self):
+        items = {
+            'WEATHER_API': WEATHER_API,
+            'WORDNIK_API': WORDNIK_API,
+            'FML_API': FML_API,
+            'WOLFRAM_API': WOLFRAM_API,
+            'DELICIOUS_USER ': DELICIOUS_USER,
+            'DELICIOUS_PASS ': DELICIOUS_PASS,
+        }
+        for key, val in items.iteritems():
+            self.chat(key + ": " + val)
+
+

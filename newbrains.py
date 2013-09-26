@@ -11,7 +11,7 @@ path = "brainmeats/" + base + ".py"
 if os.path.isfile(path):
     sys.exit("command file already exists")
 
-newfile = """from autonomic import axon, category, help, Dendrite
+newfile = """from autonomic import axon, alias, category, help, Dendrite
 
 
 @category("{0}")
@@ -23,8 +23,7 @@ class {1}(Dendrite):
     @axon
     @help("<I am an example>")
     def function_name(self):
-        # use self.snag() when cortex variables are needed
-        self.snag()""".format(base, cls)
+        return""".format(base, cls)
 
 
 f = open(path, "w")

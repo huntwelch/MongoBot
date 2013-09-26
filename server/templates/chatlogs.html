@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+{% block head %}
+    {{ super() }}
+    <style>
+        #log {
+            position: relative;
+        }
+        p {
+            clear: both;
+            margin: 0;
+            padding: 5px 5px 6px;
+        }
+        span {
+            float: left;
+            display: block;
+        }
+        span.nick {
+            font-weight: bold;
+            color: #f90;
+            width: 90px;
+            text-align: right;
+            margin-right: 4px;
+        }
+        span.index {
+            width: 50px; 
+            color: #ccc;
+        }
+        span.message {
+            float: none;
+            margin-left: 144px;
+        }
+        p.odd {
+            background: #f2f2f2;
+        }
+        p.private span {
+            color: #ccc !important;
+        }
+        p.note {
+            margin: 10px 0;
+            color: #888;
+        }
+        input.search {
+            color: #666;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            padding: 10px;
+            width: 500px;
+        }
+        #search-bar {
+            top: 45%;
+            width: 522px;
+            left: 50%;
+            margin-left: -261px; 
+        }
+        p.entry {
+            cursor: pointer;
+        }
+        p.search {
+            cursor: pointer;
+        }
+        p.search:hover {
+            background: #f90;
+        }
+        p.search:hover span {
+            color: #fff;
+        }
+        p.selected {
+            background: #99f;
+        }
+        p.selected span {
+            color: #fff;
+        }
+    </style>
+    <script>
+       $(function() {
+            $(document).on('copy', function() {
+                var temp = $('<div/>').prop('id', 'selector');
+                $('p.selected').each(function() {
+                    var item = $(this);
+                    var nick = item.find(".nick").text();
+                    var message = item.find(".message").text();
+                    var chat = $("<p/>").text('<' + nick + '> ' + message);
+                    temp.append(chat);
+                });
+                var selection = window.getSelection();
+                $('body').append(temp);
+                selection.selectAllChildren(document.getElementById('selector')); 
+                window.setTimeout(function() {
+                    $('#selector').remove();
+                },0);
+            });
+            $('#log').on('click', function(e) {
+                var item = $(e.target);
+                if( item.context.localName != "p" ) {
+                    item = item.parent();
+                }
+                if( item.hasClass('search') ) return;
+
+                item.toggleClass('selected');
+            });
+            $('#log').on('click', function(e) {
+                var item = $(e.target);
+                if( item.context.localName != "p" ) {
+                    item = item.parent();
+                }
+                if( !item.hasClass('search') ) return;
+                var target = item.children('.index').text();
+                $.ajax(
+                    "/api/chat",
+                    {
+                        dataType: "json",
+                        method: "get",
+                        data: {
+                            offset: parseInt(target) - 10,
+                            fade: target
+                        },
+                        success: function(data) {
+                            $('#log').html('');
+                            $(window).scrollTop(0);
+                            render(data);
+                        }
+                    }
+                );
+            });
+            $('body').on('keyup', function(e) {
+                if( e.keyCode == 191 ) {
+                    $('#search-bar, #overlay').show();
+                    $('#search-bar input').focus();
+                }
+            });
+
+            $(window).on('scroll', function(e) {
+                if( info.searching ) return;
+
+                var height = $(document).height() - $(window).height();
+                var scroll = $(document).scrollTop();
+
+                var offset = false;
+                var back = false;
+                if( scroll >= height ) {
+                    offset = info.end;
+                }
+                if( scroll <= 0 ) {
+                    offset = info.start - 200;
+                    back = true;
+                }
+
+                if( !offset || info.lock ) return;
+
+                info.lock = true;
+
+                $.ajax(
+                    "/api/chat",
+                    {
+                        dataType: "json",
+                        method: "get",
+                        data: {
+                            offset: offset
+                        },
+                        success: function(data) {
+                            render(data, back);
+                            info.lock = false;
+                        }
+                    }
+                );
+            });
+
+            var info = {
+                lock: false,
+                searching: false,
+                start: Infinity,
+                end: 0
+            };
+
+            var render = function(data, back, search) {
+
+                info.searching = false;
+                if( search == "searching" ) info.searching = true;
+
+                if( data[data.length - 1].index == info.end && !info.searching ) return;
+
+                data.shift();
+
+                if( !info.searching ) {
+                    if( data[0].index < info.start ) {
+                        info.start = data[0].index;
+                    }
+                    if( data[data.length - 1].index > info.end ) {
+                        info.end = data[data.length - 1].index;
+                    }
+                } else {
+                    info.start = Infinity,
+                    info.end = 0
+                }
+
+                var attachment = $("<div/>");
+
+                for(iter=0; iter < data.length; iter++) {
+                    var chat = data[iter];
+                    var p = $("<p class='entry' />");
+                    var loop = (iter % 2 ? "odd" : "even");
+                    p.addClass(loop) 
+                     .addClass(chat.interface)
+                     .addClass(chat.private)
+                     .addClass(chat.fader);
+                    var index = $("<span class='index' />").text(chat.index);
+                    var nick = $("<span class='nick' />").text(chat.nick);
+                    var message = $("<span class='message' />").text(chat.message);
+
+                    p.append(index)
+                     .append(nick)
+                     .append(message);
+
+                    attachment.append(p);
+
+                }
+                if( back ) {
+                    $("#log").prepend(attachment);
+                } else {
+                    $("#log").append(attachment);
+                }
+                $('p.fader').effect( "bounce", "slow" );
+            };
+            $('#search-bar input').on('keypress', function(e) {
+                if( e.keyCode != 13 ) return;
+
+                var search = $(e.target);
+
+                search.blur();
+                $('modal, #overlay').hide();
+                $.ajax(
+                    "/api/chat",
+                    {
+                        dataType: "json",
+                        method: "get",
+                        data: {
+                            search: search.val()
+                        },
+                        success: function(data) {
+                            $("#log").html('');
+                            render(data, false, "searching");
+                        },
+                        error: function(e) {
+                            console.log(e);
+                        }
+                    }
+                );
+
+                return false;
+            });
+            $.ajax(
+                "/api/chat",
+                {
+                    dataType: "json",
+                    method: "get",
+                    success: render
+                }
+            );
+       });
+    </script>
+{% endblock %}
+{% block content %}
+
+<!-- todo: date? / total / offset / search / index -->
+
+{% include 'nav.html' %}
+<div id="log"></div>
+<modal id="search-bar">
+    <input class="search" placeholder="Search logs" name="search" />
+</modal>
+{% endblock %}

@@ -1,6 +1,5 @@
-#System
-
 import base64
+import sys
 import os
 import re
 import urllib2
@@ -14,10 +13,9 @@ from datetime import date, timedelta
 from time import mktime, localtime, sleep
 from random import choice, randint
 
-# Local
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-    ACROSCORE, CHANNEL, SHORTENER, OWNER, REALNAME, BANNED, USERS
-from secrets import DELICIOUS_PASS, DELICIOUS_USER
+    SHORTENER, OWNER, REALNAME, SCAN
+from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
 from datastore import Drinker, connectdb
 from util import unescape, pageopen
 from autonomic import serotonin
@@ -25,13 +23,14 @@ from autonomic import serotonin
 
 class Cortex:
     def __init__(self, master):
-        
+
         print "* Initializing"
         self.values = False
         self.master = master
         self.context = CHANNEL
-        self.lastpublic = False 
-        self.lastprivate = False 
+        self.lastpublic = False
+        self.lastprivate = False
+        self.lastsender = False
         self.sock = master.sock
         self.gettingnames = True
         self.members = []
@@ -61,12 +60,18 @@ class Cortex:
         areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
 
         for area in areas:
-            mod = __import__("brainmeats", fromlist=[area])
-            mod = getattr(mod, area)
-            if electroshock:
-                reload(mod)
-            cls = getattr(mod, area.capitalize())
-            self.brainmeats[area] = cls(self)
+            print area
+            try:
+                mod = __import__("brainmeats", fromlist=[area])
+                mod = getattr(mod, area)
+                if electroshock:
+                    reload(mod)
+                cls = getattr(mod, area.capitalize())
+                self.brainmeats[area] = cls(self)
+            except Exception as e:
+                self.chat("Failed to load " + area + ".")
+                print "Failed to load " + area + "."
+                print e
 
         for brainmeat in self.brainmeats:
             serotonin(self, self.brainmeats[brainmeat], electroshock)
@@ -101,15 +106,9 @@ class Cortex:
             return
 
         line = line.strip()
-        
+
         if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
             print "* Joined " + CHANNEL
-
-        # TODO: build scan check from settings
-        scan = re.search("^:\w+\.freenode\.net", line)
-        ping = re.search("^PING", line)
-        if line != '' and not scan and not ping:
-            self.logit(line + '\n')
 
         if self.gettingnames:
             if line.find("* " + CHANNEL) != -1:
@@ -117,6 +116,12 @@ class Cortex:
                 self.gettingnames = False
                 all = re.sub(NICK + ' ', '', all)
                 self.members = all.split()
+
+        scan = re.search(SCAN, line)
+        ping = re.search("^PING", line)
+        pwd = re.search(":-passwd", line)
+        if line != '' and not scan and not ping and not pwd:
+            self.logit(line + '\n')
 
         if line.find('PING') != -1:
             self.sock.send('PONG ' + line.split()[1] + '\n')
@@ -137,8 +142,8 @@ class Cortex:
         what = components.pop(0)[1:]
 
         is_nums = re.search("^[0-9]+", what)
-        is_breaky = re.search("^" + CONTROL_KEY + "+", what)
-        if is_nums or is_breaky:
+        is_breaky = re.search("^" + CONTROL_KEY + "|[^\w]+", what)
+        if is_nums or is_breaky or not what:
             return
 
         if components:
@@ -155,7 +160,7 @@ class Cortex:
     def showlist(self):
         if not self.values or self.values[0] not in self.helpmenu:
             cats = ", ".join(self.helpcategories)
-            self.chat(CONTROL_KEY + "help [what] where what is " + cats)
+            self.chat(CONTROL_KEY + "help WHAT where WHAT is " + cats)
             return
 
         which = self.values[0]
@@ -186,7 +191,8 @@ class Cortex:
         # self.act(choice(BOREDOM) + " " + choice(self.members))
 
     def logit(self, what):
-        open(LOG, 'a').write(what)
+        with open(LOG, 'a') as f:
+            f.write(what)
 
         now = date.today()
         if now.day != 1:
@@ -200,8 +206,9 @@ class Cortex:
         shutil.move(LOG, backlog)
 
     def parse(self, msg):
-
-        print msg
+        pwd = re.search(":-passwd", msg)
+        if not pwd:
+            print msg
 
         info, content = msg[1:].split(' :', 1)
         try:
@@ -216,15 +223,14 @@ class Cortex:
         except:
             return
 
-        if nick in BANNED:
-            return
-
-        if nick not in USERS:
-            return
-
         self.lastsender = nick
+        self.lastip = ip 
 
         if content[:1] == CONTROL_KEY:
+            if nick.rstrip('_') not in USERS:
+                self.chat("My daddy says not to listen to you.")
+                return
+
             self.command(nick, content)
             return
 
@@ -235,12 +241,13 @@ class Cortex:
             self.linker(urls)
             return
 
-        self.brainmeats['broca'].parse(content, nick)
-        self.brainmeats['broca'].tourettes(content, nick)
+        if 'broca' in self.brainmeats:
+            self.brainmeats['broca'].parse(content, nick)
+            self.brainmeats['broca'].tourettes(content, nick)
 
     def tweet(self, urls):
         for url in urls:
-            response = pageopen('https://api.twitter.com/1/statuses/show.json?id=%s' % url[1])
+            response = pageopen('https://api.twitter.com/1.1/statuses/show.json?id=%s' % url[1])
             if not response:
                 self.chat("Couldn't retrieve Tweet.")
                 return
@@ -267,39 +274,54 @@ class Cortex:
                 self.tweet(twitter_urls)
                 return
 
-            fubs = 0
-            title = "Couldn't get title"
-            roasted = "Couldn't roast"
+            while True:
+                fubs = 0
+                title = "Couldn't get title"
+                roasted = "Couldn't roast"
 
-            urlbase = pageopen(url)
-            if not urlbase:
-                fubs += 1
+                urlbase = pageopen(url)
+                if not urlbase:
+                    fubs += 1
 
-            try:
-                opener = urllib2.build_opener()
-                roasted = opener.open(SHORTENER + url).read()
-            except:
-                fubs += 1
-
-            ext = url.split(".")[-1]
-            images = [
-                "gif",
-                "png",
-                "jpg",
-                "jpeg",
-            ]
-
-            if ext in images:
-                title = "Image"
-            elif ext == "pdf":
-                title = "PDF Document"
-            else:
                 try:
-                    cont = soup(urlbase)
-                    title = cont.title.string
+                    opener = urllib2.build_opener()
+                    roasted = opener.open(SHORTENER + url).read()
                 except:
-                    self.chat("Page parsing error")
-                    return
+                    fubs += 1
+
+                ext = url.split(".")[-1]
+                images = [
+                    "gif",
+                    "png",
+                    "jpg",
+                    "jpeg",
+                ]
+
+                if ext in images:
+                    title = "Image"
+                    break
+                elif ext == "pdf":
+                    title = "PDF Document"
+                    break
+                else:
+                    try:
+                        cont = soup(urlbase, convertEntities=soup.HTML_ENTITIES)
+                        if cont.title is None:
+                            redirect = cont.find('meta', attrs={'http-equiv': 'refresh'})
+                            if not redirect:
+                                redirect = cont.find('meta', attrs={'http-equiv': 'Refresh'})
+
+                            if redirect:
+                                url = redirect['content'].split('url=')[1]
+                                continue
+                            else:
+                                raise ValueError('Cannot find title')
+                        else:
+                            title = cont.title.string
+                            break
+                    except:
+                        self.chat("Page parsing error")
+                        return
 
             deli = "https://api.del.icio.us/v1/posts/add?"
             data = urllib.urlencode({
@@ -307,14 +329,15 @@ class Cortex:
                 "description": title,
                 "tags": "okdrink," + self.lastsender,
             })
-            base64string = base64.encodestring('%s:%s' % (DELICIOUS_USER, DELICIOUS_PASS))[:-1]
 
-            try:
-                req = urllib2.Request(deli, data)
-                req.add_header("Authorization", "Basic %s" % base64string)
-                send = urllib2.urlopen(req)
-            except:
-                self.chat("(delicious is down)")
+            if DELICIOUS_USER:
+                base64string = base64.encodestring('%s:%s' % (DELICIOUS_USER, DELICIOUS_PASS))[:-1]
+                try:
+                    req = urllib2.Request(deli, data)
+                    req.add_header("Authorization", "Basic %s" % base64string)
+                    send = urllib2.urlopen(req)
+                except:
+                    self.chat("(delicious is down)")
 
             if fubs == 2:
                 self.chat("Total fail")
@@ -336,6 +359,7 @@ class Cortex:
         else:
             whom = self.lastsender
         message = message.encode("utf-8")
+        self.logit("___" + NICK + ": " + str(message) + '\n')
         try:
             self.sock.send('PRIVMSG ' + whom + ' :' + str(message) + '\n')
         except:
@@ -351,4 +375,4 @@ class Cortex:
             self.chat(message)
 
     def default(self):
-        self.chat(NICK + " cannot do this thing :'(")
+        self.act(" cannot do this thing :'(")

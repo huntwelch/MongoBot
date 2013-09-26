@@ -7,10 +7,91 @@ Getting Started
     To run bot: python medulla.py
     To run bot persistently so it will recover from crashes: ./lighting.sh 
 
-    To create a new command category: python newbrains.py category_name
+Secret settings
+===============
+
+    You will need to create a file in the root folder called secrets.py,
+    containing the following variables:
+
+    CHANNEL = "#room_for_bot_to_join"
+    USERS = ['nickname_allowed_to_use_bot1', ...]
+
+    IMPORTANT: For the following items, if you do NOT want to use them,
+    set them up in the secrets file anyway, set to empty strings.
+
+    If you want the bot to automatically post to delicious:
+
+    DELICIOUS_USER = ""
+    DELICIOUS_PASS = ""
+
+    To use the -weather command. Accesses http://api.wunderground.com
+
+    WEATHER_API = "" 
+
+    To use wordnik:
+
+    WORDNIK_API = ""
+
+    To use the -fml command:
+
+    FML_API = ""
+
+    To enable sms messaging via Twilio:
+
+    TWILIO_SID = ""
+    TWILIO_TOKEN = ""
+    TWILIO_NUMBER = ""
+
+Social Secret Settings
+======================
+
+    You will need to host a website to properly setup apis.
+
+    The following settings should be set for google/twitter/facebook functionality.
+
+    Note it's not necessary to recycle GOOGLE_USER in this fashion but works for simplicity.
+
+    GOOGLE_USER = ""
+    GOOGLE_PASS = ""
+    
+    FB_USER = GOOGLE_USER + "@gmail.com"
+    FB_PASS = ""
+    FB_PAGE = ""
+    
+    FB_MONGOBOT_APPID = ""
+    FB_MONGOBOT_SECRET = ""
+    
+    TWIT_USER = GOOGLE_USER + "@gmail.com"
+    TWIT_PASS = ""
+    TWIT_PAGE = ""
+    
+    TWIT_CONSUMER_KEY = ""
+    TWIT_CONSUMER_SECRET = ""
+    TWIT_ACCESS_TOKEN = ""
+    TWIT_ACCESS_SECRET = ""
+
+New features
+============
+
+    To create a new command in an existing brainmeat category, add the
+    function to the class and add the decorator @axon. To add a help entry
+    for the function, add @help("Help message.")
+
+    To create a new command category, run this from the root directory: 
+    
+    python newbrains.py category_name
+
     This will create a file called category_name.py in brainmeats, with
     a class Category_name. Loading of this class will be automated, no
     other files need to be altered.
 
-    TODO: finish holdem
-    TODO: simplify stocks files
+To Do
+=====
+
+    TODO: link holdem to db, make persistant, open up sit/in/out functionality
+    TODO: finish holdem, needs testing and split pots probably don't work
+    TODO: fix rate limiting problems with acro
+    TODO: stock game: account for splits and reverse splits
+    TODO: replace urllib stuff with requests
+    TODO: figure out how to reboot bot when a process locks up
+    TODO: investigate Twisted

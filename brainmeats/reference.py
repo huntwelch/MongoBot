@@ -1,8 +1,11 @@
+import HTMLParser
 import simplejson
+import textwrap
 import urllib
-import re
+import os
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, alias, category, help, Dendrite
+from BeautifulSoup import BeautifulSoup
 from settings import REPO, NICK, SAFE
 from secrets import WEATHER_API
 from util import pageopen
@@ -16,10 +19,8 @@ class Reference(Dendrite):
         self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
 
     @axon
-    @help("search_term <look something up in google>")
+    @help("SEARCH_TERM <look something up in google>")
     def g(self):
-        self.snag()
-
         if not self.values:
             self.chat("Enter a word")
             return
@@ -51,29 +52,37 @@ class Reference(Dendrite):
         self.chat(REPO)
 
     @axon
-    @help("zip_code <get weather>")
+    @help("[ZIP|LOCATION (ru/moscow)] <get weather, defaults to geo api>")
     def weather(self):
-        self.snag()
-
-        if not self.values or not re.search("^\d{5}", self.values[0]):
-            self.chat("Please enter a zip code.")
+        if not WEATHER_API:
+            self.chat("WEATHER_API is not set")
             return
 
-        zip = self.values[0]
-        url = "http://api.wunderground.com/api/%s/conditions/q/%s.json" % (WEATHER_API, zip)
+        if not self.values:
+            params = "autoip.json?geo_ip=%s" % self.lastip
+        else:
+            params = "%s.json" % self.values[0]
 
-        response = pageopen(url)
+        base = "http://api.wunderground.com/api/%s/conditions/q/" % WEATHER_API
+
+        url = base + params
+
+        try:
+            response = pageopen(url)
+        except:
+            self.chat("Couldn't get weather.")
+            return
+
         if not response:
             self.chat("Couldn't get weather.")
             return
 
         try:
             json = simplejson.loads(response)
+            json = json['current_observation']
         except:
             self.chat("Couldn't parse weather.")
             return
-
-        json = json['current_observation']
 
         location = json['display_location']['full']
         condition = json['weather']
@@ -86,10 +95,66 @@ class Reference(Dendrite):
         self.chat(base % (location, condition, temp, humid, wind, feels))
 
     @axon
-    @help("equation <run simple equation in python>")
-    def calc(self):
-        self.snag()
+    @alias(["urban"])
+    @help("SEARCH_TERM <get urban dictionary entry>")
+    def ud(self):
+        if not self.values:
+            self.chat("Whatchu wanna know, bitch?")
+            return
 
+        term = ' '.join(self.values)
+
+        query = urllib.urlencode({'term': term})
+        url = 'http://www.urbandictionary.com/define.php?%s' % query
+        urlbase = pageopen(url)
+
+        try:
+            soup = BeautifulSoup(urlbase,
+                                 convertEntities=BeautifulSoup.HTML_ENTITIES)
+        except:
+            self.chat("parse error")
+            return
+
+        defn = []
+
+        elem = soup.find('div', {'class': 'definition'})
+        if elem:
+            if elem.string:
+                defn = [elem.string]
+            elif elem.contents:
+                defn = []
+                for c in elem.contents:
+                    if c.string and c.string.strip():
+                        defn.append(c.string.strip())
+
+        if defn:
+            # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
+            # entities like &#x27; so use the parser for any stray entities.
+            parser = HTMLParser.HTMLParser()
+
+            for paragraph in defn:
+                wrapped = textwrap.wrap(paragraph, 80)
+                for line in wrapped:
+                    self.chat(parser.unescape(line))
+        else:
+            self.chat("couldn't find anything")
+
+
+    # This function used to be called calc, but was changed to hack in
+    # honor of Ken's incredibly sick exploitation of the eval function, 
+    # which gave him direct access to the database:
+    # (lambda f=(lambda n:[c for c in ().__class__.__bases__[0].__subclasses__() 
+    # if c.__name__=='catch_warnings'][0]()._module.__builtins__[n]): 
+    # f("eval")(f("compile")("d=[c for c in ().__class__.__base__.__subclasses__() 
+    # if c.__name__=='catch_warnings'][0]()._module.__builtins__['__import__']('datastore');
+    # d.connectdb();e=d.Drinker.objects(name='loxo33')[0];e.awaiting='2013/5/1=loxo33 job hops';
+    # e.save()","","single")))()
+    #
+    # Ken, your kung-fu is the strongest.
+
+    @axon
+    @help("EQUATION <run simple equation in python>, OR ruthlessly fuck with bot's codebase.")
+    def hack(self):
         if not self.values:
             printout = []
             for n, f in SAFE:
@@ -98,9 +163,25 @@ class Reference(Dendrite):
 
             self.chat("Available functions: " + ", ".join(printout))
             return
+        
+        string = ' '.join(self.values)
+        if "__" in string:
+            self.chat("Rejected.")
+            return
+
         try:
-            result = eval(' '.join(self.values), {"__builtins__": None}, self.safe_calc)
+            result = eval(string, {"__builtins__": None}, self.safe_calc)
         except:
             result = NICK + " not smart enough to do that."
 
         self.chat(str(result))
+
+    @axon
+    @help("URL <get whois information>")
+    def whois(self):
+        if not self.values:
+            self.chat("The Doctor")
+            return
+
+    
+

@@ -1,16 +1,16 @@
-import wordnik
 import mongoengine
 import nltk
 import re
-import string 
+import string
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API
 from settings import NICK, STORAGE, ACROLIB, LOGDIR
 from datastore import Words, Learned, Structure
 from random import choice
 from util import pageopen
 from BeautifulSoup import BeautifulSoup as soup
+from wordnik import swagger, WordApi
 
 
 @category("language")
@@ -18,11 +18,10 @@ class Broca(Dendrite):
     def __init__(self, cortex):
         super(Broca, self).__init__(cortex)
 
-    @axon
-    @help("[word] <get definition of word>")
-    def whatmean(self):
-        self.snag()
 
+    @axon
+    @help("WORD <get definition of word>")
+    def whatmean(self):
         if not self.values:
             self.chat("Ooohhhmmmmm")
             return
@@ -48,22 +47,34 @@ class Broca(Dendrite):
         self.chat(str(len(self.definitions)) + " definitions for " + word)
         self.chat("Definition " + str(which + 1) + ": " + definition)
 
+
     def seekdef(self, word):
-        wapi = wordnik.Wordnik(api_key=WORDNIK_API)
-        results = wapi.word_get_definitions(word.strip())
+        if not WORDNIK_API:
+            self.chat("WORDNIK_API is not set.")
+            return
+
+        client = swagger.ApiClient(WORDNIK_API, 'http://api.wordnik.com/v4')
+
+        wapi = WordApi.WordApi(client)
+        results = wapi.getDefinitions(word.strip())
+
         count = 0
+
         for item in results:
+
             try:
-                definition = Words(word=item["word"],
-                                   partofspeech=item["partOfSpeech"],
-                                   definition=item["text"],
-                                   source=item["sourceDictionary"])
+                definition = Words(word=item.word,
+                                   partofspeech=item.partOfSpeech,
+                                   definition=item.text,
+                                   source=item.sourceDictionary)
+
                 definition.save()
                 if count == 0:
-                    tempdef = item["text"]
+                    tempdef = item.text
 
                 count += 1
-            except:
+            except Exception as e:
+                print e
                 continue
 
         if count > 0:
@@ -71,6 +82,7 @@ class Broca(Dendrite):
             self.chat("Definition 1:" + tempdef)
         else:
             self.chat("I got nothin.")
+
 
     def parse(self, sentence, nick):
         tokens = nltk.word_tokenize(sentence)
@@ -99,6 +111,7 @@ class Broca(Dendrite):
         except:
             pass
 
+
     def tourettes(self, sentence, nick):
         if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
             open(LOGDIR + "/mom.log", 'a').write(sentence + '\n')
@@ -120,7 +133,14 @@ class Broca(Dendrite):
             self.chat("Hammertime")
             return
 
+        if sentence == "oh shit its your birthday erikbeta happy birthday" and self.lastsender == "jcb":
+            self._act(" slaps jcb")
+            self.chat("LEAVE ERIK ALONE!")
+            return
+
+
     @axon
+    @alias(["waxhapsodic"])
     @help("<command " + NICK + " to speak>")
     def speak(self):
         sentence = []
@@ -131,17 +151,10 @@ class Broca(Dendrite):
 
         self.chat(" ".join(sentence))
 
+
     @axon
-    @help("<teach " + NICK + " a word>")
+    @help("WORD <teach " + NICK + " a word>")
     def learn(self):
-        self.snag()
-
-        # TODO: put banned in settings
-        banned = []
-        if self.lastsender in banned:
-            self.chat("My daddy says not to listen to you.")
-            return
-
         if not self.values:
             self.chat(NICK + " ponders the emptiness of meaning.")
             return
@@ -153,11 +166,10 @@ class Broca(Dendrite):
         open(STORAGE + "/natwords", 'a').write(self.values[0].strip() + '\n')
         self.chat(NICK + " learn new word!", self.lastsender)
 
-    @axon
-    @help("<have " + NICK + " create an acronym>")
-    def think(self):
-        self.snag()
 
+    @axon
+    @help("ACRONYM <have " + NICK + " decide the words for an acronym>")
+    def acronym(self):
         if not self.values:
             self.chat("About what?")
             return
@@ -170,8 +182,13 @@ class Broca(Dendrite):
             self.chat(NICK + " no want to think about that.")
             return
 
+        if self.values[0].lower() == "gross":
+            self.chat("Get Rid Of Slimey girlS")
+            return
+
         output = self.acronymit(self.values[0])
         self.chat(output)
+
 
     def acronymit(self, base):
         acronym = list(base.upper())
@@ -191,11 +208,10 @@ class Broca(Dendrite):
 
         return " ".join(output)
 
-    @axon
-    @help("word [which def] <look up etymology of word>")
-    def ety(self):
-        self.snag()
 
+    @axon
+    @help("WORD [WHICH_DEFINITION] <look up etymology of word>")
+    def ety(self):
         if not self.values:
             self.chat("Enter a word")
             return
@@ -235,12 +251,11 @@ class Broca(Dendrite):
         self.chat("Etymology " + str(ord + 1) + " of " + str(len(defs)) +
                   " for " + _word + ": " + _def)
 
+
     # TODO: broken, not sure why
     @axon
-    @help("word_or_phrase <look up anagram>")
+    @help("WORD_OR_PHRASE <look up anagram>")
     def anagram(self):
-        self.snag()
-
         if not self.values:
             self.chat("Enter a word or phrase")
             return
@@ -250,11 +265,25 @@ class Broca(Dendrite):
 
         urlbase = pageopen(url)
         if not urlbase:
-            self.chat("Couldn't find anything")
+            self.chat("Fail")
             return
 
         cont = soup(urlbase)
 
-        paragraph = cont.findAll("p")[4]
-        content = ''.join(paragraph.findAll()).replace("<br/>", ", ").encode("utf-8")
-        self.chat(content)
+        if len(cont.findAll("p")) == 6:
+            self.chat("No anagrams found.")
+            return
+
+        try:
+            paragraph = cont.findAll("p")[3]
+            content = ','.join(paragraph.findAll(text=True))
+            content = content[2:-4]
+            content = content.replace(": ,", ": ")
+            self.chat(content)
+        
+        # Usually not concerned with exceptions
+        # in mongo, but this is bound to come up
+        # again.
+        except Exception as e:
+            print e
+            self.chat("Got nothin")

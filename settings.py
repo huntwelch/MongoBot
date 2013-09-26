@@ -1,5 +1,5 @@
 from math import *
-from secrets import CHANNEL
+from secrets import CHANNEL, USERS
 
 # Connection Settings
 
@@ -7,12 +7,16 @@ HOST = "irc.freenode.net"
 PORT = 6667
 NICK = "MongoBot"
 
+# Used to filter out pings and server responses from logs and live checks
+
+SCAN = "^:\w+\.freenode\.net"
+
 # These settings are set in secrets.py
 
 # CHANNEL = (str) irc channel
 # WORDNIK_API = (str) for wordnik calls
 # WEATHER_API = (str) for weather calls to wunderground.com
-# SQL_PASSWORD = duh
+# WOLFRAM_API = (str) for weather calls to Wolfram
 
 # Directory settings
 
@@ -28,29 +32,19 @@ CONTROL_KEY = "-"
 SHORTENER = "http://roa.st/api.php?roast="
 PATIENCE = 7000
 REPO = "https://github.com/huntwelch/MongoBot"
-BANNED = []
-USERS = [
-    'castr0',
-    'chiyu',
-    'chiyou',
-    'chiyou_',
-    'dcross2',
-    'digx',
-    'erikbeta',
-    'jcb',
-    'jsbronder',
-    'kenfree',
-    'loxo33',
-    'melanarchy',
-    'mirotame',
-    'realvinay',
-    'sublimnl',
-    'Viza',
-    'woxidu',
-    'woxidu_home',
-    'xtrium',
-    'Euj1',
-]
+SMS_LOCKFILE = "/tmp/sms.lock"
+PULSE = "/tmp/bot.pulse"
+
+# Web server
+
+WEBSITE = "http://mongobot.com"
+ONETIME = '/tmp/bot.pass'
+
+# Stock game
+
+VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ'])
+STARTING_CASH = 100000
+
 # Acro
 
 ACROLIB = "natwords"
@@ -150,8 +144,3 @@ SAFE = [
     ('tan', tan),
     ('tanh', tanh),
 ]
-
-RM_URL = ""
-RM_USERS = dict(
-    hunt={"id": "89"},
-)

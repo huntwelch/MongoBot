@@ -1,15 +1,17 @@
-import MySQLdb
 import simplejson
 import urllib
 import urllib2
+import time
+import os
 
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
-from secrets import SQL_PASSWORD
+from secrets import FML_API 
 from util import colorize
 from random import choice
-
-
+from datastore import Drinker 
+from xml.dom import minidom as dom
+    
 @category("nonsense")
 class Nonsense(Dendrite):
     def __init__(self, cortex):
@@ -38,19 +40,66 @@ class Nonsense(Dendrite):
 
         self.chat(' '.join(buzzed))
 
-    # TODO: Stick data in mongodb
     @axon
-    @help("<grab random fml entry>")
+    @help("<grab a little advice>")
+    def advice(self):
+        url = 'http://api.adviceslip.com/advice'
+        
+        try:
+            headers = { 'User-Agent' : 'Mozilla/5.0' }
+            request = urllib2.Request(url, None, headers)
+            response = urllib2.urlopen(request).read()
+            json = simplejson.loads(response)
+        except:
+            self.chat('Use a rubber if you sleep with dcross2\'s mother.')
+            return
+        
+        self.chat(json['slip']['advice'] + ".. in bed.")
+    
+    @axon
+    @help("SEARCHTERM <grab random fml entry>")
     def fml(self):
-        db = MySQLdb.connect("localhost", "peter", SQL_PASSWORD, "peter_stilldrinking")
-        cursor = db.cursor()
-        cursor.execute("SELECT * FROM fmls ORDER BY RAND() LIMIT 0,1;")
-        entry = cursor.fetchone()
-        fml = entry[2]
-        self.chat(fml)
+
+        uri = 'http://api.fmylife.com'
+        lang = 'en'
+        
+        if self.values and self.values[0]:
+            path = '/view/search?'
+            search = "+".join(self.values)
+            url = uri + path + 'search=' + search + '&language=' + lang + '&key=' + FML_API
+        else:
+            path = '/view/random?'
+            url = uri + path + 'language=' + lang + '&key=' + FML_API
+
+        try:
+            raw = dom.parse(urllib.urlopen(url))
+            if self.values and self.values[0]:
+                fml = choice(raw.getElementsByTagName("text")).firstChild.nodeValue
+            else:
+                fml = raw.getElementsByTagName("text")[0].firstChild.nodeValue
+            self.chat(fml)
+        except Exception as e:
+            if self.values and self.values[0]:
+                self.chat("No results. Or done broken.")
+            else:
+                self.chat("Done broke")
+                self.chat("Exception: " + e)
+            return
 
     @axon
-    @help("<generate passward according to http://xkcd.com/936/>")
+    @help("<generate start-up elevator pitch>")
+    def startup(self):
+        url = 'http://itsthisforthat.com/api.php?text'
+
+        try:
+            out = urllib.urlopen(url).read()
+            self.chat(out.lower().capitalize())
+        except:
+            self.chat("Done broke")
+            return
+
+    @axon
+    @help("<generate password according to http://xkcd.com/936/>")
     def munroesecurity(self):
         output = []
         wordbank = []
@@ -66,13 +115,24 @@ class Nonsense(Dendrite):
         self.chat(" ".join(output))
 
     @axon
-    @help("[user] <reward someone>")
+    @help("USERNAME <reward someone>")
     def reward(self):
-        self.snag()
         if not self.values:
             self.chat("Reward whom?")
             return
         kinder = self.values[0]
+
+        drinker = Drinker.objects(name=kinder)
+        if drinker:
+            drinker = drinker[0] 
+            rewards = drinker.rewards + 1
+        else:
+            drinker = Drinker(name=kinder)
+            rewards = 1
+        
+        drinker.rewards = rewards
+        drinker.save()
+
         self.chat("Good job, " + kinder + ". Here's your star: " + colorize(u'\u2605', "yellow"))
         self._act(" pats " + kinder + "'s head.")
 
@@ -95,7 +155,6 @@ class Nonsense(Dendrite):
 
     @axon
     def love(self):
-        self.snag()
         if self.values and self.values[0] == "self":
             self._act("masturbates vigorously.")
         else:
@@ -116,12 +175,13 @@ class Nonsense(Dendrite):
         self.chat(entry['title']['$t'])
 
     @axon
-    @help("<pull up a mom quote>")
+    @help("<pull up a mom quote from logs>")
     def mom(self):
         momlines = []
         try:
             for line in open(LOGDIR + "/mom.log"):
-                momlines.append(line)
+                if "~mom" not in line:
+                    momlines.append(line)
         except:
             self.chat("Can't open mom.log")
             return
@@ -136,19 +196,17 @@ class Nonsense(Dendrite):
 
     @axon
     def say(self):
-        self.snag()
         if self.validate():
             self.announce(" ".join(self.values))
 
     @axon
     def act(self):
-        self.snag()
         if self.validate():
             self._act(" ".join(self.values), True)
 
     @axon
+    @help("URL <pull from distaste entries or add url to distate options>")
     def distaste(self):
-        self.snag()
         if self.values:
             url = urllib.quote_plus(self.values[0])
             roasted = urllib2.urlopen(SHORTENER + url).read()
