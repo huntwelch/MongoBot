@@ -57,7 +57,6 @@ class Finance(Dendrite):
 
         self.chat('Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high))
 
-
     @axon
     @help("<get current Litecoin trading information>")
     def ltc(self):
