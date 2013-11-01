@@ -40,7 +40,7 @@ PULSE = "/tmp/bot.pulse"
 
 WEBSITE = "http://mongobot.com"
 ONETIME = "/tmp/bot.pass"
-SERVER_RELOAD = "/tmp/uwsgi.reload"
+SERVER_RELOAD = "/tmp/mongo.reload"
 
 # Stock game
 

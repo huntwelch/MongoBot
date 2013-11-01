@@ -122,6 +122,10 @@ class Nonsense(Dendrite):
             return
         kinder = self.values[0]
 
+        if kinder == NICK:
+            self.chat("Service is own reward for " + NICK)
+            return
+
         drinker = Drinker.objects(name=kinder)
         if drinker:
             drinker = drinker[0] 

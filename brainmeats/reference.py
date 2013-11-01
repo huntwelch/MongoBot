@@ -46,7 +46,11 @@ class Reference(Dendrite):
         if json["responseStatus"] != 200:
             self.chat("Bad status")
             return
-
+    
+        if len(json["responseData"]["results"]) == 0:
+            self.chat("No results")
+            return
+            
         result = json["responseData"]["results"][0]
         title = result["titleNoFormatting"]
         link = result["url"]
@@ -140,7 +144,7 @@ class Reference(Dendrite):
             parser = HTMLParser.HTMLParser()
 
             for paragraph in defn:
-                wrapped = textwrap.wrap(paragraph, 80)
+                wrapped = textwrap.wrap(paragraph, 200)
                 for line in wrapped:
                     self.chat(parser.unescape(line))
         else:
