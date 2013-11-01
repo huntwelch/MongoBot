@@ -171,16 +171,6 @@ class Stock(object):
             self.change = 0
             self.perc_change = 0
 
-        # Check for after hours
-
-        self.afterhours = False
-        time = int(self.current_time_utc)
-        if self.isld_last and (time < 133000 or time > 200000):
-            self.afterhours = True
-            self.price = float(self.isld_last)
-            self.change = self.price - float(self._last)
-            self.perc_change = (self.change / float(self._last)) * 100
-
         return extracted
 
     def showquote(self, context):
@@ -226,7 +216,5 @@ class Stock(object):
             
 
         output = ', '.join(message)
-        if self.afterhours:
-            output = "After hours: " + output
-
+    
         return output
