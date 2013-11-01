@@ -83,8 +83,8 @@ class Stock(object):
             return
 
         # google specific
-        singlestock = "http://www.google.com/ig/api?stock="
-        url = singlestock + symbol
+        singlestock = "http://query.yahooapis.com/v1/public/yql?env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&q=select%20*%20from%20yahoo.finance.quotes%20where%20symbol%20%3D%20'"
+        url = singlestock + symbol + "'"
 
         try:
             raw = dom.parse(urllib.urlopen(url))
@@ -99,57 +99,60 @@ class Stock(object):
     # Extracts from google api
     def extract(self, raw):
 
-        elements = raw.childNodes[0].childNodes[0].childNodes
-
+        elements = [e for e in raw.childNodes[0].childNodes[0].childNodes[0].childNodes if e.firstChild != None]
+        
         # in the future, can just change translation
         # point is to end up with an object that won't
         # change when the api changes.
 
         translation = {
-            "symbol": "symbol",
-            "pretty_symbol": "pretty_symbol",
-            "symbol_lookup_url": "symbol_lookup_url",
-            "company": "company",
-            "exchange": "exchange",
-            "exchange_timezone": "exchange_timezone",
-            "exchange_utc_offset": "exchange_utc_offset",
-            "exchange_closing": "exchange_closing",
-            "divisor": "divisor",
-            "currency": "currency",
-            "last": "_last",
-            "high": "high",
-            "low": "low",
-            "volume": "volume",
-            "avg_volume": "avg_volume",
-            "market_cap": "market_cap",
-            "open": "open",
-            "y_close": "y_close",
-            "change": "_change",
-            "perc_change": "_perc_change",
-            "delay": "delay",
-            "trade_timestamp": "trade_timestamp",
-            "trade_date_utc": "trade_date_utc",
-            "trade_time_utc": "trade_time_utc",
-            "current_date_utc": "current_date_utc",
-            "current_time_utc": "current_time_utc",
-            "symbol_url": "symbol_url",
-            "chart_url": "chart_url",
-            "disclaimer_url": "disclaimer_url",
-            "ecn_url": "ecn_url",
-            "isld_last": "isld_last",
-            "isld_trade_date_utc": "isld_trade_date_utc",
-            "isld_trade_time_utc": "isld_trade_time_utc",
-            "brut_last": "brut_last",
-            "brut_trade_date_utc": "brut_trade_date_utc",
-            "brut_trade_time_utc": "brut_trade_time_utc",
-            "daylight_savings": "daylight_savings",
+            "Symbol": "symbol",
+            #"pretty_symbol": "pretty_symbol",
+            #"symbol_lookup_url": "symbol_lookup_url",
+            "Name": "company",
+            "StockExchange": "exchange",
+            #"exchange_timezone": "exchange_timezone",
+            #"exchange_utc_offset": "exchange_utc_offset",
+            #"exchange_closing": "exchange_closing",
+            #"divisor": "divisor",
+            #"currency": "currency",
+            "LastTradePriceOnly": "_last",
+            "AskRealtime" : "_ask_realtime",
+            "BidRealtime" : "_bid_realtime",
+            "DaysHigh": "high",
+            "DaysLow": "low",
+            "Volume": "volume",
+            "AverageDailyVolume": "avg_volume",
+            "MarketCapitalization": "market_cap",
+            "Opeb": "open",
+            "PreviousClose": "y_close",
+            "Change": "_change",
+            "ChangeinPercent": "_perc_change",
+            #"delay": "delay",
+            #"trade_timestamp": "trade_timestamp",
+            "LastTradeDate": "trade_date_utc",  #May not actually be UTC
+            "LastTradeTime": "trade_time_utc", #May not actually be UTC
+            #"current_date_utc": "current_date_utc",
+            #"current_time_utc": "current_time_utc",
+            #"symbol_url": "symbol_url",
+            #"chart_url": "chart_url",
+            #"disclaimer_url": "disclaimer_url",
+            #"ecn_url": "ecn_url",
+            #"isld_last": "isld_last",
+            #"isld_trade_date_utc": "isld_trade_date_utc",
+            #"isld_trade_time_utc": "isld_trade_time_utc",
+            #"brut_last": "brut_last",
+            #"brut_trade_date_utc": "brut_trade_date_utc",
+            #"brut_trade_time_utc": "brut_trade_time_utc",
+            #"daylight_savings": "daylight_savings",
         }
         extracted = {}
 
         for e in elements:
-            data = e.getAttribute("data")
-            extracted[translation[e.tagName]] = data
-            setattr(self, translation[e.tagName], data)
+            data = e.firstChild.nodeValue
+            if translation.has_key(e.tagName):
+                extracted[translation[e.tagName]] = data
+                setattr(self, translation[e.tagName], data)
 
         if not self.company:
             return None
