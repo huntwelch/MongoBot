@@ -166,7 +166,7 @@ class Stock(object):
             
         try:
             self.change = float(self._change)
-            self.perc_change = float(self._perc_change)
+            self.perc_change = float(self._perc_change[0:-1]) #trim % off
         except:
             self.change = 0
             self.perc_change = 0
