@@ -157,7 +157,13 @@ class Stock(object):
         if not self.company:
             return None
 
-        self.price = float(self._last)
+        if self._ask_realtime != None:
+            self.price = float(self._ask_realtime)
+        elif self._bid_realtime != None:
+            self.price = float(self._bid_realtime)
+        else:
+            self.price = float(self._last)
+            
         try:
             self.change = float(self._change)
             self.perc_change = float(self._perc_change)
