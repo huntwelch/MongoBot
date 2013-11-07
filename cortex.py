@@ -315,28 +315,41 @@ class Cortex:
                     break
                 else:
                     try:
-                        title = bs4(urlbase.text).find('title').string
+                        soup = bs4(urlbase.text)
+                        title = soup.find('title').string
                         if title is None:
-                            raise ValueError('Cannot find title')
+                            redirect = soup.find('meta', attrs={'http-equiv':
+                                'refresh'})
+                            if not redirect:
+                                redirect = soup.find('meta', attrs={'http-equiv':
+                                    'Refresh'})
+
+                            if redirect:
+                                # Shouldn't this call itself and then return here?
+                                url = redirect['content'].split('url=')[1]
+                                continue
+                            else:
+                                raise ValueError('Cannot find title')
                     except:
                         self.chat("Page parsing error - " + roasted)
                         return
 
-            deli = "https://api.del.icio.us/v1/posts/add?"
-            data = urllib.urlencode({
+            deli = "https://api.del.icio.us/v1/posts/add"
+            params = {
                 "url": url,
                 "description": title,
                 "tags": "okdrink," + self.lastsender,
-            })
+            }
 
             if DELICIOUS_USER:
-                base64string = base64.encodestring('%s:%s' % (DELICIOUS_USER, DELICIOUS_PASS))[:-1]
+                auth = requests.auth.HTTPBasicAuth(DELICIOUS_USER, DELICIOUS_PASS)
                 try:
-                    req = urllib2.Request(deli, data)
-                    req.add_header("Authorization", "Basic %s" % base64string)
-                    send = urllib2.urlopen(req)
+                    send = requests.get(deli, params=params, auth=auth)
                 except:
                     self.chat("(delicious is down)")
+
+                if not send.ok:
+                    self.chat("(delicious problem)")
 
             if fubs == 2:
                 self.chat("Total fail")
