@@ -21,6 +21,38 @@ def simpleupdate(whom, key, val):
 
     return True
 
+def incrementEntity(whom, amount):
+    try:
+        entity = Entity.objects(name=whom)
+        if entity:
+            entity = entity[0]
+        else:
+            entity = Entity(name=whom)
+
+        if entity.value:
+            entity.value = entity.value + amount
+        else:
+            entity.value = 0 + amount
+    except:
+        return False
+    entity.save()
+    return True
+
+def entityScore(whom):
+    try:
+        entity = Entity.objects(name=whom)
+        if entity:
+            entity = entity[0]
+        else:
+            entity = Entity(name=whom)
+    except:
+        return 0
+    return entity.value
+
+class Entity(mongoengine.Document):
+    name = StringField(required=True)
+    value = IntField(default=0)
+
 class Position(mongoengine.EmbeddedDocument):
     symbol = StringField(required=True)
     date = DateTimeField(required=True)
