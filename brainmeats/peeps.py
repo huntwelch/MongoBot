@@ -5,7 +5,7 @@ import hashlib
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, CHANNEL
 from secrets import USERS
-from datastore import simpleupdate, Drinker
+from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore
 
 
 @category("peeps")
@@ -47,6 +47,32 @@ class Peeps(Dendrite):
             return
 
         self.chat("Company updated.")
+
+    @axon
+    @help("increment <entity to receive point>")
+    def increment(self):
+        if not self.values:
+            self.chat("you need to give someone your love")
+            return
+        entity = " ".join(self.values)
+
+        if not incrementEntity(entity, 1):
+            self.chat("mongodb seems borked")
+            return
+        self.chat(self.lastsender + " brought " + entity + " to " + str(entityScore(entity)))
+
+    @axon
+    @help("increment <entity to receive point>")
+    def decrement(self):
+        if not self.values:
+            self.chat("you need to give someone your hate")
+            return
+        entity = " ".join(self.values)
+
+        if not incrementEntity(entity, -1):
+            self.chat("mongodb seems borked")
+            return
+        self.chat(self.lastsender + " brought " + entity + " to " + str(entityScore(entity)))
 
     @axon
     @help("<show where everyone works>")
