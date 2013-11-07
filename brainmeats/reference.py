@@ -3,9 +3,11 @@ import simplejson
 import textwrap
 import urllib
 import os
+import requests
 
 from autonomic import axon, alias, category, help, Dendrite
 from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup as bs4
 from settings import REPO, NICK, SAFE
 from secrets import WEATHER_API
 from util import pageopen
@@ -32,18 +34,24 @@ class Reference(Dendrite):
             self.chat("Enter a word")
             return
 
-        query = "+".join(self.values)
-        url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=large&q=%s&start=0" % (query)
+        # If values was a string you don't need the join/etc
+        params = {
+                'v': '1.0',
+                'rsz': 'large',
+                'start': '0',
+                'q': "+".join(values),
+                }
 
-        # Google no likey pageopen func
         try:
-            results = urllib.urlopen(url)
-            json = simplejson.loads(results.read())
+            request = requests.get(
+                    'http://ajax.googleapis.com/ajax/services/search/web',
+                    params=params)
+            json = request.json()
         except:
             self.chat("Something's buggered up")
             return
 
-        if json["responseStatus"] != 200:
+        if not result.ok:
             self.chat("Bad status")
             return
     
@@ -53,7 +61,7 @@ class Reference(Dendrite):
             
         result = json["responseData"]["results"][0]
         title = result["titleNoFormatting"]
-        link = result["url"]
+        link = result["unescapedUrl"]
 
         self.chat(title + " @ " + link)
 
@@ -113,30 +121,20 @@ class Reference(Dendrite):
             self.chat("Whatchu wanna know, bitch?")
             return
 
-        term = ' '.join(self.values)
-
-        query = urllib.urlencode({'term': term})
-        url = 'http://www.urbandictionary.com/define.php?%s' % query
-        urlbase = pageopen(url)
-
         try:
-            soup = BeautifulSoup(urlbase,
-                                 convertEntities=BeautifulSoup.HTML_ENTITIES)
+            request = requests.get('http://www.urbandictionary.com/define.php',
+                    params={'term': ' '.join(self.values)})
+            soup = bs4(request.text,
+                    convertEntities=BeautifulSoup.HTML_ENTITIES)
         except:
             self.chat("parse error")
             return
 
-        defn = []
-
         elem = soup.find('div', {'class': 'definition'})
-        if elem:
-            if elem.string:
-                defn = [elem.string]
-            elif elem.contents:
-                defn = []
-                for c in elem.contents:
-                    if c.string and c.string.strip():
-                        defn.append(c.string.strip())
+
+        defn = []
+        for string in elem.stripped_strings:
+            defn.append(string)
 
         if defn:
             # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
@@ -152,11 +150,11 @@ class Reference(Dendrite):
 
 
     # This function used to be called calc, but was changed to hack in
-    # honor of Ken's incredibly sick exploitation of the eval function, 
+    # honor of Ken's incredibly sick exploitation of the eval function,
     # which gave him direct access to the database:
-    # (lambda f=(lambda n:[c for c in ().__class__.__bases__[0].__subclasses__() 
-    # if c.__name__=='catch_warnings'][0]()._module.__builtins__[n]): 
-    # f("eval")(f("compile")("d=[c for c in ().__class__.__base__.__subclasses__() 
+    # (lambda f=(lambda n:[c for c in ().__class__.__bases__[0].__subclasses__()
+    # if c.__name__=='catch_warnings'][0]()._module.__builtins__[n]):
+    # f("eval")(f("compile")("d=[c for c in ().__class__.__base__.__subclasses__()
     # if c.__name__=='catch_warnings'][0]()._module.__builtins__['__import__']('datastore');
     # d.connectdb();e=d.Drinker.objects(name='loxo33')[0];e.awaiting='2013/5/1=loxo33 job hops';
     # e.save()","","single")))()
@@ -174,7 +172,7 @@ class Reference(Dendrite):
 
             self.chat("Available functions: " + ", ".join(printout))
             return
-        
+
         string = ' '.join(self.values)
         if "__" in string:
             self.chat("Rejected.")
@@ -194,5 +192,5 @@ class Reference(Dendrite):
             self.chat("The Doctor")
             return
 
-    
+
 

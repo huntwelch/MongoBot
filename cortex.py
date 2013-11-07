@@ -7,8 +7,10 @@ import urllib
 import simplejson
 import shutil
 import pkgutil
+import requests
 
 from BeautifulSoup import BeautifulSoup as soup
+from bs4 import BeautifulSoup as bs4
 from datetime import date, timedelta
 from time import mktime, localtime, sleep
 from random import choice, randint
@@ -17,7 +19,7 @@ from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
     SHORTENER, OWNER, REALNAME, SCAN
 from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
 from datastore import Drinker, connectdb
-from util import unescape, pageopen
+from util import unescape, pageopen, shorten
 from autonomic import serotonin
 
 
@@ -225,7 +227,7 @@ class Cortex:
             return
 
         self.lastsender = nick
-        self.lastip = ip 
+        self.lastip = ip
 
         if content[:1] == CONTROL_KEY:
             if nick.rstrip('_') not in USERS:
@@ -247,6 +249,7 @@ class Cortex:
             self.brainmeats['broca'].tourettes(content, nick)
 
     def tweet(self, urls):
+        # This should somehow call twitterapi.get_tweet
         for url in urls:
             response = pageopen('https://api.twitter.com/1.1/statuses/show.json?id=%s' % url[1])
             if not response:
@@ -276,8 +279,8 @@ class Cortex:
                 return
 
             if url.find('gist.github') != -1:
-                return 
-                
+                return
+
             if randint(1,5) == 1:
                 self.commands.get("tweet", self.default)(url)
 
@@ -286,17 +289,17 @@ class Cortex:
                 title = "Couldn't get title"
                 roasted = "Couldn't roast"
 
-                urlbase = pageopen(url)
-                if not urlbase:
+                urlbase = requests.get(url)
+                if not urlbase.ok:
                     fubs += 1
 
                 try:
-                    opener = urllib2.build_opener()
-                    roasted = opener.open(SHORTENER + url).read()
+                    roasted = shorten(url)
                 except:
                     fubs += 1
 
-                ext = url.split(".")[-1]
+
+                ext = urlbase.headers['content-type'].split('/')[1]
                 images = [
                     "gif",
                     "png",
@@ -312,22 +315,11 @@ class Cortex:
                     break
                 else:
                     try:
-                        cont = soup(urlbase, convertEntities=soup.HTML_ENTITIES)
-                        if cont.title is None:
-                            redirect = cont.find('meta', attrs={'http-equiv': 'refresh'})
-                            if not redirect:
-                                redirect = cont.find('meta', attrs={'http-equiv': 'Refresh'})
-
-                            if redirect:
-                                url = redirect['content'].split('url=')[1]
-                                continue
-                            else:
-                                raise ValueError('Cannot find title')
-                        else:
-                            title = cont.title.string
-                            break
+                        title = bs4(urlbase.text).find('title').string
+                        if title is None:
+                            raise ValueError('Cannot find title')
                     except:
-                        self.chat("Page parsing error")
+                        self.chat("Page parsing error - " + roasted)
                         return
 
             deli = "https://api.del.icio.us/v1/posts/add?"
