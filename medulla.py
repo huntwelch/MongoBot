@@ -14,14 +14,14 @@ class Medulla:
         self.sock = socket.socket()
 
         print "* Pinging IRC"
-        
+
         self.sock.connect((HOST, PORT))
         self.sock.send('NICK ' + NICK + '\n')
         self.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
         self.sock.send('JOIN ' + CHANNEL + '\n')
 
         self.sock.setblocking(0)
-        
+
         self.active = True
         self.brain = cortex.Cortex(self)
 
@@ -34,7 +34,7 @@ class Medulla:
             sleep(0.1)
             self.brain.monitor(self.sock)
             if mktime(localtime()) - self.lastpulse > 10:
-               self.setpulse() 
+                self.setpulse()
 
     def reload(self, quiet=False):
         if self.brain.values and len(self.brain.values[0]):

@@ -39,7 +39,7 @@ def fetch_chats(request, offset):
             sender, type, room = info.strip().split()
             nick, data = sender.split('!')
             if room != CHANNEL:
-                private = 'private' 
+                private = 'private'
         else:
             nick, content = line.split(': ', 1)
             nick = nick[3:]
@@ -49,14 +49,13 @@ def fetch_chats(request, offset):
             content = content.replace('ACTION', '')
             action = True
 
-
         chat = {
-            'nick': nick, 
+            'nick': nick,
             'message': content.decode('latin-1'),
-            'action': action, 
-            'index': index, 
-            'interface': 'normal', 
-            'private': private, 
+            'action': action,
+            'index': index,
+            'interface': 'normal',
+            'private': private,
         }
 
         fader = request.args.get('fade')

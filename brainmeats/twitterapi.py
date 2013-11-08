@@ -3,7 +3,7 @@ import twitter
 from autonomic import axon, alias, category, help, Dendrite
 from settings import NICK
 from secrets import (TWIT_USER, TWIT_PASS, TWIT_ACCESS_TOKEN, TWIT_ACCESS_SECRET,
-    TWIT_CONSUMER_KEY, TWIT_CONSUMER_SECRET, TWIT_PAGE)
+                     TWIT_CONSUMER_KEY, TWIT_CONSUMER_SECRET, TWIT_PAGE)
 
 
 @category("twitter")
@@ -37,7 +37,6 @@ class Twitterapi(Dendrite):
 
         if not _message:
             self.chat('Tweeted "' + status.text + '"')
-
 
     @axon
     @help("ID <retrieve the tweet with ID>")

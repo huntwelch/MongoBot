@@ -8,6 +8,7 @@ from twilio.rest import TwilioRestClient
 from secrets import USERS
 from datastore import Drinker
 
+
 @category("sms")
 class Sms(Dendrite):
     def __init__(self, cortex):
@@ -33,7 +34,7 @@ class Sms(Dendrite):
         try:
             messages = self.client.sms.messages.list(to=TWILIO_NUMBER)
         except:
-            print "Error fetching" 
+            print "Error fetching"
             return
 
         while messages:
@@ -58,13 +59,13 @@ class Sms(Dendrite):
 
             message = "SMS from " + from_ + ": " + item.body
 
-            self.announce(message) 
+            self.announce(message)
 
             if item.body[:1] == CONTROL_KEY and drinker and item.from_ != TWILIO_NUMBER:
-                self.cx.context = CHANNEL 
+                self.cx.context = CHANNEL
                 self.cx.replysms = from_
-                self.cx.command(drinker[0].name, item.body) 
-                
+                self.cx.command(drinker[0].name, item.body)
+
         self.loaded = True
 
     @axon
@@ -110,10 +111,9 @@ class Sms(Dendrite):
         num = self.values[0]
 
         try:
-            messages = self.client.sms.messages.list(to="+16468635380",from_=num)
+            messages = self.client.sms.messages.list(to="+16468635380", from_=num)
             for item in messages:
                 self.chat(item.from_ + ": " + item.body)
         except:
             self.chat("Done broke")
             return
-

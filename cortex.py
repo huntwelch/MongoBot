@@ -288,7 +288,7 @@ class Cortex:
             if url.find('gist.github') != -1:
                 return
 
-            if randint(1,5) == 1:
+            if randint(1, 5) == 1:
                 self.commands.get("tweet", self.default)(url)
 
             while True:
@@ -325,10 +325,10 @@ class Cortex:
                         title = soup.find('title').string.strip()
                         if title is None:
                             redirect = soup.find('meta', attrs={'http-equiv':
-                                'refresh'})
+                                                 'refresh'})
                             if not redirect:
                                 redirect = soup.find('meta', attrs={'http-equiv':
-                                    'Refresh'})
+                                                     'Refresh'})
 
                             if redirect:
                                 # Shouldn't this call itself and then return here?

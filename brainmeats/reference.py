@@ -32,17 +32,13 @@ class Reference(Dendrite):
             return
 
         # If values was a string you don't need the join/etc
-        params = {
-                'v': '1.0',
-                'rsz': 'large',
-                'start': '0',
-                'q': "+".join(self.values),
-                }
+        params = {'v': '1.0', 'rsz': 'large', 'start': '0',
+                  'q': "+".join(values)}
 
         try:
             request = pageopen(
-                    'http://ajax.googleapis.com/ajax/services/search/web',
-                    params=params)
+                'http://ajax.googleapis.com/ajax/services/search/web',
+                params=params)
             json = request.json()
         except:
             self.chat("Something's buggered up")
@@ -116,9 +112,9 @@ class Reference(Dendrite):
 
         try:
             request = pageopen('http://www.urbandictionary.com/define.php',
-                    params={'term': ' '.join(self.values)})
+                               params={'term': ' '.join(self.values)})
             soup = bs4(request.text,
-                    convertEntities=BeautifulSoup.HTML_ENTITIES)
+                       convertEntities=BeautifulSoup.HTML_ENTITIES)
         except:
             self.chat("parse error")
             return
@@ -141,7 +137,6 @@ class Reference(Dendrite):
         else:
             self.chat("couldn't find anything")
 
-
     # This function used to be called calc, but was changed to hack in
     # honor of Ken's incredibly sick exploitation of the eval function,
     # which gave him direct access to the database:
@@ -153,7 +148,6 @@ class Reference(Dendrite):
     # e.save()","","single")))()
     #
     # Ken, your kung-fu is the strongest.
-
     @axon
     @help("EQUATION <run simple equation in python>, OR ruthlessly fuck with bot's codebase.")
     def hack(self):
@@ -184,6 +178,3 @@ class Reference(Dendrite):
         if not self.values:
             self.chat("The Doctor")
             return
-
-
-

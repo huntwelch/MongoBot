@@ -183,7 +183,6 @@ class Holdem(Dendrite):
         self.bet = amount
         self.turn(prepend=message)
 
-
     @axon
     @help("<match the current bet>")
     def callit(self):
@@ -211,7 +210,6 @@ class Holdem(Dendrite):
         message = player + " calls. "
 
         self.turn(prepend=message)
-
 
     @axon
     @help("<show how much money you have>")
@@ -306,7 +304,6 @@ class Holdem(Dendrite):
 
         self.turn(prepend=message)
 
-
     @axon
     @help("<show the current bet amount>")
     def thebet(self):
@@ -328,8 +325,8 @@ class Holdem(Dendrite):
         # without finding anyone 'in', we still move to the next round.  That
         # means no one is 'in' or only one person is 'in'.
 
-        in_count = len([p for p in self.players.itervalues() \
-                if p.status == "in"])
+        in_count = len([p for p in self.players.itervalues()
+                       if p.status == "in"])
 
         if in_count > 1:
             next_round = False
@@ -486,8 +483,8 @@ class Holdem(Dendrite):
 
         if lastman:
             self.players[lastman].money += self.pot
-            self.announce("%s takes pot of %d because everyone else folded." %\
-                    (lastman, self.pot))
+            self.announce("%s takes pot of %d because everyone else folded." %
+                          (lastman, self.pot))
         else:
             contenders = []
             for player, p in self.players.iteritems():
@@ -511,14 +508,14 @@ class Holdem(Dendrite):
                 if not p.winlimit or p.winlimit >= self.pot:
                     p.money += self.pot
                     pot_type = ' side' if side else ''
-                    self.announce("%s wins%s pot of %d with a %s" % \
-                            (winner, pot_type, self.pot, handstr))
+                    self.announce("%s wins%s pot of %d with a %s" %
+                                  (winner, pot_type, self.pot, handstr))
                 else:
                     p.money += p.winlimit
                     p.status = "waiting"
                     self.pot -= p.winlimit
-                    self.announce("%s wins main pot of %d with a %s" % \
-                            (winner, p.winlimit, handstr))
+                    self.announce("%s wins main pot of %d with a %s" %
+                                  (winner, p.winlimit, handstr))
 
                     if self.pot > 0:
                         self.distribute(side=True)

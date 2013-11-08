@@ -9,6 +9,7 @@ from random import choice
 from datastore import Drinker
 from xml.dom import minidom as dom
 
+
 @category("nonsense")
 class Nonsense(Dendrite):
     def __init__(self, cortex):
@@ -55,7 +56,7 @@ class Nonsense(Dendrite):
     def fml(self):
 
         url = 'http://api.fmylife.com'
-        params = { 'language': 'en', 'key': FML_API }
+        params = {'language': 'en', 'key': FML_API}
 
         if self.values and self.values[0]:
             url += '/view/search'

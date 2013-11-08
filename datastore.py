@@ -6,6 +6,7 @@ from settings import STARTING_CASH
 def connectdb():
     mongoengine.connect('bot', host='localhost')
 
+
 def simpleupdate(whom, key, val):
     try:
         drinker = Drinker.objects(name=whom)
@@ -20,6 +21,7 @@ def simpleupdate(whom, key, val):
         return False
 
     return True
+
 
 def incrementEntity(whom, amount):
     try:
@@ -38,6 +40,7 @@ def incrementEntity(whom, amount):
     entity.save()
     return True
 
+
 def entityScore(whom):
     try:
         entity = Entity.objects(name=whom)
@@ -49,9 +52,11 @@ def entityScore(whom):
         return 0
     return entity.value
 
+
 class Entity(mongoengine.Document):
     name = StringField(required=True)
     value = IntField(default=0)
+
 
 class Position(mongoengine.EmbeddedDocument):
     symbol = StringField(required=True)
@@ -87,6 +92,7 @@ class Learned(mongoengine.Document):
 class Structure(mongoengine.Document):
     structure = ListField(StringField())
     contents = ListField(StringField())
+
 
 class Quote(mongoengine.Document):
     date = DateTimeField(required=True)

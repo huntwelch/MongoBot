@@ -128,7 +128,6 @@ class Peeps(Dendrite):
         drinker.save()
         self.chat("Antici..... pating.")
 
-
     @axon
     @help("[USERNAME] <show what you are or USERNAME is waiting for>")
     def timeleft(self):
@@ -151,7 +150,6 @@ class Peeps(Dendrite):
         except:
             self.chat("Couldn't parse that out.")
 
-
     @axon
     @help("USERNAME <give temporary access to USERNAME>")
     def guestpass(self):
@@ -161,11 +159,11 @@ class Peeps(Dendrite):
         else:
             guest = self.values[0]
 
-        USERS.append(guest) 
+        USERS.append(guest)
 
         self.chat("Hi " + guest + ". You seem okay.")
 
-    @axon  
+    @axon
     @help("PASSWORD <set admin password>")
     def passwd(self):
         if not self.values:
@@ -185,7 +183,7 @@ class Peeps(Dendrite):
         if not simpleupdate(whom, "password", pwd):
             self.chat("Fail.")
             return
-        
+
         self.chat("Password set.")
 
     @axon
@@ -203,7 +201,7 @@ class Peeps(Dendrite):
 
         name = self.lastsender
 
-        if not simpleupdate(name, "phone", phone):       
+        if not simpleupdate(name, "phone", phone):
             self.chat("Some shit borked.")
             return
 
@@ -222,6 +220,3 @@ class Peeps(Dendrite):
             self.chat("No such numba. No such zone.")
         else:
             self.chat(user.name + ': ' + user.phone)
-        
-
-
