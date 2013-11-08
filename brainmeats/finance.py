@@ -44,7 +44,7 @@ class Finance(Dendrite):
             return
 
         try:
-            json = response.json
+            json = response.json()
         except:
             self.chat("Couldn't parse BTC data.")
             return
@@ -67,7 +67,7 @@ class Finance(Dendrite):
             return
 
         try:
-            json = response.json
+            json = response.json()
         except:
             self.chat("Couldn't parse LTC data.")
             return
