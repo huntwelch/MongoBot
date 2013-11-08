@@ -92,6 +92,5 @@ To Do
     TODO: finish holdem, needs testing and split pots probably don't work
     TODO: fix rate limiting problems with acro
     TODO: stock game: account for splits and reverse splits
-    TODO: replace urllib stuff with requests
     TODO: figure out how to reboot bot when a process locks up
     TODO: investigate Twisted

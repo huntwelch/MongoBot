@@ -265,7 +265,7 @@ class Broca(Dendrite):
             self.chat("Couldn't find anything")
             return
 
-        cont = soup(urlbase)
+        cont = soup(urlbase.text)
 
         heads = cont.findAll("dt")
         defs = cont.findAll("dd")
@@ -309,7 +309,7 @@ class Broca(Dendrite):
             self.chat("Fail")
             return
 
-        cont = soup(urlbase)
+        cont = soup(urlbase.text)
 
         if len(cont.findAll("p")) == 6:
             self.chat("No anagrams found.")
@@ -321,7 +321,7 @@ class Broca(Dendrite):
             content = content[2:-4]
             content = content.replace(": ,", ": ")
             self.chat(content)
-        
+
         # Usually not concerned with exceptions
         # in mongo, but this is bound to come up
         # again.

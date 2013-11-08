@@ -2,9 +2,6 @@ import base64
 import sys
 import os
 import re
-import urllib2
-import urllib
-import simplejson
 import shutil
 import pkgutil
 import requests
@@ -252,12 +249,12 @@ class Cortex:
         # This should somehow call twitterapi.get_tweet
         for url in urls:
             response = pageopen('https://api.twitter.com/1.1/statuses/show.json?id=%s' % url[1])
-            if not response:
+            if not response.ok:
                 self.chat("Couldn't retrieve Tweet.")
                 return
 
             try:
-                json = simplejson.loads(response)
+                json = response.json
             except:
                 self.chat("Couldn't parse Tweet.")
                 return
@@ -289,7 +286,7 @@ class Cortex:
                 title = "Couldn't get title"
                 roasted = "Couldn't roast"
 
-                urlbase = requests.get(url)
+                urlbase = pageopen(url)
                 if not urlbase.ok:
                     fubs += 1
 

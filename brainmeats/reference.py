@@ -1,9 +1,6 @@
 import HTMLParser
-import simplejson
 import textwrap
-import urllib
 import os
-import requests
 
 from autonomic import axon, alias, category, help, Dendrite
 from BeautifulSoup import BeautifulSoup
@@ -43,7 +40,7 @@ class Reference(Dendrite):
                 }
 
         try:
-            request = requests.get(
+            request = pageopen(
                     'http://ajax.googleapis.com/ajax/services/search/web',
                     params=params)
             json = request.json()
@@ -54,11 +51,11 @@ class Reference(Dendrite):
         if not result.ok:
             self.chat("Bad status")
             return
-    
+
         if len(json["responseData"]["results"]) == 0:
             self.chat("No results")
             return
-            
+
         result = json["responseData"]["results"][0]
         title = result["titleNoFormatting"]
         link = result["unescapedUrl"]
@@ -92,12 +89,12 @@ class Reference(Dendrite):
             self.chat("Couldn't get weather.")
             return
 
-        if not response:
+        if not response.ok:
             self.chat("Couldn't get weather.")
             return
 
         try:
-            json = simplejson.loads(response)
+            json = response.json
             json = json['current_observation']
         except:
             self.chat("Couldn't parse weather.")
@@ -122,7 +119,7 @@ class Reference(Dendrite):
             return
 
         try:
-            request = requests.get('http://www.urbandictionary.com/define.php',
+            request = pageopen('http://www.urbandictionary.com/define.php',
                     params={'term': ' '.join(self.values)})
             soup = bs4(request.text,
                     convertEntities=BeautifulSoup.HTML_ENTITIES)

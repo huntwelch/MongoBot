@@ -1,4 +1,3 @@
-import simplejson
 import locale
 
 from autonomic import axon, category, help, Dendrite
@@ -45,7 +44,7 @@ class Finance(Dendrite):
             return
 
         try:
-            json = simplejson.loads(response)
+            json = response.json
         except:
             self.chat("Couldn't parse BTC data.")
             return
@@ -68,7 +67,7 @@ class Finance(Dendrite):
             return
 
         try:
-            json = simplejson.loads(response)
+            json = response.json
         except:
             self.chat("Couldn't parse LTC data.")
             return
