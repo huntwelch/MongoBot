@@ -59,16 +59,17 @@ def colorize(text, color):
 def pageopen(url, params={}):
     try:
         headers = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'}
-        urlbase = requests.get(url, headers=headers, params=params)
+        urlbase = requests.get(url, headers=headers, params=params, timeout=5)
     except requests.exceptions.RequestException as e:
         print e
         return False
-    
+
     return urlbase
+
 
 def shorten(url):
     try:
-        short_url = requests.get(SHORTENER, params={'roast': url}).text
+        short_url = requests.get(SHORTENER, params={'roast': url}, timeout=5).text
     except:
         return ''
 
