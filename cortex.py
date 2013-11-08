@@ -242,7 +242,7 @@ class Cortex:
             if content[-2:] == '--':
                 self.commands.get('decrement')()
             return
-            
+
 
         ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         match_urls = re.compile(ur)
@@ -322,7 +322,7 @@ class Cortex:
                 else:
                     try:
                         soup = bs4(urlbase.text)
-                        title = soup.find('title').string
+                        title = soup.find('title').string.strip()
                         if title is None:
                             redirect = soup.find('meta', attrs={'http-equiv':
                                 'refresh'})
