@@ -92,9 +92,8 @@ class Stock(object):
         url = singlestock + symbol + "'"
 
         try:
-            raw = dom.parse(pageopen(url))
+            raw = dom.parseString(pageopen(url).text)
         except Exception as e:
-            print e
             return
 
         self.stock = self.extract(raw)
