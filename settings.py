@@ -30,7 +30,7 @@ ACROSCORE = STORAGE + "/acro/"
 # Misc
 
 CONTROL_KEY = "-"
-SHORTENER = "http://roa.st/api.php?roast="
+SHORTENER = "http://roa.st/api.php"
 PATIENCE = 7000
 REPO = "https://github.com/huntwelch/MongoBot"
 SMS_LOCKFILE = "/tmp/sms.lock"

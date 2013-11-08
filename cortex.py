@@ -2,22 +2,21 @@ import base64
 import sys
 import os
 import re
-import urllib2
-import urllib
-import simplejson
 import shutil
 import pkgutil
+import requests
 
 from BeautifulSoup import BeautifulSoup as soup
+from bs4 import BeautifulSoup as bs4
 from datetime import date, timedelta
 from time import mktime, localtime, sleep
 from random import choice, randint
 
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-    SHORTENER, OWNER, REALNAME, SCAN
+    OWNER, REALNAME, SCAN
 from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
 from datastore import Drinker, connectdb
-from util import unescape, pageopen
+from util import unescape, pageopen, shorten
 from autonomic import serotonin
 
 
@@ -225,7 +224,7 @@ class Cortex:
             return
 
         self.lastsender = nick
-        self.lastip = ip 
+        self.lastip = ip
 
         if content[:1] == CONTROL_KEY:
             if nick.rstrip('_') not in USERS:
@@ -247,14 +246,15 @@ class Cortex:
             self.brainmeats['broca'].tourettes(content, nick)
 
     def tweet(self, urls):
+        # This should somehow call twitterapi.get_tweet
         for url in urls:
             response = pageopen('https://api.twitter.com/1.1/statuses/show.json?id=%s' % url[1])
-            if not response:
+            if not response.ok:
                 self.chat("Couldn't retrieve Tweet.")
                 return
 
             try:
-                json = simplejson.loads(response)
+                json = response.json
             except:
                 self.chat("Couldn't parse Tweet.")
                 return
@@ -276,8 +276,8 @@ class Cortex:
                 return
 
             if url.find('gist.github') != -1:
-                return 
-                
+                return
+
             if randint(1,5) == 1:
                 self.commands.get("tweet", self.default)(url)
 
@@ -287,16 +287,16 @@ class Cortex:
                 roasted = "Couldn't roast"
 
                 urlbase = pageopen(url)
-                if not urlbase:
+                if not urlbase.ok:
                     fubs += 1
 
                 try:
-                    opener = urllib2.build_opener()
-                    roasted = opener.open(SHORTENER + url).read()
+                    roasted = shorten(url)
                 except:
                     fubs += 1
 
-                ext = url.split(".")[-1]
+
+                ext = urlbase.headers['content-type'].split('/')[1]
                 images = [
                     "gif",
                     "png",
@@ -312,39 +312,41 @@ class Cortex:
                     break
                 else:
                     try:
-                        cont = soup(urlbase, convertEntities=soup.HTML_ENTITIES)
-                        if cont.title is None:
-                            redirect = cont.find('meta', attrs={'http-equiv': 'refresh'})
+                        soup = bs4(urlbase.text)
+                        title = soup.find('title').string
+                        if title is None:
+                            redirect = soup.find('meta', attrs={'http-equiv':
+                                'refresh'})
                             if not redirect:
-                                redirect = cont.find('meta', attrs={'http-equiv': 'Refresh'})
+                                redirect = soup.find('meta', attrs={'http-equiv':
+                                    'Refresh'})
 
                             if redirect:
+                                # Shouldn't this call itself and then return here?
                                 url = redirect['content'].split('url=')[1]
                                 continue
                             else:
                                 raise ValueError('Cannot find title')
-                        else:
-                            title = cont.title.string
-                            break
                     except:
-                        self.chat("Page parsing error")
+                        self.chat("Page parsing error - " + roasted)
                         return
 
-            deli = "https://api.del.icio.us/v1/posts/add?"
-            data = urllib.urlencode({
+            deli = "https://api.del.icio.us/v1/posts/add"
+            params = {
                 "url": url,
                 "description": title,
                 "tags": "okdrink," + self.lastsender,
-            })
+            }
 
             if DELICIOUS_USER:
-                base64string = base64.encodestring('%s:%s' % (DELICIOUS_USER, DELICIOUS_PASS))[:-1]
+                auth = requests.auth.HTTPBasicAuth(DELICIOUS_USER, DELICIOUS_PASS)
                 try:
-                    req = urllib2.Request(deli, data)
-                    req.add_header("Authorization", "Basic %s" % base64string)
-                    send = urllib2.urlopen(req)
+                    send = requests.get(deli, params=params, auth=auth)
                 except:
                     self.chat("(delicious is down)")
+
+                if not send.ok:
+                    self.chat("(delicious problem)")
 
             if fubs == 2:
                 self.chat("Total fail")

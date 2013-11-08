@@ -1,7 +1,6 @@
-import urllib
-import urllib2
 import re
 import htmlentitydefs
+import requests
 from settings import CHANNEL, SHORTENER
 from xml.dom import minidom as dom
 
@@ -57,17 +56,22 @@ def colorize(text, color):
 
 
 
-def pageopen(url):
+def pageopen(url, params={}):
     try:
-        opener = urllib2.build_opener()
-        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-        urlbase = opener.open(url).read()
-        urlbase = re.sub('\s+', ' ', urlbase).strip()
+        headers = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'}
+        urlbase = requests.get(url, headers=headers, params=params)
     except:
         return False
 
     return urlbase
 
+def shorten(url):
+    try:
+        short_url = requests.get(SHORTENER, params={'roast': url}).text
+    except:
+        return ''
+
+    return short_url
 
 # Utility classes
 
@@ -87,7 +91,7 @@ class Stock(object):
         url = singlestock + symbol + "'"
 
         try:
-            raw = dom.parse(urllib.urlopen(url))
+            raw = dom.parse(pageopen(url))
         except:
             return
 
@@ -100,7 +104,7 @@ class Stock(object):
     def extract(self, raw):
 
         elements = [e for e in raw.childNodes[0].childNodes[0].childNodes[0].childNodes if e.firstChild != None]
-        
+
         # in the future, can just change translation
         # point is to end up with an object that won't
         # change when the api changes.
@@ -163,7 +167,7 @@ class Stock(object):
             self.price = float(self._bid_realtime)
         else:
             self.price = float(self._last)
-            
+
         try:
             self.change = float(self._change)
             self.perc_change = float(self._perc_change[0:-1]) #trim % off
@@ -206,15 +210,14 @@ class Stock(object):
                 addon = pretty + ": " + self.stock[id]
                 message.append(addon)
 
-        link = urllib.quote("http://www.google.com/finance?client=ig&q=" + self.stock["symbol"])
+        link = "http://www.google.com/finance?client=ig&q=" + self.stock["symbol"]
         try:
-            opener = urllib2.build_opener()
-            roasted = opener.open(SHORTENER + link).read()
+            roasted = shorten(link)
             message.append(roasted)
         except:
             message.append("Can't link")
-            
+
 
         output = ', '.join(message)
-    
+
         return output

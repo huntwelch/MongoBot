@@ -27,7 +27,7 @@ class Twitterapi(Dendrite):
         if not self.values and not _message:
             self.chat("Tweet what?")
             return
-        
+
         if not _message:
             message = ' '.join(self.values)
         else:
@@ -37,3 +37,15 @@ class Twitterapi(Dendrite):
 
         if not _message:
             self.chat('Tweeted "' + status.text + '"')
+
+
+    @axon
+    @help("ID <retrieve the tweet with ID>")
+    def get_tweet(self, value):
+        status = self.api.GetStatus(value)
+
+        text = status.text
+        screen_name = status.user.screen_name
+        name = status.user.name
+        if status.text:
+            self.chat('%s (%s) tweeted: %s' % (name, screen_name, text))

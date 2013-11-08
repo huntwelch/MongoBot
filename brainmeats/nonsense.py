@@ -1,17 +1,14 @@
-import simplejson
-import urllib
-import urllib2
 import time
 import os
 
 from autonomic import axon, category, help, Dendrite
-from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
-from secrets import FML_API 
-from util import colorize
+from settings import STORAGE, ACROLIB, LOGDIR, DISTASTE, NICK
+from secrets import FML_API
+from util import colorize, pageopen, shorten
 from random import choice
-from datastore import Drinker 
+from datastore import Drinker
 from xml.dom import minidom as dom
-    
+
 @category("nonsense")
 class Nonsense(Dendrite):
     def __init__(self, cortex):
@@ -44,35 +41,31 @@ class Nonsense(Dendrite):
     @help("<grab a little advice>")
     def advice(self):
         url = 'http://api.adviceslip.com/advice'
-        
+
         try:
-            headers = { 'User-Agent' : 'Mozilla/5.0' }
-            request = urllib2.Request(url, None, headers)
-            response = urllib2.urlopen(request).read()
-            json = simplejson.loads(response)
+            json = pageopen(url).json
         except:
             self.chat('Use a rubber if you sleep with dcross2\'s mother.')
             return
-        
+
         self.chat(json['slip']['advice'] + ".. in bed.")
-    
+
     @axon
     @help("SEARCHTERM <grab random fml entry>")
     def fml(self):
 
-        uri = 'http://api.fmylife.com'
-        lang = 'en'
-        
+        url = 'http://api.fmylife.com'
+        params = { 'language': 'en', 'key': FML_API }
+
         if self.values and self.values[0]:
-            path = '/view/search?'
-            search = "+".join(self.values)
-            url = uri + path + 'search=' + search + '&language=' + lang + '&key=' + FML_API
+            url += '/view/search'
+            params['search'] = "+".join(self.values)
         else:
-            path = '/view/random?'
-            url = uri + path + 'language=' + lang + '&key=' + FML_API
+            url += '/view/random'
 
         try:
-            raw = dom.parse(urllib.urlopen(url))
+            response = pageopen(url, params)
+            raw = dom.parse(response.text)
             if self.values and self.values[0]:
                 fml = choice(raw.getElementsByTagName("text")).firstChild.nodeValue
             else:
@@ -92,7 +85,7 @@ class Nonsense(Dendrite):
         url = 'http://itsthisforthat.com/api.php?text'
 
         try:
-            out = urllib.urlopen(url).read()
+            out = pageopen(url).text
             self.chat(out.lower().capitalize())
         except:
             self.chat("Done broke")
@@ -128,12 +121,12 @@ class Nonsense(Dendrite):
 
         drinker = Drinker.objects(name=kinder)
         if drinker:
-            drinker = drinker[0] 
+            drinker = drinker[0]
             rewards = drinker.rewards + 1
         else:
             drinker = Drinker(name=kinder)
             rewards = 1
-        
+
         drinker.rewards = rewards
         drinker.save()
 
@@ -169,8 +162,8 @@ class Nonsense(Dendrite):
     def aleksey(self):
         url = 'https://spreadsheets.google.com/feeds/list/0Auy4L1ZnQpdYdERZOGV1bHZrMEFYQkhKVHc4eEE3U0E/od6/public/basic?alt=json'
         try:
-            response = urllib2.urlopen(url).read()
-            json = simplejson.loads(response)
+            response = pageopen(url)
+            json = response.json
         except:
             self.chat('Somethin dun goobied.')
             return
@@ -212,8 +205,7 @@ class Nonsense(Dendrite):
     @help("URL <pull from distaste entries or add url to distate options>")
     def distaste(self):
         if self.values:
-            url = urllib.quote_plus(self.values[0])
-            roasted = urllib2.urlopen(SHORTENER + url).read()
+            roasted = shorten(url)
 
             open(DISTASTE, 'a').write(roasted + '\n')
             self.chat("Another one rides the bus")
