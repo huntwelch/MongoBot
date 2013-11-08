@@ -234,6 +234,16 @@ class Cortex:
             self.command(nick, content)
             return
 
+        if content[:-2] in USERS and content[-2:] in ['--','++']:
+            print "Active"
+            self.values = [content[:-2]]
+            if content[-2:] == '++':
+                self.commands.get('increment')()
+            if content[-2:] == '--':
+                self.commands.get('decrement')()
+            return
+
+
         ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         match_urls = re.compile(ur)
         urls = match_urls.findall(content)
@@ -249,7 +259,7 @@ class Cortex:
         # This should somehow call twitterapi.get_tweet
         for url in urls:
             response = pageopen('https://api.twitter.com/1.1/statuses/show.json?id=%s' % url[1])
-            if not response.ok:
+            if not response:
                 self.chat("Couldn't retrieve Tweet.")
                 return
 
@@ -287,7 +297,7 @@ class Cortex:
                 roasted = "Couldn't roast"
 
                 urlbase = pageopen(url)
-                if not urlbase.ok:
+                if not urlbase:
                     fubs += 1
 
                 try:
@@ -312,7 +322,7 @@ class Cortex:
                 else:
                     try:
                         soup = bs4(urlbase.text)
-                        title = soup.find('title').string
+                        title = soup.find('title').string.strip()
                         if title is None:
                             redirect = soup.find('meta', attrs={'http-equiv':
                                                  'refresh'})
@@ -326,10 +336,13 @@ class Cortex:
                                 continue
                             else:
                                 raise ValueError('Cannot find title')
+                        break
+
                     except:
                         self.chat("Page parsing error - " + roasted)
                         return
 
+            print "Delic"
             deli = "https://api.del.icio.us/v1/posts/add"
             params = {
                 "url": url,
@@ -344,13 +357,16 @@ class Cortex:
                 except:
                     self.chat("(delicious is down)")
 
-                if not send.ok:
+                if not send:
                     self.chat("(delicious problem)")
 
             if fubs == 2:
                 self.chat("Total fail")
             else:
                 self.chat(unescape(title) + " @ " + roasted)
+
+            print "All the way"
+            break
 
     def announce(self, message, whom=False):
         message = message.encode("utf-8")

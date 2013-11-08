@@ -58,8 +58,9 @@ def colorize(text, color):
 def pageopen(url, params={}):
     try:
         headers = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'}
-        urlbase = requests.get(url, headers=headers, params=params)
-    except:
+        urlbase = requests.get(url, headers=headers, params=params, timeout=5)
+    except requests.exceptions.RequestException as e:
+        print e
         return False
 
     return urlbase
@@ -67,7 +68,7 @@ def pageopen(url, params={}):
 
 def shorten(url):
     try:
-        short_url = requests.get(SHORTENER, params={'roast': url}).text
+        short_url = requests.get(SHORTENER, params={'roast': url}, timeout=5).text
     except:
         return ''
 
@@ -86,13 +87,13 @@ class Stock(object):
         if not symbol:
             return
 
-        # google specific
+        # yahoo specific
         singlestock = "http://query.yahooapis.com/v1/public/yql?env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&q=select%20*%20from%20yahoo.finance.quotes%20where%20symbol%20%3D%20'"
         url = singlestock + symbol + "'"
 
         try:
-            raw = dom.parse(pageopen(url))
-        except:
+            raw = dom.parseString(pageopen(url).text)
+        except Exception as e:
             return
 
         self.stock = self.extract(raw)
@@ -100,7 +101,7 @@ class Stock(object):
     def __nonzero__(self):
         return self.stock is not None
 
-    # Extracts from google api
+    # Extracts from yahoo api
     def extract(self, raw):
 
         elements = [e for e in

@@ -66,7 +66,7 @@ class Nonsense(Dendrite):
 
         try:
             response = pageopen(url, params)
-            raw = dom.parse(response.text)
+            raw = dom.parseString(response.text)
             if self.values and self.values[0]:
                 fml = choice(raw.getElementsByTagName("text")).firstChild.nodeValue
             else:

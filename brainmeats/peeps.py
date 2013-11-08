@@ -2,7 +2,7 @@ import datetime
 import re
 import hashlib
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, category, help, Dendrite, alias
 from settings import STORAGE, CHANNEL
 from secrets import USERS
 from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore
@@ -49,7 +49,7 @@ class Peeps(Dendrite):
         self.chat("Company updated.")
 
     @axon
-    @help("increment <entity to receive point>")
+    @help("DRINKER <give somebody a point>")
     def increment(self):
         if not self.values:
             self.chat("you need to give someone your love")
@@ -62,7 +62,7 @@ class Peeps(Dendrite):
         self.chat(self.lastsender + " brought " + entity + " to " + str(entityScore(entity)))
 
     @axon
-    @help("increment <entity to receive point>")
+    @help("DRINKER <take a point away>")
     def decrement(self):
         if not self.values:
             self.chat("you need to give someone your hate")

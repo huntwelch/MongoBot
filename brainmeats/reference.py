@@ -44,10 +44,6 @@ class Reference(Dendrite):
             self.chat("Something's buggered up")
             return
 
-        if not result.ok:
-            self.chat("Bad status")
-            return
-
         if len(json["responseData"]["results"]) == 0:
             self.chat("No results")
             return
@@ -85,7 +81,7 @@ class Reference(Dendrite):
             self.chat("Couldn't get weather.")
             return
 
-        if not response.ok:
+        if not response:
             self.chat("Couldn't get weather.")
             return
 
