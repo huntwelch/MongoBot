@@ -234,6 +234,16 @@ class Cortex:
             self.command(nick, content)
             return
 
+        if content[:-2] in USERS and content[-2:] in ['--','++']:
+            print "Active"
+            self.values = [content[:-2]]
+            if content[-2:] == '++':
+                self.commands.get('increment')()
+            if content[-2:] == '--':
+                self.commands.get('decrement')()
+            return
+            
+
         ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         match_urls = re.compile(ur)
         urls = match_urls.findall(content)

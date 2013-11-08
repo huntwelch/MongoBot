@@ -93,7 +93,8 @@ class Stock(object):
 
         try:
             raw = dom.parse(pageopen(url))
-        except:
+        except Exception as e:
+            print e
             return
 
         self.stock = self.extract(raw)
