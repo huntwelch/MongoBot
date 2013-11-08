@@ -48,7 +48,7 @@ class Reference(Dendrite):
             self.chat("Something's buggered up")
             return
 
-        if not result.ok:
+        if not result:
             self.chat("Bad status")
             return
 
@@ -89,7 +89,7 @@ class Reference(Dendrite):
             self.chat("Couldn't get weather.")
             return
 
-        if not response.ok:
+        if not response:
             self.chat("Couldn't get weather.")
             return
 
