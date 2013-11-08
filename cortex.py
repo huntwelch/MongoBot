@@ -295,7 +295,6 @@ class Cortex:
                 except:
                     fubs += 1
 
-
                 ext = urlbase.headers['content-type'].split('/')[1]
                 images = [
                     "gif",
@@ -327,10 +326,13 @@ class Cortex:
                                 continue
                             else:
                                 raise ValueError('Cannot find title')
+                        break
+
                     except:
                         self.chat("Page parsing error - " + roasted)
                         return
 
+            print "Delic"
             deli = "https://api.del.icio.us/v1/posts/add"
             params = {
                 "url": url,
@@ -352,6 +354,9 @@ class Cortex:
                 self.chat("Total fail")
             else:
                 self.chat(unescape(title) + " @ " + roasted)
+
+            print "All the way"
+            break
 
     def announce(self, message, whom=False):
         message = message.encode("utf-8")

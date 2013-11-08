@@ -60,9 +60,10 @@ def pageopen(url, params={}):
     try:
         headers = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'}
         urlbase = requests.get(url, headers=headers, params=params)
-    except:
+    except requests.exceptions.RequestException as e:
+        print e
         return False
-
+    
     return urlbase
 
 def shorten(url):
@@ -86,7 +87,7 @@ class Stock(object):
         if not symbol:
             return
 
-        # google specific
+        # yahoo specific
         singlestock = "http://query.yahooapis.com/v1/public/yql?env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&q=select%20*%20from%20yahoo.finance.quotes%20where%20symbol%20%3D%20'"
         url = singlestock + symbol + "'"
 
@@ -100,7 +101,7 @@ class Stock(object):
     def __nonzero__(self):
         return self.stock is not None
 
-    # Extracts from google api
+    # Extracts from yahoo api
     def extract(self, raw):
 
         elements = [e for e in raw.childNodes[0].childNodes[0].childNodes[0].childNodes if e.firstChild != None]
