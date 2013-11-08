@@ -234,6 +234,16 @@ class Cortex:
             self.command(nick, content)
             return
 
+        if content[:-2] in USERS and content[-2:] in ['--','++']:
+            print "Active"
+            self.values = [content[:-2]]
+            if content[-2:] == '++':
+                self.commands.get('increment')()
+            if content[-2:] == '--':
+                self.commands.get('decrement')()
+            return
+            
+
         ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         match_urls = re.compile(ur)
         urls = match_urls.findall(content)
@@ -295,7 +305,6 @@ class Cortex:
                 except:
                     fubs += 1
 
-
                 ext = urlbase.headers['content-type'].split('/')[1]
                 images = [
                     "gif",
@@ -327,10 +336,13 @@ class Cortex:
                                 continue
                             else:
                                 raise ValueError('Cannot find title')
+                        break
+
                     except:
                         self.chat("Page parsing error - " + roasted)
                         return
 
+            print "Delic"
             deli = "https://api.del.icio.us/v1/posts/add"
             params = {
                 "url": url,
@@ -352,6 +364,9 @@ class Cortex:
                 self.chat("Total fail")
             else:
                 self.chat(unescape(title) + " @ " + roasted)
+
+            print "All the way"
+            break
 
     def announce(self, message, whom=False):
         message = message.encode("utf-8")

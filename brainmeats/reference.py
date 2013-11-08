@@ -36,7 +36,7 @@ class Reference(Dendrite):
                 'v': '1.0',
                 'rsz': 'large',
                 'start': '0',
-                'q': "+".join(values),
+                'q': "+".join(self.values),
                 }
 
         try:
@@ -46,10 +46,6 @@ class Reference(Dendrite):
             json = request.json()
         except:
             self.chat("Something's buggered up")
-            return
-
-        if not result:
-            self.chat("Bad status")
             return
 
         if len(json["responseData"]["results"]) == 0:
