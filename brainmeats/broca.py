@@ -21,7 +21,6 @@ class Broca(Dendrite):
         self.readstuff = False
         self.knowledge = False
 
-
     @axon
     @help("<Make " + NICK + " read books>")
     def readup(self):
@@ -36,7 +35,6 @@ class Broca(Dendrite):
         self.knowledge = nltk.Text(tokens)
 
         self.chat("Okay, read all the things.")
-
 
     @axon
     @help("<command " + NICK + " to speak>")
@@ -54,7 +52,6 @@ class Broca(Dendrite):
 
         self.readstuff = True
         self.chat(text)
-
 
     @axon
     @help("WORD <get definition of word>")
@@ -83,7 +80,6 @@ class Broca(Dendrite):
 
         self.chat(str(len(self.definitions)) + " definitions for " + word)
         self.chat("Definition " + str(which + 1) + ": " + definition)
-
 
     def seekdef(self, word):
         if not WORDNIK_API:
@@ -120,7 +116,6 @@ class Broca(Dendrite):
         else:
             self.chat("I got nothin.")
 
-
     def parse(self, sentence, nick):
         tokens = nltk.word_tokenize(sentence)
         tagged = nltk.pos_tag(tokens)
@@ -147,7 +142,6 @@ class Broca(Dendrite):
             struct.save()
         except:
             pass
-
 
     def tourettes(self, sentence, nick):
         if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
@@ -179,7 +173,6 @@ class Broca(Dendrite):
             self.chat("LEAVE ERIK ALONE!")
             return
 
-
     @axon
     @alias(["waxhapsodic"])
     @help("<command " + NICK + " to speak>")
@@ -191,7 +184,6 @@ class Broca(Dendrite):
             sentence.append(_word.word)
 
         self.chat(" ".join(sentence))
-
 
     @axon
     @help("WORD <teach " + NICK + " a word>")
@@ -206,7 +198,6 @@ class Broca(Dendrite):
 
         open(STORAGE + "/natwords", 'a').write(self.values[0].strip() + '\n')
         self.chat(NICK + " learn new word!", self.lastsender)
-
 
     @axon
     @help("ACRONYM <have " + NICK + " decide the words for an acronym>")
@@ -230,7 +221,6 @@ class Broca(Dendrite):
         output = self.acronymit(self.values[0])
         self.chat(output)
 
-
     def acronymit(self, base):
         acronym = list(base.upper())
         output = []
@@ -248,7 +238,6 @@ class Broca(Dendrite):
                     good = True
 
         return " ".join(output)
-
 
     @axon
     @help("WORD [WHICH_DEFINITION] <look up etymology of word>")
@@ -291,7 +280,6 @@ class Broca(Dendrite):
 
         self.chat("Etymology " + str(ord + 1) + " of " + str(len(defs)) +
                   " for " + _word + ": " + _def)
-
 
     # TODO: broken, not sure why
     @axon

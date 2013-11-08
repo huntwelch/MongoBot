@@ -107,5 +107,3 @@ class System(Dendrite):
         }
         for key, val in items.iteritems():
             self.chat(key + ": " + val)
-
-

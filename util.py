@@ -55,7 +55,6 @@ def colorize(text, color):
     return "\x03" + str(color) + text + "\x03"
 
 
-
 def pageopen(url, params={}):
     try:
         headers = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'}
@@ -65,6 +64,7 @@ def pageopen(url, params={}):
 
     return urlbase
 
+
 def shorten(url):
     try:
         short_url = requests.get(SHORTENER, params={'roast': url}).text
@@ -73,8 +73,8 @@ def shorten(url):
 
     return short_url
 
-# Utility classes
 
+# Utility classes
 class Stock(object):
 
     def __init__(self, symbol):
@@ -103,7 +103,9 @@ class Stock(object):
     # Extracts from google api
     def extract(self, raw):
 
-        elements = [e for e in raw.childNodes[0].childNodes[0].childNodes[0].childNodes if e.firstChild != None]
+        elements = [e for e in
+                    raw.childNodes[0].childNodes[0].childNodes[0].childNodes if
+                    e.firstChild is not None]
 
         # in the future, can just change translation
         # point is to end up with an object that won't
@@ -121,8 +123,8 @@ class Stock(object):
             #"divisor": "divisor",
             #"currency": "currency",
             "LastTradePriceOnly": "_last",
-            "AskRealtime" : "_ask_realtime",
-            "BidRealtime" : "_bid_realtime",
+            "AskRealtime": "_ask_realtime",
+            "BidRealtime": "_bid_realtime",
             "DaysHigh": "high",
             "DaysLow": "low",
             "Volume": "volume",
@@ -134,8 +136,8 @@ class Stock(object):
             "ChangeinPercent": "_perc_change",
             #"delay": "delay",
             #"trade_timestamp": "trade_timestamp",
-            "LastTradeDate": "trade_date_utc",  #May not actually be UTC
-            "LastTradeTime": "trade_time_utc", #May not actually be UTC
+            "LastTradeDate": "trade_date_utc",  # May not actually be UTC
+            "LastTradeTime": "trade_time_utc",  # May not actually be UTC
             #"current_date_utc": "current_date_utc",
             #"current_time_utc": "current_time_utc",
             #"symbol_url": "symbol_url",
@@ -154,23 +156,23 @@ class Stock(object):
 
         for e in elements:
             data = e.firstChild.nodeValue
-            if translation.has_key(e.tagName):
+            if translation in e.tagName:
                 extracted[translation[e.tagName]] = data
                 setattr(self, translation[e.tagName], data)
 
         if not self.company:
             return None
 
-        if self._ask_realtime != None:
+        if self._ask_realtime is not None:
             self.price = float(self._ask_realtime)
-        elif self._bid_realtime != None:
+        elif self._bid_realtime is not None:
             self.price = float(self._bid_realtime)
         else:
             self.price = float(self._last)
 
         try:
             self.change = float(self._change)
-            self.perc_change = float(self._perc_change[0:-1]) #trim % off
+            self.perc_change = float(self._perc_change[0:-1])  # trim % off
         except:
             self.change = 0
             self.perc_change = 0
@@ -216,7 +218,6 @@ class Stock(object):
             message.append(roasted)
         except:
             message.append("Can't link")
-
 
         output = ', '.join(message)
 

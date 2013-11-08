@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import simplejson as json 
+import simplejson as json
 
 from flask import Flask, request, session, g, redirect, url_for, abort, \
-     render_template, flash, _app_ctx_stack
+    render_template, flash, _app_ctx_stack
 from server.decorators import requires_auth
 from server.helpers import fetch_chats, render_xml
 
-
 app = Flask(__name__)
+
 
 @app.route("/")
 def index():

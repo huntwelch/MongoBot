@@ -38,6 +38,7 @@ class Dendrite(object):
     def members(self):
         return self.cx.members
 
+
 def serotonin(cortex, expansion, electroshock):
     methods = inspect.getmembers(expansion)
     letter = expansion.category[:2]
