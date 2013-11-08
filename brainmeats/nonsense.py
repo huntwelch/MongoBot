@@ -2,7 +2,7 @@ import time
 import os
 
 from autonomic import axon, category, help, Dendrite
-from settings import STORAGE, ACROLIB, LOGDIR, SHORTENER, DISTASTE, NICK
+from settings import STORAGE, ACROLIB, LOGDIR, DISTASTE, NICK
 from secrets import FML_API
 from util import colorize, pageopen, shorten
 from random import choice

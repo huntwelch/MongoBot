@@ -13,7 +13,7 @@ from time import mktime, localtime, sleep
 from random import choice, randint
 
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-    SHORTENER, OWNER, REALNAME, SCAN
+    OWNER, REALNAME, SCAN
 from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
 from datastore import Drinker, connectdb
 from util import unescape, pageopen, shorten
