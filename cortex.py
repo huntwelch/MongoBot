@@ -249,7 +249,7 @@ class Cortex:
         # This should somehow call twitterapi.get_tweet
         for url in urls:
             response = pageopen('https://api.twitter.com/1.1/statuses/show.json?id=%s' % url[1])
-            if not response.ok:
+            if not response:
                 self.chat("Couldn't retrieve Tweet.")
                 return
 
@@ -287,7 +287,7 @@ class Cortex:
                 roasted = "Couldn't roast"
 
                 urlbase = pageopen(url)
-                if not urlbase.ok:
+                if not urlbase:
                     fubs += 1
 
                 try:
@@ -345,7 +345,7 @@ class Cortex:
                 except:
                     self.chat("(delicious is down)")
 
-                if not send.ok:
+                if not send:
                     self.chat("(delicious problem)")
 
             if fubs == 2:
