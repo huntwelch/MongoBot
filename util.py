@@ -2,11 +2,10 @@ import re
 import HTMLParser
 import requests
 from settings import CHANNEL, SHORTENER
-from xml.dom import minidom as dom
+from collections import OrderedDict
 
 
 # Utility functions
-
 def unescape(text):
     parser = HTMLParser.HTMLParser()
     return parser.unescape(text)
@@ -37,7 +36,7 @@ def colorize(text, color):
     if isinstance(color, str):
         color = colors[color]
 
-    return "\x03" + str(color) + text + "\x03"
+    return "\x03" + str(color) + ' ' + text + "\x03"
 
 
 def pageopen(url, params={}):
@@ -72,98 +71,48 @@ class Stock(object):
         if not symbol:
             return
 
+        # yahoo fields
+        # See http://www.gummy-stuff.org/Yahoo-data.htm for more
+        fields = OrderedDict([
+            ('symbol', 's'),
+            ('price', 'k1'),
+            ('perc_change', 'k2'),
+            ('change', 'c6'),
+            ('exchange', 'x'),
+            ('company', 'n'),
+            ('volume', 'v'),
+            ('market_cap', 'j1'),
+        ])
+
         # yahoo specific
-        singlestock = "http://query.yahooapis.com/v1/public/yql?env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&q=select%20*%20from%20yahoo.finance.quotes%20where%20symbol%20%3D%20'"
-        url = singlestock + symbol + "'"
+        url = 'http://finance.yahoo.com/d/quotes.csv'
+        params = {'f': ''.join(fields.values()), 's': symbol}
 
         try:
-            raw = dom.parseString(pageopen(url).text)
+            raw_string = pageopen(url, params).text
+            raw_list = raw_string.strip().replace('"', '').split(',')
+            data = {key: raw_list.pop(0) for (key) in fields.keys()}
         except Exception as e:
             return
 
-        self.stock = self.extract(raw)
+        if data['exchange'] == 'N/A':
+            return
+
+        # Turn N/A - <b>92.73</b> into just the decimal
+        data['price'] = float(re.search('(\d|\.)+',
+                              data['price'].split('-').pop()).group())
+        # Turn N/A - +0.84% into just the decimal
+        data['perc_change'] = float(re.search('(\+|-)?(\d|\.)+',
+                                    data['perc_change'].split('-').pop()).group())
+        data['change'] = float(data['change'])
+
+        for key, value in data.items():
+            setattr(self, key, value)
+
+        self.stock = data
 
     def __nonzero__(self):
         return self.stock is not None
-
-    # Extracts from yahoo api
-    def extract(self, raw):
-
-        elements = [e for e in
-                    raw.childNodes[0].childNodes[0].childNodes[0].childNodes if
-                    e.firstChild is not None]
-
-        # in the future, can just change translation
-        # point is to end up with an object that won't
-        # change when the api changes.
-
-        translation = {
-            "Symbol": "symbol",
-            #"pretty_symbol": "pretty_symbol",
-            #"symbol_lookup_url": "symbol_lookup_url",
-            "Name": "company",
-            "StockExchange": "exchange",
-            #"exchange_timezone": "exchange_timezone",
-            #"exchange_utc_offset": "exchange_utc_offset",
-            #"exchange_closing": "exchange_closing",
-            #"divisor": "divisor",
-            #"currency": "currency",
-            "LastTradePriceOnly": "_last",
-            "AskRealtime": "_ask_realtime",
-            "BidRealtime": "_bid_realtime",
-            "DaysHigh": "high",
-            "DaysLow": "low",
-            "Volume": "volume",
-            "AverageDailyVolume": "avg_volume",
-            "MarketCapitalization": "market_cap",
-            "Opeb": "open",
-            "PreviousClose": "y_close",
-            "Change": "_change",
-            "ChangeinPercent": "_perc_change",
-            #"delay": "delay",
-            #"trade_timestamp": "trade_timestamp",
-            "LastTradeDate": "trade_date_utc",  # May not actually be UTC
-            "LastTradeTime": "trade_time_utc",  # May not actually be UTC
-            #"current_date_utc": "current_date_utc",
-            #"current_time_utc": "current_time_utc",
-            #"symbol_url": "symbol_url",
-            #"chart_url": "chart_url",
-            #"disclaimer_url": "disclaimer_url",
-            #"ecn_url": "ecn_url",
-            #"isld_last": "isld_last",
-            #"isld_trade_date_utc": "isld_trade_date_utc",
-            #"isld_trade_time_utc": "isld_trade_time_utc",
-            #"brut_last": "brut_last",
-            #"brut_trade_date_utc": "brut_trade_date_utc",
-            #"brut_trade_time_utc": "brut_trade_time_utc",
-            #"daylight_savings": "daylight_savings",
-        }
-        extracted = {}
-
-        for e in elements:
-            data = e.firstChild.nodeValue
-            if translation in e.tagName:
-                extracted[translation[e.tagName]] = data
-                setattr(self, translation[e.tagName], data)
-
-        if not self.company:
-            return None
-
-        if self._ask_realtime is not None:
-            self.price = float(self._ask_realtime)
-        elif self._bid_realtime is not None:
-            self.price = float(self._bid_realtime)
-        else:
-            self.price = float(self._last)
-
-        try:
-            self.change = float(self._change)
-            self.perc_change = float(self._perc_change[0:-1])  # trim % off
-        except:
-            self.change = 0
-            self.perc_change = 0
-
-        return extracted
 
     def showquote(self, context):
         if not self.stock:
@@ -173,11 +122,9 @@ class Stock(object):
         changestring = str(self.change) + " (" + ("%.2f" % self.perc_change) + "%)"
 
         if self.change < 0:
-            color = "4"
+            changestring = colorize(changestring, 'red')
         else:
-            color = "3"
-
-        changestring = "\x03" + color + " " + changestring + "\x03"
+            changestring = colorize(changestring, 'green')
 
         message = [
             name,
@@ -195,15 +142,12 @@ class Stock(object):
         if context != CHANNEL:
             for item in otherinfo:
                 pretty, id = item
-                addon = pretty + ": " + self.stock[id]
+                addon = pretty + ": " + getattr(self, id, 'N/A')
                 message.append(addon)
 
-        link = "http://www.google.com/finance?client=ig&q=" + self.stock["symbol"]
-        try:
-            roasted = shorten(link)
-            message.append(roasted)
-        except:
-            message.append("Can't link")
+        link = 'http://finance.yahoo.com/q?s=' + self.symbol
+        roasted = shorten(link)
+        message.append(roasted)
 
         output = ', '.join(message)
 
