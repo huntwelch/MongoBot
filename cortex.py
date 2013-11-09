@@ -9,11 +9,11 @@ from datetime import date, timedelta
 from time import mktime, localtime, sleep
 from random import randint
 
-from settings import NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
+from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
     OWNER, REALNAME, SCAN
 from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
-from datastore import connectdb
-from util import unescape, pageopen, shorten
+from datastore import Drinker, connectdb
+from util import unescape, pageopen, shorten, RateLimited
 from autonomic import serotonin
 
 
@@ -371,6 +371,7 @@ class Cortex:
         except:
             self.sock.send('PRIVMSG ' + CHANNEL + ' :Having trouble saying that for some reason\n')
 
+    @RateLimited(5)
     def chat(self, message, target=False):
         if target:
             whom = target
