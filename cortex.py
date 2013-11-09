@@ -1,21 +1,18 @@
-import base64
-import sys
 import os
 import re
 import shutil
 import pkgutil
 import requests
 
-from BeautifulSoup import BeautifulSoup as soup
 from bs4 import BeautifulSoup as bs4
 from datetime import date, timedelta
 from time import mktime, localtime, sleep
-from random import choice, randint
+from random import randint
 
-from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
+from settings import NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
     OWNER, REALNAME, SCAN
 from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
-from datastore import Drinker, connectdb
+from datastore import connectdb
 from util import unescape, pageopen, shorten
 from autonomic import serotonin
 

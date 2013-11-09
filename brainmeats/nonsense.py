@@ -1,6 +1,3 @@
-import time
-import os
-
 from autonomic import axon, category, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, DISTASTE, NICK
 from secrets import FML_API

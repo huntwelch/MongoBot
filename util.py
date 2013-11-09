@@ -1,5 +1,5 @@
 import re
-import htmlentitydefs
+import HTMLParser
 import requests
 from settings import CHANNEL, SHORTENER
 from xml.dom import minidom as dom
@@ -8,23 +8,8 @@ from xml.dom import minidom as dom
 # Utility functions
 
 def unescape(text):
-    def fixup(m):
-        text = m.group(0)
-        if text[:2] == "&#":
-            try:
-                if text[:3] == "&#x":
-                    return unichr(int(text[3:-1], 16))
-                else:
-                    return unichr(int(text[2:-1]))
-            except ValueError:
-                pass
-        else:
-            try:
-                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
-            except KeyError:
-                pass
-        return text
-    return re.sub("&#?\w+;", fixup, text)
+    parser = HTMLParser.HTMLParser()
+    return parser.unescape(text)
 
 
 # instead of presuming to predict what
