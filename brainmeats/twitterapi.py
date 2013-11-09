@@ -43,8 +43,8 @@ class Twitterapi(Dendrite):
     def get_tweet(self, value):
         status = self.api.GetStatus(value)
 
-        text = status.text
-        screen_name = status.user.screen_name
-        name = status.user.name
+        text = status['text']
+        screen_name = status['user']['screen_name']
+        name = status['user']['name']
         if status.text:
             self.chat('%s (%s) tweeted: %s' % (name, screen_name, text))

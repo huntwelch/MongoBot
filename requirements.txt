@@ -1,5 +1,4 @@
 BeautifulSoup4==4.3.2
-BeautifulSoup==3.2.1
 Flask==0.10
 Jinja2==2.7
 MarkupSafe==0.18

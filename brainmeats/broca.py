@@ -9,7 +9,7 @@ from settings import NICK, STORAGE, ACROLIB, LOGDIR, RAW_TEXT
 from datastore import Words, Learned, Structure
 from random import choice, randint
 from util import pageopen
-from BeautifulSoup import BeautifulSoup as soup
+from bs4 import BeautifulSoup as soup
 from wordnik import swagger, WordApi
 
 
@@ -247,9 +247,9 @@ class Broca(Dendrite):
             return
 
         word = self.values[0]
-        url = "http://www.etymonline.com/index.php?allowed_in_frame=0&search=" + word + "&searchmode=term"
+        params = {'allowed_in_frame': '0', 'searchmode': 'term', 'search': word}
 
-        urlbase = pageopen(url)
+        urlbase = pageopen("http://www.etymonline.com/index.php", params)
         if not urlbase:
             self.chat("Couldn't find anything")
             return

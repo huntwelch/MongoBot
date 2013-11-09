@@ -1,13 +1,10 @@
-import HTMLParser
 import textwrap
-import os
 
 from autonomic import axon, alias, category, help, Dendrite
-from BeautifulSoup import BeautifulSoup
 from bs4 import BeautifulSoup as bs4
 from settings import REPO, NICK, SAFE
 from secrets import WEATHER_API
-from util import pageopen
+from util import unescape, pageopen
 
 
 @category("reference")
@@ -113,8 +110,7 @@ class Reference(Dendrite):
         try:
             request = pageopen('http://www.urbandictionary.com/define.php',
                                params={'term': ' '.join(self.values)})
-            soup = bs4(request.text,
-                       convertEntities=BeautifulSoup.HTML_ENTITIES)
+            soup = bs4(request.text)
         except:
             self.chat("parse error")
             return
@@ -128,12 +124,10 @@ class Reference(Dendrite):
         if defn:
             # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
             # entities like &#x27; so use the parser for any stray entities.
-            parser = HTMLParser.HTMLParser()
-
             for paragraph in defn:
                 wrapped = textwrap.wrap(paragraph, 200)
                 for line in wrapped:
-                    self.chat(parser.unescape(line))
+                    self.chat(unescape(line))
         else:
             self.chat("couldn't find anything")
 

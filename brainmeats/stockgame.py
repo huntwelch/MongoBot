@@ -34,6 +34,10 @@ class Stockgame(Dendrite):
             self.chat("Stock exchange %s DENIED!" % stock.exchange)
             return
 
+        if stock.price < 0.01:
+            self.chat("No penny stocks")
+            return
+
         drinker = Drinker.objects(name=whom).first()
         if not drinker:
             drinker = Drinker(name=whom)

@@ -1,22 +1,19 @@
-import base64
-import sys
 import os
 import re
 import shutil
 import pkgutil
 import requests
 
-from BeautifulSoup import BeautifulSoup as soup
 from bs4 import BeautifulSoup as bs4
 from datetime import date, timedelta
 from time import mktime, localtime, sleep
-from random import choice, randint
+from random import randint
 
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
     OWNER, REALNAME, SCAN
 from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
 from datastore import Drinker, connectdb
-from util import unescape, pageopen, shorten
+from util import unescape, pageopen, shorten, RateLimited
 from autonomic import serotonin
 
 
@@ -234,7 +231,7 @@ class Cortex:
             self.command(nick, content)
             return
 
-        if content[:-2] in USERS and content[-2:] in ['--','++']:
+        if content[:-2] in USERS and content[-2:] in ['--', '++']:
             print "Active"
             self.values = [content[:-2]]
             if content[-2:] == '++':
@@ -242,7 +239,6 @@ class Cortex:
             if content[-2:] == '--':
                 self.commands.get('decrement')()
             return
-
 
         ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         match_urls = re.compile(ur)
@@ -375,6 +371,7 @@ class Cortex:
         except:
             self.sock.send('PRIVMSG ' + CHANNEL + ' :Having trouble saying that for some reason\n')
 
+    @RateLimited(5)
     def chat(self, message, target=False):
         if target:
             whom = target
