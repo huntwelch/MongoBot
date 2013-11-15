@@ -18,9 +18,16 @@ class Webserver(Dendrite):
 
     @axon
     @help("<Get one-time link to chat log>")
-    def linklog(self):
+    def chatlink(self):
         num = self._setaccess()
         link = WEBSITE + "/chatlogs?onetime=" + str(num)
+        self.chat(link)
+
+    @axon
+    @help("<Get one-time link to error log>")
+    def errorlink(self):
+        num = self._setaccess()
+        link = WEBSITE + "/errorlog?onetime=" + str(num)
         self.chat(link)
 
     @axon

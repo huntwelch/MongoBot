@@ -49,6 +49,7 @@ class Broca(Dendrite):
         total = Markov.objects.count()
         select = random.randint(0,total-1)
         seed = Markov.objects[select]
+        words = []
 
         words.append(seed.prefix)
         words.append(random.choice(seed.follow))

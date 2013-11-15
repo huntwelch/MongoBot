@@ -31,6 +31,13 @@ def chatlogs():
     return render_template('chatlogs.html', hint=hint)
 
 
+@app.route("/errorlog")
+@requires_auth
+def errorlog():
+    log = open('hippocampus/log/error.log', 'r').read()
+    return render_template('errors.html', log=log)
+
+
 @app.route("/codez")
 def codez():
     return render_template('codez.html')
