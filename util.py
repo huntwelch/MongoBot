@@ -1,3 +1,4 @@
+import time
 import re
 import HTMLParser
 import requests

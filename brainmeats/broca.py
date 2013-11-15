@@ -2,11 +2,12 @@ import mongoengine
 import nltk
 import re
 import string
+import random
 
 from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API
 from settings import NICK, STORAGE, ACROLIB, LOGDIR, RAW_TEXT
-from datastore import Words, Learned, Structure
+from datastore import Words, Learned, Structure, Markov
 from random import choice, randint
 from util import pageopen
 from bs4 import BeautifulSoup as soup
@@ -20,6 +21,46 @@ class Broca(Dendrite):
 
         self.readstuff = False
         self.knowledge = False
+
+
+    @axon
+    def mark(self, line):
+        words = line.split()
+        while len(words) > 2:
+            word = words.pop(0)
+            prefix = "%s %s" % (word, words[0])
+            follow = words[1]
+
+            entry = Markov.objects(prefix=prefix)
+            if not entry:
+                entry = Markov(prefix=prefix, follow=[follow])
+            else:
+                entry = entry[0]
+                if follow in entry.follow:
+                    continue
+
+                entry.follow.append(follow)
+
+            entry.save()
+        
+    @axon
+    @help("<Make " + NICK + " speak markov chain>")
+    def babble(self):
+        total = Markov.objects.count()
+        select = random.randint(0,total-1)
+        seed = Markov.objects[select]
+
+        words.append(seed.prefix)
+        words.append(random.choice(seed.follow))
+
+        while True:
+            tail = "%s %s" % (words[-2:-1], words[-1])
+            add = Markov.objects(prefix=tail)
+            if not add:
+                break
+            words.append(random.choice(add.follow))
+
+        self.chat(" ".join(words))
 
     @axon
     @help("<Make " + NICK + " read books>")
