@@ -41,7 +41,7 @@ class Nonsense(Dendrite):
         url = 'http://api.adviceslip.com/advice'
 
         try:
-            json = pageopen(url).json
+            json = pageopen(url).json()
         except:
             self.chat('Use a rubber if you sleep with dcross2\'s mother.')
             return
@@ -74,7 +74,7 @@ class Nonsense(Dendrite):
                 self.chat("No results. Or done broken.")
             else:
                 self.chat("Done broke")
-                self.chat("Exception: " + e)
+                self.chat("Exception: " + str(e))
             return
 
     @axon
@@ -161,7 +161,7 @@ class Nonsense(Dendrite):
         url = 'https://spreadsheets.google.com/feeds/list/0Auy4L1ZnQpdYdERZOGV1bHZrMEFYQkhKVHc4eEE3U0E/od6/public/basic?alt=json'
         try:
             response = pageopen(url)
-            json = response.json
+            json = response.json()
         except:
             self.chat('Somethin dun goobied.')
             return

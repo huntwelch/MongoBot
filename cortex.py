@@ -260,7 +260,7 @@ class Cortex:
                 return
 
             try:
-                json = response.json
+                json = response.json()
             except:
                 self.chat("Couldn't parse Tweet.")
                 return
