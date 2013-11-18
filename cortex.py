@@ -294,7 +294,10 @@ class Cortex:
 
                 urlbase = pageopen(url)
                 if not urlbase:
-                    fubs += 1
+                    # we don't have a valid requests object here
+                    # just give up early
+                    self.chat("Total fail")
+                    return
 
                 try:
                     roasted = shorten(url)
