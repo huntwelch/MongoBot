@@ -30,7 +30,7 @@ class Reference(Dendrite):
 
         # If values was a string you don't need the join/etc
         params = {'v': '1.0', 'rsz': 'large', 'start': '0',
-                  'q': "+".join(values)}
+                  'q': "+".join(self.values)}
 
         try:
             request = pageopen(
@@ -83,7 +83,7 @@ class Reference(Dendrite):
             return
 
         try:
-            json = response.json
+            json = response.json()
             json = json['current_observation']
         except:
             self.chat("Couldn't parse weather.")
