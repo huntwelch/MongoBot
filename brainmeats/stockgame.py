@@ -178,6 +178,10 @@ class Stockgame(Dendrite):
                 else:
                     net = -p.quantity * stock.price
                     collateral += 2 * p.quantity * p.price
+                if net >= 10000000:
+                    # Get rid of stupid twitter positions
+                    continue
+
                 total += net
 
             scores.append((drinker.name, cash, collateral,
@@ -232,6 +236,10 @@ class Stockgame(Dendrite):
                     net = p.quantity * (stock.price - p.price)
                 else:
                     net = p.quantity * (p.price - stock.price)
+
+                if net >= 10000000:
+                    # Get rid of stupid twitter positions
+                    continue
 
                 self.chat("%8s %10s %10d %10.02f %10.02f %10.02f" %
                           (p.type, p.symbol, p.quantity, p.price, stock.price,

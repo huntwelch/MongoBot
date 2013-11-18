@@ -299,9 +299,9 @@ class Cortex:
                     self.chat("Total fail")
                     return
 
-                try:
-                    roasted = shorten(url)
-                except:
+                roasted = shorten(url)
+                if not roasted:
+                    roasted = ''
                     fubs += 1
 
                 ext = urlbase.headers['content-type'].split('/')[1]
