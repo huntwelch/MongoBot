@@ -75,7 +75,7 @@ def pageopen(url, params={}):
 def shorten(url):
     short_url = pageopen(SHORTENER, params={'roast': url})
 
-    if short_url
+    if short_url:
         return short_url.text
     return ''
 

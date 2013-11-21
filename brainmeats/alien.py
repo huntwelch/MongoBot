@@ -15,8 +15,20 @@ class Alien(Dendrite):
 
 
     @axon
-    @help("<>")
+    @help("<grab reddit stuff>")
     def reddit(self):
-        entries = self.api.get_subreddit('funny').get_hot(limit=20)
+        if not self.values:
+            subreddit = False
+        else:
+            subreddit = self.values[0]
+
+        if subreddit:
+            gettum = self.api.get_subreddit(subreddit).get_hot(limit=5)
+        else:
+            gettum = self.api.get_random_subreddit().get_hot(limit=5)
+
+        # Maybe cache these if the subreddit doesn't change
+        entries = ["%s %s" % (str(x), x.short_link) for x in gettum]
         entry = random.choice(entries)
+
         self.chat(str(entry))
