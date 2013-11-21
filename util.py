@@ -66,17 +66,18 @@ def pageopen(url, params={}):
     except requests.exceptions.RequestException as e:
         print e
         return False
+    except:
+        return False
 
     return urlbase
 
 
 def shorten(url):
-    try:
-        short_url = requests.get(SHORTENER, params={'roast': url}, timeout=5).text
-    except:
-        return ''
+    short_url = pageopen(SHORTENER, params={'roast': url})
 
-    return short_url
+    if short_url
+        return short_url.text
+    return ''
 
 
 # Utility classes

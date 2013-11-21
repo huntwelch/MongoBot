@@ -205,8 +205,9 @@ class Nonsense(Dendrite):
         if self.values:
             roasted = shorten(url)
 
-            open(DISTASTE, 'a').write(roasted + '\n')
-            self.chat("Another one rides the bus")
+            if roasted:
+                open(DISTASTE, 'a').write(roasted + '\n')
+                self.chat("Another one rides the bus")
             return
 
         lines = []
