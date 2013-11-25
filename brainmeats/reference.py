@@ -117,9 +117,13 @@ class Reference(Dendrite):
 
         elem = soup.find('div', {'class': 'definition'})
 
-        defn = []
-        for string in elem.stripped_strings:
-            defn.append(string)
+        try:
+            defn = []
+            for string in elem.stripped_strings:
+                defn.append(string)
+        except:
+            self.chat("couldn't find anything")
+
 
         if defn:
             # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
