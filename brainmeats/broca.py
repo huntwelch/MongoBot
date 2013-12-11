@@ -4,6 +4,7 @@ import re
 import string
 import random
 
+from threading import Thread
 from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API
 from settings import NICK, STORAGE, ACROLIB, LOGDIR, RAW_TEXT
@@ -26,23 +27,32 @@ class Broca(Dendrite):
     @axon
     def mark(self, line):
         words = line.split()
-        while len(words) > 2:
-            word = words.pop(0)
-            prefix = "%s %s" % (word, words[0])
-            follow = words[1]
-
-            entry = Markov.objects(prefix=prefix)
-            if not entry:
-                entry = Markov(prefix=prefix, follow=[follow])
-            else:
-                entry = entry[0]
-                if follow in entry.follow:
-                    continue
-
-                entry.follow.append(follow)
-
-            entry.save()
         
+        def recorder(words):
+            while len(words) > 2:
+                word = words.pop(0)
+                prefix = "%s %s" % (word, words[0])
+                follow = words[1]
+
+                entry = Markov.objects(prefix=prefix)
+                if not entry:
+                    entry = Markov(prefix=prefix, follow=[follow])
+                else:
+                    entry = entry[0]
+                    print follow
+                    print entry.follow
+                    if follow in entry.follow:
+                        continue
+
+                    entry.follow.append(follow)
+
+                entry.save()
+
+        thread = Thread(target = recorder, args = (words,)) 
+        thread.start()
+        thread.join()
+        
+
     @axon
     @help("<Make " + NICK + " speak markov chain>")
     def babble(self):
