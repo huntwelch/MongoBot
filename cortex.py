@@ -250,7 +250,8 @@ class Cortex:
         if 'broca' in self.brainmeats:
             self.brainmeats['broca'].parse(content, nick)
             self.brainmeats['broca'].tourettes(content, nick)
-            self.brainmeats['broca'].mark(content)
+            # Too slow. Rethink.
+            # self.brainmeats['broca'].mark(content)
 
     def tweet(self, urls):
         # This should somehow call twitterapi.get_tweet
