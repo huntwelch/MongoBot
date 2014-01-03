@@ -4,6 +4,7 @@ import settings
 import cortex
 import os
 import thread
+import ssl
 
 from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER, SMS_LOCKFILE, PULSE
 from time import sleep, mktime, localtime
@@ -11,11 +12,15 @@ from time import sleep, mktime, localtime
 
 class Medulla:
     def __init__(self):
-        self.sock = socket.socket()
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         print "* Pinging IRC"
 
-        self.sock.connect((HOST, PORT))
+        sock.connect((HOST, PORT))
+
+        #self.sock = ssl.wrap_socket(sock)
+        self.sock = sock
+
         self.sock.send('NICK ' + NICK + '\n')
         self.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
         self.sock.send('JOIN ' + CHANNEL + '\n')

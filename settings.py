@@ -3,7 +3,7 @@ from secrets import CHANNEL, USERS
 
 # Connection Settings
 
-HOST = "irc.freenode.net"
+HOST = "chat.freenode.net"
 PORT = 6667
 NICK = "MongoBot"
 

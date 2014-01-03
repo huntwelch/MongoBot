@@ -95,14 +95,17 @@ class Cortex:
 
     def monitor(self, sock):
         currenttime = int(mktime(localtime()))
+
         self.parietal(currenttime)
 
         try:
-            line = self.sock.recv(500)
+            line = self.sock.recv(256)
         except:
             return
 
         line = line.strip()
+        if not line:
+            return
 
         if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
             print "* Joined " + CHANNEL
@@ -227,8 +230,11 @@ class Cortex:
             if nick.rstrip('_') not in USERS:
                 self.chat("My daddy says not to listen to you.")
                 return
-
+            
+            print "Executing command: %s" % content
+            _mark = int(mktime(localtime()))
             self.command(nick, content)
+            print "Finished in: %s" % str(int(mktime(localtime())) - _mark)
             return
 
         if content[:-2] in USERS and content[-2:] in ['--', '++']:
@@ -248,9 +254,9 @@ class Cortex:
             return
 
         if 'broca' in self.brainmeats:
-            self.brainmeats['broca'].parse(content, nick)
             self.brainmeats['broca'].tourettes(content, nick)
             # Too slow. Rethink.
+            # self.brainmeats['broca'].parse(content, nick)
             # self.brainmeats['broca'].mark(content)
 
     def tweet(self, urls):
