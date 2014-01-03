@@ -93,49 +93,48 @@ class Cortex:
             if self.live[func]:
                 self.live[func]()
 
-    def monitor(self, sock):
+    def monitor(self):
         currenttime = int(mktime(localtime()))
-
         self.parietal(currenttime)
 
+        self.sock.setblocking(0)
         try:
-            line = self.sock.recv(256)
+            lines = self.sock.recv(256)
         except:
             return
 
-        line = line.strip()
-        if not line:
-            return
+        for line in lines.split("\n"):
+            line = line.strip()
 
-        if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
-            print "* Joined " + CHANNEL
+            if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
+                print "* Joined " + CHANNEL
 
-        if self.gettingnames:
-            if line.find("* " + CHANNEL) != -1:
-                all = line.split(":")[2]
-                self.gettingnames = False
-                all = re.sub(NICK + ' ', '', all)
-                self.members = all.split()
+            if self.gettingnames:
+                if line.find("* " + CHANNEL) != -1:
+                    all = line.split(":")[2]
+                    self.gettingnames = False
+                    all = re.sub(NICK + ' ', '', all)
+                    self.members = all.split()
 
-        scan = re.search(SCAN, line)
-        ping = re.search("^PING", line)
-        pwd = re.search(":-passwd", line)
-        if line != '' and not scan and not ping and not pwd:
-            self.logit(line + '\n')
+            scan = re.search(SCAN, line)
+            ping = re.search("^PING", line)
+            pwd = re.search(":-passwd", line)
+            if line != '' and not scan and not ping and not pwd:
+                self.logit(line + '\n')
 
-        if line.find('PING') != -1:
-            self.sock.send('PONG ' + line.split()[1] + '\n')
-        elif line.find('PRIVMSG') != -1:
-            self.boredom = currenttime
-            content = line.split(' ', 3)
-            self.context = content[2]
+            if line.find('PING') != -1:
+                self.sock.send('PONG ' + line.split()[1] + '\n')
+            elif line.find('PRIVMSG') != -1:
+                self.boredom = currenttime
+                content = line.split(' ', 3)
+                self.context = content[2]
 
-            if self.context == NICK:
-                self.lastprivate = content
-            else:
-                self.lastpublic = content
+                if self.context == NICK:
+                    self.lastprivate = content
+                else:
+                    self.lastpublic = content
 
-            self.parse(line)
+                self.parse(line)
 
     def command(self, sender, cmd):
         components = cmd.split()

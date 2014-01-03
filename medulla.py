@@ -37,7 +37,7 @@ class Medulla:
 
         while True:
             sleep(0.1)
-            self.brain.monitor(self.sock)
+            self.brain.monitor()
             if mktime(localtime()) - self.lastpulse > 10:
                 self.setpulse()
 
