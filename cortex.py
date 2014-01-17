@@ -256,7 +256,7 @@ class Cortex:
             self.brainmeats['broca'].tourettes(content, nick)
             # Too slow. Rethink.
             # self.brainmeats['broca'].parse(content, nick)
-            # self.brainmeats['broca'].mark(content)
+            self.brainmeats['broca'].mark(content)
 
     def tweet(self, urls):
         # This should somehow call twitterapi.get_tweet
@@ -292,7 +292,10 @@ class Cortex:
                 return
 
             if randint(1, 5) == 1:
-                self.commands.get("tweet", self.default)(url)
+                try:
+                    self.commands.get("tweet", self.default)(url)
+                except:
+                    pass
 
             while True:
                 fubs = 0
@@ -311,7 +314,11 @@ class Cortex:
                     roasted = ''
                     fubs += 1
 
-                ext = urlbase.headers['content-type'].split('/')[1]
+                try:
+                    ext = urlbase.headers['content-type'].split('/')[1]
+                except:
+                    ext = False
+
                 images = [
                     "gif",
                     "png",

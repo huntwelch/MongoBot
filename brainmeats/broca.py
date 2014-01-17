@@ -3,6 +3,7 @@ import nltk
 import re
 import string
 import random
+import redis
 
 from threading import Thread
 from autonomic import axon, alias, category, help, Dendrite
@@ -20,6 +21,8 @@ class Broca(Dendrite):
     def __init__(self, cortex):
         super(Broca, self).__init__(cortex)
 
+        self.markov = redis.StrictRedis(host='localhost', port=6379, db=0)
+
         self.readstuff = False
         self.knowledge = False
 
@@ -28,48 +31,39 @@ class Broca(Dendrite):
     def mark(self, line):
         words = line.split()
         
-        def recorder(words):
-            while len(words) > 2:
-                word = words.pop(0)
-                prefix = "%s %s" % (word, words[0])
-                follow = words[1]
+        while len(words) > 2:
+            word = words.pop(0)
+            prefix = "%s %s" % (word, words[0])
+            follow = words[1]
 
-                entry = Markov.objects(prefix=prefix)
-                if not entry:
-                    entry = Markov(prefix=prefix, follow=[follow])
-                else:
-                    entry = entry[0]
-                    print follow
-                    print entry.follow
-                    if follow in entry.follow:
-                        continue
-
-                    entry.follow.append(follow)
-
-                entry.save()
-
-        thread = Thread(target = recorder, args = (words,)) 
-        thread.start()
-        thread.join()
-        
+            entry = self.markov.get(prefix)
+            if not entry:
+                self.markov.set(prefix, follow)
+            else:
+                follows = entry.split(',')
+                follows.append(follow)
+                follow = ','.join(follows)
+                self.markov.set(prefix, follow)
 
     @axon
     @help("<Make " + NICK + " speak markov chain>")
     def babble(self):
-        total = Markov.objects.count()
-        select = random.randint(0,total-1)
-        seed = Markov.objects[select]
+        seed = self.markov.randomkey()
         words = []
 
-        words.append(seed.prefix)
-        words.append(random.choice(seed.follow))
+        words.append(seed)
+        follows = self.markov.get(seed)
+        follows = follows.split(',')
+        words.append(random.choice(follows))
 
         while True:
             tail = "%s %s" % (words[-2:-1], words[-1])
-            add = Markov.objects(prefix=tail)
+            add = self.markov.get(tail)
             if not add:
                 break
-            words.append(random.choice(add.follow))
+            follows = self.markov.get(seed)
+            follows = follows.split(',')
+            words.append(random.choice(follows))
 
         self.chat(" ".join(words))
 
