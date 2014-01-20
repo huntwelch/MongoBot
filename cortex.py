@@ -259,24 +259,8 @@ class Cortex:
             self.brainmeats['broca'].mark(content)
 
     def tweet(self, urls):
-        # This should somehow call twitterapi.get_tweet
         for url in urls:
-            response = pageopen('https://api.twitter.com/1.1/statuses/show.json?id=%s' % url[1])
-            if not response:
-                self.chat("Couldn't retrieve Tweet.")
-                return
-
-            try:
-                json = response.json()
-            except:
-                self.chat("Couldn't parse Tweet.")
-                return
-
-            name = json['user']['name']
-            screen_name = json['user']['screen_name']
-            text = json['text']
-
-            self.chat('%s (%s) tweeted: %s' % (name, screen_name, text))
+            self.brainmeats['twitterapi'].get_tweet(url[1])
 
     def linker(self, urls):
         for url in urls:

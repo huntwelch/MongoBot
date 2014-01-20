@@ -40,8 +40,11 @@ class Twitterapi(Dendrite):
 
     @axon
     @help("ID <retrieve the tweet with ID>")
-    def get_tweet(self):
-        status = self.api.GetStatus('+'.join(self.values))
+    def get_tweet(self, id=False):
+        if not id:
+            id = '+'.join(self.values)
+
+        status = self.api.GetStatus(id)
 
         text = status.text
         screen_name = status.user.screen_name

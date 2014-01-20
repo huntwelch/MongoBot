@@ -21,7 +21,7 @@ class Broca(Dendrite):
     def __init__(self, cortex):
         super(Broca, self).__init__(cortex)
 
-        self.markov = redis.StrictRedis(host='localhost', port=6379, db=0)
+        self.markov = redis.StrictRedis(unix_socket_path='/tmp/redis.sock') 
 
         self.readstuff = False
         self.knowledge = False
