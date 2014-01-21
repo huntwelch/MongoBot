@@ -5,7 +5,7 @@ import hashlib
 from autonomic import axon, category, help, Dendrite, alias
 from settings import STORAGE, CHANNEL
 from secrets import USERS
-from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore
+from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore, topScores
 
 
 @category("peeps")
@@ -73,6 +73,17 @@ class Peeps(Dendrite):
             self.chat("mongodb seems borked")
             return
         self.chat(self.lastsender + " brought " + entity + " to " + str(entityScore(entity)))
+    
+    @axon
+    @help("show the leaderboard")
+    def leaderboard(self):
+        if not self.values:
+            limit=5
+        else:
+            limit = self.values[0]
+
+        for drinker in topScores(limit):
+            self.chat(drinker.name + " has " + str(drinker.value) + " points"):
 
     @axon
     @help("<show where everyone works>")
