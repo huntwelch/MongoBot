@@ -83,7 +83,7 @@ class Peeps(Dendrite):
             limit = self.values[0]
 
         for drinker in topScores(limit):
-            self.chat(drinker.name + " has " + str(drinker.value) + " points"):
+            self.chat(drinker.name + " has " + str(drinker.value) + " points")
 
     @axon
     @help("<show where everyone works>")

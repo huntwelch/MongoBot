@@ -3,6 +3,7 @@ import HTMLParser
 import requests
 from settings import CHANNEL, SHORTENER
 from collections import OrderedDict
+import time
 
 
 # Utility functions
