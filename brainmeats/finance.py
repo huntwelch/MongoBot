@@ -96,6 +96,15 @@ class Finance(Dendrite):
             self.chat("Couldn't parse DOGE data.")
             return
 
-        weighted = json['vwap']
+        weighted = float(json['vwap'])
 
-        self.chat('Dogecoin, Volume-Weighted Average Price: $%s' % (weighted))
+        if self.values:
+            try:
+                value = weighted * int(self.values[0])
+            except:
+                self.chat("Couldn't compute DOGE value.")
+                return
+
+            self.chat('Value of %s DOGE is $%s' % (self.values[0], value))
+        else:
+            self.chat('Dogecoin, Volume-Weighted Average Price: $%s' % (weighted))
