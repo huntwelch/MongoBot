@@ -5,7 +5,19 @@ Getting Started
     pip install -r requirements.txt
     
     To run bot: python medulla.py
-    To run bot persistently so it will recover from crashes: ./lighting.sh 
+    To run bot persistently so it will recover from crashes: python doctor.py
+
+Advanced Usage
+==============
+
+    MongoBot is capable of running a number of web services and apis. For best
+    results, run it on an nginx server via uwsgi. And by best results, I mean
+    any.
+
+    Also, the markov functionality is based on redis, so you'll have to get a 
+    redis server up and running. Also, the markov stuff might be broken, it's
+    pretty recent and so far just spitting out three word phrases, but that
+    might be due to dearth of content.
 
 Secret settings
 ===============
@@ -42,10 +54,20 @@ Secret settings
     TWILIO_TOKEN = ""
     TWILIO_NUMBER = ""
 
+    And there's some pending work coming for wolfram, so may as well:
+
+    WOLFRAM_API = ""
+
 Social Secret Settings
 ======================
 
     You will need to host a website to properly setup apis.
+    MongoBot is setup with uwsgi to run ontop of a(n?) nginx server.
+    You're going to have to figure that one out on your own
+    for the moment.
+
+    HTTP_USER = ""
+    HTTP_PASS = ""
 
     The following settings should be set for google/twitter/facebook functionality.
 
@@ -70,6 +92,12 @@ Social Secret Settings
     TWIT_ACCESS_TOKEN = ""
     TWIT_ACCESS_SECRET = ""
 
+
+    ... And of course, when you need to peruse reddit.
+
+    REDDIT_APPID = ""
+    REDDIT_SECRET = ""
+
 New features
 ============
 
@@ -88,9 +116,12 @@ New features
 To Do
 =====
 
+    TODO: Probably make this readme better
+    TODO: reddit command break without specified subreddit
+    TODO: dafuq is wrong with the -all command
+    TODO: Clean up broca, decide what to do with it
     TODO: link holdem to db, make persistant, open up sit/in/out functionality
     TODO: finish holdem, needs testing and split pots probably don't work
     TODO: fix rate limiting problems with acro
     TODO: stock game: account for splits and reverse splits
-    TODO: figure out how to reboot bot when a process locks up
-    TODO: investigate Twisted
+    TODO: remove last of beautiful soup dependencies

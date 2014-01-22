@@ -97,6 +97,7 @@ class System(Dendrite):
     @axon
     @help("<print api keys and stuff>")
     def secrets(self):
+        # TODO: lot of new secrets, add them, or list them and get specific one from values
         items = {
             'WEATHER_API': WEATHER_API,
             'WORDNIK_API': WORDNIK_API,

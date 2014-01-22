@@ -111,7 +111,6 @@ INSULT = [
 BOREDOM = [
     "kicks",
     "slaps",
-    "butt rapes",
     "offers dcross's mom to",
     "throws feces at",
 ]
