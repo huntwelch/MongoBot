@@ -1,10 +1,13 @@
 import os
+import pyotp
+import base64
 
 from functools import wraps
 from flask import request, Response
 from secrets import HTTP_USER, HTTP_PASS
-from settings import ONETIME
 
+
+totp = pyotp.TOTP(base64.b32encode(HTTP_PASS), interval=600)
 
 def check_auth(username, password):
     """This function is called to check if a username /
@@ -23,20 +26,9 @@ def authenticate():
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-
         if request.args.get('onetime'):
-            try:
-                file = open(ONETIME, 'r')
-                current = file.readline()
-                file.close()
-
-                print current == request.args.get('onetime')
-
-                if request.args.get('onetime') == current:
-                    os.remove(ONETIME)
-                    return f(*args, **kwargs)
-            except:
-                print "Failed to open"
+            if request.args.get('onetime') == totp.now():
+                return f(*args, **kwargs)
 
         auth = request.authorization
 
