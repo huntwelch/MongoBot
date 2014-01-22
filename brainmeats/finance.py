@@ -2,7 +2,7 @@ import locale
 
 from autonomic import axon, category, help, Dendrite
 from util import pageopen, Stock
-import simplejson as json
+import simplejson
 
 
 @category("finance")
@@ -91,7 +91,7 @@ class Finance(Dendrite):
             return
 
         try:
-            json = json.loads(response.text)
+            json = simplejson.loads(response.text)
         except:
             self.chat("Couldn't parse DOGE data.")
             return
