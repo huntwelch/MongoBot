@@ -2,14 +2,17 @@ import mongoengine
 import nltk
 import re
 import string
+import random
+import redis
 
+from threading import Thread
 from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API
-from settings import NICK, STORAGE, ACROLIB, LOGDIR
-from datastore import Words, Learned, Structure
-from random import choice
+from settings import NICK, STORAGE, ACROLIB, LOGDIR, RAW_TEXT
+from datastore import Words, Learned, Structure, Markov
+from random import choice, randint
 from util import pageopen
-from BeautifulSoup import BeautifulSoup as soup
+from bs4 import BeautifulSoup as soup
 from wordnik import swagger, WordApi
 
 
@@ -18,6 +21,83 @@ class Broca(Dendrite):
     def __init__(self, cortex):
         super(Broca, self).__init__(cortex)
 
+        self.markov = redis.StrictRedis(unix_socket_path='/tmp/redis.sock') 
+
+        self.readstuff = False
+        self.knowledge = False
+
+
+    @axon
+    def mark(self, line):
+        words = line.split()
+        
+        while len(words) > 2:
+            word = words.pop(0)
+            prefix = "%s %s" % (word, words[0])
+            follow = words[1]
+
+            entry = self.markov.get(prefix)
+            if not entry:
+                self.markov.set(prefix, follow)
+            else:
+                follows = entry.split(',')
+                follows.append(follow)
+                follow = ','.join(follows)
+                self.markov.set(prefix, follow)
+
+    @axon
+    @help("<Make " + NICK + " speak markov chain>")
+    def babble(self):
+        seed = self.markov.randomkey()
+        words = []
+
+        words.append(seed)
+        follows = self.markov.get(seed)
+        follows = follows.split(',')
+        words.append(random.choice(follows))
+
+        while True:
+            tail = "%s %s" % (words[-2:-1], words[-1])
+            add = self.markov.get(tail)
+            if not add:
+                break
+            follows = self.markov.get(seed)
+            follows = follows.split(',')
+            words.append(random.choice(follows))
+
+        self.chat(" ".join(words))
+
+    @axon
+    @help("<Make " + NICK + " read books>")
+    def readup(self):
+        if self.knowledge:
+            self.chat("Already read today.")
+            return
+
+        self.chat("This may take a minute.")
+        books = open(RAW_TEXT, 'r')
+        data = books.read().replace('\n', ' ')
+        tokens = nltk.word_tokenize(data)
+        self.knowledge = nltk.Text(tokens)
+
+        self.chat("Okay, read all the things.")
+
+    @axon
+    @help("<command " + NICK + " to speak>")
+    def speak2(self):
+        if not self.knowledge:
+            self.chat("Can't speak good yet. Must read.")
+            return
+
+        if not self.readstuff:
+            self.chat("Just one sec...")
+            self.knowledge.generate()
+
+        length = randint(10, 100)
+        text = ' '.join(self.knowledge._trigram_model.generate(length))
+
+        self.readstuff = True
+        self.chat(text)
 
     @axon
     @help("WORD <get definition of word>")
@@ -46,7 +126,6 @@ class Broca(Dendrite):
 
         self.chat(str(len(self.definitions)) + " definitions for " + word)
         self.chat("Definition " + str(which + 1) + ": " + definition)
-
 
     def seekdef(self, word):
         if not WORDNIK_API:
@@ -83,7 +162,6 @@ class Broca(Dendrite):
         else:
             self.chat("I got nothin.")
 
-
     def parse(self, sentence, nick):
         tokens = nltk.word_tokenize(sentence)
         tagged = nltk.pos_tag(tokens)
@@ -111,7 +189,6 @@ class Broca(Dendrite):
         except:
             pass
 
-
     def tourettes(self, sentence, nick):
         if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
             open(LOGDIR + "/mom.log", 'a').write(sentence + '\n')
@@ -123,6 +200,10 @@ class Broca(Dendrite):
 
         if sentence.lower().find("oh snap") != -1:
             self.chat("yeah WHAT?? Oh yes he DID")
+            return
+
+        if sentence.lower().find("'murican") != -1:
+            self.chat("fuck yeah")
             return
 
         if sentence.lower().find("rimshot") != -1:
@@ -138,7 +219,6 @@ class Broca(Dendrite):
             self.chat("LEAVE ERIK ALONE!")
             return
 
-
     @axon
     @alias(["waxhapsodic"])
     @help("<command " + NICK + " to speak>")
@@ -150,7 +230,6 @@ class Broca(Dendrite):
             sentence.append(_word.word)
 
         self.chat(" ".join(sentence))
-
 
     @axon
     @help("WORD <teach " + NICK + " a word>")
@@ -165,7 +244,6 @@ class Broca(Dendrite):
 
         open(STORAGE + "/natwords", 'a').write(self.values[0].strip() + '\n')
         self.chat(NICK + " learn new word!", self.lastsender)
-
 
     @axon
     @help("ACRONYM <have " + NICK + " decide the words for an acronym>")
@@ -189,7 +267,6 @@ class Broca(Dendrite):
         output = self.acronymit(self.values[0])
         self.chat(output)
 
-
     def acronymit(self, base):
         acronym = list(base.upper())
         output = []
@@ -208,7 +285,6 @@ class Broca(Dendrite):
 
         return " ".join(output)
 
-
     @axon
     @help("WORD [WHICH_DEFINITION] <look up etymology of word>")
     def ety(self):
@@ -217,14 +293,14 @@ class Broca(Dendrite):
             return
 
         word = self.values[0]
-        url = "http://www.etymonline.com/index.php?allowed_in_frame=0&search=" + word + "&searchmode=term"
+        params = {'allowed_in_frame': '0', 'searchmode': 'term', 'search': word}
 
-        urlbase = pageopen(url)
+        urlbase = pageopen("http://www.etymonline.com/index.php", params)
         if not urlbase:
             self.chat("Couldn't find anything")
             return
 
-        cont = soup(urlbase)
+        cont = soup(urlbase.text)
 
         heads = cont.findAll("dt")
         defs = cont.findAll("dd")
@@ -251,7 +327,6 @@ class Broca(Dendrite):
         self.chat("Etymology " + str(ord + 1) + " of " + str(len(defs)) +
                   " for " + _word + ": " + _def)
 
-
     # TODO: broken, not sure why
     @axon
     @help("WORD_OR_PHRASE <look up anagram>")
@@ -268,7 +343,7 @@ class Broca(Dendrite):
             self.chat("Fail")
             return
 
-        cont = soup(urlbase)
+        cont = soup(urlbase.text)
 
         if len(cont.findAll("p")) == 6:
             self.chat("No anagrams found.")
@@ -280,7 +355,7 @@ class Broca(Dendrite):
             content = content[2:-4]
             content = content.replace(": ,", ": ")
             self.chat(content)
-        
+
         # Usually not concerned with exceptions
         # in mongo, but this is bound to come up
         # again.

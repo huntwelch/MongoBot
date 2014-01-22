@@ -1,31 +1,35 @@
-import urllib
-import urllib2
+import time
 import re
-import htmlentitydefs
+import HTMLParser
+import requests
 from settings import CHANNEL, SHORTENER
-from xml.dom import minidom as dom
+from collections import OrderedDict
+import time
 
 
 # Utility functions
+def RateLimited(maxPerSecond):
+    # http://stackoverflow.com/questions/667508/whats-a-good-rate-limiting-algorithm
+    minInterval = 1.0 / float(maxPerSecond)
+
+    def decorate(func):
+        lastTimeCalled = [0.0]
+
+        def rateLimitedFunction(*args, **kargs):
+            elapsed = time.clock() - lastTimeCalled[0]
+            leftToWait = minInterval - elapsed
+            if leftToWait > 0:
+                time.sleep(leftToWait)
+            ret = func(*args, **kargs)
+            lastTimeCalled[0] = time.clock()
+            return ret
+        return rateLimitedFunction
+    return decorate
+
 
 def unescape(text):
-    def fixup(m):
-        text = m.group(0)
-        if text[:2] == "&#":
-            try:
-                if text[:3] == "&#x":
-                    return unichr(int(text[3:-1], 16))
-                else:
-                    return unichr(int(text[2:-1]))
-            except ValueError:
-                pass
-        else:
-            try:
-                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
-            except KeyError:
-                pass
-        return text
-    return re.sub("&#?\w+;", fixup, text)
+    parser = HTMLParser.HTMLParser()
+    return parser.unescape(text)
 
 
 # instead of presuming to predict what
@@ -53,24 +57,31 @@ def colorize(text, color):
     if isinstance(color, str):
         color = colors[color]
 
-    return "\x03" + str(color) + text + "\x03"
+    return "\x03" + str(color) + ' ' + text + "\x03"
 
 
-
-def pageopen(url):
+def pageopen(url, params={}):
     try:
-        opener = urllib2.build_opener()
-        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-        urlbase = opener.open(url).read()
-        urlbase = re.sub('\s+', ' ', urlbase).strip()
+        headers = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'}
+        urlbase = requests.get(url, headers=headers, params=params, timeout=5)
+    except requests.exceptions.RequestException as e:
+        print e
+        return False
     except:
         return False
 
     return urlbase
 
 
-# Utility classes
+def shorten(url):
+    short_url = pageopen(SHORTENER, params={'roast': url})
 
+    if short_url:
+        return short_url.text
+    return ''
+
+
+# Utility classes
 class Stock(object):
 
     def __init__(self, symbol):
@@ -82,97 +93,48 @@ class Stock(object):
         if not symbol:
             return
 
-        # google specific
-        singlestock = "http://www.google.com/ig/api?stock="
-        url = singlestock + symbol
+        # yahoo fields
+        # See http://www.gummy-stuff.org/Yahoo-data.htm for more
+        fields = OrderedDict([
+            ('symbol', 's'),
+            ('price', 'k1'),
+            ('perc_change', 'k2'),
+            ('change', 'c6'),
+            ('exchange', 'x'),
+            ('company', 'n'),
+            ('volume', 'v'),
+            ('market_cap', 'j1'),
+        ])
+
+        # yahoo specific
+        url = 'http://finance.yahoo.com/d/quotes.csv'
+        params = {'f': ''.join(fields.values()), 's': symbol}
 
         try:
-            raw = dom.parse(urllib.urlopen(url))
-        except:
+            raw_string = pageopen(url, params).text
+            raw_list = raw_string.strip().replace('"', '').split(',')
+            data = {key: raw_list.pop(0) for (key) in fields.keys()}
+        except Exception as e:
             return
 
-        self.stock = self.extract(raw)
+        if data['exchange'] == 'N/A':
+            return
+
+        # Turn N/A - <b>92.73</b> into just the decimal
+        data['price'] = float(re.search('(\d|\.)+',
+                              data['price'].split('-').pop()).group())
+        # Turn N/A - +0.84% into just the decimal
+        data['perc_change'] = float(re.search('(\+|-)?(\d|\.)+',
+                                    data['perc_change'].split('-').pop()).group())
+        data['change'] = float(data['change'])
+
+        for key, value in data.items():
+            setattr(self, key, value)
+
+        self.stock = data
 
     def __nonzero__(self):
         return self.stock is not None
-
-    # Extracts from google api
-    def extract(self, raw):
-
-        elements = raw.childNodes[0].childNodes[0].childNodes
-
-        # in the future, can just change translation
-        # point is to end up with an object that won't
-        # change when the api changes.
-
-        translation = {
-            "symbol": "symbol",
-            "pretty_symbol": "pretty_symbol",
-            "symbol_lookup_url": "symbol_lookup_url",
-            "company": "company",
-            "exchange": "exchange",
-            "exchange_timezone": "exchange_timezone",
-            "exchange_utc_offset": "exchange_utc_offset",
-            "exchange_closing": "exchange_closing",
-            "divisor": "divisor",
-            "currency": "currency",
-            "last": "_last",
-            "high": "high",
-            "low": "low",
-            "volume": "volume",
-            "avg_volume": "avg_volume",
-            "market_cap": "market_cap",
-            "open": "open",
-            "y_close": "y_close",
-            "change": "_change",
-            "perc_change": "_perc_change",
-            "delay": "delay",
-            "trade_timestamp": "trade_timestamp",
-            "trade_date_utc": "trade_date_utc",
-            "trade_time_utc": "trade_time_utc",
-            "current_date_utc": "current_date_utc",
-            "current_time_utc": "current_time_utc",
-            "symbol_url": "symbol_url",
-            "chart_url": "chart_url",
-            "disclaimer_url": "disclaimer_url",
-            "ecn_url": "ecn_url",
-            "isld_last": "isld_last",
-            "isld_trade_date_utc": "isld_trade_date_utc",
-            "isld_trade_time_utc": "isld_trade_time_utc",
-            "brut_last": "brut_last",
-            "brut_trade_date_utc": "brut_trade_date_utc",
-            "brut_trade_time_utc": "brut_trade_time_utc",
-            "daylight_savings": "daylight_savings",
-        }
-        extracted = {}
-
-        for e in elements:
-            data = e.getAttribute("data")
-            extracted[translation[e.tagName]] = data
-            setattr(self, translation[e.tagName], data)
-
-        if not self.company:
-            return None
-
-        self.price = float(self._last)
-        try:
-            self.change = float(self._change)
-            self.perc_change = float(self._perc_change)
-        except:
-            self.change = 0
-            self.perc_change = 0
-
-        # Check for after hours
-
-        self.afterhours = False
-        time = int(self.current_time_utc)
-        if self.isld_last and (time < 133000 or time > 200000):
-            self.afterhours = True
-            self.price = float(self.isld_last)
-            self.change = self.price - float(self._last)
-            self.perc_change = (self.change / float(self._last)) * 100
-
-        return extracted
 
     def showquote(self, context):
         if not self.stock:
@@ -182,11 +144,9 @@ class Stock(object):
         changestring = str(self.change) + " (" + ("%.2f" % self.perc_change) + "%)"
 
         if self.change < 0:
-            color = "4"
+            changestring = colorize(changestring, 'red')
         else:
-            color = "3"
-
-        changestring = "\x03" + color + " " + changestring + "\x03"
+            changestring = colorize(changestring, 'green')
 
         message = [
             name,
@@ -204,20 +164,13 @@ class Stock(object):
         if context != CHANNEL:
             for item in otherinfo:
                 pretty, id = item
-                addon = pretty + ": " + self.stock[id]
+                addon = pretty + ": " + getattr(self, id, 'N/A')
                 message.append(addon)
 
-        link = urllib.quote("http://www.google.com/finance?client=ig&q=" + self.stock["symbol"])
-        try:
-            opener = urllib2.build_opener()
-            roasted = opener.open(SHORTENER + link).read()
-            message.append(roasted)
-        except:
-            message.append("Can't link")
-            
+        link = 'http://finance.yahoo.com/q?s=' + self.symbol
+        roasted = shorten(link)
+        message.append(roasted)
 
         output = ', '.join(message)
-        if self.afterhours:
-            output = "After hours: " + output
 
         return output

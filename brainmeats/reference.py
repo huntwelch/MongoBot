@@ -1,14 +1,10 @@
-import HTMLParser
-import simplejson
 import textwrap
-import urllib
-import os
 
 from autonomic import axon, alias, category, help, Dendrite
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup as bs4
 from settings import REPO, NICK, SAFE
 from secrets import WEATHER_API
-from util import pageopen
+from util import unescape, pageopen
 
 
 @category("reference")
@@ -19,30 +15,39 @@ class Reference(Dendrite):
         self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
 
     @axon
+    @help("SEARCH_METHOD SEARCH_TERM <look something up in saved search path>")
+    def s(self):
+        if not self.values or len(self.values) < 2:
+            self.chat("Search with -s METHOD TERM(S)")
+            return
+
+    @axon
     @help("SEARCH_TERM <look something up in google>")
     def g(self):
         if not self.values:
             self.chat("Enter a word")
             return
 
-        query = "+".join(self.values)
-        url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=large&q=%s&start=0" % (query)
+        # If values was a string you don't need the join/etc
+        params = {'v': '1.0', 'rsz': 'large', 'start': '0',
+                  'q': "+".join(self.values)}
 
-        # Google no likey pageopen func
         try:
-            results = urllib.urlopen(url)
-            json = simplejson.loads(results.read())
+            request = pageopen(
+                'http://ajax.googleapis.com/ajax/services/search/web',
+                params=params)
+            json = request.json()
         except:
             self.chat("Something's buggered up")
             return
 
-        if json["responseStatus"] != 200:
-            self.chat("Bad status")
+        if len(json["responseData"]["results"]) == 0:
+            self.chat("No results")
             return
 
         result = json["responseData"]["results"][0]
         title = result["titleNoFormatting"]
-        link = result["url"]
+        link = result["unescapedUrl"]
 
         self.chat(title + " @ " + link)
 
@@ -78,7 +83,7 @@ class Reference(Dendrite):
             return
 
         try:
-            json = simplejson.loads(response)
+            json = response.json()
             json = json['current_observation']
         except:
             self.chat("Couldn't parse weather.")
@@ -102,56 +107,45 @@ class Reference(Dendrite):
             self.chat("Whatchu wanna know, bitch?")
             return
 
-        term = ' '.join(self.values)
-
-        query = urllib.urlencode({'term': term})
-        url = 'http://www.urbandictionary.com/define.php?%s' % query
-        urlbase = pageopen(url)
-
         try:
-            soup = BeautifulSoup(urlbase,
-                                 convertEntities=BeautifulSoup.HTML_ENTITIES)
+            request = pageopen('http://www.urbandictionary.com/define.php',
+                               params={'term': ' '.join(self.values)})
+            soup = bs4(request.text)
         except:
             self.chat("parse error")
             return
 
-        defn = []
-
         elem = soup.find('div', {'class': 'definition'})
-        if elem:
-            if elem.string:
-                defn = [elem.string]
-            elif elem.contents:
-                defn = []
-                for c in elem.contents:
-                    if c.string and c.string.strip():
-                        defn.append(c.string.strip())
+
+        try:
+            defn = []
+            for string in elem.stripped_strings:
+                defn.append(string)
+        except:
+            self.chat("couldn't find anything")
+
 
         if defn:
             # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
             # entities like &#x27; so use the parser for any stray entities.
-            parser = HTMLParser.HTMLParser()
-
             for paragraph in defn:
-                wrapped = textwrap.wrap(paragraph, 80)
+                wrapped = textwrap.wrap(paragraph, 200)
                 for line in wrapped:
-                    self.chat(parser.unescape(line))
+                    self.chat(unescape(line))
         else:
             self.chat("couldn't find anything")
 
-
     # This function used to be called calc, but was changed to hack in
-    # honor of Ken's incredibly sick exploitation of the eval function, 
+    # honor of Ken's incredibly sick exploitation of the eval function,
     # which gave him direct access to the database:
-    # (lambda f=(lambda n:[c for c in ().__class__.__bases__[0].__subclasses__() 
-    # if c.__name__=='catch_warnings'][0]()._module.__builtins__[n]): 
-    # f("eval")(f("compile")("d=[c for c in ().__class__.__base__.__subclasses__() 
+    # (lambda f=(lambda n:[c for c in ().__class__.__bases__[0].__subclasses__()
+    # if c.__name__=='catch_warnings'][0]()._module.__builtins__[n]):
+    # f("eval")(f("compile")("d=[c for c in ().__class__.__base__.__subclasses__()
     # if c.__name__=='catch_warnings'][0]()._module.__builtins__['__import__']('datastore');
     # d.connectdb();e=d.Drinker.objects(name='loxo33')[0];e.awaiting='2013/5/1=loxo33 job hops';
     # e.save()","","single")))()
     #
     # Ken, your kung-fu is the strongest.
-
     @axon
     @help("EQUATION <run simple equation in python>, OR ruthlessly fuck with bot's codebase.")
     def hack(self):
@@ -163,7 +157,7 @@ class Reference(Dendrite):
 
             self.chat("Available functions: " + ", ".join(printout))
             return
-        
+
         string = ' '.join(self.values)
         if "__" in string:
             self.chat("Rejected.")
@@ -182,6 +176,3 @@ class Reference(Dendrite):
         if not self.values:
             self.chat("The Doctor")
             return
-
-    
-

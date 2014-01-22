@@ -3,7 +3,7 @@ from secrets import CHANNEL, USERS
 
 # Connection Settings
 
-HOST = "irc.freenode.net"
+HOST = "chat.freenode.net"
 PORT = 6667
 NICK = "MongoBot"
 
@@ -23,13 +23,14 @@ SCAN = "^:\w+\.freenode\.net"
 STORAGE = "hippocampus"
 LOGDIR = STORAGE + "/log"
 LOG = LOGDIR + "/chat.log"
+RAW_TEXT = 'booklearnin/raw'
 DISTASTE = STORAGE + "/distaste"
 ACROSCORE = STORAGE + "/acro/"
 
 # Misc
 
 CONTROL_KEY = "-"
-SHORTENER = "http://roa.st/api.php?roast="
+SHORTENER = "http://roa.st/api.php"
 PATIENCE = 7000
 REPO = "https://github.com/huntwelch/MongoBot"
 SMS_LOCKFILE = "/tmp/sms.lock"
@@ -38,7 +39,8 @@ PULSE = "/tmp/bot.pulse"
 # Web server
 
 WEBSITE = "http://mongobot.com"
-ONETIME = '/tmp/bot.pass'
+ONETIME = "/tmp/bot.pass"
+SERVER_RELOAD = "/tmp/mongo.reload"
 
 # Stock game
 
@@ -109,7 +111,6 @@ INSULT = [
 BOREDOM = [
     "kicks",
     "slaps",
-    "butt rapes",
     "offers dcross's mom to",
     "throws feces at",
 ]

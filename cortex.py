@@ -1,23 +1,19 @@
-import base64
-import sys
 import os
 import re
-import urllib2
-import urllib
-import simplejson
 import shutil
 import pkgutil
+import requests
 
-from BeautifulSoup import BeautifulSoup as soup
+from bs4 import BeautifulSoup as bs4
 from datetime import date, timedelta
 from time import mktime, localtime, sleep
-from random import choice, randint
+from random import randint
 
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-    SHORTENER, OWNER, REALNAME, SCAN
+    OWNER, REALNAME, SCAN
 from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
 from datastore import Drinker, connectdb
-from util import unescape, pageopen
+from util import unescape, pageopen, shorten, RateLimited
 from autonomic import serotonin
 
 
@@ -29,6 +25,7 @@ class Cortex:
         self.master = master
         self.context = CHANNEL
         self.lastpublic = False
+        self.replysms = False
         self.lastprivate = False
         self.lastsender = False
         self.sock = master.sock
@@ -96,46 +93,48 @@ class Cortex:
             if self.live[func]:
                 self.live[func]()
 
-    def monitor(self, sock):
+    def monitor(self):
         currenttime = int(mktime(localtime()))
         self.parietal(currenttime)
 
+        self.sock.setblocking(0)
         try:
-            line = self.sock.recv(500)
+            lines = self.sock.recv(256)
         except:
             return
 
-        line = line.strip()
+        for line in lines.split("\n"):
+            line = line.strip()
 
-        if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
-            print "* Joined " + CHANNEL
+            if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
+                print "* Joined " + CHANNEL
 
-        if self.gettingnames:
-            if line.find("* " + CHANNEL) != -1:
-                all = line.split(":")[2]
-                self.gettingnames = False
-                all = re.sub(NICK + ' ', '', all)
-                self.members = all.split()
+            if self.gettingnames:
+                if line.find("* " + CHANNEL) != -1:
+                    all = line.split(":")[2]
+                    self.gettingnames = False
+                    all = re.sub(NICK + ' ', '', all)
+                    self.members = all.split()
 
-        scan = re.search(SCAN, line)
-        ping = re.search("^PING", line)
-        pwd = re.search(":-passwd", line)
-        if line != '' and not scan and not ping and not pwd:
-            self.logit(line + '\n')
+            scan = re.search(SCAN, line)
+            ping = re.search("^PING", line)
+            pwd = re.search(":-passwd", line)
+            if line != '' and not scan and not ping and not pwd:
+                self.logit(line + '\n')
 
-        if line.find('PING') != -1:
-            self.sock.send('PONG ' + line.split()[1] + '\n')
-        elif line.find('PRIVMSG') != -1:
-            self.boredom = currenttime
-            content = line.split(' ', 3)
-            self.context = content[2]
+            if line.find('PING') != -1:
+                self.sock.send('PONG ' + line.split()[1] + '\n')
+            elif line.find('PRIVMSG') != -1:
+                self.boredom = currenttime
+                content = line.split(' ', 3)
+                self.context = content[2]
 
-            if self.context == NICK:
-                self.lastprivate = content
-            else:
-                self.lastpublic = content
+                if self.context == NICK:
+                    self.lastprivate = content
+                else:
+                    self.lastpublic = content
 
-            self.parse(line)
+                self.parse(line)
 
     def command(self, sender, cmd):
         components = cmd.split()
@@ -224,14 +223,26 @@ class Cortex:
             return
 
         self.lastsender = nick
-        self.lastip = ip 
+        self.lastip = ip
 
         if content[:1] == CONTROL_KEY:
             if nick.rstrip('_') not in USERS:
                 self.chat("My daddy says not to listen to you.")
                 return
-
+            
+            print "Executing command: %s" % content
+            _mark = int(mktime(localtime()))
             self.command(nick, content)
+            print "Finished in: %s" % str(int(mktime(localtime())) - _mark)
+            return
+
+        if content[:-2] in USERS and content[-2:] in ['--', '++']:
+            print "Active"
+            self.values = [content[:-2]]
+            if content[-2:] == '++':
+                self.commands.get('increment')()
+            if content[-2:] == '--':
+                self.commands.get('decrement')()
             return
 
         ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
@@ -242,27 +253,14 @@ class Cortex:
             return
 
         if 'broca' in self.brainmeats:
-            self.brainmeats['broca'].parse(content, nick)
             self.brainmeats['broca'].tourettes(content, nick)
+            # Too slow. Rethink.
+            # self.brainmeats['broca'].parse(content, nick)
+            self.brainmeats['broca'].mark(content)
 
     def tweet(self, urls):
         for url in urls:
-            response = pageopen('https://api.twitter.com/1.1/statuses/show.json?id=%s' % url[1])
-            if not response:
-                self.chat("Couldn't retrieve Tweet.")
-                return
-
-            try:
-                json = simplejson.loads(response)
-            except:
-                self.chat("Couldn't parse Tweet.")
-                return
-
-            name = json['user']['name']
-            screen_name = json['user']['screen_name']
-            text = json['text']
-
-            self.chat('%s (%s) tweeted: %s' % (name, screen_name, text))
+            self.brainmeats['twitterapi'].get_tweet(url[1])
 
     def linker(self, urls):
         for url in urls:
@@ -274,6 +272,15 @@ class Cortex:
                 self.tweet(twitter_urls)
                 return
 
+            if url.find('gist.github') != -1:
+                return
+
+            if randint(1, 5) == 1:
+                try:
+                    self.commands.get("tweet", self.default)(url)
+                except:
+                    pass
+
             while True:
                 fubs = 0
                 title = "Couldn't get title"
@@ -281,15 +288,21 @@ class Cortex:
 
                 urlbase = pageopen(url)
                 if not urlbase:
+                    # we don't have a valid requests object here
+                    # just give up early
+                    self.chat("Total fail")
+                    return
+
+                roasted = shorten(url)
+                if not roasted:
+                    roasted = ''
                     fubs += 1
 
                 try:
-                    opener = urllib2.build_opener()
-                    roasted = opener.open(SHORTENER + url).read()
+                    ext = urlbase.headers['content-type'].split('/')[1]
                 except:
-                    fubs += 1
+                    ext = False
 
-                ext = url.split(".")[-1]
                 images = [
                     "gif",
                     "png",
@@ -305,44 +318,52 @@ class Cortex:
                     break
                 else:
                     try:
-                        cont = soup(urlbase, convertEntities=soup.HTML_ENTITIES)
-                        if cont.title is None:
-                            redirect = cont.find('meta', attrs={'http-equiv': 'refresh'})
+                        soup = bs4(urlbase.text)
+                        title = soup.find('title').string.strip()
+                        if title is None:
+                            redirect = soup.find('meta', attrs={'http-equiv':
+                                                 'refresh'})
                             if not redirect:
-                                redirect = cont.find('meta', attrs={'http-equiv': 'Refresh'})
+                                redirect = soup.find('meta', attrs={'http-equiv':
+                                                     'Refresh'})
 
                             if redirect:
+                                # Shouldn't this call itself and then return here?
                                 url = redirect['content'].split('url=')[1]
                                 continue
                             else:
                                 raise ValueError('Cannot find title')
-                        else:
-                            title = cont.title.string
-                            break
+                        break
+
                     except:
-                        self.chat("Page parsing error")
+                        self.chat("Page parsing error - " + roasted)
                         return
 
-            deli = "https://api.del.icio.us/v1/posts/add?"
-            data = urllib.urlencode({
+            print "Delic"
+            deli = "https://api.del.icio.us/v1/posts/add"
+            params = {
                 "url": url,
                 "description": title,
                 "tags": "okdrink," + self.lastsender,
-            })
+            }
 
             if DELICIOUS_USER:
-                base64string = base64.encodestring('%s:%s' % (DELICIOUS_USER, DELICIOUS_PASS))[:-1]
+                auth = requests.auth.HTTPBasicAuth(DELICIOUS_USER, DELICIOUS_PASS)
                 try:
-                    req = urllib2.Request(deli, data)
-                    req.add_header("Authorization", "Basic %s" % base64string)
-                    send = urllib2.urlopen(req)
+                    send = requests.get(deli, params=params, auth=auth)
                 except:
                     self.chat("(delicious is down)")
+
+                if not send:
+                    self.chat("(delicious problem)")
 
             if fubs == 2:
                 self.chat("Total fail")
             else:
                 self.chat(unescape(title) + " @ " + roasted)
+
+            print "All the way"
+            break
 
     def announce(self, message, whom=False):
         message = message.encode("utf-8")
@@ -351,6 +372,7 @@ class Cortex:
         except:
             self.sock.send('PRIVMSG ' + CHANNEL + ' :Having trouble saying that for some reason\n')
 
+    @RateLimited(5)
     def chat(self, message, target=False):
         if target:
             whom = target
@@ -362,6 +384,11 @@ class Cortex:
         self.logit("___" + NICK + ": " + str(message) + '\n')
         try:
             self.sock.send('PRIVMSG ' + whom + ' :' + str(message) + '\n')
+            if self.replysms:
+                to = self.replysms
+                self.replysms = False
+                self.values = [to, str(message)]
+                self.commands.get('sms')()
         except:
             self.sock.send('PRIVMSG ' + whom + ' :Having trouble saying that for some reason\n')
 
@@ -373,6 +400,11 @@ class Cortex:
             self.chat(message, target)
         else:
             self.chat(message)
+            if self.replysms:
+                to = self.replysms
+                self.replysms = False
+                self.values = [to, str(message)]
+                self.commands.get('sms')()
 
     def default(self):
         self.act(" cannot do this thing :'(")

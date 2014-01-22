@@ -6,6 +6,7 @@ from settings import STARTING_CASH
 def connectdb():
     mongoengine.connect('bot', host='localhost')
 
+
 def simpleupdate(whom, key, val):
     try:
         drinker = Drinker.objects(name=whom)
@@ -20,6 +21,44 @@ def simpleupdate(whom, key, val):
         return False
 
     return True
+
+
+def incrementEntity(whom, amount):
+    try:
+        entity = Entity.objects(name=whom)
+        if entity:
+            entity = entity[0]
+        else:
+            entity = Entity(name=whom)
+
+        if entity.value:
+            entity.value = entity.value + amount
+        else:
+            entity.value = 0 + amount
+    except:
+        return False
+    entity.save()
+    return True
+
+
+def entityScore(whom):
+    try:
+        entity = Entity.objects(name=whom)
+        if entity:
+            entity = entity[0]
+        else:
+            entity = Entity(name=whom)
+    except:
+        return 0
+    return entity.value
+
+def topScores(limit):
+    return Entity.objects.order_by('-value').limit(limit)
+
+class Entity(mongoengine.Document):
+    name = StringField(required=True)
+    value = IntField(default=0)
+
 
 class Position(mongoengine.EmbeddedDocument):
     symbol = StringField(required=True)
@@ -47,6 +86,11 @@ class Words(mongoengine.Document):
     source = StringField(required=True)
 
 
+class Markov(mongoengine.Document):
+    prefix = StringField()
+    follow = ListField(StringField())
+
+
 class Learned(mongoengine.Document):
     word = StringField(required=True)
     partofspeech = StringField(required=True)
@@ -55,6 +99,7 @@ class Learned(mongoengine.Document):
 class Structure(mongoengine.Document):
     structure = ListField(StringField())
     contents = ListField(StringField())
+
 
 class Quote(mongoengine.Document):
     date = DateTimeField(required=True)

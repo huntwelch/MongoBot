@@ -13,8 +13,6 @@ HAND_NAMES = ("HIGH_CARD", "PAIR", "TWO_PAIR", "THREE_OF_A_KIND", "STRAIGHT",
               "FLUSH", "FULL_HOUSE", "FOUR_OF_A_KIND", "STRAIGHT_FLUSH")
 
 
-
-
 class Card(object):
     #SUITS = ['s', 'h', 'd', 'c']
     SUITS = [u"\u2660", u"\u2665", u"\u2666", u"\u2663"]

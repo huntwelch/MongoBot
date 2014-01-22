@@ -20,6 +20,9 @@ class {1}(Dendrite):
         super({1}, self).__init__(cortex)
 
     # Example command function
+    # The axon decorator adds it to the available chatroom commands,
+    # based on the name of the function. The @help adds an entry to 
+    # the appropriate category.
     @axon
     @help("<I am an example>")
     def function_name(self):
