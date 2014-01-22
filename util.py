@@ -2,10 +2,16 @@ import time
 import re
 import HTMLParser
 import requests
-from settings import CHANNEL, SHORTENER
-from collections import OrderedDict
 import time
+import pyotp
+import base64
 
+from settings import CHANNEL, SHORTENER
+from secrets import HTTP_PASS
+from collections import OrderedDict
+
+# For onetime stuff
+totp = pyotp.TOTP(base64.b32encode(HTTP_PASS), interval=600)
 
 # Utility functions
 def RateLimited(maxPerSecond):
