@@ -16,10 +16,12 @@ def index():
 
 
 @app.route("/api/chat", methods=['GET', 'POST'])
+@requires_auth
 def api_chat():
     offset = False
     if request.args.get('offset'):
         offset = request.args.get('offset')
+
     chats = fetch_chats(request, offset)
     return json.dumps(chats)
 

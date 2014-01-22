@@ -16,7 +16,6 @@ def fetch_chats(request, offset):
 
     index = 0
     for line in log:
-
         # TODO: maybe move line parsing out to a general function
         if line.find(NICK) is 1:
             continue
@@ -34,20 +33,24 @@ def fetch_chats(request, offset):
             continue
 
         private = ''
-        if not bot:
-            info, content = line[1:].split(' :', 1)
-            sender, type, room = info.strip().split()
-            nick, data = sender.split('!')
-            if room != CHANNEL:
-                private = 'private'
-        else:
-            nick, content = line.split(': ', 1)
-            nick = nick[3:]
 
-        action = False
-        if content.find('ACTION') is 1:
-            content = content.replace('ACTION', '')
-            action = True
+        try:
+            if not bot:
+                info, content = line[1:].split(' :', 1)
+                sender, type, room = info.strip().split()
+                nick, data = sender.split('!')
+                if room != CHANNEL:
+                    private = 'private'
+            else:
+                nick, content = line.split(': ', 1)
+                nick = nick[3:]
+
+            action = False
+            if content.find('ACTION') is 1:
+                content = content.replace('ACTION', '')
+                action = True
+        except:
+            continue
 
         chat = {
             'nick': nick,
