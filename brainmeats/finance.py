@@ -100,9 +100,10 @@ class Finance(Dendrite):
 
         if self.values:
             try:
-                value = weighted * self.values[0]
+                value = weighted * int(self.values[0])
             except:
                 self.chat("Couldn't compute DOGE value.")
+                return
 
             self.chat('Value of %s DOGE is $%s' % (self.values[0], value))
         else:
