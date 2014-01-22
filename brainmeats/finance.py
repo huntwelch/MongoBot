@@ -96,7 +96,6 @@ class Finance(Dendrite):
             self.chat("Couldn't parse DOGE data.")
             return
 
-        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-        weighted = locale.currency(json['vwap'])
+        weighted = json['vwap']
 
-        self.chat('Dogecoin, Volume-Weighted Average Price: %s' % (weighted))
+        self.chat('Dogecoin, Volume-Weighted Average Price: $%s' % (weighted))
