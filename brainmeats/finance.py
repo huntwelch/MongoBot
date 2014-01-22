@@ -78,3 +78,24 @@ class Finance(Dendrite):
         high = locale.currency(json['ticker']['high'])
 
         self.chat('Litecoin, Last: %s, Low: %s, High: %s' % (last, low, high))
+
+    @axon
+    @help("<get current Dogecoin trading information>")
+    def doge(self):
+        url = 'http://dogecoinaverage.com/USD.json'
+
+        response = pageopen(url)
+        if not response:
+            self.chat("Couldn't retrieve DOGE data.")
+            return
+
+        try:
+            json = response.json()
+        except:
+            self.chat("Couldn't parse DOGE data.")
+            return
+
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+        weighted = locale.currency(json['vwap'])
+
+        self.chat('Dogecoin, Volume-Weighted Average Price: %s' % (weighted))
