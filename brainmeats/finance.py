@@ -57,7 +57,7 @@ class Finance(Dendrite):
 
         if self.values:
             try:
-                value = locale.currency(last * float(self.values[0]))
+                value = locale.currency(float(json['ticker']['last']) * float(self.values[0]))
             except:
                 self.chat("Couldn't compute BTC value.")
                 return
@@ -89,7 +89,7 @@ class Finance(Dendrite):
 
         if self.values:
             try:
-                value = locale.currency(last * float(self.values[0]))
+                value = locale.currency(float(json['ticker']['last']) * float(self.values[0]))
             except:
                 self.chat("Couldn't compute LTC value.")
                 return
