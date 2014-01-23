@@ -55,7 +55,16 @@ class Finance(Dendrite):
         low = locale.currency(json['ticker']['low'])
         high = locale.currency(json['ticker']['high'])
 
-        self.chat('Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high))
+        if self.values:
+            try:
+                value = locale.currency(last * int(self.values[0]))
+            except:
+                self.chat("Couldn't compute BTC value.")
+                return
+
+            self.chat('Value of %s BTC is %s' % (self.values[0], value))
+        else:
+            self.chat('Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high))
 
     @axon
     @help("<get current Litecoin trading information>")
@@ -78,7 +87,16 @@ class Finance(Dendrite):
         low = locale.currency(json['ticker']['low'])
         high = locale.currency(json['ticker']['high'])
 
-        self.chat('Litecoin, Last: %s, Low: %s, High: %s' % (last, low, high))
+        if self.values:
+            try:
+                value = locale.currency(last * int(self.values[0]))
+            except:
+                self.chat("Couldn't compute LTC value.")
+                return
+
+            self.chat('Value of %s LTC is %s' % (self.values[0], value))
+        else:
+            self.chat('Litecoin, Last: %s, Low: %s, High: %s' % (last, low, high))
 
     @axon
     @help("<get current Dogecoin trading information>")
@@ -100,11 +118,12 @@ class Finance(Dendrite):
 
         if self.values:
             try:
-                value = weighted * int(self.values[0])
+                locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+                value = locale.currency(weighted * int(self.values[0]))
             except:
                 self.chat("Couldn't compute DOGE value.")
                 return
 
-            self.chat('Value of %s DOGE is $%s' % (self.values[0], value))
+            self.chat('Value of %s DOGE is %s' % (self.values[0], value))
         else:
             self.chat('Dogecoin, Volume-Weighted Average Price: $%s' % (weighted))
