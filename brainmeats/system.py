@@ -5,12 +5,14 @@ import pkgutil
 from autonomic import axon, category, help, Dendrite
 from settings import SAFESET, NICK, IDENT, HOST, REALNAME
 from secrets import *
+from util import colorize
 from time import sleep
 
 
 @category("system")
 class System(Dendrite):
     def __init__(self, cortex):
+        self.libs = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
         super(System, self).__init__(cortex)
 
     @axon
@@ -96,9 +98,93 @@ class System(Dendrite):
         self.chat("I know kung-fu.")
 
     @axon
-    def libs(self):
-        areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
-        self.chat(', '.join(areas))
+    @help("<show available libs and their status>")
+    def meats(self):
+        _libs = []
+        for lib in self.libs:
+            if lib not in self.cx.master.ENABLED:
+                _libs.append(colorize(lib, 'red')) 
+            else:
+                _libs.append(colorize(lib, 'green')) 
+
+        self.chat(', '.join(_libs))
+
+    @axon
+    @help("LIB_1 [LIB_n] <activate libraries>")
+    def enable(self):
+        if not self.values:
+            self.chat("Enable what?")
+            return
+
+        if self.values[0] == '*':
+            values = self.libs
+        else:
+            values = self.values
+
+        already = []
+        nonextant = []
+        enabled = []
+        for lib in values:
+            if lib in self.cx.master.ENABLED:
+                already.append(lib) 
+            elif lib not in self.libs:
+                nonextant.append(lib)
+            else:
+                enabled.append(lib)
+                self.cx.master.ENABLED.append(lib)
+
+        messages = []
+        if len(already):
+            messages.append('%s already enabled.' % ', '.join(already))
+            
+        if len(nonextant):
+            messages.append("%s don't exist." % ', '.join(nonextant))
+            
+        if len(enabled):
+            messages.append("Enabled %s." % ', '.join(enabled))
+            
+        self.cx.master.reload(True)
+
+        self.chat(' '.join(messages))
+
+    @axon
+    @help("LIB_1 [LIB_n] <deactivate libraries>")
+    def disable(self):
+        if not self.values:
+            self.chat("Disable what?")
+            return
+
+        if 'system' in self.values:
+            self.chat("You can't disable the system, jackass.")
+            return
+
+        already = []
+        nonextant = []
+        disabled = []
+        for lib in self.values:
+            if lib not in self.libs:
+                nonextant.append(lib)
+            elif lib not in self.cx.master.ENABLED:
+                already.append(lib) 
+            else:
+                disabled.append(lib)
+                self.cx.master.ENABLED.remove(lib)
+
+        messages = []
+        if len(already):
+            messages.append('%s already disabled.' % ', '.join(already))
+            
+        if len(nonextant):
+            messages.append("%s don't exist." % ', '.join(nonextant))
+            
+        if len(disabled):
+            messages.append("Disabled %s." % ', '.join(disabled))
+            
+        self.cx.master.reload(True)
+
+        self.chat(' '.join(messages))
+
+
 
     @axon
     @help("<print api keys and stuff>")

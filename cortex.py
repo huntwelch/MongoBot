@@ -57,6 +57,9 @@ class Cortex:
         areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
 
         for area in areas:
+            if area not in self.master.ENABLED:
+                continue
+
             print area
             try:
                 mod = __import__("brainmeats", fromlist=[area])

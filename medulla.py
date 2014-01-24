@@ -6,7 +6,7 @@ import os
 import thread
 import ssl
 
-from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER, SMS_LOCKFILE, PULSE
+from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER, SMS_LOCKFILE, PULSE, ENABLED
 from time import sleep, mktime, localtime
 
 
@@ -14,11 +14,13 @@ class Medulla:
     def __init__(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+        # Could write disabled to a file for persistance between reboots 
+        self.ENABLED = ENABLED
+
         print "* Pinging IRC"
 
         sock.connect((HOST, PORT))
 
-        #self.sock = ssl.wrap_socket(sock)
         self.sock = sock
 
         self.sock.send('NICK ' + NICK + '\n')

@@ -11,13 +11,6 @@ NICK = "MongoBot"
 
 SCAN = "^:\w+\.freenode\.net"
 
-# These settings are set in secrets.py
-
-# CHANNEL = (str) irc channel
-# WORDNIK_API = (str) for wordnik calls
-# WEATHER_API = (str) for weather calls to wunderground.com
-# WOLFRAM_API = (str) for weather calls to Wolfram
-
 # Directory settings
 
 STORAGE = "hippocampus"
