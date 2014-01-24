@@ -7,15 +7,18 @@ import pyotp
 import base64
 
 from settings import CHANNEL, SHORTENER
-from secrets import HTTP_PASS
+from secrets import HTTP_PASS, DELICIOUS_USER, DELICIOUS_PASS
 from collections import OrderedDict
 
 # For onetime stuff
 totp = pyotp.TOTP(base64.b32encode(HTTP_PASS), interval=600)
 
+
 # Utility functions
-def RateLimited(maxPerSecond):
-    # http://stackoverflow.com/questions/667508/whats-a-good-rate-limiting-algorithm
+
+
+# http://stackoverflow.com/questions/667508/whats-a-good-rate-limiting-algorithm
+def ratelimited(maxPerSecond):
     minInterval = 1.0 / float(maxPerSecond)
 
     def decorate(func):
@@ -38,9 +41,6 @@ def unescape(text):
     return parser.unescape(text)
 
 
-# instead of presuming to predict what
-# will be colored, make it easy to prep
-# string elements
 def colorize(text, color):
     colors = {
         "white": 0,
@@ -180,3 +180,23 @@ class Stock(object):
         output = ', '.join(message)
 
         return output
+
+
+def postdelicious(url, title, sender):
+
+    deli = "https://api.del.icio.us/v1/posts/add"
+    params = {
+        "url": url,
+        "description": title,
+        "tags": "%s,%s" % (CHANNEL, sender),
+    }
+
+    if DELICIOUS_USER:
+        auth = requests.auth.HTTPBasicAuth(DELICIOUS_USER, DELICIOUS_PASS)
+        try:
+            send = requests.get(deli, params=params, auth=auth)
+        except:
+            self.chat("(delicious is down)")
+
+        if not send:
+            self.chat("(delicious problem)")

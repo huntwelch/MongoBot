@@ -13,10 +13,12 @@ from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
     OWNER, REALNAME, SCAN
 from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
 from datastore import Drinker, connectdb
-from util import unescape, pageopen, shorten, RateLimited
+from util import unescape, pageopen, shorten, ratelimited, postdelicious
 from autonomic import serotonin
 
-
+# Basically all the interesting interaction with
+# irc and command / content parsing happens here.
+# Also connects to mongodb.
 class Cortex:
     def __init__(self, master):
 
@@ -262,6 +264,10 @@ class Cortex:
             self.brainmeats['broca'].mark(content)
 
     def tweet(self, urls):
+
+        if 'twitterapi' not in self.brainmeats:
+            return
+
         for url in urls:
             self.brainmeats['twitterapi'].get_tweet(url[1])
 
@@ -291,8 +297,8 @@ class Cortex:
 
                 urlbase = pageopen(url)
                 if not urlbase:
-                    # we don't have a valid requests object here
-                    # just give up early
+                    # If we don't have a valid requests
+                    # object here just give up early
                     self.chat("Total fail")
                     return
 
@@ -342,30 +348,13 @@ class Cortex:
                         self.chat("Page parsing error - " + roasted)
                         return
 
-            print "Delic"
-            deli = "https://api.del.icio.us/v1/posts/add"
-            params = {
-                "url": url,
-                "description": title,
-                "tags": "okdrink," + self.lastsender,
-            }
-
-            if DELICIOUS_USER:
-                auth = requests.auth.HTTPBasicAuth(DELICIOUS_USER, DELICIOUS_PASS)
-                try:
-                    send = requests.get(deli, params=params, auth=auth)
-                except:
-                    self.chat("(delicious is down)")
-
-                if not send:
-                    self.chat("(delicious problem)")
+            postdelicious(url, title, self.lastsender)
 
             if fubs == 2:
                 self.chat("Total fail")
             else:
                 self.chat(unescape(title) + " @ " + roasted)
 
-            print "All the way"
             break
 
     def announce(self, message, whom=False):
@@ -375,7 +364,7 @@ class Cortex:
         except:
             self.sock.send('PRIVMSG ' + CHANNEL + ' :Having trouble saying that for some reason\n')
 
-    @RateLimited(5)
+    @ratelimited(5)
     def chat(self, message, target=False):
         if target:
             whom = target

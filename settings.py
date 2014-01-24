@@ -7,9 +7,12 @@ HOST = "chat.freenode.net"
 PORT = 6667
 NICK = "MongoBot"
 
-# Used to filter out pings and server responses from logs and live checks
+# Used to filter out pings and server responses from 
+# logs and live checks. Obviously if you're not on
+# freenode, you'll need to update this.
 
 SCAN = "^:\w+\.freenode\.net"
+
 
 # Directory settings
 
@@ -19,6 +22,7 @@ LOG = LOGDIR + "/chat.log"
 RAW_TEXT = 'booklearnin/raw'
 DISTASTE = STORAGE + "/distaste"
 ACROSCORE = STORAGE + "/acro/"
+
 
 # Enabled libraries
 
@@ -42,6 +46,7 @@ ENABLED = [
     "webserver",
 ]
 
+
 # Misc
 
 CONTROL_KEY = "-"
@@ -50,16 +55,20 @@ PATIENCE = 7000
 REPO = "https://github.com/huntwelch/MongoBot"
 SMS_LOCKFILE = "/tmp/sms.lock"
 PULSE = "/tmp/bot.pulse"
+PULSE_RATE = 25
+
 
 # Web server
 
 WEBSITE = "http://mongobot.com"
 SERVER_RELOAD = "/tmp/mongo.reload"
 
+
 # Stock game
 
 VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ'])
 STARTING_CASH = 100000
+
 
 # Acro
 
@@ -76,10 +85,6 @@ NO_ACRO_PENALTY = 2
 NO_VOTE_PENALTY = 5
 BREAK = 15
 BOTPLAY = True
-
-IDENT = "macrotic"
-REALNAME = "macrotic"
-OWNER = "chiyou"
 
 SAFESET = [
     ('Bot settings', ':'),

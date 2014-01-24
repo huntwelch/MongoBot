@@ -1,7 +1,9 @@
 import mongoengine
+
 from mongoengine import *
 from settings import STARTING_CASH
 
+# All mongodb stuff.
 
 def connectdb():
     mongoengine.connect('bot', host='localhost')

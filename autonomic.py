@@ -2,6 +2,11 @@ import inspect
 from settings import CONTROL_KEY
 
 
+# The core of the library methodology used
+# by MongoBot. All brainmeats are Dendrites,
+# inheriting the state of the cortex as the
+# cortex monitors the chatroom. It also adds
+# some handy shortcuts to cortex functions.
 class Dendrite(object):
     def __init__(self, cortex):
         self.cx = cortex
@@ -39,6 +44,9 @@ class Dendrite(object):
         return self.cx.members
 
 
+# This is what the cortex uses to setup the brainmeat
+# libs, according to the decorators on the classes and
+# functions in the lib.
 def serotonin(cortex, expansion, electroshock):
     methods = inspect.getmembers(expansion)
     letter = expansion.category[:2]
@@ -71,25 +79,34 @@ def serotonin(cortex, expansion, electroshock):
             cortex.helpcategories.append(newcat)
 
 
+# Decorators, yo
+
+# How the lib is stored and labelled.
+# This is used internally and by the 
+# help menu, so no weird characters.
 def category(text):
     def add(cls):
         cls.category = text
         return cls
     return add
 
-
+# Makes the function available as 
+# a chat command, using the function
+# name.
 def axon(fn):
     fn.create_command = True
     return fn
 
-
+# Tell people your function is 
+# there and how to use it.
 def help(text):
     def add(fn):
         fn.help = text
         return fn
     return add
 
-
+# Don't want to type out findfreechildpornwithukmirrors?
+# @alias up 'perv'!
 def alias(aliases):
     def add(fn):
         fn.aliases = aliases
