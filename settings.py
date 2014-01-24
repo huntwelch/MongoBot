@@ -27,6 +27,28 @@ RAW_TEXT = 'booklearnin/raw'
 DISTASTE = STORAGE + "/distaste"
 ACROSCORE = STORAGE + "/acro/"
 
+# Enabled libraries
+
+ENABLED = [
+    "acro",
+    "alien",
+    "broca",
+    "chess",
+    "facebook",
+    "finance",
+    "holdem",
+    "memory",
+    "nonsense",
+    "peeps",
+    "quotes",
+    "reference",
+    "sms",
+    "stockgame",
+    "system",
+    "twitterapi",
+    "webserver",
+]
+
 # Misc
 
 CONTROL_KEY = "-"

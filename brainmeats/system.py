@@ -1,5 +1,6 @@
 import os
 import re
+import pkgutil
 
 from autonomic import axon, category, help, Dendrite
 from settings import SAFESET, NICK, IDENT, HOST, REALNAME
@@ -93,6 +94,11 @@ class System(Dendrite):
         os.system("git pull origin master")
         self.cx.master.reload(True)
         self.chat("I know kung-fu.")
+
+    @axon
+    def libs(self):
+        areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
+        self.chat(', '.join(areas))
 
     @axon
     @help("<print api keys and stuff>")

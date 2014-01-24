@@ -80,7 +80,7 @@ class Cortex:
         self.live[name] = False
 
     def parietal(self, currenttime):
-        if currenttime - self.namecheck > 300:
+        if currenttime - self.namecheck > 60:
             self.namecheck = int(mktime(localtime()))
             self.getnames()
 
@@ -110,7 +110,7 @@ class Cortex:
                 print "* Joined " + CHANNEL
 
             if self.gettingnames:
-                if line.find("* " + CHANNEL) != -1:
+                if line.find("@ " + CHANNEL) != -1:
                     all = line.split(":")[2]
                     self.gettingnames = False
                     all = re.sub(NICK + ' ', '', all)

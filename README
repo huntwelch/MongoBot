@@ -7,6 +7,9 @@ Getting Started
     To run bot: python medulla.py
     To run bot persistently so it will recover from crashes: python doctor.py
 
+    You'll need to install MongoDB to use most of the features relating to people
+
+
 Advanced Usage
 ==============
 
@@ -19,84 +22,14 @@ Advanced Usage
     pretty recent and so far just spitting out three word phrases, but that
     might be due to dearth of content.
 
+
 Secret settings
 ===============
 
-    You will need to create a file in the root folder called secrets.py,
-    containing the following variables:
+    You will need to create a file in the root folder called secrets.py.
+    example.secrets.py has descriptions of each setting, just copy it to
+    secrets.py and set away.
 
-    CHANNEL = "#room_for_bot_to_join"
-    USERS = ['nickname_allowed_to_use_bot1', ...]
-
-    IMPORTANT: For the following items, if you do NOT want to use them,
-    set them up in the secrets file anyway, set to empty strings.
-
-    If you want the bot to automatically post to delicious:
-
-    DELICIOUS_USER = ""
-    DELICIOUS_PASS = ""
-
-    To use the -weather command. Accesses http://api.wunderground.com
-
-    WEATHER_API = "" 
-
-    To use wordnik:
-
-    WORDNIK_API = ""
-
-    To use the -fml command:
-
-    FML_API = ""
-
-    To enable sms messaging via Twilio:
-
-    TWILIO_SID = ""
-    TWILIO_TOKEN = ""
-    TWILIO_NUMBER = ""
-
-    And there's some pending work coming for wolfram, so may as well:
-
-    WOLFRAM_API = ""
-
-Social Secret Settings
-======================
-
-    You will need to host a website to properly setup apis.
-    MongoBot is setup with uwsgi to run ontop of a(n?) nginx server.
-    You're going to have to figure that one out on your own
-    for the moment.
-
-    HTTP_USER = ""
-    HTTP_PASS = ""
-
-    The following settings should be set for google/twitter/facebook functionality.
-
-    Note it's not necessary to recycle GOOGLE_USER in this fashion but works for simplicity.
-
-    GOOGLE_USER = ""
-    GOOGLE_PASS = ""
-    
-    FB_USER = GOOGLE_USER + "@gmail.com"
-    FB_PASS = ""
-    FB_PAGE = ""
-    
-    FB_MONGOBOT_APPID = ""
-    FB_MONGOBOT_SECRET = ""
-    
-    TWIT_USER = GOOGLE_USER + "@gmail.com"
-    TWIT_PASS = ""
-    TWIT_PAGE = ""
-    
-    TWIT_CONSUMER_KEY = ""
-    TWIT_CONSUMER_SECRET = ""
-    TWIT_ACCESS_TOKEN = ""
-    TWIT_ACCESS_SECRET = ""
-
-
-    ... And of course, when you need to peruse reddit.
-
-    REDDIT_APPID = ""
-    REDDIT_SECRET = ""
 
 New features
 ============
