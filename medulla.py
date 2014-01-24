@@ -6,7 +6,8 @@ import os
 import thread
 import ssl
 
-from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER, SMS_LOCKFILE, PULSE, ENABLED
+from settings import NICK, HOST, PORT, CHANNEL, SMS_LOCKFILE, PULSE, ENABLED
+from secrets import IDENT, REALNAME, OWNER
 from time import sleep, mktime, localtime
 
 # Welcome to the beginning of a very strained brain metaphor!

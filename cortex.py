@@ -9,9 +9,8 @@ from datetime import date, timedelta
 from time import mktime, localtime, sleep
 from random import randint
 
-from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-    OWNER, REALNAME, SCAN
-from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
+from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN
+from secrets import CHANNEL, USERS, OWNER, REALNAME 
 from datastore import Drinker, connectdb
 from util import unescape, pageopen, shorten, ratelimited, postdelicious
 from autonomic import serotonin

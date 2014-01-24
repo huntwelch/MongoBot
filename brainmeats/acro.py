@@ -11,7 +11,6 @@ from settings import INSULTS, INSULT, STORAGE, TIME_FACTOR, \
 
 @category("acro")
 class Acro(Dendrite):
-
     def __init__(self, cortex):
         super(Acro, self).__init__(cortex)
 

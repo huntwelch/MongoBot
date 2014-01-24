@@ -26,7 +26,6 @@ class Broca(Dendrite):
         self.readstuff = False
         self.knowledge = False
 
-
     @axon
     def mark(self, line):
         words = line.split()

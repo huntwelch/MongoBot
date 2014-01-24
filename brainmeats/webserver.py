@@ -5,6 +5,7 @@ from autonomic import axon, alias, category, help, Dendrite
 from settings import WEBSITE, SERVER_RELOAD
 from util import totp
 
+
 @category("webserver")
 class Webserver(Dendrite):
     def __init__(self, cortex):

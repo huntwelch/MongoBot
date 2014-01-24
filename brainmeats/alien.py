@@ -13,7 +13,6 @@ class Alien(Dendrite):
         user_agent = "MongoBot by /u/locrelite and friends, github.com/huntwelch/MongoBot"
         self.api = praw.Reddit(user_agent=user_agent)
 
-
     @axon
     @help("<grab reddit stuff>")
     def reddit(self):

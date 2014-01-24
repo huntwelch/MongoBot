@@ -138,11 +138,12 @@ class Reference(Dendrite):
     # This function used to be called calc, but was changed to hack in
     # honor of Ken's incredibly sick exploitation of the eval function,
     # which gave him direct access to the database:
+    #
     # (lambda f=(lambda n:[c for c in ().__class__.__bases__[0].__subclasses__()
     # if c.__name__=='catch_warnings'][0]()._module.__builtins__[n]):
     # f("eval")(f("compile")("d=[c for c in ().__class__.__base__.__subclasses__()
     # if c.__name__=='catch_warnings'][0]()._module.__builtins__['__import__']('datastore');
-    # d.connectdb();e=d.Drinker.objects(name='loxo33')[0];e.awaiting='2013/5/1=loxo33 job hops';
+    # d.connectdb();e=d.Drinker.objects(name='redacted')[0];e.awaiting='2013/5/1=redacted job hops';
     # e.save()","","single")))()
     #
     # Ken, your kung-fu is the strongest.
@@ -159,6 +160,8 @@ class Reference(Dendrite):
             return
 
         string = ' '.join(self.values)
+
+        # This is to stop future Kens
         if "__" in string:
             self.chat("Rejected.")
             return
