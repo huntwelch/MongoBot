@@ -3,12 +3,15 @@ import re
 import pkgutil
 
 from autonomic import axon, category, help, Dendrite
-from settings import SAFESET, NICK, IDENT, HOST, REALNAME
+from settings import SAFESET, NICK, HOST
 from secrets import *
 from util import colorize
 from time import sleep
 
 
+# System is stuff relating to the function of the
+# the bot and the server. There's some potentially 
+# dangerous shit in here.
 @category("system")
 class System(Dendrite):
     def __init__(self, cortex):
@@ -24,6 +27,10 @@ class System(Dendrite):
             sleep(1)
             self.chat(name + " : " + str(value))
 
+
+    # Rewite a setting in the settings file. Available settings
+    # are defined in SAFESET. Do not put SAFESET in the SAFESET.
+    # That's just crazy.
     @axon
     @help("SETTING=VALUE <update a " + NICK + " setting>")
     def update(self, inhouse=False):
@@ -61,16 +68,23 @@ class System(Dendrite):
 
         self.chat(NICK + " rewrite brain. Feel smarter.")
 
+    # Reloads the bot. Any changes make to cortex or brainmeats
+    # and most settings will be reflected after a reload.
     @axon
     @help("<reload " + NICK + ">")
     def reload(self):
         self.cx.master.reload()
 
+    # Actually kills the medulla process and waits for the 
+    # doctor to restart. Some settings and any changes to 
+    # medulla.py won't take effect until a reboot.
     @axon
     @help("<set squirrel on fire and staple it to angel. No, really>")
     def reboot(self):
         self.cx.master.die()
 
+    # A shortcut to the update function to change nick. Also
+    # tells the irc server.
     @axon
     @help("NICKNAME <change " + NICK + "'s name>")
     def nick(self):
@@ -90,6 +104,10 @@ class System(Dendrite):
         self.update(['NICK', name])
         self.reboot()
 
+    # DANGER ZONE. You merge it, anyone can pull it. If you
+    # have a catastrophic failure after this, it's probably
+    # because of a conflict with local changes. But will it
+    # tell you that's what happened? HELL no.
     @axon
     @help("<update from git repo>")
     def gitpull(self):
@@ -97,6 +115,7 @@ class System(Dendrite):
         self.cx.master.reload(True)
         self.chat("I know kung-fu.")
 
+    # Show libs.
     @axon
     @help("<show available libs and their status>")
     def meats(self):
@@ -109,6 +128,7 @@ class System(Dendrite):
 
         self.chat(', '.join(_libs))
 
+    # Turn libs on.
     @axon
     @help("LIB_1 [LIB_n] <activate libraries>")
     def enable(self):
@@ -147,6 +167,8 @@ class System(Dendrite):
 
         self.chat(' '.join(messages))
 
+    # Turn libs off. Why all this lib stuff? Helps when developing, so
+    # you can just turn stuff off while you tinker and prevent crashes.
     @axon
     @help("LIB_1 [LIB_n] <deactivate libraries>")
     def disable(self):
@@ -184,8 +206,7 @@ class System(Dendrite):
 
         self.chat(' '.join(messages))
 
-
-
+    # Show secret stuff.
     @axon
     @help("<print api keys and stuff>")
     def secrets(self):

@@ -22,9 +22,14 @@ LOG = LOGDIR + "/chat.log"
 RAW_TEXT = 'booklearnin/raw'
 DISTASTE = STORAGE + "/distaste"
 ACROSCORE = STORAGE + "/acro/"
+IMGS = STORAGE + "/downloads/imgs/"
 
 
-# Enabled libraries
+# Enabled libraries. These are the default brainmeats
+# that load up on start or reboot. You can enable and 
+# disable them with -enable and -disable while the bots
+# running. Comment out anything you don't want to load 
+# here.
 
 ENABLED = [
     "acro",
@@ -49,13 +54,15 @@ ENABLED = [
 
 # Misc
 
-CONTROL_KEY = "-"
+CONTROL_KEY = "-" # All commands are preceded by this. It can be whatever you want.
 SHORTENER = "http://roa.st/api.php"
 PATIENCE = 7000
-REPO = "https://github.com/huntwelch/MongoBot"
+REPO = "https://github.com/huntwelch/MongoBot" # Used by the -source command.
 SMS_LOCKFILE = "/tmp/sms.lock"
 PULSE = "/tmp/bot.pulse"
 PULSE_RATE = 25
+STORE_URLS = True
+STORE_IMGS = True
 
 
 # Web server
@@ -86,13 +93,19 @@ NO_VOTE_PENALTY = 5
 BREAK = 15
 BOTPLAY = True
 
+
+# These are settings that can be changed during
+# runtime with the -update command. Note that 
+# update actually rewrites this file; changes are
+# permanent. You can also add a setting here if
+# you want to make it available.
+
 SAFESET = [
     ('Bot settings', ':'),
     ('CONTROL_KEY', '"' + CONTROL_KEY + '"'),
     ('SHORTENER', '"' + SHORTENER + '"'),
     ('PATIENCE', PATIENCE),
     ('NICK', '"' + NICK + '"'),
-    ('CHANNEL', '"' + CHANNEL + '"'),
     ('HOST', '"' + HOST + '"'),
     ('PORT', PORT),
 
@@ -110,6 +123,10 @@ SAFESET = [
     ('BREAK', BREAK),
     ('BOTPLAY', BOTPLAY),
 ]
+
+
+# If you want an obnoxious bot. INSULT/INSULTS
+# are just used by the acro. game.
 
 INSULTS = [
     "are little bitches",
@@ -133,6 +150,9 @@ BOREDOM = [
     "offers dcross's mom to",
     "throws feces at",
 ]
+
+
+# Math functions available to the -hack command.
 
 SAFE = [
     ('abs', abs),

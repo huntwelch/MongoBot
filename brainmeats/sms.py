@@ -9,6 +9,8 @@ from secrets import USERS
 from datastore import Drinker
 
 
+# This shit be awesome. It requires a twilio account, but
+# there's no better way to hive-mind fuck with someone.
 @category("sms")
 class Sms(Dendrite):
     def __init__(self, cortex):
@@ -18,7 +20,7 @@ class Sms(Dendrite):
         self.loaded = False
         self.current = mktime(localtime())
         self.next_ = self.current + 10
-        self.cx.addlive(self.smsticker)
+        self.cx.addlive(self.smsticker) # This is the addlive example.
 
         return
 

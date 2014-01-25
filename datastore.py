@@ -3,6 +3,7 @@ import mongoengine
 from mongoengine import *
 from settings import STARTING_CASH
 
+
 # All mongodb stuff.
 
 def connectdb():
@@ -54,8 +55,10 @@ def entityScore(whom):
         return 0
     return entity.value
 
+
 def topScores(limit):
     return Entity.objects.order_by('-value').limit(limit)
+
 
 class Entity(mongoengine.Document):
     name = StringField(required=True)

@@ -64,3 +64,6 @@ To Do
     TODO: finish holdem, needs testing and split pots probably don't work
     TODO: stock game: account for splits and reverse splits
     TODO: remove last of beautiful soup dependencies, if possible
+    TODO: add @requires decorator, check for server, redis, mongo, have -features command to check.
+          Function by function level? 
+    TODO: base USERS on user@host mask, identify with password.

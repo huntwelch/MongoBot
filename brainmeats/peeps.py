@@ -8,6 +8,10 @@ from secrets import USERS
 from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore, topScores
 
 
+# Basically everything here depends on mongodb, and
+# many other functions of other libraries refer to peeps
+# stuff. If you install no other external stuff, I 
+# recommend mongodb.
 @category("peeps")
 class Peeps(Dendrite):
     def __init__(self, cortex):

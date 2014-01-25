@@ -1,4 +1,5 @@
 import random
+
 from autonomic import axon, category, help, Dendrite
 from datastore import Quote
 from datetime import datetime
