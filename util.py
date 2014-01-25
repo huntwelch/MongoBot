@@ -215,6 +215,9 @@ def postdelicious(url, title, sender):
 # modifies the original and returns None, so im 
 # is no longer usable.
 def asciiart(image_path):
+    if image_path.find('/') != -1:
+        return
+
     greyscale = [" "," ",".,-","_ivc=!/|\\~","gjez2]/(YL)t[+T7Vf","mdK4ZGbNDXY5P*Q","W8KMA","#%$"]
     zonebounds=[36,72,108,144,180,216,252]
     size = 30
