@@ -1,7 +1,10 @@
+import os
+import time
+
 from autonomic import axon, category, help, Dendrite
-from settings import STORAGE, ACROLIB, LOGDIR, DISTASTE, NICK
+from settings import STORAGE, ACROLIB, LOGDIR, DISTASTE, NICK, IMGS
 from secrets import FML_API
-from util import colorize, pageopen, shorten
+from util import colorize, pageopen, shorten, asciiart
 from random import choice
 from datastore import Drinker
 from xml.dom import minidom as dom
@@ -215,3 +218,32 @@ class Nonsense(Dendrite):
             lines.append(line)
 
         self.chat(choice(lines))
+
+    @axon
+    def images(self, lim=5):
+        iter = 0
+        for file in os.listdir(IMGS):
+            if iter == lim:
+                return
+            iter += 1
+            self.chat(file)
+
+    @axon
+    def ascii(self):
+        if not self.values:
+            self.chat("Ascii what?")
+            return
+
+        path = IMGS + self.values[0]
+
+        try:
+            preview = asciiart(path)
+        except Exception as e:
+            self.chat(str(e))
+            self.chat("Couldn't render.")
+            return
+            
+        lines = preview.split("\n")
+        for line in lines:
+            time.sleep(1)
+            self.chat(line)

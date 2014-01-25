@@ -3,6 +3,7 @@ import re
 import shutil
 import pkgutil
 import requests
+import thread
 
 from bs4 import BeautifulSoup as bs4
 from datetime import date, timedelta
@@ -358,10 +359,25 @@ class Cortex:
                     "jpeg",
                 ]
 
+                # This needs to be threaded. Cause images can be 
+                # big n stuff.
+                def saveimage(url):
+                    r = requests.get(url, stream=True)
+
+                    if r.status_code != 200:
+                        return
+
+                    fname = url.split('/').pop()
+                    path = IMGS + fname
+                    with open(path, 'w+') as f:
+                        for chunk in r.iter_content(1024):
+                            f.write(chunk)
+                        f.close()
+
                 if ext in images:
                     title = "Image"
                     if STORE_IMGS:
-                        os.system('cd %s && wget %s &' % (IMGS, url))
+                        thread.start_new_thread(saveimage, (url,))
                     break
                 elif ext == "pdf":
                     title = "PDF Document"
@@ -412,6 +428,9 @@ class Cortex:
         for url in urls:
             self.brainmeats['twitterapi'].get_tweet(url[1])
 
+    # Announce means the chat is always sent to the channel,
+    # never back as a private response.
+    @ratelimited(2)
     def announce(self, message, whom=False):
         message = message.encode("utf-8")
         try:
@@ -422,7 +441,7 @@ class Cortex:
     # Since chat is mongo's only means of communicating with
     # a room, the ratelimiting here should prevent any overflow
     # violations.
-    @ratelimited(5)
+    @ratelimited(2)
     def chat(self, message, target=False):
         if target:
             whom = target
