@@ -9,7 +9,7 @@ from threading import Thread
 from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API
 from settings import NICK, STORAGE, ACROLIB, LOGDIR, RAW_TEXT
-from datastore import Words, Learned, Structure, Markov
+from datastore import Words, Learned, Structure
 from random import choice, randint
 from util import pageopen
 from bs4 import BeautifulSoup as soup

@@ -91,11 +91,6 @@ class Words(mongoengine.Document):
     source = StringField(required=True)
 
 
-class Markov(mongoengine.Document):
-    prefix = StringField()
-    follow = ListField(StringField())
-
-
 class Learned(mongoengine.Document):
     word = StringField(required=True)
     partofspeech = StringField(required=True)
