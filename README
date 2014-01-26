@@ -66,4 +66,3 @@ To Do
     TODO: remove last of beautiful soup dependencies, if possible
     TODO: add @requires decorator, check for server, redis, mongo, have -features command to check.
           Function by function level? 
-    TODO: base USERS on user@host mask, identify with password.

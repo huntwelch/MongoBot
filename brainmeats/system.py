@@ -2,8 +2,8 @@ import os
 import re
 import pkgutil
 
-from autonomic import axon, category, help, Dendrite
-from settings import SAFESET, NICK, HOST
+from autonomic import axon, category, help, Dendrite, public
+from settings import SAFESET, NICK, HOST, REGISTERED
 from secrets import *
 from util import colorize
 from time import sleep
@@ -27,6 +27,34 @@ class System(Dendrite):
             sleep(1)
             self.chat(name + " : " + str(value))
 
+    # This should be pretty straightforward. Based on BOT_PASS
+    # in secrets; nobody can use the bot until they're 
+    # registered. Went with flat file for ease of editing
+    # and manipulation.
+    @axon
+    @public
+    @help("PASSWORD <register your nick and host to use the bot>")
+    def regme(self):
+        if not self.values:
+            self.chat("Please enter a password.")
+            return
+        
+        if self.values[0] != BOT_PASS:
+            self.chat("Not the password.")
+            return
+
+        real = self.cx.lastrealsender
+        if real in self.cx.REALUSERS:
+            self.chat("Already know you, bro.")
+            return
+        
+        self.cx.REALUSERS.append(real)
+
+        users = open(REGISTERED, 'a')
+        users.write(real + "\n")
+        users.close()
+
+        self.chat("You in, bro.")
 
     # Rewite a setting in the settings file. Available settings
     # are defined in SAFESET. Do not put SAFESET in the SAFESET.

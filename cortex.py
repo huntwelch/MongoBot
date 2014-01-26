@@ -10,8 +10,8 @@ from datetime import date, timedelta
 from time import mktime, localtime, sleep
 from random import randint
 
-from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, STORE_IMGS, IMGS
-from secrets import CHANNEL, USERS, OWNER, REALNAME 
+from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, STORE_IMGS, IMGS, REGISTERED 
+from secrets import CHANNEL, USERS, OWNER, REALNAME
 from datastore import Drinker, connectdb
 from util import unescape, pageopen, shorten, ratelimited, postdelicious
 from autonomic import serotonin
@@ -37,6 +37,7 @@ class Cortex:
         self.boredom = int(mktime(localtime()))
         self.namecheck = int(mktime(localtime()))
         self.live = {}
+        self.public_commands = []
 
         self.helpmenu = {}
         self.commands = {
@@ -46,6 +47,11 @@ class Cortex:
 
         print "* Loading brainmeats"
         self.loadbrains()
+
+        print "* Loading users"
+        users = open(REGISTERED, 'r')
+        self.REALUSERS = users.read().splitlines()
+        users.close()
 
         print "* Connecting to datastore"
         connectdb()
@@ -182,6 +188,7 @@ class Cortex:
             nick, data = sender.split('!')
             realname, ip = data.split('@')
             realname = realname[1:]
+            self.lastrealsender = data[1:]
         except:
             return
 
@@ -191,7 +198,7 @@ class Cortex:
         # Determine if the action is a command and the user is
         # approved.
         if content[:1] == CONTROL_KEY:
-            if nick.rstrip('_') not in USERS:
+            if self.lastrealsender not in self.REALUSERS and content[1:].split()[0] not in self.public_commands:
                 self.chat("My daddy says not to listen to you.")
                 return
             

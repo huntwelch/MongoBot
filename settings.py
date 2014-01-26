@@ -23,6 +23,7 @@ RAW_TEXT = 'booklearnin/raw'
 DISTASTE = STORAGE + "/distaste"
 ACROSCORE = STORAGE + "/acro/"
 IMGS = STORAGE + "/downloads/imgs/"
+REGISTERED = STORAGE + "/allowed"
 
 
 # Enabled libraries. These are the default brainmeats

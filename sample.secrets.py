@@ -6,6 +6,11 @@ REALNAME = ""
 OWNER = ""
 
 
+# Password for users to register with the bot
+
+BOT_PASS = ""
+
+
 # Only these nicks can send bot commands
 
 USERS = [

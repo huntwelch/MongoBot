@@ -61,6 +61,9 @@ def serotonin(cortex, expansion, electroshock):
         if hasattr(method, "help"):
             helps.append(CONTROL_KEY + name + " " + method.help)
 
+        if hasattr(method, "public_command"):
+            cortex.public_commands.append(name)
+
         if name in cortex.commands and not electroshock:
             print "Warning: overwriting " + name
 
@@ -95,6 +98,12 @@ def category(text):
 # name.
 def axon(fn):
     fn.create_command = True
+    return fn
+
+# Makes the function available
+# to non-registered users.
+def public(fn):
+    fn.public_command = True
     return fn
 
 # Tell people your function is 
