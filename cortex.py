@@ -11,7 +11,7 @@ from time import mktime, localtime, sleep
 from random import randint
 
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, STORE_IMGS, IMGS, REGISTERED 
-from secrets import CHANNEL, USERS, OWNER, REALNAME
+from secrets import CHANNEL, OWNER, REALNAME
 from datastore import Drinker, connectdb
 from util import unescape, pageopen, shorten, ratelimited, postdelicious
 from autonomic import serotonin
@@ -33,6 +33,7 @@ class Cortex:
         self.sock = master.sock
         self.gettingnames = True
         self.members = []
+        self.guests = [] 
         self.memories = False
         self.boredom = int(mktime(localtime()))
         self.namecheck = int(mktime(localtime()))
@@ -198,7 +199,7 @@ class Cortex:
         # Determine if the action is a command and the user is
         # approved.
         if content[:1] == CONTROL_KEY:
-            if self.lastrealsender not in self.REALUSERS and content[1:].split()[0] not in self.public_commands:
+            if self.lastrealsender not in self.REALUSERS and content[1:].split()[0] not in self.public_commands and nick not in self.guests:
                 self.chat("My daddy says not to listen to you.")
                 return
             
@@ -211,7 +212,7 @@ class Cortex:
         # This is a special case for giving people meaningless
         # points so you can feel like you're in grade school
         # again.
-        if content[:-2] in USERS and content[-2:] in ['--', '++']:
+        if content[:-2] in self.members and content[-2:] in ['--', '++']:
             print "Active"
             self.values = [content[:-2]]
             if content[-2:] == '++':

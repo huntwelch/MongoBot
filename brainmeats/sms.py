@@ -5,7 +5,6 @@ from time import mktime, localtime, strftime
 from secrets import TWILIO_SID, TWILIO_TOKEN, TWILIO_NUMBER, SAFE_NUMBERS
 from settings import CONTROL_KEY, CHANNEL
 from twilio.rest import TwilioRestClient
-from secrets import USERS
 from datastore import Drinker
 
 

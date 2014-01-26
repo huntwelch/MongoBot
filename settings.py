@@ -1,5 +1,5 @@
 from math import *
-from secrets import CHANNEL, USERS
+from secrets import CHANNEL
 
 # Connection Settings
 

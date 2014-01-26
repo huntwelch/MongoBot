@@ -4,7 +4,6 @@ import hashlib
 
 from autonomic import axon, category, help, Dendrite, alias
 from settings import STORAGE, CHANNEL
-from secrets import USERS
 from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore, topScores
 
 
@@ -174,7 +173,7 @@ class Peeps(Dendrite):
         else:
             guest = self.values[0]
 
-        USERS.append(guest)
+        self.cx.guests.append(guest)
 
         self.chat("Hi " + guest + ". You seem okay.")
 

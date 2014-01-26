@@ -11,13 +11,6 @@ OWNER = ""
 BOT_PASS = ""
 
 
-# Only these nicks can send bot commands
-
-USERS = [
-    'irc_nick',
-]
-
-
 # Simple APIs
 
 WEATHER_API = ""
