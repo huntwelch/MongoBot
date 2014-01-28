@@ -1,3 +1,10 @@
+# This file's a bit out of place vs. the rest of
+# the architecture. Basically, Vinay wrote it on a
+# place on his way to vegas to test some poker
+# probabilities, and, not wanting to write it all
+# again for the holdem game, I just slapped it in
+# and imported it.
+
 #!/usr/bin/env python
 STRAIGHT_FLUSH = 8
 FOUR_OF_A_KIND = 7
