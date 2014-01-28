@@ -19,7 +19,7 @@ SCAN = "^:\w+\.freenode\.net"
 STORAGE = "hippocampus"
 LOGDIR = STORAGE + "/log"
 LOG = LOGDIR + "/chat.log"
-RAW_TEXT = 'booklearnin/raw'
+BOOKS = "booklearnin/"
 DISTASTE = STORAGE + "/distaste"
 ACROSCORE = STORAGE + "/acro/"
 IMGS = STORAGE + "/downloads/imgs/"
@@ -64,6 +64,7 @@ PULSE = "/tmp/bot.pulse"
 PULSE_RATE = 25
 STORE_URLS = True
 STORE_IMGS = True
+BABBLE_LIMIT = 100
 
 
 # Web server

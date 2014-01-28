@@ -238,4 +238,14 @@ def asciiart(image_path):
 
     return out
 
-    
+
+def savefromweb(url, path):
+    r = requests.get(url, stream=True)
+
+    if r.status_code != 200:
+        return
+
+    with open(path, 'w+') as f:
+        for chunk in r.iter_content(1024):
+            f.write(chunk)
+        f.close()

@@ -13,7 +13,7 @@ from random import randint
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, STORE_IMGS, IMGS, REGISTERED 
 from secrets import CHANNEL, OWNER, REALNAME
 from datastore import Drinker, connectdb
-from util import unescape, pageopen, shorten, ratelimited, postdelicious
+from util import unescape, pageopen, shorten, ratelimited, postdelicious, savefromweb
 from autonomic import serotonin
 
 # Basically all the interesting interaction with
@@ -35,6 +35,7 @@ class Cortex:
         self.members = []
         self.guests = [] 
         self.memories = False
+        self.autobabble = False
         self.boredom = int(mktime(localtime()))
         self.namecheck = int(mktime(localtime()))
         self.live = {}
@@ -126,8 +127,8 @@ class Cortex:
     # And this is basic function that runs all the time.
     # The razor qualia edge of consciousness, if you will
     # (though you shouldn't). It susses out the important
-    # info, logs the chat info, sends PONG, and decides
-    # whether to send new information to the parser.
+    # info, logs the chat, sends PONG, finds commands, and
+    # decides whether to send new information to the parser.
     def monitor(self):
         currenttime = int(mktime(localtime()))
         self.parietal(currenttime)
@@ -236,9 +237,9 @@ class Cortex:
         # in tourettes and adds to the markov chain.
         if 'broca' in self.brainmeats:
             self.brainmeats['broca'].tourettes(content, nick)
-            # Too slow. Rethink.
-            # self.brainmeats['broca'].parse(content, nick)
             self.brainmeats['broca'].mark(content)
+            if self.autobabble and content.find(NICK) > 0:
+                self.brainmeats['broca'].babble()
 
     # If it is indeed a command, the cortex stores who sent it,
     # and any words after the command are split in a values array,
@@ -367,25 +368,14 @@ class Cortex:
                     "jpeg",
                 ]
 
-                # This needs to be threaded. Cause images can be 
-                # big n stuff.
-                def saveimage(url):
-                    r = requests.get(url, stream=True)
-
-                    if r.status_code != 200:
-                        return
-
-                    fname = url.split('/').pop()
-                    path = IMGS + fname
-                    with open(path, 'w+') as f:
-                        for chunk in r.iter_content(1024):
-                            f.write(chunk)
-                        f.close()
-
                 if ext in images:
                     title = "Image"
                     if STORE_IMGS:
-                        thread.start_new_thread(saveimage, (url,))
+                        # This needs to be threaded. Cause images can be 
+                        # big n stuff.
+                        fname = url.split('/').pop()
+                        path = IMGS + fname
+                        thread.start_new_thread(savefromweb, (url, path))
                     break
                 elif ext == "pdf":
                     title = "PDF Document"

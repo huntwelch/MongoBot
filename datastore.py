@@ -4,7 +4,8 @@ from mongoengine import *
 from settings import STARTING_CASH
 
 
-# All mongodb stuff.
+# All mongodb stuff. I've been told this would be 
+# better done with sqlite. Some day.
 
 def connectdb():
     mongoengine.connect('bot', host='localhost')

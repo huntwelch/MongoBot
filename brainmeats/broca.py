@@ -4,18 +4,23 @@ import re
 import string
 import random
 import redis
+import time
 
 from threading import Thread
 from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API
-from settings import NICK, STORAGE, ACROLIB, LOGDIR, RAW_TEXT
+from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT
 from datastore import Words, Learned, Structure
 from random import choice, randint
-from util import pageopen
+from util import pageopen, savefromweb
 from bs4 import BeautifulSoup as soup
 from wordnik import swagger, WordApi
 
 
+# Much fail here. I study up on NLTK at the rate
+# of 5 minutes a month. The miscellaneous language 
+# functions usually work, and of course the markov
+# is done here.
 @category("language")
 class Broca(Dendrite):
     def __init__(self, cortex):
@@ -45,41 +50,72 @@ class Broca(Dendrite):
                 self.markov.set(prefix, follow)
 
     @axon
+    @help("URL_OF_TEXT_FILE <Make " + NICK + " read something>")
+    def read(self):
+        if not self.values:
+            self.chat("Read what?")
+            return
+
+        book = self.values[0]
+        if book[-4:] != '.txt':
+            self.chat("Plain text file only. %s purist." % NICK)
+            return
+
+        name = "%s_%s.txt" % ( int(time.mktime(time.localtime())), self.lastsender )
+        path = BOOKS + name
+
+        try:
+            savefromweb(book, path)    
+        except Exception as e:
+            self.chat("Could not find book.")
+            self.chat(str(e))
+            return
+
+        with open(path) as b:
+            for line in b:
+                self.mark(line)
+
+        self.chat("Eh, I like his older, funnier work.")
+
+    @axon
+    @alias(["waxhapsodic"])
     @help("<Make " + NICK + " speak markov chain>")
     def babble(self):
         seed = self.markov.randomkey()
-        words = []
 
-        words.append(seed)
+        words = seed.split()
+
         follows = self.markov.get(seed)
         follows = follows.split(',')
         words.append(random.choice(follows))
 
-        while True:
-            tail = "%s %s" % (words[-2:-1], words[-1])
-            add = self.markov.get(tail)
-            if not add:
+        while len(words) < BABBLE_LIMIT:
+            tail = "%s %s" % (words[-2], words[-1])
+            follows = self.markov.get(tail)
+            if not follows:
                 break
-            follows = self.markov.get(seed)
             follows = follows.split(',')
             words.append(random.choice(follows))
 
         self.chat(" ".join(words))
 
-    @axon
-    @help("<Make " + NICK + " read books>")
-    def readup(self):
-        if self.knowledge:
-            self.chat("Already read today.")
-            return
+    # This is kind of sluggish and kldugey,
+    # and sort of spiritually been replaced by
+    # the read function above.
+    #
+    # @axon
+    # def readup(self):
+    #     if self.knowledge:
+    #         self.chat("Already read today.")
+    #         return
 
-        self.chat("This may take a minute.")
-        books = open(RAW_TEXT, 'r')
-        data = books.read().replace('\n', ' ')
-        tokens = nltk.word_tokenize(data)
-        self.knowledge = nltk.Text(tokens)
+    #     self.chat("This may take a minute.")
+    #     books = open(RAW_TEXT, 'r')
+    #     data = books.read().replace('\n', ' ')
+    #     tokens = nltk.word_tokenize(data)
+    #     self.knowledge = nltk.Text(tokens)
 
-        self.chat("Okay, read all the things.")
+    #     self.chat("Okay, read all the things.")
 
     @axon
     @help("<command " + NICK + " to speak>")
@@ -219,7 +255,6 @@ class Broca(Dendrite):
             return
 
     @axon
-    @alias(["waxhapsodic"])
     @help("<command " + NICK + " to speak>")
     def speak(self):
         sentence = []

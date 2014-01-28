@@ -10,6 +10,9 @@ from datastore import Drinker
 from xml.dom import minidom as dom
 
 
+# Every drunk conversation that produces the idea for 
+# a command that just seems funny at the time ends up
+# here.
 @category("nonsense")
 class Nonsense(Dendrite):
     def __init__(self, cortex):
@@ -219,20 +222,26 @@ class Nonsense(Dendrite):
 
         self.chat(choice(lines))
 
-    # TODO: make this turn on automatic markov responses until reload
+    # Show Mongo the mind of God
     @axon
     def pressreturn(self):
+        self.cx.autobabble = True
         self.chat("94142243431512659321054872390486828512913474876027671959234602385829583047250165232525929692572765536436346272718401201264304554632945012784226484107566234789626728592858295347502772262646456217613984829519475412398501")
 
     @axon
     def images(self, lim=5):
         iter = 0
         for file in os.listdir(IMGS):
+            if file == '.gitignore':
+                continue
             if iter == lim:
                 return
             iter += 1
             self.chat(file)
 
+    # This not as awesome as I thought it would be,
+    # and tends to get cut off by rate limits. The
+    # nuts and bolts are in util.py
     @axon
     def ascii(self):
         if not self.values:
@@ -243,8 +252,11 @@ class Nonsense(Dendrite):
 
         try:
             preview = asciiart(path)
-        except Exception as e:
-            self.chat(str(e))
+        except:
+            self.chat("Couldn't render.")
+            return
+            
+        if not preview:
             self.chat("Couldn't render.")
             return
             

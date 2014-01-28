@@ -9,8 +9,8 @@
 .pydevproject
 natwords
 wordbank
-secrets.py
 introductions
-python.core
-raw
 allowed
+python.core
+secrets.py
+read.py
