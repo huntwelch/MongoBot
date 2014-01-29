@@ -7,19 +7,16 @@ from secrets import WEATHER_API
 from util import unescape, pageopen
 
 
+# There's some semantic overlap between this and some functions
+# in broca, but in general, if it's not about the stockmarket
+# and you want useful iniformation from a simple api or scraper,
+# it goes here.
 @category("reference")
 class Reference(Dendrite):
     def __init__(self, cortex):
         super(Reference, self).__init__(cortex)
 
         self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
-
-    @axon
-    @help("SEARCH_METHOD SEARCH_TERM <look something up in saved search path>")
-    def s(self):
-        if not self.values or len(self.values) < 2:
-            self.chat("Search with -s METHOD TERM(S)")
-            return
 
     @axon
     @help("SEARCH_TERM <look something up in google>")
@@ -115,7 +112,7 @@ class Reference(Dendrite):
             self.chat("parse error")
             return
 
-        elem = soup.find('div', {'class': 'definition'})
+        elem = soup.find('div', {'class': 'meaning'})
 
         try:
             defn = []
@@ -173,6 +170,10 @@ class Reference(Dendrite):
 
         self.chat(str(result))
 
+    # I wanted to do a good whois function, but whois parsing is
+    # a shitshow even stackoverflow balked at. If you know of or
+    # want to create a solid parser for it, go for it. I'll take
+    # that pull request like a crack whore.
     @axon
     @help("URL <get whois information>")
     def whois(self):
