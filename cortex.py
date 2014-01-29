@@ -4,6 +4,7 @@ import shutil
 import pkgutil
 import requests
 import thread
+import socket
 
 from bs4 import BeautifulSoup as bs4
 from datetime import date, timedelta
@@ -189,8 +190,9 @@ class Cortex:
         try:
             nick, data = sender.split('!')
             realname, ip = data.split('@')
+            ip = socket.gethostbyname_ex(ip.strip())[2][0]
             realname = realname[1:]
-            self.lastrealsender = data[1:]
+            self.lastrealsender = "%s@%s" % (realname, ip)
         except:
             return
 
