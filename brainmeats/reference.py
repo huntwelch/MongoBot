@@ -180,21 +180,16 @@ class Reference(Dendrite):
 
         lookup = self.values[0]
 
-        if re.match(r'^[0-9\.]+$', lookup):
-            self.chat("IP")
-            f = socket.gethostbyaddr
-        else:
-            self.chat("Host")
-            f = socket.gethostbyname_ex
-
         try:
-            ip = f(self.values[0].strip())[2][0]
-        except:
+            if re.match(r'^[0-9\.]+$', lookup):
+                resolved = socket.gethostbyaddr(lookup.strip())[0]
+            else:
+                resolved = socket.gethostbyname_ex(lookup.strip())[2][0]
+        except
             self.chat("Couldn't find anything.")
             return
-
+        
         self.chat(ip)
-
 
     # I wanted to do a good whois function, but whois parsing is
     # a shitshow even stackoverflow balked at. If you know of or
