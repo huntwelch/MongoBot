@@ -22,7 +22,7 @@
             margin-right: 4px;
         }
         span.index {
-            width: 50px; 
+            width: 150px; 
             color: #ccc;
         }
         span.message {
@@ -203,7 +203,12 @@
                      .addClass(chat.interface)
                      .addClass(chat.private)
                      .addClass(chat.fader);
-                    var index = $("<span class='index' />").text(chat.index);
+                    
+                    if( chat.time ) {
+                        var index = $("<span class='index' />").text(chat.time);
+                    } else {
+                        var index = $("<span class='index' />").text(chat.index);
+                    }
                     var nick = $("<span class='nick' />").text(chat.nick);
                     var message = $("<span class='message' />").text(chat.message);
 

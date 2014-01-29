@@ -5,6 +5,7 @@ import pkgutil
 import requests
 import thread
 import socket
+import time
 
 from bs4 import BeautifulSoup as bs4
 from datetime import date, timedelta
@@ -145,6 +146,7 @@ class Cortex:
 
             if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
                 print "* Joined " + CHANNEL
+                self.getnames()
 
             if self.gettingnames:
                 if line.find("@ " + CHANNEL) != -1:
@@ -308,7 +310,7 @@ class Cortex:
     # Simple logging.
     def logit(self, what):
         with open(LOG, 'a') as f:
-            f.write(what)
+            f.write("TS:%s;%s" % (time.time(), what))
 
         now = date.today()
         if now.day != 1:

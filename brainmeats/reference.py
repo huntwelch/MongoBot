@@ -1,4 +1,6 @@
 import textwrap
+import socket
+import re
 
 from autonomic import axon, alias, category, help, Dendrite
 from bs4 import BeautifulSoup as bs4
@@ -169,6 +171,30 @@ class Reference(Dendrite):
             result = NICK + " not smart enough to do that."
 
         self.chat(str(result))
+
+    @axon
+    def ns(self):
+        if not self.values:
+            self.chat("Lookup what?")
+            return
+
+        lookup = self.values[0]
+
+        if re.match(r'^[0-9\.]+$', lookup):
+            self.chat("IP")
+            f = socket.gethostbyaddr
+        else:
+            self.chat("Host")
+            f = socket.gethostbyname_ex
+
+        try:
+            ip = f(self.values[0].strip())[2][0]
+        except:
+            self.chat("Couldn't find anything.")
+            return
+
+        self.chat(ip)
+
 
     # I wanted to do a good whois function, but whois parsing is
     # a shitshow even stackoverflow balked at. If you know of or

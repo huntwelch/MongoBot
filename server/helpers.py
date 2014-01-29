@@ -1,7 +1,8 @@
 import re
 
+from datetime import datetime
 from flask import Flask, request, session, make_response, render_template
-from settings import NICK, SCAN, CHANNEL
+from settings import NICK, SCAN, CHANNEL, LOG
 
 
 def render_xml(path):
@@ -11,12 +12,28 @@ def render_xml(path):
 
 
 def fetch_chats(request, offset):
-    log = open('hippocampus/log/chat.log', 'r')
+    log = open(LOG, 'r')
     chats = []
 
     index = 0
     for line in log:
         # TODO: maybe move line parsing out to a general function
+
+        timestamp = False
+
+        # This checks for TS for back compat.
+        if line[:2] == 'TS':
+            clip = line.find(';')
+            timestamp = line[3:clip]
+
+            _date = datetime.fromtimestamp(float(timestamp))
+            timestamp = _date.strftime('%Y-%m-%d %H:%M:%S')
+
+            clip += 1
+            line = line[clip:]
+
+
+
         if line.find(NICK) is 1:
             continue
 
@@ -35,6 +52,7 @@ def fetch_chats(request, offset):
         private = ''
 
         try:
+
             if not bot:
                 info, content = line[1:].split(' :', 1)
                 sender, type, room = info.strip().split()
@@ -53,6 +71,7 @@ def fetch_chats(request, offset):
             continue
 
         chat = {
+            'time': timestamp,
             'nick': nick,
             'message': content.decode('latin-1'),
             'action': action,

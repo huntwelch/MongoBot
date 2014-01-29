@@ -80,6 +80,7 @@ class Medulla:
         reload(cortex)
         self.brain = cortex.Cortex(self)
         self.brain.loadbrains(True)
+        self.brain.getnames()
 
         self.active = True
 

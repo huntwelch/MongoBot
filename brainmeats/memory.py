@@ -1,5 +1,5 @@
 from autonomic import axon, category, help, Dendrite
-from settings import LOG
+from settings import LOG, CONTROL_KEY
 
 
 @category("memory")
@@ -20,10 +20,13 @@ class Memory(Dendrite):
         for line in open(LOG):
             if line.find(thinkingof) != -1:
                 try:
+                    if line[:2] == 'TS':
+                        clip = line.find(';') + 1
+                        line = line[clip:]
                     whom, message = line[1:].split(":", 1)
                 except:
                     continue
-                if message.find("~somethingabout") == 0:
+                if message.find("%smem" % CONTROL_KEY) == 0:
                     continue
                 whom = whom.split("!")[0]
                 self.memories.append(whom + ": " + message)

@@ -101,6 +101,9 @@ class System(Dendrite):
     @axon
     @help("<reload " + NICK + ">")
     def reload(self):
+        meats = self.cx.brainmeats
+        if 'webserver' in meats:
+            meats['webserver'].reloadserver(True)
         self.cx.master.reload()
 
     # Actually kills the medulla process and waits for the 

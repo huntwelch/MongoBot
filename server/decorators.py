@@ -24,7 +24,7 @@ def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if request.args.get('onetime'):
-            if totp.verify(request.args.get('onetime')):
+            if totp.verify(int(request.args.get('onetime'))):
                 return f(*args, **kwargs)
 
         auth = request.authorization
