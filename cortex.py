@@ -6,6 +6,7 @@ import requests
 import thread
 import socket
 import time
+import string
 
 from bs4 import BeautifulSoup as bs4
 from datetime import date, timedelta
@@ -83,7 +84,7 @@ class Cortex:
                 cls = getattr(mod, area.capitalize())
                 self.brainmeats[area] = cls(self)
             except Exception as e:
-                self.chat("Failed to load " + area + ".")
+                self.chat("Failed to load %s: %s" % (area, str(e)))
                 print "Failed to load " + area + "."
                 print e
 
@@ -423,7 +424,6 @@ class Cortex:
 
     # This shows tweet content if a url is to a tweet.
     def tweet(self, urls):
-
         if 'twitterapi' not in self.brainmeats:
             return
 
@@ -444,17 +444,22 @@ class Cortex:
     # a room, the ratelimiting here should prevent any overflow
     # violations.
     @ratelimited(2)
-    def chat(self, message, target=False):
+    def chat(self, message, target=False, error=False):
         if target:
             whom = target
         elif self.context == CHANNEL:
             whom = CHANNEL
         else:
             whom = self.lastsender
+
+        filter(lambda x: x in string.printable, message)
         message = message.encode("utf-8")
         self.logit("___" + NICK + ": " + str(message) + '\n')
         try:
-            self.sock.send('PRIVMSG ' + whom + ' :' + str(message) + '\n')
+            m = str(message)
+            if error:
+                m += ' ' + str(error)
+            self.sock.send('PRIVMSG %s :%s\n' % (whom,m))
             if self.replysms:
                 to = self.replysms
                 self.replysms = False

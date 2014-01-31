@@ -185,11 +185,11 @@ class Reference(Dendrite):
                 resolved = socket.gethostbyaddr(lookup.strip())[0]
             else:
                 resolved = socket.gethostbyname_ex(lookup.strip())[2][0]
-        except
+        except:
             self.chat("Couldn't find anything.")
             return
         
-        self.chat(ip)
+        self.chat(resolved)
 
     # I wanted to do a good whois function, but whois parsing is
     # a shitshow even stackoverflow balked at. If you know of or

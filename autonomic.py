@@ -11,8 +11,8 @@ class Dendrite(object):
     def __init__(self, cortex):
         self.cx = cortex
 
-    def chat(self, what, target=False):
-        self.cx.chat(what, target)
+    def chat(self, what, target=False, error=False):
+        self.cx.chat(what, target, error)
 
     def announce(self, what):
         self.cx.announce(what)

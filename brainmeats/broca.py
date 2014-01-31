@@ -81,7 +81,22 @@ class Broca(Dendrite):
     @alias(["waxhapsodic"])
     @help("<Make " + NICK + " speak markov chain>")
     def babble(self):
-        seed = self.markov.randomkey()
+
+        if self.values:
+            if len(self.values) > 1:
+                pattern = "%s %s" % (self.values[0], self.values[1])
+            else:
+                pattern = "*%s*" % self.values[0]
+
+            matches = self.markov.keys(pattern)
+
+            if not matches:
+                self.chat('Got nothin')
+                return
+
+            seed = random.choice(matches)
+        else:
+            seed = self.markov.randomkey()
 
         words = seed.split()
 
@@ -89,11 +104,20 @@ class Broca(Dendrite):
         follows = follows.split(',')
         words.append(random.choice(follows))
 
+        suspense = [
+            'and', 'to', 'a', 'but', 'very',
+            'the', 'when', 'how', 
+        ]
+
         while len(words) < BABBLE_LIMIT:
             tail = "%s %s" % (words[-2], words[-1])
             follows = self.markov.get(tail)
             if not follows:
-                break
+                if words[-1] in suspense:
+                    seed = self.markov.randomkey() 
+                    follows = self.markov.get(seed)
+                else:
+                    break
             follows = follows.split(',')
             words.append(random.choice(follows))
 
@@ -355,11 +379,16 @@ class Broca(Dendrite):
         if ord < 0:
             ord = 0
 
-        _word = ''.join(heads[ord].findAll(text=True)).encode("utf-8")
-        _def = ''.join(defs[ord].findAll(text=True)).encode("utf-8")
+        try:
+            _word = ''.join(heads[ord].findAll(text=True))
+            _def = ''.join(defs[ord].findAll(text=True))
+        except Exception as e:
+            self.chat('Failed to parse.', error=e)
+            return
 
         self.chat("Etymology " + str(ord + 1) + " of " + str(len(defs)) +
-                  " for " + _word + ": " + _def)
+                      " for " + _word + ": " + _def)
+
 
     # TODO: broken, not sure why
     @axon
