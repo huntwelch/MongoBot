@@ -448,7 +448,6 @@ class Broca(Dendrite):
         word = '+'.join(self.values)
         url = 'http://wordsmith.org/anagram/anagram.cgi?anagram=%s&t=50&a=n' % word
 
-        try:
         urlbase = pageopen(url)
         if not urlbase:
             self.chat("Fail")
