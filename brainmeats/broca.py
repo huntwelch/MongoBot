@@ -148,14 +148,15 @@ class Broca(Dendrite):
 
         suspense = [
             'and', 'to', 'a', 'but', 'very',
-            'the', 'when', 'how', 
+            'the', 'when', 'how', '', ' ', 'my',
+            'its', 'of', 'is',
         ]
 
         while len(words) < BABBLE_LIMIT:
             tail = "%s %s" % (words[-2], words[-1])
             follows = self.markov.get(tail)
             if not follows:
-                if words[-1] in suspense:
+                if words[-1].lower().strip() in suspense:
                     seed = self.markov.randomkey() 
                     follows = self.markov.get(seed)
                 else:
@@ -308,7 +309,7 @@ class Broca(Dendrite):
             self.chat("yeah WHAT?? Oh yes he DID")
             return
 
-        if sentence.lower().find("'murican") != -1:
+        if sentence.lower().find("murican") != -1:
             self.chat("fuck yeah")
             return
 
@@ -317,9 +318,15 @@ class Broca(Dendrite):
             return
 
         if sentence.lower().find("stop") == len(sentence) - 4 and len(sentence) != 3:
-            self.chat("Hammertime")
+            stops = [
+                'Hammertime',
+                "Children, what's that sound",
+                'Collaborate and listen',
+            ]
+            self.chat(random.choice(stops))
             return
 
+        # There's a very good reason for this.
         if sentence == "oh shit its your birthday erikbeta happy birthday" and self.lastsender == "jcb":
             self._act(" slaps jcb")
             self.chat("LEAVE ERIK ALONE!")
