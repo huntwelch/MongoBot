@@ -6,6 +6,8 @@ from settings import NICK
 from secrets import REDDIT_APPID, REDDIT_SECRET
 
 
+# It's called 'alien' because (re)ddit conflicted
+# with (re)ference in the help menu.
 @category("alien")
 class Alien(Dendrite):
     def __init__(self, cortex):

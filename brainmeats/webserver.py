@@ -6,6 +6,7 @@ from settings import WEBSITE, SERVER_RELOAD
 from util import totp
 
 
+# Allz the webs stuff.
 @category("webserver")
 class Webserver(Dendrite):
     def __init__(self, cortex):

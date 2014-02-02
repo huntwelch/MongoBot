@@ -77,11 +77,53 @@ class Broca(Dendrite):
 
         self.chat("Eh, I like his older, funnier work.")
 
+    # MongoBot's ability to run a markov chain is a large
+    # part of the reason I started working on mongo in the
+    # first place.
+    # 
+    # (cough)
+    #
+    # So MongoBot was made on a whim in the chatroom of his 
+    # birth just because I wanted to know how to make a bot.
+    # Since at the time I was pretty checked out of my job
+    # I put an awful lot of work into him, and he eventually
+    # edged out ExStaffRobot as the dominant bot.
+    # 
+    # ExStaffRobot itself was a descendent of StaffRobot, 
+    # the dev irc chatbot that warned us about failures and
+    # stuff at OkCupid (the Staff Robot that pops up all
+    # over OkCupid is itself a rendering of this StaffRobot
+    # by one of the frontend designers. He and I never got
+    # on, but he does draw a mean bot). This StaffRobot had
+    # a markov chat function in it, which I didn't really 
+    # understand at the time, as I was scared of all these
+    # awesome CS majors, and was, essentially, an out-of-work
+    # film student who only got the job because a few of the
+    # powers that were didn't think frontend programmers
+    # needed to be very smart. But I really wanted to put a 
+    # markov chain in my bot, partly to understand and because
+    # I missed the old bot after one of the founders bitched
+    # about it being annoying until we had to turn it off,
+    # and another small piece of the personality that kept me
+    # at the job through the first year of death camp hours
+    # was wicked away.
+    #
+    # So three years after MongoBot made his first appearance
+    # I finally faced my fears of inferiority and looked up
+    # a markov chain on wikipedia, where I discovered it was,
+    # in fact, totally fucking trivial.
+    #
+    # It reminds me a bit of a video editor who was training
+    # me on an internship, and I asked him how to do split
+    # screen and he said he didn't think I was ready for that
+    # yet, so I just taught myself. When he found out, he
+    # got so upset he walked out of the room. Point is, 
+    # Americans have some seriously fucked up problems with
+    # their opinions on the nature and value of intelligence.
     @axon
     @alias(["waxhapsodic"])
     @help("<Make " + NICK + " speak markov chain>")
     def babble(self):
-
         if self.values:
             if len(self.values) > 1:
                 pattern = "%s %s" % (self.values[0], self.values[1])
@@ -248,6 +290,11 @@ class Broca(Dendrite):
         except:
             pass
 
+    # This is where all the conversational tics and 
+    # automatic reactions are set up. Also, for some
+    # reason, the mom log, because it's awesome but
+    # maybe not cortex material. Is the name of this
+    # function in poor taste? Yes.
     def tourettes(self, sentence, nick):
         if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
             open(LOGDIR + "/mom.log", 'a').write(sentence + '\n')
@@ -399,8 +446,9 @@ class Broca(Dendrite):
             return
 
         word = '+'.join(self.values)
-        url = "http://wordsmith.org/anagram/anagram.cgi?anagram=" + word + "&t=50&a=n"
+        url = 'http://wordsmith.org/anagram/anagram.cgi?anagram=%s&t=50&a=n' % word
 
+        try:
         urlbase = pageopen(url)
         if not urlbase:
             self.chat("Fail")
@@ -412,16 +460,13 @@ class Broca(Dendrite):
             self.chat("No anagrams found.")
             return
 
+        # This is a really shaky way to parse a
+        # page, but it's all I had to go on.
         try:
             paragraph = cont.findAll("p")[3]
             content = ','.join(paragraph.findAll(text=True))
             content = content[2:-4]
             content = content.replace(": ,", ": ")
             self.chat(content)
-
-        # Usually not concerned with exceptions
-        # in mongo, but this is bound to come up
-        # again.
         except Exception as e:
-            print e
-            self.chat("Got nothin")
+            self.chat("Couldn't parse.", str(e))

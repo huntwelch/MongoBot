@@ -25,7 +25,7 @@ from autonomic import serotonin
 class Cortex:
     def __init__(self, master):
 
-        print "* Initializing"
+        print '* Initializing'
         self.values = False
         self.master = master
         self.context = CHANNEL
@@ -46,26 +46,26 @@ class Cortex:
 
         self.helpmenu = {}
         self.commands = {
-            "help": self.showlist,
+            'help': self.showlist,
         }
         self.helpcategories = []
 
-        print "* Loading brainmeats"
+        print '* Loading brainmeats'
         self.loadbrains()
 
-        print "* Loading users"
+        print '* Loading users'
         users = open(REGISTERED, 'r')
         self.REALUSERS = users.read().splitlines()
         users.close()
 
-        print "* Connecting to datastore"
+        print '* Connecting to datastore'
         connectdb()
 
     # Loads up all the files in brainmeats and runs them 
     # through the hookup process.
     def loadbrains(self, electroshock=False):
         self.brainmeats = {}
-        brainmeats = __import__("brainmeats", fromlist=[])
+        brainmeats = __import__('brainmeats', fromlist=[])
         if electroshock:
             reload(brainmeats)
 
@@ -77,15 +77,15 @@ class Cortex:
 
             print area
             try:
-                mod = __import__("brainmeats", fromlist=[area])
+                mod = __import__('brainmeats', fromlist=[area])
                 mod = getattr(mod, area)
                 if electroshock:
                     reload(mod)
                 cls = getattr(mod, area.capitalize())
                 self.brainmeats[area] = cls(self)
             except Exception as e:
-                self.chat("Failed to load %s: %s" % (area, str(e)))
-                print "Failed to load " + area + "."
+                self.chat('Failed to load %s.' % area, error=str(e))
+                print 'Failed to load %s.' % area
                 print e
 
         for brainmeat in self.brainmeats:
@@ -142,23 +142,23 @@ class Cortex:
         except:
             return
 
-        for line in lines.split("\n"):
+        for line in lines.split('\n'):
             line = line.strip()
 
-            if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
+            if re.search('^:' + NICK + '!~' + REALNAME + '@.+ JOIN ' + CHANNEL + '$', line):
                 print "* Joined " + CHANNEL
                 self.getnames()
 
             if self.gettingnames:
-                if line.find("@ " + CHANNEL) != -1:
-                    all = line.split(":")[2]
+                if line.find('@ ' + CHANNEL) != -1:
+                    all = line.split(':')[2]
                     self.gettingnames = False
                     all = re.sub(NICK + ' ', '', all)
                     self.members = all.split()
 
             scan = re.search(SCAN, line)
-            ping = re.search("^PING", line)
-            pwd = re.search(":-passwd", line)
+            ping = re.search('^PING', line)
+            pwd = re.search(':-passwd', line)
             if line != '' and not scan and not ping and not pwd:
                 self.logit(line + '\n')
 
@@ -180,7 +180,7 @@ class Cortex:
     # most of its actions got moved to the nonsense and 
     # broca brainmeats.
     def parse(self, msg):
-        pwd = re.search(":-passwd", msg)
+        pwd = re.search(':-passwd', msg)
         if not pwd:
             print msg
 
@@ -195,7 +195,7 @@ class Cortex:
             realname, ip = data.split('@')
             ip = socket.gethostbyname_ex(ip.strip())[2][0]
             realname = realname[1:]
-            self.lastrealsender = "%s@%s" % (realname, ip)
+            self.lastrealsender = '%s@%s' % (realname, ip)
         except:
             return
 
@@ -205,21 +205,23 @@ class Cortex:
         # Determine if the action is a command and the user is
         # approved.
         if content[:1] == CONTROL_KEY:
-            if self.lastrealsender not in self.REALUSERS and content[1:].split()[0] not in self.public_commands and nick not in self.guests:
-                self.chat("My daddy says not to listen to you.")
+            if self.lastrealsender not in self.REALUSERS \
+            and content[1:].split()[0] not in self.public_commands \
+            and nick not in self.guests:
+                self.chat('My daddy says not to listen to you.')
                 return
             
-            print "Executing command: %s" % content
+            print 'Executing command: %s' % content
             _mark = int(mktime(localtime()))
             self.command(nick, content)
-            print "Finished in: %s" % str(int(mktime(localtime())) - _mark)
+            print 'Finished in: %s' % str(int(mktime(localtime())) - _mark)
             return
 
         # This is a special case for giving people meaningless
         # points so you can feel like you're in grade school
         # again.
         if content[:-2] in self.members and content[-2:] in ['--', '++']:
-            print "Active"
+            print 'Active'
             self.values = [content[:-2]]
             if content[-2:] == '++':
                 self.commands.get('increment')()
@@ -263,7 +265,7 @@ class Cortex:
         else:
             self.values = False
 
-        self.logit(sender + " sent command: " + what + "\n")
+        self.logit('%s sent command: %s\n' % (sender, what))
         self.lastsender = sender
         self.lastcommand = what
 
@@ -274,8 +276,8 @@ class Cortex:
     # into categories.
     def showlist(self):
         if not self.values or self.values[0] not in self.helpmenu:
-            cats = ", ".join(self.helpcategories)
-            self.chat(CONTROL_KEY + "help WHAT where WHAT is " + cats)
+            cats = ', '.join(self.helpcategories)
+            self.chat('%shelp WHAT where WHAT is %s' % (CONTROL_KEY, cats))
             return
 
         which = self.values[0]
@@ -295,14 +297,14 @@ class Cortex:
     # See who's about.
     def getnames(self):
         self.gettingnames = True
-        self.sock.send('NAMES ' + CHANNEL + '\n')
+        self.sock.send('NAMES %s\n' % CHANNEL)
 
     # Careful with this one.
     def bored(self):
         if not self.members:
             return
 
-        self.announce("Chirp chirp. Chirp Chirp.")
+        self.announce('Chirp chirp. Chirp Chirp.')
 
         # The behavior below is known to be highly obnoxious
         # self.act("is bored.")
@@ -311,14 +313,14 @@ class Cortex:
     # Simple logging.
     def logit(self, what):
         with open(LOG, 'a') as f:
-            f.write("TS:%s;%s" % (time.time(), what))
+            f.write('TS:%s;%s' % (time.time(), what))
 
         now = date.today()
         if now.day != 1:
             return
 
         prev = date.today() - timedelta(days=1)
-        backlog = LOGDIR + "/" + prev.strftime("%Y%m") + "-mongo.log"
+        backlog = '%s/%s-mongo.log' % (LOGDIR, prev.strftime('%Y%m'))
         if os.path.isfile(backlog):
             return
 
@@ -340,7 +342,7 @@ class Cortex:
 
             if randint(1, 5) == 1:
                 try:
-                    self.commands.get("tweet", self.default)(url)
+                    self.commands.get('tweet', self.default)(url)
                 except:
                     pass
 
@@ -353,7 +355,7 @@ class Cortex:
                 if not urlbase:
                     # If we don't have a valid requests
                     # object here just give up early
-                    self.chat("Total fail")
+                    self.chat('Total fail')
                     return
 
                 roasted = shorten(url)
@@ -367,14 +369,14 @@ class Cortex:
                     ext = False
 
                 images = [
-                    "gif",
-                    "png",
-                    "jpg",
-                    "jpeg",
+                    'gif',
+                    'png',
+                    'jpg',
+                    'jpeg',
                 ]
 
                 if ext in images:
-                    title = "Image"
+                    title = 'Image'
                     if STORE_IMGS:
                         # This needs to be threaded. Cause images can be 
                         # big n stuff.
@@ -382,11 +384,12 @@ class Cortex:
                         path = IMGS + fname
                         thread.start_new_thread(savefromweb, (url, path))
                     break
-                elif ext == "pdf":
-                    title = "PDF Document"
+                elif ext == 'pdf':
+                    title = 'PDF Document'
                     break
                 else:
-                    # Bit of ugliness here.
+                    # Bit of ugliness here. I blame the W3C. Henry, I'm 
+                    # looking at you.
                     try:
                         soup = bs4(urlbase.text)
                         title = soup.find('title').string.strip()
@@ -398,7 +401,6 @@ class Cortex:
                                                      'Refresh'})
 
                             if redirect:
-                                # Shouldn't this call itself and then return here?
                                 url = redirect['content'].split('url=')[1]
                                 continue
                             else:
@@ -406,7 +408,7 @@ class Cortex:
                         break
 
                     except:
-                        self.chat("Page parsing error - " + roasted)
+                        self.chat('Page parsing error - %s' % roasted)
                         return
 
             # If you have a delicious account set up. Yes, delicious
@@ -418,7 +420,7 @@ class Cortex:
             if fubs == 2:
                 self.chat("Total fail")
             else:
-                self.chat(unescape(title) + " @ " + roasted)
+                self.chat("%s @ %s" % (unescape(title), roasted))
 
             break
 
@@ -433,12 +435,8 @@ class Cortex:
     # Announce means the chat is always sent to the channel,
     # never back as a private response.
     @ratelimited(2)
-    def announce(self, message, whom=False):
-        message = message.encode("utf-8")
-        try:
-            self.sock.send('PRIVMSG ' + CHANNEL + ' :' + str(message) + '\n')
-        except:
-            self.sock.send('PRIVMSG ' + CHANNEL + ' :Having trouble saying that for some reason\n')
+    def announce(self, message):
+        self.chat(message, target=CHANNEL)
 
     # Since chat is mongo's only means of communicating with
     # a room, the ratelimiting here should prevent any overflow
@@ -453,8 +451,8 @@ class Cortex:
             whom = self.lastsender
 
         filter(lambda x: x in string.printable, message)
-        message = message.encode("utf-8")
-        self.logit("___" + NICK + ": " + str(message) + '\n')
+        message = message.encode('utf-8')
+        self.logit('___%s: %s\n' % (NICK, str(message)))
         try:
             m = str(message)
             if error:
@@ -466,10 +464,10 @@ class Cortex:
                 self.values = [to, str(message)]
                 self.commands.get('sms')()
         except:
-            self.sock.send('PRIVMSG ' + whom + ' :Having trouble saying that for some reason\n')
+            self.sock.send('PRIVMSG %s :Having trouble saying that for some reason\n' % whom)
 
     def act(self, message, public=False, target=False):
-        message = "\001ACTION " + message + "\001"
+        message = '\001ACTION %s\001' % message
         if public:
             self.announce(message)
         elif target:
