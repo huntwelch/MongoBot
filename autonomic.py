@@ -1,4 +1,5 @@
 import inspect
+
 from settings import CONTROL_KEY
 
 
@@ -115,7 +116,7 @@ def help(text):
     return add
 
 # Don't want to type out findfreechildpornwithukmirrors?
-# @alias up 'perv'!
+# @alias(['perv', 'seriouslydude', 'gethelp'])
 def alias(aliases):
     def add(fn):
         fn.aliases = aliases
