@@ -200,10 +200,8 @@ def postdelicious(url, title, sender):
         try:
             send = requests.get(deli, params=params, auth=auth)
         except:
-            self.chat("(delicious is down)")
-
-        if not send:
-            self.chat("(delicious problem)")
+            pass
+            
 
 # http://stevendkay.wordpress.com/2009/09/08/generating-ascii-art-from-photographs-in-python/
 # Couldn't have done this with the above link,
