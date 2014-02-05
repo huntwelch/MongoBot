@@ -32,8 +32,12 @@ class Twitterapi(Dendrite):
             message = ' '.join(self.values)
         else:
             message = _message
-
-        status = self.api.PostUpdate(message)
+        
+        try:
+            status = self.api.PostUpdate(message)
+        except:
+            self.chat("Twitter error.")
+            return
 
         if not _message:
             self.chat('Tweeted "' + status.text + '"')

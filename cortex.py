@@ -269,7 +269,48 @@ class Cortex:
         self.lastsender = sender
         self.lastcommand = what
 
-        self.commands.get(what, self.default)()
+        # So you'll notice that some commands return
+        # values that this function sorts out into chats,
+        # while other commands directly run the self.chat,
+        # ._act, and .announce functions attached by the
+        # Dendrite class. Well, it used to be just those
+        # self.chat(whatever) and return, because it's a bot,
+        # right? It's final output is a chat, otherwise it's
+        # not much of a chatbot.
+        #
+        # Then some asshole in our chatroom said something 
+        # like "it'd be cool if we could pipe commands, like
+        # -tweet|babble or something."
+        # 
+        # So THAT got stuck in my head even though it's 
+        # totally ridiculous, but I won't be able to sleep
+        # until it's fully implemented, and the first step 
+        # in that is the ability to do something besides
+        # just chat out at the end of the function. If it's
+        # being piped, the best way to do that is reset
+        # self.values to the result of the command if it's
+        # piped from or to a pipeable function (I know 
+        # 'from or to' should be one or the other, but it's
+        # 1am and I'm drunkenly listening to the Nye vs. 
+        # Ham debate over youtube and it's almost as 
+        # upsetting as realizing I'm going to have to comb
+        # over every goddamn function in this bot to 
+        # determine what's pipeable and change its output).
+        #
+        # Point is, you can return a list or a string at
+        # the end of a brainmeat command, or just use chat.
+        # I probably won't worry about act and announce.
+        result = self.commands.get(what, self.default)()
+
+        if not result:
+            return
+
+        if type(result) is str:
+            self.chat(result)
+
+        if type(result) is list:
+            for line in result:
+                self.chat(line)
 
     # Help menu. It used to just show every command, but there
     # are so goddamn many at this point, they had to be split

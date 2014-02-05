@@ -223,7 +223,10 @@ class Broca(Dendrite):
             definition = self.definitions[which]["definition"]
         except:
             self.chat("Can't find a definition. Pinging wordnik...")
-            self.seekdef(word)
+            try:
+                self.seekdef(word)
+            except Exception as e:
+                self.chat("Wordnik broke.", error=str(e))
             return
 
         self.chat(str(len(self.definitions)) + " definitions for " + word)
@@ -235,7 +238,6 @@ class Broca(Dendrite):
             return
 
         client = swagger.ApiClient(WORDNIK_API, 'http://api.wordnik.com/v4')
-
         wapi = WordApi.WordApi(client)
         results = wapi.getDefinitions(word.strip())
 

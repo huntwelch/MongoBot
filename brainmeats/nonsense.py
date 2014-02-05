@@ -143,23 +143,23 @@ class Nonsense(Dendrite):
 
     @axon
     def skynet(self):
-        self.chat("Activating.")
+        return 'Activating.'
 
     @axon
     @help("<throw table>")
     def table(self):
-        self.chat(u'\u0028' + u'\u256F' + u'\u00B0' + u'\u25A1' + u'\u00B0' + u'\uFF09' + u'\u256F' + u'\uFE35' + u'\u0020' + u'\u253B' + u'\u2501' + u'\u253B')
+        return u'\u0028' + u'\u256F' + u'\u00B0' + u'\u25A1' + u'\u00B0' + u'\uFF09' + u'\u256F' + u'\uFE35' + u'\u0020' + u'\u253B' + u'\u2501' + u'\u253B'
 
     @axon
     def hate(self):
-        self.chat(NICK + " knows hate. " + NICK + " hates many things.")
+        return '%(nick)s knows hate. %(nick)s hates many things.' % {'nick': NICK}
 
     @axon
     def love(self):
         if self.values and self.values[0] == "self":
             self._act("masturbates vigorously.")
         else:
-            self.chat(NICK + " cannot love. " + NICK + " is only machine :'(")
+            return "%(nick)s cannot love. %(nick) is only machine :'(" % {'nick': NICK}
 
     @axon
     @help("<pull a quote from shitalekseysays.com>")
@@ -169,11 +169,11 @@ class Nonsense(Dendrite):
             response = pageopen(url)
             json = response.json()
         except:
-            self.chat('Somethin dun goobied.')
-            return
+            return 'Somethin dun goobied.'
+            
 
         entry = choice(json['feed']['entry'])
-        self.chat(entry['title']['$t'])
+        return entry['title']['$t']
 
     @axon
     @help("<pull up a mom quote from logs>")
@@ -184,10 +184,9 @@ class Nonsense(Dendrite):
                 if "~mom" not in line:
                     momlines.append(line)
         except:
-            self.chat("Can't open mom.log")
-            return
+            return "Can't open mom.log"
 
-        self.chat(choice(momlines))
+        return choice(momlines)
 
     @axon
     def whatvinaylost(self):
