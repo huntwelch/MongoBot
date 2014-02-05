@@ -2,7 +2,7 @@ import os
 import re
 import pkgutil
 
-from autonomic import axon, category, help, Dendrite, public
+from autonomic import axon, category, help, Dendrite, public, alias
 from settings import SAFESET, NICK, HOST, REGISTERED
 from secrets import *
 from util import colorize
@@ -110,6 +110,7 @@ class System(Dendrite):
     # doctor to restart. Some settings and any changes to 
     # medulla.py won't take effect until a reboot.
     @axon
+    @alias(['seppuku', 'harakiri'])
     @help("<set squirrel on fire and staple it to angel. No, really>")
     def reboot(self):
         self.cx.master.die()

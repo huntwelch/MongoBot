@@ -11,6 +11,7 @@ class Twitterapi(Dendrite):
     def __init__(self, cortex):
         super(Twitterapi, self).__init__(cortex)
 
+    def connect(self):
         self.api = twitter.Api(consumer_key=TWIT_CONSUMER_KEY,
                                consumer_secret=TWIT_CONSUMER_SECRET,
                                access_token_key=TWIT_ACCESS_TOKEN,

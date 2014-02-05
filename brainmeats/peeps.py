@@ -1,12 +1,18 @@
 import datetime
+import dateutil.parser
 import re
 import hashlib
 
 from autonomic import axon, category, help, Dendrite, alias
-from settings import STORAGE, CHANNEL
+from settings import STORAGE, CHANNEL, NICK
+from secrets import MEETUP_LOCATION, MEETUP_NOTIFY, MEETUP_DAY
 from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore, topScores
 
 
+# This loosely encapsulates things having to do with
+# people in the room. Obviously some overlap with
+# other areas, but generally works.
+#
 # Basically everything here depends on mongodb, and
 # many other functions of other libraries refer to peeps
 # stuff. If you install no other external stuff, I 
@@ -14,6 +20,10 @@ from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScor
 @category("peeps")
 class Peeps(Dendrite):
     def __init__(self, cortex):
+
+        self.checked = False
+        self.checks = MEETUP_NOTIFY
+
         super(Peeps, self).__init__(cortex)
 
     @axon
@@ -111,16 +121,24 @@ class Peeps(Dendrite):
 
     @axon
     @help("<ping everyone in the room>")
-    def all(self):
+    def all(self, whom=False):
         peeps = self.members
-        try:
-            peeps.remove(self.lastsender)
-        except:
+
+        if not peeps:
             self.chat('List incoherrent')
             return
 
+        if not whom:
+            try:
+                peeps.remove(self.lastsender)
+            except:
+                self.chat('List incoherrent')
+                return
+
+        announcer = whom or self.lastsender
+
         peeps = ', '.join(peeps)
-        self.chat(peeps + ', ' + self.lastsender + ' has something very important to say.')
+        self.chat(peeps + ', ' + announcer + ' has something very important to say.')
 
     @axon
     @help("YYYY/MM/DD=EVENT_DESCRIPTION <save what you're waiting for>")
@@ -234,3 +252,35 @@ class Peeps(Dendrite):
             self.chat("No such numba. No such zone.")
         else:
             self.chat(user.name + ': ' + user.phone)
+
+    def meetup(self, hour):
+
+        if hour not in self.checks:
+            return
+
+        period, day = MEETUP_DAY.split()        
+        check = dateutil.parser.parse(day)
+
+        if self.checked == check.month:
+            return
+
+        if not self.checks:
+            self.checked = check.month
+
+        self.checks.remove(hour)
+
+        period = int(period[:1])
+        begin = (period - 1) * 7 + 1
+        end = period * 7
+
+        if check.day < begin or check.day > end:
+            return False
+
+        self.all(NICK)
+        self.announce('Meetup tonight! %s' % MEETUP_LOCATION)
+        
+    @axon
+    def okdrink(self):
+        whenwhere = 'Every %s, %s' % (MEETUP_DAY, MEETUP_LOCATION)
+        return whenwhere
+        

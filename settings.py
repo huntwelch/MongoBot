@@ -65,6 +65,7 @@ PULSE_RATE = 25
 STORE_URLS = True
 STORE_IMGS = True
 BABBLE_LIMIT = 100
+TIMEZONE = 'EST'
 
 
 # Web server

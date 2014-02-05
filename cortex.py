@@ -9,12 +9,14 @@ import time
 import string
 
 from bs4 import BeautifulSoup as bs4
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+from pytz import timezone
 from time import mktime, localtime, sleep
 from random import randint
 
-from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, STORE_IMGS, IMGS, REGISTERED 
-from secrets import CHANNEL, OWNER, REALNAME
+from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, \
+    STORE_IMGS, IMGS, REGISTERED, TIMEZONE
+from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY
 from datastore import Drinker, connectdb
 from util import unescape, pageopen, shorten, ratelimited, postdelicious, savefromweb
 from autonomic import serotonin
@@ -60,6 +62,14 @@ class Cortex:
 
         print '* Connecting to datastore'
         connectdb()
+
+        # The twitter api is bitchy about setting up
+        # connections and tends to rate limit if, say,
+        # the bot's repeatedly crashing. This makes 
+        # sure mongo is at least setup and not crashy
+        # before trying to connect.
+        if 'twitterapi' in self.brainmeats:
+            self.brainmeats['twitterapi'].connect()
 
     # Loads up all the files in brainmeats and runs them 
     # through the hookup process.
@@ -114,6 +124,11 @@ class Cortex:
     # Core automatic stuff. I firmly believe boredom to
     # be a fundamental process in both man and machine.
     def parietal(self, currenttime):
+
+        calendar = datetime.now(timezone(TIMEZONE))
+        if calendar.hour in MEETUP_NOTIFY and 'peeps' in self.brainmeats:
+            self.brainmeats['peeps'].meetup(calendar.hour)
+
         if currenttime - self.namecheck > 60:
             self.namecheck = int(mktime(localtime()))
             self.getnames()
