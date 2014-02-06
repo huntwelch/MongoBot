@@ -264,10 +264,10 @@ class Peeps(Dendrite):
         if self.checked == check.month:
             return
 
+        self.checks.remove(hour)
+
         if not self.checks:
             self.checked = check.month
-
-        self.checks.remove(hour)
 
         period = int(period[:1])
         begin = (period - 1) * 7 + 1
@@ -275,6 +275,9 @@ class Peeps(Dendrite):
 
         if check.day < begin or check.day > end:
             return False
+
+        if datetime.date.today().day != check.day:
+            return
 
         self.all(NICK)
         self.announce('Meetup tonight! %s' % MEETUP_LOCATION)
