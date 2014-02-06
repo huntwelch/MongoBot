@@ -119,12 +119,14 @@ class Cortex:
         self.live[func.__name__] = func
 
     def droplive(self, name):
-        self.live[name] = False
+        self.live.remove(name)
 
     # Core automatic stuff. I firmly believe boredom to
     # be a fundamental process in both man and machine.
     def parietal(self, currenttime):
 
+        # This should really just be an addlive. Maybe
+        # the other two functions, too.
         calendar = datetime.now(timezone(TIMEZONE))
         if calendar.hour in MEETUP_NOTIFY and 'peeps' in self.brainmeats:
             self.brainmeats['peeps'].meetup(calendar.hour)
@@ -139,8 +141,7 @@ class Cortex:
                 self.bored()
 
         for func in self.live:
-            if self.live[func]:
-                self.live[func]()
+            self.live[func]()
 
     # And this is basic function that runs all the time.
     # The razor qualia edge of consciousness, if you will

@@ -85,6 +85,11 @@ def serotonin(cortex, expansion, electroshock):
 
 # Decorators, yo
 
+# Proposed:
+# @requires(vars, connections, installs)
+# @live() to run it in parietal. Iffy.
+# @pipe() can pipe output to another function
+
 # How the lib is stored and labelled.
 # This is used internally and by the 
 # help menu, so no weird characters.
