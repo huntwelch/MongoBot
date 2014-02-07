@@ -3,27 +3,27 @@ from secrets import CHANNEL
 
 # Connection Settings
 
-HOST = "banks.freenode.net"
+HOST = 'banks.freenode.net'
 PORT = 6667
-NICK = "MongoBot"
+NICK = 'MongoBot'
 
 # Used to filter out pings and server responses from 
 # logs and live checks. Obviously if you're not on
 # freenode, you'll need to update this.
 
-SCAN = "^:\w+\.freenode\.net"
+SCAN = '^:\w+\.freenode\.net'
 
 
 # Directory settings
 
-STORAGE = "hippocampus"
-LOGDIR = STORAGE + "/log"
-LOG = LOGDIR + "/chat.log"
-BOOKS = "booklearnin/"
-DISTASTE = STORAGE + "/distaste"
-ACROSCORE = STORAGE + "/acro/"
-IMGS = STORAGE + "/downloads/imgs/"
-REGISTERED = STORAGE + "/allowed"
+STORAGE = 'hippocampus'
+LOGDIR = STORAGE + '/log'
+LOG = LOGDIR + '/chat.log'
+BOOKS = 'booklearnin/'
+DISTASTE = STORAGE + '/distaste'
+ACROSCORE = STORAGE + '/acro/'
+IMGS = STORAGE + '/downloads/imgs/'
+REGISTERED = STORAGE + '/allowed'
 
 
 # Enabled libraries. These are the default brainmeats
@@ -33,34 +33,35 @@ REGISTERED = STORAGE + "/allowed"
 # here.
 
 ENABLED = [
-    "acro",
-    "alien",
-    "broca",
-    "chess",
-    "facebook",
-    "finance",
-    "holdem",
-    "memory",
-    "nonsense",
-    "peeps",
-    "quotes",
-    "reference",
-    "sms",
-    "stockgame",
-    "system",
-    "twitterapi",
-    "webserver",
+    'acro',
+    'alien',
+    'broca',
+    'chess',
+    'facebook',
+    'finance',
+    'holdem',
+    'memory',
+    'nonsense',
+    'peeps',
+    'quotes',
+    'reference',
+    'sms',
+    'stockgame',
+    'system',
+    'twitterapi',
+    'webserver',
 ]
 
 
 # Misc
 
-CONTROL_KEY = "-" # All commands are preceded by this. It can be whatever you want.
-SHORTENER = "http://roa.st/api.php"
+CONTROL_KEY = '-' # All commands are preceded by this. It can be whatever you want.
+SHORTENER = 'http://roa.st/api.php'
 PATIENCE = 7000
-REPO = "https://github.com/huntwelch/MongoBot" # Used by the -source command.
-SMS_LOCKFILE = "/tmp/sms.lock"
-PULSE = "/tmp/bot.pulse"
+REPO = 'https://github.com/huntwelch/MongoBot' # Used by the -source command.
+SMS_LOCKFILE = '/tmp/sms.lock'
+REDIS_SOCK = '/tmp/redis.sock'
+PULSE = '/tmp/bot.pulse'
 PULSE_RATE = 25
 STORE_URLS = True
 STORE_IMGS = True
@@ -70,8 +71,8 @@ TIMEZONE = 'EST'
 
 # Web server
 
-WEBSITE = "http://mongobot.com"
-SERVER_RELOAD = "/tmp/mongo.reload"
+WEBSITE = 'http://mongobot.com'
+SERVER_RELOAD = '/tmp/mongo.reload'
 
 
 # Stock game
@@ -82,7 +83,7 @@ STARTING_CASH = 100000
 
 # Acro
 
-ACROLIB = "natwords"
+ACROLIB = 'natwords'
 MINLEN = 5
 MAXLEN = 7
 ROUNDS = 5
@@ -132,26 +133,26 @@ SAFESET = [
 # are just used by the acro. game.
 
 INSULTS = [
-    "are little bitches",
-    "are chumps",
-    "are cunt knockers",
-    "are lazy bastards",
+    'are little bitches',
+    'are chumps',
+    'are cunt knockers',
+    'are lazy bastards',
     "are busy with dcross's mom",
 ]
 
 INSULT = [
-    "is a little bitch",
-    "is a chump",
-    "is a cunt knocker",
-    "is a lazy bastard",
+    'is a little bitch',
+    'is a chump',
+    'is a cunt knocker',
+    'is a lazy bastard',
     "is busy with dcross's mom",
 ]
 
 BOREDOM = [
-    "kicks",
-    "slaps",
+    'kicks',
+    'slaps',
+    'throws feces at',
     "offers dcross's mom to",
-    "throws feces at",
 ]
 
 
@@ -187,5 +188,3 @@ SAFE = [
     ('tan', tan),
     ('tanh', tanh),
 ]
-
-

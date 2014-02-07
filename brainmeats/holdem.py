@@ -8,15 +8,20 @@ from datastore import Drinker
 
 
 class Player(object):
+
+    name = ''
+    status = 'in'
+    money = 0
+    round_money = 0
+    hand_money = 0
+    besthand = None
+    winlimit = None
+
+    hand = []
+
     def __init__(self, name, money):
         self.name = name
         self.money = money
-        self.hand = []
-        self.besthand = None
-        self.winlimit = None
-        self.status = "in"
-        self.round_money = 0
-        self.hand_money = 0
 
     def __repr__(self):
         r = "Player(name=%r, money=%r, round_money=%r, hand_money=%r, "\

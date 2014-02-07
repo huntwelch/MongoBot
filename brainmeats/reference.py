@@ -15,10 +15,11 @@ from util import unescape, pageopen
 # it goes here.
 @category("reference")
 class Reference(Dendrite):
+
+    safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
+
     def __init__(self, cortex):
         super(Reference, self).__init__(cortex)
-
-        self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
 
     @axon
     @help("SEARCH_TERM <look something up in google>")

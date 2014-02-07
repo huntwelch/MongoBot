@@ -9,19 +9,20 @@ from datastore import Drinker
 
 
 # This shit be awesome. It requires a twilio account, but
-# there's no better way to hive-mind fuck with someone.
+# there's no better way to hive-mind-fuck with someone.
 @category("sms")
 class Sms(Dendrite):
+
+    client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
+    incoming = []
+    loaded = False
+    current = mktime(localtime())
+    next_ = current + 10
+
     def __init__(self, cortex):
         super(Sms, self).__init__(cortex)
-        self.client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
-        self.incoming = []
-        self.loaded = False
-        self.current = mktime(localtime())
-        self.next_ = self.current + 10
-        self.cx.addlive(self.smsticker) # This is the addlive example.
 
-        return
+        self.cx.addlive(self.smsticker) # This is the addlive example.
 
     def smsticker(self):
 

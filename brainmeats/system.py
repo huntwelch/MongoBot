@@ -14,8 +14,10 @@ from time import sleep
 # dangerous shit in here.
 @category("system")
 class System(Dendrite):
+
+    libs = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
+
     def __init__(self, cortex):
-        self.libs = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
         super(System, self).__init__(cortex)
 
     @axon

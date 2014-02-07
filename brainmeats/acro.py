@@ -17,10 +17,11 @@ from settings import INSULTS, INSULT, STORAGE, TIME_FACTOR, \
 # to it, as it's not a deal breaker, it's just exploitable.
 @category("acro")
 class Acro(Dendrite):
+
+    active = False
+
     def __init__(self, cortex):
         super(Acro, self).__init__(cortex)
-
-        self.active = False
 
     @axon
     @help("[pause|resume|end] <start/pause/resume/end acro game>")

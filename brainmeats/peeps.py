@@ -19,11 +19,11 @@ from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScor
 # recommend mongodb.
 @category("peeps")
 class Peeps(Dendrite):
+
+    checked = False
+    checks = MEETUP_NOTIFY
+
     def __init__(self, cortex):
-
-        self.checked = False
-        self.checks = MEETUP_NOTIFY
-
         super(Peeps, self).__init__(cortex)
 
     @axon

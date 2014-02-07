@@ -9,7 +9,7 @@ import time
 from threading import Thread
 from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API
-from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT
+from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, REDIS_SOCK
 from datastore import Words, Learned, Structure
 from random import choice, randint
 from util import pageopen, savefromweb
@@ -23,13 +23,13 @@ from wordnik import swagger, WordApi
 # is done here.
 @category("language")
 class Broca(Dendrite):
+
+    markov = redis.StrictRedis(unix_socket_path=REDIS_SOCK) 
+    readstuff = False
+    knowledge = False
+
     def __init__(self, cortex):
         super(Broca, self).__init__(cortex)
-
-        self.markov = redis.StrictRedis(unix_socket_path='/tmp/redis.sock') 
-
-        self.readstuff = False
-        self.knowledge = False
 
     @axon
     def mark(self, line):
@@ -164,7 +164,13 @@ class Broca(Dendrite):
             follows = follows.split(',')
             words.append(random.choice(follows))
 
-        return " ".join(words)
+        words = ' '.join(words)
+        rep = re.compile('[\()\[\]"]')
+        words = rep.sub('', words)
+        words = words.split()
+        words = ' '.join(words)
+
+        return words
 
     # This is kind of sluggish and kldugey,
     # and sort of spiritually been replaced by

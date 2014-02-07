@@ -25,32 +25,40 @@ from autonomic import serotonin
 # irc and command / content parsing happens here.
 # Also connects to mongodb.
 class Cortex:
+
+    context = CHANNEL
+
+    master = False
+    sock = False
+    values = False
+    lastpublic = False
+    replysms = False
+    lastprivate = False
+    lastsender = False
+    gettingnames = True
+    memories = False
+    autobabble = False
+
+    public_commands = []
+    helpcategories = []
+    members = []
+    guests = [] 
+    REALUSERS = []
+
+    commands = {}
+    live = {}
+    helpmenu = {}
+
+    boredom = int(mktime(localtime()))
+    namecheck = int(mktime(localtime()))
+
     def __init__(self, master):
 
         print '* Initializing'
-        self.values = False
         self.master = master
-        self.context = CHANNEL
-        self.lastpublic = False
-        self.replysms = False
-        self.lastprivate = False
-        self.lastsender = False
         self.sock = master.sock
-        self.gettingnames = True
-        self.members = []
-        self.guests = [] 
-        self.memories = False
-        self.autobabble = False
-        self.boredom = int(mktime(localtime()))
-        self.namecheck = int(mktime(localtime()))
-        self.live = {}
-        self.public_commands = []
 
-        self.helpmenu = {}
-        self.commands = {
-            'help': self.showlist,
-        }
-        self.helpcategories = []
+        self.commands['help'] = self.showlist
 
         print '* Loading brainmeats'
         self.loadbrains()
@@ -162,7 +170,7 @@ class Cortex:
                     all = line.split(':')[2]
                     self.gettingnames = False
                     all = re.sub(NICK + ' ', '', all)
-                    self.members = all.split()
+                    self.members += list(set(all.split()) - set(self.members))
 
             scan = re.search(SCAN, line)
             ping = re.search('^PING', line)
@@ -206,6 +214,9 @@ class Cortex:
             self.lastrealsender = '%s@%s' % (realname, ip)
         except:
             return
+
+        if nick not in self.members:
+            self.members.append(nick)
 
         self.lastsender = nick
         self.lastip = ip
@@ -257,15 +268,15 @@ class Cortex:
     # and any words after the command are split in a values array,
     # accessible by the brainmeats as self.values.
     def command(self, sender, cmd):
-        components = cmd.split()
-        what = components.pop(0)[1:]
+        chain = cmd.split('|', 1)
         pipe = False
 
-        chain = what.split('|', 1)
-
         if len(chain) is 2:
-            what = chain[0]            
-            pipe = chain[1]
+            cmd = chain[0].strip()
+            pipe = chain[1].strip()
+
+        components = cmd.split()
+        what = components.pop(0)[1:]
 
         is_nums = re.search("^[0-9]+", what)
         is_breaky = re.search("^" + CONTROL_KEY + "|[^\w]+", what)
@@ -318,7 +329,7 @@ class Cortex:
             return
 
         if pipe:
-            self.command(sender, '%s%s %s' % (CONTROL_KEY, pipe, result))
+            self.command(sender, '%s %s' % (pipe, result))
             return
 
         if type(result) is str:
