@@ -39,7 +39,7 @@ class Nonsense(Dendrite):
             choice(bsn),
         ]
 
-        self.chat(' '.join(buzzed))
+        return ' '.join(buzzed)
 
     @axon
     @help("<grab a little advice>")
@@ -49,10 +49,9 @@ class Nonsense(Dendrite):
         try:
             json = pageopen(url).json()
         except:
-            self.chat('Use a rubber if you sleep with dcross2\'s mother.')
-            return
+            return 'Use a rubber if you sleep with dcross2\'s mother.'
 
-        self.chat(json['slip']['advice'] + ".. in bed.")
+        return json['slip']['advice'] + ".. in bed."
 
     @axon
     @help("SEARCHTERM <grab random fml entry>")
@@ -74,7 +73,7 @@ class Nonsense(Dendrite):
                 fml = choice(raw.getElementsByTagName("text")).firstChild.nodeValue
             else:
                 fml = raw.getElementsByTagName("text")[0].firstChild.nodeValue
-            self.chat(fml)
+            return fml
         except Exception as e:
             if self.values and self.values[0]:
                 self.chat("No results. Or done broken.")
@@ -90,7 +89,7 @@ class Nonsense(Dendrite):
 
         try:
             out = pageopen(url).text
-            self.chat(out.lower().capitalize())
+            return out.lower().capitalize()
         except:
             self.chat("Done broke")
             return
@@ -109,7 +108,7 @@ class Nonsense(Dendrite):
             output.append(word)
             count += 1
 
-        self.chat(" ".join(output))
+        return " ".join(output)
 
     @axon
     @help("USERNAME <reward someone>")
@@ -225,7 +224,7 @@ class Nonsense(Dendrite):
     @axon
     def pressreturn(self):
         self.cx.autobabble = True
-        self.chat("94142243431512659321054872390486828512913474876027671959234602385829583047250165232525929692572765536436346272718401201264304554632945012784226484107566234789626728592858295347502772262646456217613984829519475412398501")
+        return "94142243431512659321054872390486828512913474876027671959234602385829583047250165232525929692572765536436346272718401201264304554632945012784226484107566234789626728592858295347502772262646456217613984829519475412398501"
 
     @axon
     def images(self, lim=5):

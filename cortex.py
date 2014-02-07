@@ -63,14 +63,6 @@ class Cortex:
         print '* Connecting to datastore'
         connectdb()
 
-        # The twitter api is bitchy about setting up
-        # connections and tends to rate limit if, say,
-        # the bot's repeatedly crashing. This makes 
-        # sure mongo is at least setup and not crashy
-        # before trying to connect.
-        if 'twitterapi' in self.brainmeats:
-            self.brainmeats['twitterapi'].connect()
-
     # Loads up all the files in brainmeats and runs them 
     # through the hookup process.
     def loadbrains(self, electroshock=False):
@@ -227,10 +219,7 @@ class Cortex:
                 self.chat('My daddy says not to listen to you.')
                 return
             
-            print 'Executing command: %s' % content
-            _mark = int(mktime(localtime()))
             self.command(nick, content)
-            print 'Finished in: %s' % str(int(mktime(localtime())) - _mark)
             return
 
         # This is a special case for giving people meaningless
@@ -270,6 +259,13 @@ class Cortex:
     def command(self, sender, cmd):
         components = cmd.split()
         what = components.pop(0)[1:]
+        pipe = False
+
+        chain = what.split('|', 1)
+
+        if len(chain) is 2:
+            what = chain[0]            
+            pipe = chain[1]
 
         is_nums = re.search("^[0-9]+", what)
         is_breaky = re.search("^" + CONTROL_KEY + "|[^\w]+", what)
@@ -319,6 +315,10 @@ class Cortex:
         result = self.commands.get(what, self.default)()
 
         if not result:
+            return
+
+        if pipe:
+            self.command(sender, '%s%s %s' % (CONTROL_KEY, pipe, result))
             return
 
         if type(result) is str:

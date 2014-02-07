@@ -121,7 +121,7 @@ class Broca(Dendrite):
     # Americans have some seriously fucked up problems with
     # their opinions on the nature and value of intelligence.
     @axon
-    @alias(["waxhapsodic"])
+    @alias(["waxrhapsodic"])
     @help("<Make " + NICK + " speak markov chain>")
     def babble(self):
         if self.values:
@@ -164,7 +164,7 @@ class Broca(Dendrite):
             follows = follows.split(',')
             words.append(random.choice(follows))
 
-        self.chat(" ".join(words))
+        return " ".join(words)
 
     # This is kind of sluggish and kldugey,
     # and sort of spiritually been replaced by
