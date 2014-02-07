@@ -54,6 +54,42 @@ New features
     a class Category_name. Loading of this class will be automated, no
     other files need to be altered.
 
+
+Philosophies
+===========
+
+    Don't nest logic when you can short circuit.
+
+    BAD:
+
+    if blah:
+        for x in stuff:
+            do stuff
+
+    GOOD:
+
+    if not blah:
+        return
+
+    for x in stuff:
+        do stuff
+    
+    Try to stick to single quotes wherever possible.
+
+    String interpolation is better than adding up strings. I'm totally 
+    not great at remembering this, but I'm trying.
+
+    When using in the chat room, you can pipe commands, i.e.:
+
+    -babble Zaphod | -tweet
+
+    ... will tweet whatever babble spits out.
+
+    If you want a function to be pipeable to other functions, return the output
+    instead of just chatting from the function. 
+    
+    Why would anyone add piping to a chat bot? I dunno. Things got out of hand.
+
 To Do
 =====
 

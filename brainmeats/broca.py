@@ -235,9 +235,9 @@ class Broca(Dendrite):
                 self.chat("Wordnik broke.", error=str(e))
             return
 
-        self.chat("%s definitions for %s" % (str(len(self.definitions)), word)
+        self.chat("%s definitions for %s" % (str(len(self.definitions)), word))
 
-        return "Definition %s: %s" % ( str(which + 1), definition)
+        return "Definition %s: %s" % (str(which + 1), definition)
 
     def seekdef(self, word):
         if not WORDNIK_API:
