@@ -14,5 +14,5 @@ class Facebook(Dendrite):
     @axon
     @help("<show link to " + NICK + "'s community page>")
     def fblink(self):
-        self.chat(FB_PAGE)
-        return
+        return FB_PAGE
+        

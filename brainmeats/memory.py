@@ -32,7 +32,7 @@ class Memory(Dendrite):
                 self.memories.append(whom + ": " + message)
         self.memories.pop()
         self.mempoint = len(self.memories) - 1
-        self.remember()
+        return self.remember()
 
     @axon
     @help("<after mem, get the next phrase memory>")
@@ -43,7 +43,7 @@ class Memory(Dendrite):
             self.chat("That's the most recent thing I can remember.")
             return
         self.mempoint += 1
-        self.remember()
+        return self.remember()
 
     @axon
     @help("<after mem, get the previous phrase memory>")
@@ -54,7 +54,7 @@ class Memory(Dendrite):
             self.chat("That's as far back as I can remember.")
             return
         self.mempoint -= 1
-        self.remember()
+        return self.remember()
 
     @axon
     @help("<after mem, get the latest phrase memory>")
@@ -62,7 +62,7 @@ class Memory(Dendrite):
         if self.nomem():
             return
         self.mempoint = 0
-        self.remember()
+        return self.remember()
 
     @axon
     @help("<you see where this is going>")
@@ -70,13 +70,13 @@ class Memory(Dendrite):
         if self.nomem():
             return
         self.mempoint = len(self.memories) - 1
-        self.remember()
+        return self.remember()
 
     def remember(self):
         try:
-            self.chat(self.memories[self.mempoint])
+            return self.memories[self.mempoint]
         except:
-            self.chat("Don't recall anything about that.")
+            return "Don't recall anything about that."
 
     def nomem(self):
         if not self.memories:

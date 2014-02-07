@@ -235,8 +235,9 @@ class Broca(Dendrite):
                 self.chat("Wordnik broke.", error=str(e))
             return
 
-        self.chat(str(len(self.definitions)) + " definitions for " + word)
-        self.chat("Definition " + str(which + 1) + ": " + definition)
+        self.chat("%s definitions for %s" % (str(len(self.definitions)), word)
+
+        return "Definition %s: %s" % ( str(which + 1), definition)
 
     def seekdef(self, word):
         if not WORDNIK_API:
@@ -385,7 +386,7 @@ class Broca(Dendrite):
             return
 
         output = self.acronymit(self.values[0])
-        self.chat(output)
+        return output
 
     def acronymit(self, base):
         acronym = list(base.upper())
@@ -448,8 +449,7 @@ class Broca(Dendrite):
             self.chat('Failed to parse.', error=e)
             return
 
-        self.chat("Etymology " + str(ord + 1) + " of " + str(len(defs)) +
-                      " for " + _word + ": " + _def)
+        return "Etymology %s of %s for %s: %s" % (str(ord + 1), str(len(defs)), _word, _def)
 
 
     # TODO: broken, not sure why
@@ -481,6 +481,6 @@ class Broca(Dendrite):
             content = ','.join(paragraph.findAll(text=True))
             content = content[2:-4]
             content = content.replace(": ,", ": ")
-            self.chat(content)
+            return content
         except Exception as e:
             self.chat("Couldn't parse.", str(e))

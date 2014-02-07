@@ -32,14 +32,19 @@ class Alien(Dendrite):
             subreddit = self.values[0]
             self.last = subreddit
 
-        if subreddit:
-            gettum = self.api.get_subreddit(subreddit).get_hot(limit=5)
-        else:
-            # this is borked for whatever reason
-            gettum = self.api.get_random_subreddit().get_hot(limit=5)
+        try:
+            if subreddit:
+                gettum = self.api.get_subreddit(subreddit).get_hot(limit=5)
+            else:
+                # this is borked for whatever reason
+                gettum = self.api.get_random_subreddit().get_hot(limit=5)
 
-        # Maybe cache these if the subreddit doesn't change
-        entries = ["%s %s" % (str(x), x.short_link) for x in gettum]
-        entry = random.choice(entries)
+            # Maybe cache these if the subreddit doesn't change
+            entries = ["%s %s" % (str(x), x.short_link) for x in gettum]
+            entry = random.choice(entries)
+
+        except Exception as e:
+            self.chat('Reddit fail.', str(e))
+            return
 
         return str(entry)

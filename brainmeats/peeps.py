@@ -72,7 +72,7 @@ class Peeps(Dendrite):
         if not incrementEntity(entity, 1):
             self.chat("mongodb seems borked")
             return
-        self.chat(self.lastsender + " brought " + entity + " to " + str(entityScore(entity)))
+        return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
 
     @axon
     @help("DRINKER <take a point away>")
@@ -85,7 +85,7 @@ class Peeps(Dendrite):
         if not incrementEntity(entity, -1):
             self.chat("mongodb seems borked")
             return
-        self.chat(self.lastsender + " brought " + entity + " to " + str(entityScore(entity)))
+        return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
     
     @axon
     @help("show the leaderboard")
@@ -138,7 +138,7 @@ class Peeps(Dendrite):
         announcer = whom or self.lastsender
 
         peeps = ', '.join(peeps)
-        self.chat(peeps + ', ' + announcer + ' has something very important to say.')
+        return '%s, %s has something very important to say.' % (peeps, announcer)
 
     @axon
     @help("YYYY/MM/DD=EVENT_DESCRIPTION <save what you're waiting for>")
@@ -158,7 +158,7 @@ class Peeps(Dendrite):
             drinker = Drinker(name=name, awaiting=awaiting)
 
         drinker.save()
-        self.chat("Antici..... pating.")
+        return "Antici..... pating."
 
     @axon
     @help("[USERNAME] <show what you are or USERNAME is waiting for>")
@@ -178,7 +178,7 @@ class Peeps(Dendrite):
             year, month, day = moment.split("/")
             delta = datetime.date(int(year), int(month), int(day)) - datetime.date.today()
 
-            self.chat("Only %s days till %s" % (delta.days, event))
+            return "Only %s days till %s" % (delta.days, event)
         except:
             self.chat("Couldn't parse that out.")
 
@@ -193,7 +193,7 @@ class Peeps(Dendrite):
 
         self.cx.guests.append(guest)
 
-        self.chat("Hi " + guest + ". You seem okay.")
+        return "Hi " + guest + ". You seem okay."
 
     @axon
     @help("PASSWORD <set admin password>")
@@ -249,9 +249,9 @@ class Peeps(Dendrite):
 
         user = Drinker.objects(name=search_for).first()
         if not user or not user.phone:
-            self.chat("No such numba. No such zone.")
+            return "No such numba. No such zone."
         else:
-            self.chat(user.name + ': ' + user.phone)
+            return user.name + ': ' + user.phone
 
     def meetup(self, hour):
 

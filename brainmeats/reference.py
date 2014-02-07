@@ -49,12 +49,12 @@ class Reference(Dendrite):
         title = result["titleNoFormatting"]
         link = result["unescapedUrl"]
 
-        self.chat(title + " @ " + link)
+        return "%s @ %s" % (title, link)
 
     @axon
     @help("<display link to bot's github repository>")
     def source(self):
-        self.chat(REPO)
+        return REPO
 
     @axon
     @help("[ZIP|LOCATION (ru/moscow)] <get weather, defaults to geo api>")
@@ -97,7 +97,7 @@ class Reference(Dendrite):
         feels = json['feelslike_string']
 
         base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s"
-        self.chat(base % (location, condition, temp, humid, wind, feels))
+        return base % (location, condition, temp, humid, wind, feels)
 
     @axon
     @alias(["urban"])
@@ -171,7 +171,7 @@ class Reference(Dendrite):
         except:
             result = NICK + " not smart enough to do that."
 
-        self.chat(str(result))
+        return str(result)
 
     @axon
     def ns(self):
@@ -190,7 +190,7 @@ class Reference(Dendrite):
             self.chat("Couldn't find anything.")
             return
         
-        self.chat(resolved)
+        return resolved
 
     # I wanted to do a good whois function, but whois parsing is
     # a shitshow even stackoverflow balked at. If you know of or
@@ -199,6 +199,4 @@ class Reference(Dendrite):
     @axon
     @help("URL <get whois information>")
     def whois(self):
-        if not self.values:
-            self.chat("The Doctor")
-            return
+        return "The Doctor"
