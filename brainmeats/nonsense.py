@@ -147,7 +147,7 @@ class Nonsense(Dendrite):
     @axon
     @help("<throw table>")
     def table(self):
-        return u'\u0028' + u'\u256F' + u'\u00B0' + u'\u25A1' + u'\u00B0' + u'\uFF09' + u'\u256F' + u'\uFE35' + u'\u0020' + u'\u253B' + u'\u2501' + u'\u253B'
+        return u'\u0028\u256F\u00B0\u25A1\u00B0\uFF09\u256F\uFE35\u0020\u253B\u2501\u253B'
 
     @axon
     def hate(self):
@@ -158,7 +158,7 @@ class Nonsense(Dendrite):
         if self.values and self.values[0] == "self":
             self._act("masturbates vigorously.")
         else:
-            return "%(nick)s cannot love. %(nick) is only machine :'(" % {'nick': NICK}
+            return "%(nick)s cannot love. %(nick)s is only machine :'(" % {'nick': NICK}
 
     @axon
     @help("<pull a quote from shitalekseysays.com>")
@@ -169,7 +169,6 @@ class Nonsense(Dendrite):
             json = response.json()
         except:
             return 'Somethin dun goobied.'
-            
 
         entry = choice(json['feed']['entry'])
         return entry['title']['$t']
@@ -225,40 +224,3 @@ class Nonsense(Dendrite):
     def pressreturn(self):
         self.cx.autobabble = True
         return "94142243431512659321054872390486828512913474876027671959234602385829583047250165232525929692572765536436346272718401201264304554632945012784226484107566234789626728592858295347502772262646456217613984829519475412398501"
-
-    @axon
-    def images(self, lim=5):
-        iter = 0
-        for file in os.listdir(IMGS):
-            if file == '.gitignore':
-                continue
-            if iter == lim:
-                return
-            iter += 1
-            self.chat(file)
-
-    # This not as awesome as I thought it would be,
-    # and tends to get cut off by rate limits. The
-    # nuts and bolts are in util.py
-    @axon
-    def ascii(self):
-        if not self.values:
-            self.chat("Ascii what?")
-            return
-
-        path = IMGS + self.values[0]
-
-        try:
-            preview = asciiart(path)
-        except:
-            self.chat("Couldn't render.")
-            return
-            
-        if not preview:
-            self.chat("Couldn't render.")
-            return
-            
-        lines = preview.split("\n")
-        for line in lines:
-            time.sleep(1)
-            self.chat(line)

@@ -23,6 +23,8 @@ BOOKS = 'booklearnin/'
 DISTASTE = STORAGE + '/distaste'
 ACROSCORE = STORAGE + '/acro/'
 IMGS = STORAGE + '/downloads/imgs/'
+VIDS = STORAGE + '/downloads/videos/'
+GIFS = 'server/static/gifs/'
 REGISTERED = STORAGE + '/allowed'
 
 
@@ -35,6 +37,7 @@ REGISTERED = STORAGE + '/allowed'
 ENABLED = [
     'acro',
     'alien',
+    'artsy',
     'broca',
     'chess',
     'facebook',

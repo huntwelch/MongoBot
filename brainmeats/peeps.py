@@ -22,6 +22,7 @@ class Peeps(Dendrite):
 
     checked = False
     checks = MEETUP_NOTIFY
+    notifymethods = ['sms', 'email', 'prowl', 'pushover']
 
     def __init__(self, cortex):
         super(Peeps, self).__init__(cortex)
@@ -238,6 +239,12 @@ class Peeps(Dendrite):
             return
 
         self.chat("Number updated.")
+
+    @axon
+    def notifyme(self):
+        if not self.values or len(self.values) != 2 or self.values[0] not in notifymethods:
+            self.chat('Please enter "sms|email|prowl|pushover and your code/info"')
+            return
 
     @axon
     @help("[USERNAME] <view your own phone number or another drinker's>")

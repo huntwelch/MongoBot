@@ -3,7 +3,6 @@ import re
 import shutil
 import pkgutil
 import requests
-import thread
 import socket
 import time
 import string
@@ -20,6 +19,7 @@ from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY
 from datastore import Drinker, connectdb
 from util import unescape, pageopen, shorten, ratelimited, postdelicious, savefromweb
 from autonomic import serotonin
+
 
 # Basically all the interesting interaction with
 # irc and command / content parsing happens here.
@@ -332,7 +332,7 @@ class Cortex:
             self.command(sender, '%s %s' % (pipe, result))
             return
 
-        if type(result) is str:
+        if type(result) in [str, unicode]:
             self.chat(result)
 
         if type(result) is list:
@@ -446,12 +446,11 @@ class Cortex:
                 if ext in images:
                     title = 'Image'
                     if STORE_IMGS:
-                        # This needs to be threaded. Cause images can be 
-                        # big n stuff.
                         fname = url.split('/').pop()
                         path = IMGS + fname
-                        thread.start_new_thread(savefromweb, (url, path))
+                        savefromweb(url, path)
                     break
+
                 elif ext == 'pdf':
                     title = 'PDF Document'
                     break

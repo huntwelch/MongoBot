@@ -5,6 +5,7 @@ import requests
 import pyotp
 import base64
 import random
+import threading
 
 from PIL import Image
 from bisect import bisect
@@ -238,6 +239,11 @@ def asciiart(image_path):
 
 
 def savefromweb(url, path):
+    thread = threading.Thread(target=savethread, args=(url, path))
+    thread.start()
+    return
+
+def savethread(url, path):
     r = requests.get(url, stream=True)
 
     if r.status_code != 200:
