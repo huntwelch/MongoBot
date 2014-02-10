@@ -104,6 +104,10 @@ class Stock(object):
         if not symbol:
             return
 
+        # Yahoo uses hyphens in the symbols; old portfolios might be saved
+        # with dots from when we were using the Google API - look up with hyphen.
+        symbol.replace('.', '-')
+
         # yahoo fields
         # See http://www.gummy-stuff.org/Yahoo-data.htm for more
         fields = OrderedDict([
