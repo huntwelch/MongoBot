@@ -22,6 +22,9 @@
             margin-right: 4px;
         }
         span.index {
+            display: none;
+        }
+        span.time {
             width: 150px; 
             color: #ccc;
         }
@@ -205,16 +208,19 @@
                      .addClass(chat.fader);
                     
                     if( chat.time ) {
-                        var index = $("<span class='index' />").text(chat.time);
-                    } else {
-                        var index = $("<span class='index' />").text(chat.index);
+                        var time = $("<span class='time' />").text(chat.time);
+                        p.append(time);
                     }
+
+                    var index = $("<span class='index' />").text(chat.index);
                     var nick = $("<span class='nick' />").text(chat.nick);
                     var message = $("<span class='message' />").text(chat.message);
+
 
                     p.append(index)
                      .append(nick)
                      .append(message);
+
 
                     attachment.append(p);
 
