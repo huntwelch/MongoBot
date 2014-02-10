@@ -6,34 +6,42 @@ import os
 import thread
 import ssl
 
-from settings import NICK, IDENT, HOST, PORT, CHANNEL, REALNAME, OWNER, SMS_LOCKFILE, PULSE
+from settings import NICK, HOST, PORT, CHANNEL, SMS_LOCKFILE, PULSE, ENABLED
+from secrets import IDENT, REALNAME, OWNER
 from time import sleep, mktime, localtime
 
 
+# Welcome to the beginning of a very strained brain metaphor!
+# This is the shell for running the cortex. Ideally, this will never
+# fail and you never have to reboot. Hah! I make funny, yes? More 
+# important, if you make changes to this file, you have to reboot as
+# a reload won't change it.
 class Medulla:
     def __init__(self):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        print "* Pinging IRC"
+        print '* Pinging IRC'
 
-        sock.connect((HOST, PORT))
+        self.sock.connect((HOST, PORT))
 
-        #self.sock = ssl.wrap_socket(sock)
-        self.sock = sock
-
-        self.sock.send('NICK ' + NICK + '\n')
-        self.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
-        self.sock.send('JOIN ' + CHANNEL + '\n')
+        self.sock.send('NICK %s\n' % NICK)
+        self.sock.send('USER %s %s bla :%s\n' % (IDENT, HOST, REALNAME))
+        self.sock.send('JOIN %s\n' % CHANNEL)
 
         self.sock.setblocking(0)
 
+        self.ENABLED = ENABLED
         self.active = True
         self.brain = cortex.Cortex(self)
 
-        print "* Establishing pulse"
+        # The pulse file is set as a measure of how
+        # long the bot has been spinning its gears
+        # in a process. If it can't set the pulse
+        # for too long, a signal kills it and reboots.
+        print '* Establishing pulse'
         self.setpulse()
 
-        print "* Running monitor"
+        print '* Running monitor'
 
         while True:
             sleep(0.1)
@@ -41,14 +49,16 @@ class Medulla:
             if mktime(localtime()) - self.lastpulse > 10:
                 self.setpulse()
 
+    # Reload has to be run from here to update the
+    # cortex.
     def reload(self, quiet=False):
         if self.brain.values and len(self.brain.values[0]):
             quiet = True
 
         if not quiet:
-            self.brain.act("strokes out.")
+            self.brain.act('strokes out.')
         else:
-            self.brain.act("strokes out.", False, OWNER)
+            self.brain.act('strokes out.', False, OWNER)
 
         self.active = False
 
@@ -66,13 +76,14 @@ class Medulla:
         reload(cortex)
         self.brain = cortex.Cortex(self)
         self.brain.loadbrains(True)
+        self.brain.getnames()
 
         self.active = True
 
         if not quiet:
-            self.brain.act("comes to.")
+            self.brain.act('comes to.')
         else:
-            self.brain.act("comes to.", False, OWNER)
+            self.brain.act('comes to.', False, OWNER)
 
     def setpulse(self):
         self.lastpulse = mktime(localtime())

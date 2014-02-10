@@ -8,18 +8,19 @@ from secrets import (TWIT_USER, TWIT_PASS, TWIT_ACCESS_TOKEN, TWIT_ACCESS_SECRET
 
 @category("twitter")
 class Twitterapi(Dendrite):
+
+    api = twitter.Api(consumer_key=TWIT_CONSUMER_KEY,
+                      consumer_secret=TWIT_CONSUMER_SECRET,
+                      access_token_key=TWIT_ACCESS_TOKEN,
+                      access_token_secret=TWIT_ACCESS_SECRET)
+
     def __init__(self, cortex):
         super(Twitterapi, self).__init__(cortex)
-
-        self.api = twitter.Api(consumer_key=TWIT_CONSUMER_KEY,
-                               consumer_secret=TWIT_CONSUMER_SECRET,
-                               access_token_key=TWIT_ACCESS_TOKEN,
-                               access_token_secret=TWIT_ACCESS_SECRET)
 
     @axon
     @help("<show link to " + NICK + "'s twitter feed>")
     def totw(self):
-        self.chat(TWIT_PAGE)
+        return TWIT_PAGE
 
     @axon
     @help("MESSAGE <post to " + NICK + "'s twitter feed>")
@@ -32,8 +33,11 @@ class Twitterapi(Dendrite):
             message = ' '.join(self.values)
         else:
             message = _message
-
-        status = self.api.PostUpdate(message)
+        
+        try:
+            status = self.api.PostUpdate(message)
+        except Exception as e:
+            return "Twitter error."
 
         if not _message:
             self.chat('Tweeted "' + status.text + '"')
@@ -50,4 +54,4 @@ class Twitterapi(Dendrite):
         screen_name = status.user.screen_name
         name = status.user.name
         if status.text:
-            self.chat('%s (%s) tweeted: %s' % (name, screen_name, text))
+            return '%s (%s) tweeted: %s' % (name, screen_name, text)

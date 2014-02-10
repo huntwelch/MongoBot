@@ -5,22 +5,24 @@ from time import mktime, localtime, strftime
 from secrets import TWILIO_SID, TWILIO_TOKEN, TWILIO_NUMBER, SAFE_NUMBERS
 from settings import CONTROL_KEY, CHANNEL
 from twilio.rest import TwilioRestClient
-from secrets import USERS
 from datastore import Drinker
 
 
+# This shit be awesome. It requires a twilio account, but
+# there's no better way to hive-mind-fuck with someone.
 @category("sms")
 class Sms(Dendrite):
+
+    client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
+    incoming = []
+    loaded = False
+    current = mktime(localtime())
+    next_ = current + 10
+
     def __init__(self, cortex):
         super(Sms, self).__init__(cortex)
-        self.client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
-        self.incoming = []
-        self.loaded = False
-        self.current = mktime(localtime())
-        self.next_ = self.current + 10
-        self.cx.addlive(self.smsticker)
 
-        return
+        self.cx.addlive(self.smsticker) # This is the addlive example.
 
     def smsticker(self):
 

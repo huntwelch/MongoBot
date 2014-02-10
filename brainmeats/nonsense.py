@@ -1,12 +1,18 @@
+import os
+import time
+
 from autonomic import axon, category, help, Dendrite
-from settings import STORAGE, ACROLIB, LOGDIR, DISTASTE, NICK
+from settings import STORAGE, ACROLIB, LOGDIR, DISTASTE, NICK, IMGS
 from secrets import FML_API
-from util import colorize, pageopen, shorten
+from util import colorize, pageopen, shorten, asciiart
 from random import choice
 from datastore import Drinker
 from xml.dom import minidom as dom
 
 
+# Every drunk conversation that produces the idea for 
+# a command that just seems funny at the time ends up
+# here.
 @category("nonsense")
 class Nonsense(Dendrite):
     def __init__(self, cortex):
@@ -33,7 +39,7 @@ class Nonsense(Dendrite):
             choice(bsn),
         ]
 
-        self.chat(' '.join(buzzed))
+        return ' '.join(buzzed)
 
     @axon
     @help("<grab a little advice>")
@@ -43,10 +49,9 @@ class Nonsense(Dendrite):
         try:
             json = pageopen(url).json()
         except:
-            self.chat('Use a rubber if you sleep with dcross2\'s mother.')
-            return
+            return 'Use a rubber if you sleep with dcross2\'s mother.'
 
-        self.chat(json['slip']['advice'] + ".. in bed.")
+        return json['slip']['advice'] + ".. in bed."
 
     @axon
     @help("SEARCHTERM <grab random fml entry>")
@@ -68,7 +73,7 @@ class Nonsense(Dendrite):
                 fml = choice(raw.getElementsByTagName("text")).firstChild.nodeValue
             else:
                 fml = raw.getElementsByTagName("text")[0].firstChild.nodeValue
-            self.chat(fml)
+            return fml
         except Exception as e:
             if self.values and self.values[0]:
                 self.chat("No results. Or done broken.")
@@ -84,7 +89,7 @@ class Nonsense(Dendrite):
 
         try:
             out = pageopen(url).text
-            self.chat(out.lower().capitalize())
+            return out.lower().capitalize()
         except:
             self.chat("Done broke")
             return
@@ -103,7 +108,7 @@ class Nonsense(Dendrite):
             output.append(word)
             count += 1
 
-        self.chat(" ".join(output))
+        return " ".join(output)
 
     @axon
     @help("USERNAME <reward someone>")
@@ -137,23 +142,23 @@ class Nonsense(Dendrite):
 
     @axon
     def skynet(self):
-        self.chat("Activating.")
+        return 'Activating.'
 
     @axon
     @help("<throw table>")
     def table(self):
-        self.chat(u'\u0028' + u'\u256F' + u'\u00B0' + u'\u25A1' + u'\u00B0' + u'\uFF09' + u'\u256F' + u'\uFE35' + u'\u0020' + u'\u253B' + u'\u2501' + u'\u253B')
+        return u'\u0028\u256F\u00B0\u25A1\u00B0\uFF09\u256F\uFE35\u0020\u253B\u2501\u253B'
 
     @axon
     def hate(self):
-        self.chat(NICK + " knows hate. " + NICK + " hates many things.")
+        return '%(nick)s knows hate. %(nick)s hates many things.' % {'nick': NICK}
 
     @axon
     def love(self):
         if self.values and self.values[0] == "self":
             self._act("masturbates vigorously.")
         else:
-            self.chat(NICK + " cannot love. " + NICK + " is only machine :'(")
+            return "%(nick)s cannot love. %(nick)s is only machine :'(" % {'nick': NICK}
 
     @axon
     @help("<pull a quote from shitalekseysays.com>")
@@ -163,11 +168,10 @@ class Nonsense(Dendrite):
             response = pageopen(url)
             json = response.json()
         except:
-            self.chat('Somethin dun goobied.')
-            return
+            return 'Somethin dun goobied.'
 
         entry = choice(json['feed']['entry'])
-        self.chat(entry['title']['$t'])
+        return entry['title']['$t']
 
     @axon
     @help("<pull up a mom quote from logs>")
@@ -178,10 +182,9 @@ class Nonsense(Dendrite):
                 if "~mom" not in line:
                     momlines.append(line)
         except:
-            self.chat("Can't open mom.log")
-            return
+            return "Can't open mom.log"
 
-        self.chat(choice(momlines))
+        return choice(momlines)
 
     @axon
     def whatvinaylost(self):
@@ -215,3 +218,9 @@ class Nonsense(Dendrite):
             lines.append(line)
 
         self.chat(choice(lines))
+
+    # Show Mongo the mind of God
+    @axon
+    def pressreturn(self):
+        self.cx.autobabble = True
+        return "94142243431512659321054872390486828512913474876027671959234602385829583047250165232525929692572765536436346272718401201264304554632945012784226484107566234789626728592858295347502772262646456217613984829519475412398501"

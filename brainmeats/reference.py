@@ -1,4 +1,6 @@
 import textwrap
+import socket
+import re
 
 from autonomic import axon, alias, category, help, Dendrite
 from bs4 import BeautifulSoup as bs4
@@ -7,19 +9,17 @@ from secrets import WEATHER_API
 from util import unescape, pageopen
 
 
+# There's some semantic overlap between this and some functions
+# in broca, but in general, if it's not about the stockmarket
+# and you want useful iniformation from a simple api or scraper,
+# it goes here.
 @category("reference")
 class Reference(Dendrite):
+
+    safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
+
     def __init__(self, cortex):
         super(Reference, self).__init__(cortex)
-
-        self.safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
-
-    @axon
-    @help("SEARCH_METHOD SEARCH_TERM <look something up in saved search path>")
-    def s(self):
-        if not self.values or len(self.values) < 2:
-            self.chat("Search with -s METHOD TERM(S)")
-            return
 
     @axon
     @help("SEARCH_TERM <look something up in google>")
@@ -49,12 +49,12 @@ class Reference(Dendrite):
         title = result["titleNoFormatting"]
         link = result["unescapedUrl"]
 
-        self.chat(title + " @ " + link)
+        return "%s @ %s" % (title, link)
 
     @axon
     @help("<display link to bot's github repository>")
     def source(self):
-        self.chat(REPO)
+        return REPO
 
     @axon
     @help("[ZIP|LOCATION (ru/moscow)] <get weather, defaults to geo api>")
@@ -97,7 +97,7 @@ class Reference(Dendrite):
         feels = json['feelslike_string']
 
         base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s"
-        self.chat(base % (location, condition, temp, humid, wind, feels))
+        return base % (location, condition, temp, humid, wind, feels)
 
     @axon
     @alias(["urban"])
@@ -115,7 +115,7 @@ class Reference(Dendrite):
             self.chat("parse error")
             return
 
-        elem = soup.find('div', {'class': 'definition'})
+        elem = soup.find('div', {'class': 'meaning'})
 
         try:
             defn = []
@@ -138,11 +138,12 @@ class Reference(Dendrite):
     # This function used to be called calc, but was changed to hack in
     # honor of Ken's incredibly sick exploitation of the eval function,
     # which gave him direct access to the database:
+    #
     # (lambda f=(lambda n:[c for c in ().__class__.__bases__[0].__subclasses__()
     # if c.__name__=='catch_warnings'][0]()._module.__builtins__[n]):
     # f("eval")(f("compile")("d=[c for c in ().__class__.__base__.__subclasses__()
     # if c.__name__=='catch_warnings'][0]()._module.__builtins__['__import__']('datastore');
-    # d.connectdb();e=d.Drinker.objects(name='loxo33')[0];e.awaiting='2013/5/1=loxo33 job hops';
+    # d.connectdb();e=d.Drinker.objects(name='redacted')[0];e.awaiting='2013/5/1=redacted job hops';
     # e.save()","","single")))()
     #
     # Ken, your kung-fu is the strongest.
@@ -159,6 +160,8 @@ class Reference(Dendrite):
             return
 
         string = ' '.join(self.values)
+
+        # This is to stop future Kens
         if "__" in string:
             self.chat("Rejected.")
             return
@@ -168,11 +171,32 @@ class Reference(Dendrite):
         except:
             result = NICK + " not smart enough to do that."
 
-        self.chat(str(result))
+        return str(result)
 
+    @axon
+    def ns(self):
+        if not self.values:
+            self.chat("Lookup what?")
+            return
+
+        lookup = self.values[0]
+
+        try:
+            if re.match(r'^[0-9\.]+$', lookup):
+                resolved = socket.gethostbyaddr(lookup.strip())[0]
+            else:
+                resolved = socket.gethostbyname_ex(lookup.strip())[2][0]
+        except:
+            self.chat("Couldn't find anything.")
+            return
+        
+        return resolved
+
+    # I wanted to do a good whois function, but whois parsing is
+    # a shitshow even stackoverflow balked at. If you know of or
+    # want to create a solid parser for it, go for it. I'll take
+    # that pull request like a crack whore.
     @axon
     @help("URL <get whois information>")
     def whois(self):
-        if not self.values:
-            self.chat("The Doctor")
-            return
+        return "The Doctor"

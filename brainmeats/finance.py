@@ -13,26 +13,28 @@ class Finance(Dendrite):
     @axon
     @help("STOCK_SYMBOL <get stock quote>")
     def q(self):
-        symbol = self.values[0]
 
-        if not symbol:
+        if not self.values:
             self.chat("Enter a symbol")
             return
+
+        symbol = self.values[0]
 
         # I feel like this try shouldn't be necessary,
         # something may have changed in the API
         showit = False
+
         try:
             stock = Stock(symbol)
             showit = stock.showquote(self.context)
-        except:
+        except Exception as e:
             pass
 
         if not showit:
             self.chat("Couldn't find company.")
             return
 
-        self.chat(showit)
+        return showit
 
     @axon
     @help("<get current Bitcoin trading information>")
@@ -62,9 +64,9 @@ class Finance(Dendrite):
                 self.chat("Couldn't compute BTC value.")
                 return
 
-            self.chat('Value of %s BTC is %s' % (self.values[0], value))
+            return 'Value of %s BTC is %s' % (self.values[0], value)
         else:
-            self.chat('Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high))
+            return 'Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high)
 
     @axon
     @help("<get current Litecoin trading information>")
@@ -94,9 +96,9 @@ class Finance(Dendrite):
                 self.chat("Couldn't compute LTC value.")
                 return
 
-            self.chat('Value of %s LTC is %s' % (self.values[0], value))
+            return 'Value of %s LTC is %s' % (self.values[0], value)
         else:
-            self.chat('Litecoin, Last: %s, Low: %s, High: %s' % (last, low, high))
+            return 'Litecoin, Last: %s, Low: %s, High: %s' % (last, low, high)
 
     @axon
     @help("<get current Dogecoin trading information>")
@@ -124,6 +126,6 @@ class Finance(Dendrite):
                 self.chat("Couldn't compute DOGE value.")
                 return
 
-            self.chat('Value of %s DOGE is %s' % (self.values[0], value))
+            return 'Value of %s DOGE is %s' % (self.values[0], value)
         else:
-            self.chat('Dogecoin, Volume-Weighted Average Price: $%s' % (weighted))
+            return 'Dogecoin, Volume-Weighted Average Price: $%s' % (weighted)

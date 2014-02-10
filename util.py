@@ -2,14 +2,28 @@ import time
 import re
 import HTMLParser
 import requests
+import pyotp
+import base64
+import random
+import threading
+
+from PIL import Image
+from bisect import bisect
+
 from settings import CHANNEL, SHORTENER
+from secrets import HTTP_PASS, DELICIOUS_USER, DELICIOUS_PASS
 from collections import OrderedDict
-import time
+
+
+# For onetime stuff
+totp = pyotp.TOTP(base64.b32encode(HTTP_PASS), interval=600)
 
 
 # Utility functions
-def RateLimited(maxPerSecond):
-    # http://stackoverflow.com/questions/667508/whats-a-good-rate-limiting-algorithm
+
+
+# http://stackoverflow.com/questions/667508/whats-a-good-rate-limiting-algorithm
+def ratelimited(maxPerSecond):
     minInterval = 1.0 / float(maxPerSecond)
 
     def decorate(func):
@@ -32,9 +46,6 @@ def unescape(text):
     return parser.unescape(text)
 
 
-# instead of presuming to predict what
-# will be colored, make it easy to prep
-# string elements
 def colorize(text, color):
     colors = {
         "white": 0,
@@ -174,3 +185,71 @@ class Stock(object):
         output = ', '.join(message)
 
         return output
+
+
+def postdelicious(url, title, sender):
+
+    deli = "https://api.del.icio.us/v1/posts/add"
+    params = {
+        "url": url,
+        "description": title,
+        "tags": "%s,%s" % (CHANNEL, sender),
+    }
+
+    if DELICIOUS_USER:
+        auth = requests.auth.HTTPBasicAuth(DELICIOUS_USER, DELICIOUS_PASS)
+        try:
+            send = requests.get(deli, params=params, auth=auth)
+        except:
+            pass
+            
+
+# http://stevendkay.wordpress.com/2009/09/08/generating-ascii-art-from-photographs-in-python/
+# Couldn't have done this with the above link,
+# but there are some problems with the script:
+# if you adapt from it, don't use 'str' as a 
+# variable name unless you want some troubling
+# error messages when you try to debug by casting
+# exceptions with str(), and im = im.thumbnail
+# modifies the original and returns None, so im 
+# is no longer usable.
+def asciiart(image_path):
+    if image_path.find('/') != -1:
+        return
+
+    greyscale = [" "," ",".,-","_ivc=!/|\\~","gjez2]/(YL)t[+T7Vf","mdK4ZGbNDXY5P*Q","W8KMA","#%$"]
+    zonebounds=[36,72,108,144,180,216,252]
+    size = 30
+    out = ""
+
+    img = Image.open(image_path)
+    img.thumbnail((size, size), Image.ANTIALIAS)
+    img = img.resize((size*2, size))
+    img = img.convert("L")
+
+    for y in range(0,img.size[1]):
+        for x in range(0,img.size[0]):
+            lum = 255 - img.getpixel((x,y))
+            row = bisect(zonebounds,lum)
+            possibles = greyscale[row]
+            out += possibles[random.randint(0,len(possibles)-1)]
+        out += "\n"
+
+    return out
+
+
+def savefromweb(url, path):
+    thread = threading.Thread(target=savethread, args=(url, path))
+    thread.start()
+    return
+
+def savethread(url, path):
+    r = requests.get(url, stream=True)
+
+    if r.status_code != 200:
+        return
+
+    with open(path, 'w+') as f:
+        for chunk in r.iter_content(1024):
+            f.write(chunk)
+        f.close()

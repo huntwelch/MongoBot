@@ -3,7 +3,7 @@ import os
 from functools import wraps
 from flask import request, Response
 from secrets import HTTP_USER, HTTP_PASS
-from settings import ONETIME
+from util import totp
 
 
 def check_auth(username, password):
@@ -23,20 +23,9 @@ def authenticate():
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-
         if request.args.get('onetime'):
-            try:
-                file = open(ONETIME, 'r')
-                current = file.readline()
-                file.close()
-
-                print current == request.args.get('onetime')
-
-                if request.args.get('onetime') == current:
-                    os.remove(ONETIME)
-                    return f(*args, **kwargs)
-            except:
-                print "Failed to open"
+            if totp.verify(int(request.args.get('onetime'))):
+                return f(*args, **kwargs)
 
         auth = request.authorization
 

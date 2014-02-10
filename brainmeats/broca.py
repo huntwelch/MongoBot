@@ -4,28 +4,32 @@ import re
 import string
 import random
 import redis
+import time
 
 from threading import Thread
 from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API
-from settings import NICK, STORAGE, ACROLIB, LOGDIR, RAW_TEXT
-from datastore import Words, Learned, Structure, Markov
+from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, REDIS_SOCK
+from datastore import Words, Learned, Structure
 from random import choice, randint
-from util import pageopen
+from util import pageopen, savefromweb
 from bs4 import BeautifulSoup as soup
 from wordnik import swagger, WordApi
 
 
+# Much fail here. I study up on NLTK at the rate
+# of 5 minutes a month. The miscellaneous language 
+# functions usually work, and of course the markov
+# is done here.
 @category("language")
 class Broca(Dendrite):
+
+    markov = redis.StrictRedis(unix_socket_path=REDIS_SOCK) 
+    readstuff = False
+    knowledge = False
+
     def __init__(self, cortex):
         super(Broca, self).__init__(cortex)
-
-        self.markov = redis.StrictRedis(unix_socket_path='/tmp/redis.sock') 
-
-        self.readstuff = False
-        self.knowledge = False
-
 
     @axon
     def mark(self, line):
@@ -46,41 +50,145 @@ class Broca(Dendrite):
                 self.markov.set(prefix, follow)
 
     @axon
+    @help("URL_OF_TEXT_FILE <Make " + NICK + " read something>")
+    def read(self):
+        if not self.values:
+            self.chat("Read what?")
+            return
+
+        book = self.values[0]
+        if book[-4:] != '.txt':
+            self.chat("Plain text file only. %s purist." % NICK)
+            return
+
+        name = "%s_%s.txt" % ( int(time.mktime(time.localtime())), self.lastsender )
+        path = BOOKS + name
+
+        try:
+            savefromweb(book, path)    
+        except Exception as e:
+            self.chat("Could not find book.")
+            self.chat(str(e))
+            return
+
+        with open(path) as b:
+            for line in b:
+                self.mark(line)
+
+        self.chat("Eh, I like his older, funnier work.")
+
+    # MongoBot's ability to run a markov chain is a large
+    # part of the reason I started working on mongo in the
+    # first place.
+    # 
+    # (cough)
+    #
+    # So MongoBot was made on a whim in the chatroom of his 
+    # birth just because I wanted to know how to make a bot.
+    # Since at the time I was pretty checked out of my job
+    # I put an awful lot of work into him, and he eventually
+    # edged out ExStaffRobot as the dominant bot.
+    # 
+    # ExStaffRobot itself was a descendent of StaffRobot, 
+    # the dev irc chatbot that warned us about failures and
+    # stuff at OkCupid (the Staff Robot that pops up all
+    # over OkCupid is itself a rendering of this StaffRobot
+    # by one of the frontend designers. He and I never got
+    # on, but he does draw a mean bot). This StaffRobot had
+    # a markov chat function in it, which I didn't really 
+    # understand at the time, as I was scared of all these
+    # awesome CS majors, and was, essentially, an out-of-work
+    # film student who only got the job because a few of the
+    # powers that were didn't think frontend programmers
+    # needed to be very smart. But I really wanted to put a 
+    # markov chain in my bot, partly to understand and because
+    # I missed the old bot after one of the founders bitched
+    # about it being annoying until we had to turn it off,
+    # and another small piece of the personality that kept me
+    # at the job through the first year of death camp hours
+    # was wicked away.
+    #
+    # So three years after MongoBot made his first appearance
+    # I finally faced my fears of inferiority and looked up
+    # a markov chain on wikipedia, where I discovered it was,
+    # in fact, totally fucking trivial.
+    #
+    # It reminds me a bit of a video editor who was training
+    # me on an internship, and I asked him how to do split
+    # screen and he said he didn't think I was ready for that
+    # yet, so I just taught myself. When he found out, he
+    # got so upset he walked out of the room. Point is, 
+    # Americans have some seriously fucked up problems with
+    # their opinions on the nature and value of intelligence.
+    @axon
+    @alias(["waxrhapsodic"])
     @help("<Make " + NICK + " speak markov chain>")
     def babble(self):
-        seed = self.markov.randomkey()
-        words = []
+        if self.values:
+            if len(self.values) > 1:
+                pattern = "%s %s" % (self.values[0], self.values[1])
+            else:
+                pattern = "*%s*" % self.values[0]
 
-        words.append(seed)
+            matches = self.markov.keys(pattern)
+
+            if not matches:
+                self.chat('Got nothin')
+                return
+
+            seed = random.choice(matches)
+        else:
+            seed = self.markov.randomkey()
+
+        words = seed.split()
+
         follows = self.markov.get(seed)
         follows = follows.split(',')
         words.append(random.choice(follows))
 
-        while True:
-            tail = "%s %s" % (words[-2:-1], words[-1])
-            add = self.markov.get(tail)
-            if not add:
-                break
-            follows = self.markov.get(seed)
+        suspense = [
+            'and', 'to', 'a', 'but', 'very',
+            'the', 'when', 'how', '', ' ', 'my',
+            'its', 'of', 'is',
+        ]
+
+        while len(words) < BABBLE_LIMIT:
+            tail = "%s %s" % (words[-2], words[-1])
+            follows = self.markov.get(tail)
+            if not follows:
+                if words[-1].lower().strip() in suspense:
+                    seed = self.markov.randomkey() 
+                    follows = self.markov.get(seed)
+                else:
+                    break
             follows = follows.split(',')
             words.append(random.choice(follows))
 
-        self.chat(" ".join(words))
+        words = ' '.join(words)
+        rep = re.compile('[\()\[\]"]')
+        words = rep.sub('', words)
+        words = words.split()
+        words = ' '.join(words)
 
-    @axon
-    @help("<Make " + NICK + " read books>")
-    def readup(self):
-        if self.knowledge:
-            self.chat("Already read today.")
-            return
+        return words
 
-        self.chat("This may take a minute.")
-        books = open(RAW_TEXT, 'r')
-        data = books.read().replace('\n', ' ')
-        tokens = nltk.word_tokenize(data)
-        self.knowledge = nltk.Text(tokens)
+    # This is kind of sluggish and kldugey,
+    # and sort of spiritually been replaced by
+    # the read function above.
+    #
+    # @axon
+    # def readup(self):
+    #     if self.knowledge:
+    #         self.chat("Already read today.")
+    #         return
 
-        self.chat("Okay, read all the things.")
+    #     self.chat("This may take a minute.")
+    #     books = open(RAW_TEXT, 'r')
+    #     data = books.read().replace('\n', ' ')
+    #     tokens = nltk.word_tokenize(data)
+    #     self.knowledge = nltk.Text(tokens)
+
+    #     self.chat("Okay, read all the things.")
 
     @axon
     @help("<command " + NICK + " to speak>")
@@ -121,11 +229,15 @@ class Broca(Dendrite):
             definition = self.definitions[which]["definition"]
         except:
             self.chat("Can't find a definition. Pinging wordnik...")
-            self.seekdef(word)
+            try:
+                self.seekdef(word)
+            except Exception as e:
+                self.chat("Wordnik broke.", error=str(e))
             return
 
-        self.chat(str(len(self.definitions)) + " definitions for " + word)
-        self.chat("Definition " + str(which + 1) + ": " + definition)
+        self.chat("%s definitions for %s" % (str(len(self.definitions)), word))
+
+        return "Definition %s: %s" % (str(which + 1), definition)
 
     def seekdef(self, word):
         if not WORDNIK_API:
@@ -133,7 +245,6 @@ class Broca(Dendrite):
             return
 
         client = swagger.ApiClient(WORDNIK_API, 'http://api.wordnik.com/v4')
-
         wapi = WordApi.WordApi(client)
         results = wapi.getDefinitions(word.strip())
 
@@ -189,6 +300,11 @@ class Broca(Dendrite):
         except:
             pass
 
+    # This is where all the conversational tics and 
+    # automatic reactions are set up. Also, for some
+    # reason, the mom log, because it's awesome but
+    # maybe not cortex material. Is the name of this
+    # function in poor taste? Yes.
     def tourettes(self, sentence, nick):
         if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
             open(LOGDIR + "/mom.log", 'a').write(sentence + '\n')
@@ -202,7 +318,7 @@ class Broca(Dendrite):
             self.chat("yeah WHAT?? Oh yes he DID")
             return
 
-        if sentence.lower().find("'murican") != -1:
+        if sentence.lower().find("murican") != -1:
             self.chat("fuck yeah")
             return
 
@@ -211,16 +327,21 @@ class Broca(Dendrite):
             return
 
         if sentence.lower().find("stop") == len(sentence) - 4 and len(sentence) != 3:
-            self.chat("Hammertime")
+            stops = [
+                'Hammertime',
+                "Children, what's that sound",
+                'Collaborate and listen',
+            ]
+            self.chat(random.choice(stops))
             return
 
+        # There's a very good reason for this.
         if sentence == "oh shit its your birthday erikbeta happy birthday" and self.lastsender == "jcb":
             self._act(" slaps jcb")
             self.chat("LEAVE ERIK ALONE!")
             return
 
     @axon
-    @alias(["waxhapsodic"])
     @help("<command " + NICK + " to speak>")
     def speak(self):
         sentence = []
@@ -265,7 +386,7 @@ class Broca(Dendrite):
             return
 
         output = self.acronymit(self.values[0])
-        self.chat(output)
+        return output
 
     def acronymit(self, base):
         acronym = list(base.upper())
@@ -321,11 +442,15 @@ class Broca(Dendrite):
         if ord < 0:
             ord = 0
 
-        _word = ''.join(heads[ord].findAll(text=True)).encode("utf-8")
-        _def = ''.join(defs[ord].findAll(text=True)).encode("utf-8")
+        try:
+            _word = ''.join(heads[ord].findAll(text=True))
+            _def = ''.join(defs[ord].findAll(text=True))
+        except Exception as e:
+            self.chat('Failed to parse.', error=e)
+            return
 
-        self.chat("Etymology " + str(ord + 1) + " of " + str(len(defs)) +
-                  " for " + _word + ": " + _def)
+        return "Etymology %s of %s for %s: %s" % (str(ord + 1), str(len(defs)), _word, _def)
+
 
     # TODO: broken, not sure why
     @axon
@@ -336,7 +461,7 @@ class Broca(Dendrite):
             return
 
         word = '+'.join(self.values)
-        url = "http://wordsmith.org/anagram/anagram.cgi?anagram=" + word + "&t=50&a=n"
+        url = 'http://wordsmith.org/anagram/anagram.cgi?anagram=%s&t=50&a=n' % word
 
         urlbase = pageopen(url)
         if not urlbase:
@@ -349,16 +474,13 @@ class Broca(Dendrite):
             self.chat("No anagrams found.")
             return
 
+        # This is a really shaky way to parse a
+        # page, but it's all I had to go on.
         try:
             paragraph = cont.findAll("p")[3]
             content = ','.join(paragraph.findAll(text=True))
             content = content[2:-4]
             content = content.replace(": ,", ": ")
-            self.chat(content)
-
-        # Usually not concerned with exceptions
-        # in mongo, but this is bound to come up
-        # again.
+            return content
         except Exception as e:
-            print e
-            self.chat("Got nothin")
+            self.chat("Couldn't parse.", str(e))

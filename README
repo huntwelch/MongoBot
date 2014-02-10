@@ -7,96 +7,37 @@ Getting Started
     To run bot: python medulla.py
     To run bot persistently so it will recover from crashes: python doctor.py
 
+    You'll need to install MongoDB to use most of the features relating to people
+
+
+Dafuq is going on?
+==================
+
+    For best results in answering this question, check out settings.py, 
+    followed by medulla.py and cortex.py. Also, learn python. 
+
+
 Advanced Usage
 ==============
 
     MongoBot is capable of running a number of web services and apis. For best
-    results, run it on an nginx server via uwsgi. And by best results, I mean
-    any.
+    results, run an nginx server and uwsgi server/deploy.ini. And by best results, 
+    I mean any. More documentation on this once I figure out how I did it the 
+    first time.
 
     Also, the markov functionality is based on redis, so you'll have to get a 
     redis server up and running. Also, the markov stuff might be broken, it's
     pretty recent and so far just spitting out three word phrases, but that
     might be due to dearth of content.
 
+
 Secret settings
 ===============
 
-    You will need to create a file in the root folder called secrets.py,
-    containing the following variables:
+    You will need to create a file in the root folder called secrets.py.
+    example.secrets.py has descriptions of each setting, just copy it to
+    secrets.py and set away.
 
-    CHANNEL = "#room_for_bot_to_join"
-    USERS = ['nickname_allowed_to_use_bot1', ...]
-
-    IMPORTANT: For the following items, if you do NOT want to use them,
-    set them up in the secrets file anyway, set to empty strings.
-
-    If you want the bot to automatically post to delicious:
-
-    DELICIOUS_USER = ""
-    DELICIOUS_PASS = ""
-
-    To use the -weather command. Accesses http://api.wunderground.com
-
-    WEATHER_API = "" 
-
-    To use wordnik:
-
-    WORDNIK_API = ""
-
-    To use the -fml command:
-
-    FML_API = ""
-
-    To enable sms messaging via Twilio:
-
-    TWILIO_SID = ""
-    TWILIO_TOKEN = ""
-    TWILIO_NUMBER = ""
-
-    And there's some pending work coming for wolfram, so may as well:
-
-    WOLFRAM_API = ""
-
-Social Secret Settings
-======================
-
-    You will need to host a website to properly setup apis.
-    MongoBot is setup with uwsgi to run ontop of a(n?) nginx server.
-    You're going to have to figure that one out on your own
-    for the moment.
-
-    HTTP_USER = ""
-    HTTP_PASS = ""
-
-    The following settings should be set for google/twitter/facebook functionality.
-
-    Note it's not necessary to recycle GOOGLE_USER in this fashion but works for simplicity.
-
-    GOOGLE_USER = ""
-    GOOGLE_PASS = ""
-    
-    FB_USER = GOOGLE_USER + "@gmail.com"
-    FB_PASS = ""
-    FB_PAGE = ""
-    
-    FB_MONGOBOT_APPID = ""
-    FB_MONGOBOT_SECRET = ""
-    
-    TWIT_USER = GOOGLE_USER + "@gmail.com"
-    TWIT_PASS = ""
-    TWIT_PAGE = ""
-    
-    TWIT_CONSUMER_KEY = ""
-    TWIT_CONSUMER_SECRET = ""
-    TWIT_ACCESS_TOKEN = ""
-    TWIT_ACCESS_SECRET = ""
-
-
-    ... And of course, when you need to peruse reddit.
-
-    REDDIT_APPID = ""
-    REDDIT_SECRET = ""
 
 New features
 ============
@@ -113,15 +54,51 @@ New features
     a class Category_name. Loading of this class will be automated, no
     other files need to be altered.
 
+
+Philosophies
+===========
+
+    Don't nest logic when you can short circuit.
+
+    BAD:
+
+    if blah:
+        for x in stuff:
+            do stuff
+
+    GOOD:
+
+    if not blah:
+        return
+
+    for x in stuff:
+        do stuff
+    
+    Try to stick to single quotes wherever possible.
+
+    String interpolation is better than adding up strings. I'm totally 
+    not great at remembering this, but I'm trying.
+
+    When using in the chat room, you can pipe commands, i.e.:
+
+    -babble Zaphod | -tweet
+
+    ... will tweet whatever babble spits out.
+
+    If you want a function to be pipeable to other functions, return the output
+    instead of just chatting from the function. 
+    
+    Why would anyone add piping to a chat bot? I dunno. Things got out of hand.
+
 To Do
 =====
 
     TODO: Probably make this readme better
-    TODO: reddit command break without specified subreddit
-    TODO: dafuq is wrong with the -all command
+    TODO: reddit command breaks without specified subreddit
     TODO: Clean up broca, decide what to do with it
     TODO: link holdem to db, make persistant, open up sit/in/out functionality
     TODO: finish holdem, needs testing and split pots probably don't work
-    TODO: fix rate limiting problems with acro
     TODO: stock game: account for splits and reverse splits
-    TODO: remove last of beautiful soup dependencies
+    TODO: remove last of beautiful soup dependencies, if possible
+    TODO: add @requires decorator, check for server, redis, mongo, have -features command to check.
+          Function by function level? 

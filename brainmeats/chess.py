@@ -1,38 +1,43 @@
 from autonomic import axon, category, help, Dendrite
 
 
+# This isn't actually playable without an 
+# enormous ammount of trust between the players.
+# Always wanted to do more with it, but, well,
+# I haven't.
 @category("chess")
 class Chess(Dendrite):
+
+    pieces = dict(
+        br=u'\u265c',
+        bn=u'\u265e',
+        bb=u'\u265d',
+        bq=u'\u265b',
+        bk=u'\u265a',
+        bp=u'\u265f',
+        wr=u'\u2656',
+        wn=u'\u2658',
+        wb=u'\u2657',
+        wq=u'\u2655',
+        wk=u'\u2654',
+        wp=u'\u2659',
+    )
+
+    basegrid = [
+        ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
+        ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
+        ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr'],
+    ]
+
+    chessgrid = basegrid
+
     def __init__(self, cortex):
         super(Chess, self).__init__(cortex)
-
-        self.pieces = dict(
-            br=u'\u265c',
-            bn=u'\u265e',
-            bb=u'\u265d',
-            bq=u'\u265b',
-            bk=u'\u265a',
-            bp=u'\u265f',
-            wr=u'\u2656',
-            wn=u'\u2658',
-            wb=u'\u2657',
-            wq=u'\u2655',
-            wk=u'\u2654',
-            wp=u'\u2659',
-        )
-
-        self.basegrid = [
-            ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
-            ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
-            ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr'],
-        ]
-
-        self.chessgrid = self.basegrid
 
     @axon
     @help("<reset chessboard>")

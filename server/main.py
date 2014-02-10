@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+# Welcome to the server. If you've install uwsgi and nginx
+# and that nginx server is running and then ran uwsgi server/deploy.ini,
+# yay! You can use this. This runs a couple of simple pages, a 
+# chatlog interface, and an error log behind an http auth or the
+# temporary password thing. Will eventually document how to get it
+# up and running more extensively.
+
+
 import simplejson as json
 
 from flask import Flask, request, session, g, redirect, url_for, abort, \

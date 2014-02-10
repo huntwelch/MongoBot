@@ -9,13 +9,19 @@ from settings import INSULTS, INSULT, STORAGE, TIME_FACTOR, \
     BOTPLAY, NICK
 
 
+# This is probably the first official brainmeat, as we
+# realized it was just to big to stuff into the cortex.
+# It's also some of the oldest and least attended code,
+# even after it was rewritten in the Great Brainmat 
+# Transition. There's at least one bug, but I haven't gotten
+# to it, as it's not a deal breaker, it's just exploitable.
 @category("acro")
 class Acro(Dendrite):
 
+    active = False
+
     def __init__(self, cortex):
         super(Acro, self).__init__(cortex)
-
-        self.active = False
 
     @axon
     @help("[pause|resume|end] <start/pause/resume/end acro game>")
@@ -49,6 +55,7 @@ class Acro(Dendrite):
     def boards(self):
         scores = {}
 
+        # This is obviously a nonsense thing to do in the long term.
         for path, dirs, files in os.walk(os.path.abspath(ACROSCORE)):
             for file in files:
                 for line in open(path + "/" + file):
@@ -72,12 +79,12 @@ class Acro(Dendrite):
     @axon
     @help("<print the rules for the acro game>")
     def acrorules(self):
-        self.chat("1 of 6 start game with ~acro.")
-        self.chat("2 of 6 when the acronym comes up, type /msg " + NICK + " your version of what the acronym stands for.")
-        self.chat("3 of 6 each word of your submission is automatically updated unless you preface it with '-', so 'do -it up' will show as 'Do it Up'.")
-        self.chat("4 of 6 when the voting comes up, msg " + NICK + " with the number of your vote.")
+        self.chat("1 of 6 start game with %sacro." % CONTROL_KEY)
+        self.chat("2 of 6 when the acronym comes up, type /msg %s your version of what the acronym stands for." % NICK)
+        self.chat("3 of 6 each word of your submission is automatically uppercased unless you preface it with '-', so 'do -it up' will show as 'Do it Up'.")
+        self.chat("4 of 6 when the voting comes up, msg %s with the number of your vote." % NICK)
         self.chat("5 of 6 play till the rounds are up.")
-        self.chat("6 of 6 " + NICK + " plays by default. Run ~update BOTPLAY False to turn it off.")
+        self.chat("6 of 6 %s plays by default. Run %supdate BOTPLAY False to turn it off." % (NICK, CONTROL_KEY))
 
     def gimper(self, check, action, penalty):
         gimps = []

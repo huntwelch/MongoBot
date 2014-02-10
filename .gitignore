@@ -1,4 +1,5 @@
 *.log
+*.log.*
 *.pyc
 *.swp
 *.game
@@ -8,7 +9,8 @@
 .pydevproject
 natwords
 wordbank
-secrets.py
 introductions
+allowed
 python.core
-raw
+secrets.py
+junk/*

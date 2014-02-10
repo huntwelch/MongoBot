@@ -1,7 +1,11 @@
 import mongoengine
+
 from mongoengine import *
 from settings import STARTING_CASH
 
+
+# All mongodb stuff. I've been told this would be 
+# better done with sqlite. Some day.
 
 def connectdb():
     mongoengine.connect('bot', host='localhost')
@@ -52,8 +56,10 @@ def entityScore(whom):
         return 0
     return entity.value
 
+
 def topScores(limit):
     return Entity.objects.order_by('-value').limit(limit)
+
 
 class Entity(mongoengine.Document):
     name = StringField(required=True)
@@ -84,11 +90,6 @@ class Words(mongoengine.Document):
     partofspeech = StringField(required=True)
     definition = StringField(required=True)
     source = StringField(required=True)
-
-
-class Markov(mongoengine.Document):
-    prefix = StringField()
-    follow = ListField(StringField())
 
 
 class Learned(mongoengine.Document):

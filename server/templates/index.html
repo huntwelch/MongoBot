@@ -13,10 +13,13 @@
             margin-top: -150px;
             margin-left: -150px;
         }
+        a img {
+            border: none;
+        }
     </style>
 {% endblock %}
 {% block content %}
 <p id="mongo">
-    <img src="{{ url_for('static', filename='img/mongobot.png') }}" alt="MongoBot live..." />
+    <a href="https://github.com/huntwelch/MongoBot"><img src="{{ url_for('static', filename='img/mongobot.png') }}" alt="MongoBot live..." /></a>
 </p>
 {% endblock %}

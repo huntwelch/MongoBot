@@ -1,14 +1,22 @@
 import os
 import re
+import pkgutil
 
-from autonomic import axon, category, help, Dendrite
-from settings import SAFESET, NICK, IDENT, HOST, REALNAME
+from autonomic import axon, category, help, Dendrite, public, alias
+from settings import SAFESET, NICK, HOST, REGISTERED
 from secrets import *
+from util import colorize
 from time import sleep
 
 
+# System is stuff relating to the function of the
+# the bot and the server. There's some potentially 
+# dangerous shit in here.
 @category("system")
 class System(Dendrite):
+
+    libs = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
+
     def __init__(self, cortex):
         super(System, self).__init__(cortex)
 
@@ -21,6 +29,38 @@ class System(Dendrite):
             sleep(1)
             self.chat(name + " : " + str(value))
 
+    # This should be pretty straightforward. Based on BOT_PASS
+    # in secrets; nobody can use the bot until they're 
+    # registered. Went with flat file for ease of editing
+    # and manipulation.
+    @axon
+    @public
+    @help("PASSWORD <register your nick and host to use the bot>")
+    def regme(self):
+        if not self.values:
+            self.chat("Please enter a password.")
+            return
+        
+        if self.values[0] != BOT_PASS:
+            self.chat("Not the password.")
+            return
+
+        real = self.cx.lastrealsender
+        if real in self.cx.REALUSERS:
+            self.chat("Already know you, bro.")
+            return
+        
+        self.cx.REALUSERS.append(real)
+
+        users = open(REGISTERED, 'a')
+        users.write(real + "\n")
+        users.close()
+
+        self.chat("You in, bro.")
+
+    # Rewite a setting in the settings file. Available settings
+    # are defined in SAFESET. Do not put SAFESET in the SAFESET.
+    # That's just crazy.
     @axon
     @help("SETTING=VALUE <update a " + NICK + " setting>")
     def update(self, inhouse=False):
@@ -58,16 +98,27 @@ class System(Dendrite):
 
         self.chat(NICK + " rewrite brain. Feel smarter.")
 
+    # Reloads the bot. Any changes make to cortex or brainmeats
+    # and most settings will be reflected after a reload.
     @axon
     @help("<reload " + NICK + ">")
     def reload(self):
+        meats = self.cx.brainmeats
+        if 'webserver' in meats:
+            meats['webserver'].reloadserver(True)
         self.cx.master.reload()
 
+    # Actually kills the medulla process and waits for the 
+    # doctor to restart. Some settings and any changes to 
+    # medulla.py won't take effect until a reboot.
     @axon
+    @alias(['seppuku', 'harakiri'])
     @help("<set squirrel on fire and staple it to angel. No, really>")
     def reboot(self):
         self.cx.master.die()
 
+    # A shortcut to the update function to change nick. Also
+    # tells the irc server.
     @axon
     @help("NICKNAME <change " + NICK + "'s name>")
     def nick(self):
@@ -87,6 +138,10 @@ class System(Dendrite):
         self.update(['NICK', name])
         self.reboot()
 
+    # DANGER ZONE. You merge it, anyone can pull it. If you
+    # have a catastrophic failure after this, it's probably
+    # because of a conflict with local changes. But will it
+    # tell you that's what happened? HELL no.
     @axon
     @help("<update from git repo>")
     def gitpull(self):
@@ -94,6 +149,98 @@ class System(Dendrite):
         self.cx.master.reload(True)
         self.chat("I know kung-fu.")
 
+    # Show libs.
+    @axon
+    @help("<show available libs and their status>")
+    def meats(self):
+        _libs = []
+        for lib in self.libs:
+            if lib not in self.cx.master.ENABLED:
+                _libs.append(colorize(lib, 'red')) 
+            else:
+                _libs.append(colorize(lib, 'green')) 
+
+        self.chat(', '.join(_libs))
+
+    # Turn libs on.
+    @axon
+    @help("LIB_1 [LIB_n] <activate libraries>")
+    def enable(self):
+        if not self.values:
+            self.chat("Enable what?")
+            return
+
+        if self.values[0] == '*':
+            values = self.libs
+        else:
+            values = self.values
+
+        already = []
+        nonextant = []
+        enabled = []
+        for lib in values:
+            if lib in self.cx.master.ENABLED:
+                already.append(lib) 
+            elif lib not in self.libs:
+                nonextant.append(lib)
+            else:
+                enabled.append(lib)
+                self.cx.master.ENABLED.append(lib)
+
+        messages = []
+        if len(already):
+            messages.append('%s already enabled.' % ', '.join(already))
+            
+        if len(nonextant):
+            messages.append("%s don't exist." % ', '.join(nonextant))
+            
+        if len(enabled):
+            messages.append("Enabled %s." % ', '.join(enabled))
+            
+        self.cx.master.reload(True)
+
+        self.chat(' '.join(messages))
+
+    # Turn libs off. Why all this lib stuff? Helps when developing, so
+    # you can just turn stuff off while you tinker and prevent crashes.
+    @axon
+    @help("LIB_1 [LIB_n] <deactivate libraries>")
+    def disable(self):
+        if not self.values:
+            self.chat("Disable what?")
+            return
+
+        if 'system' in self.values:
+            self.chat("You can't disable the system, jackass.")
+            return
+
+        already = []
+        nonextant = []
+        disabled = []
+        for lib in self.values:
+            if lib not in self.libs:
+                nonextant.append(lib)
+            elif lib not in self.cx.master.ENABLED:
+                already.append(lib) 
+            else:
+                disabled.append(lib)
+                self.cx.master.ENABLED.remove(lib)
+
+        messages = []
+        if len(already):
+            messages.append('%s already disabled.' % ', '.join(already))
+            
+        if len(nonextant):
+            messages.append("%s don't exist." % ', '.join(nonextant))
+            
+        if len(disabled):
+            messages.append("Disabled %s." % ', '.join(disabled))
+            
+        self.cx.master.reload(True)
+
+        self.chat(' '.join(messages))
+
+    # Show secret stuff.
     @axon
     @help("<print api keys and stuff>")
     def secrets(self):

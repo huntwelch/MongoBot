@@ -3,84 +3,135 @@ import re
 import shutil
 import pkgutil
 import requests
+import socket
+import time
+import string
 
 from bs4 import BeautifulSoup as bs4
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+from pytz import timezone
 from time import mktime, localtime, sleep
 from random import randint
 
-from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, \
-    OWNER, REALNAME, SCAN
-from secrets import CHANNEL, DELICIOUS_PASS, DELICIOUS_USER, USERS
+from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, \
+    STORE_IMGS, IMGS, REGISTERED, TIMEZONE
+from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY
 from datastore import Drinker, connectdb
-from util import unescape, pageopen, shorten, RateLimited
+from util import unescape, pageopen, shorten, ratelimited, postdelicious, savefromweb
 from autonomic import serotonin
 
 
+# Basically all the interesting interaction with
+# irc and command / content parsing happens here.
+# Also connects to mongodb.
 class Cortex:
+
+    context = CHANNEL
+
+    master = False
+    sock = False
+    values = False
+    lastpublic = False
+    replysms = False
+    lastprivate = False
+    lastsender = False
+    gettingnames = True
+    memories = False
+    autobabble = False
+
+    public_commands = []
+    helpcategories = []
+    members = []
+    guests = [] 
+    REALUSERS = []
+
+    commands = {}
+    live = {}
+    helpmenu = {}
+
+    boredom = int(mktime(localtime()))
+    namecheck = int(mktime(localtime()))
+
     def __init__(self, master):
 
-        print "* Initializing"
-        self.values = False
+        print '* Initializing'
         self.master = master
-        self.context = CHANNEL
-        self.lastpublic = False
-        self.replysms = False
-        self.lastprivate = False
-        self.lastsender = False
         self.sock = master.sock
-        self.gettingnames = True
-        self.members = []
-        self.memories = False
-        self.boredom = int(mktime(localtime()))
-        self.namecheck = int(mktime(localtime()))
-        self.live = {}
 
-        self.helpmenu = {}
-        self.commands = {
-            "help": self.showlist,
-        }
-        self.helpcategories = []
+        self.commands['help'] = self.showlist
 
-        print "* Loading brainmeats"
+        print '* Loading brainmeats'
         self.loadbrains()
 
-        print "* Connecting to datastore"
+        print '* Loading users'
+        users = open(REGISTERED, 'r')
+        self.REALUSERS = users.read().splitlines()
+        users.close()
+
+        print '* Connecting to datastore'
         connectdb()
 
+    # Loads up all the files in brainmeats and runs them 
+    # through the hookup process.
     def loadbrains(self, electroshock=False):
         self.brainmeats = {}
-        brainmeats = __import__("brainmeats", fromlist=[])
+        brainmeats = __import__('brainmeats', fromlist=[])
         if electroshock:
             reload(brainmeats)
 
         areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
 
         for area in areas:
+            if area not in self.master.ENABLED:
+                continue
+
             print area
             try:
-                mod = __import__("brainmeats", fromlist=[area])
+                mod = __import__('brainmeats', fromlist=[area])
                 mod = getattr(mod, area)
                 if electroshock:
                     reload(mod)
                 cls = getattr(mod, area.capitalize())
                 self.brainmeats[area] = cls(self)
             except Exception as e:
-                self.chat("Failed to load " + area + ".")
-                print "Failed to load " + area + "."
+                self.chat('Failed to load %s.' % area, error=str(e))
+                print 'Failed to load %s.' % area
                 print e
 
         for brainmeat in self.brainmeats:
             serotonin(self, self.brainmeats[brainmeat], electroshock)
 
+    # I'll be frank, I don't have that great a grasp on
+    # threading, and despite working with people who do,
+    # there were a number of live processes that thread
+    # solutions weren't solving.
+    #
+    # The solution was to have everything that needs to 
+    # run live run on one ticker. If you need something
+    # to run continuously, add this to the __init__ of
+    # your brainmeat:
+    #
+    # self.cx.addlive(self.ticker)
+    #
+    # ticker being the function in the class that runs.
+    # see brainmeats/sms.y for a good example of this.
     def addlive(self, func):
         self.live[func.__name__] = func
 
     def droplive(self, name):
-        self.live[name] = False
+        self.live.remove(name)
 
+    # Core automatic stuff. I firmly believe boredom to
+    # be a fundamental process in both man and machine.
     def parietal(self, currenttime):
-        if currenttime - self.namecheck > 300:
+
+        # This should really just be an addlive. Maybe
+        # the other two functions, too.
+        calendar = datetime.now(timezone(TIMEZONE))
+        if calendar.hour in MEETUP_NOTIFY and 'peeps' in self.brainmeats:
+            self.brainmeats['peeps'].meetup(calendar.hour)
+
+        if currenttime - self.namecheck > 60:
             self.namecheck = int(mktime(localtime()))
             self.getnames()
 
@@ -90,9 +141,13 @@ class Cortex:
                 self.bored()
 
         for func in self.live:
-            if self.live[func]:
-                self.live[func]()
+            self.live[func]()
 
+    # And this is basic function that runs all the time.
+    # The razor qualia edge of consciousness, if you will
+    # (though you shouldn't). It susses out the important
+    # info, logs the chat, sends PONG, finds commands, and
+    # decides whether to send new information to the parser.
     def monitor(self):
         currenttime = int(mktime(localtime()))
         self.parietal(currenttime)
@@ -103,22 +158,23 @@ class Cortex:
         except:
             return
 
-        for line in lines.split("\n"):
+        for line in lines.split('\n'):
             line = line.strip()
 
-            if re.search("^:" + NICK + "!~" + REALNAME + "@.+ JOIN " + CHANNEL + "$", line):
+            if re.search('^:' + NICK + '!~' + REALNAME + '@.+ JOIN ' + CHANNEL + '$', line):
                 print "* Joined " + CHANNEL
+                self.getnames()
 
             if self.gettingnames:
-                if line.find("* " + CHANNEL) != -1:
-                    all = line.split(":")[2]
+                if line.find('@ ' + CHANNEL) != -1:
+                    all = line.split(':')[2]
                     self.gettingnames = False
                     all = re.sub(NICK + ' ', '', all)
-                    self.members = all.split()
+                    self.members += list(set(all.split()) - set(self.members))
 
             scan = re.search(SCAN, line)
-            ping = re.search("^PING", line)
-            pwd = re.search(":-passwd", line)
+            ping = re.search('^PING', line)
+            pwd = re.search(':-passwd', line)
             if line != '' and not scan and not ping and not pwd:
                 self.logit(line + '\n')
 
@@ -136,7 +192,89 @@ class Cortex:
 
                 self.parse(line)
 
+    # Le parser. This used to be a very busy function before
+    # most of its actions got moved to the nonsense and 
+    # broca brainmeats.
+    def parse(self, msg):
+        pwd = re.search(':-passwd', msg)
+        if not pwd:
+            print msg
+
+        info, content = msg[1:].split(' :', 1)
+        try:
+            sender, type, room = info.strip().split()
+        except:
+            return
+
+        try:
+            nick, data = sender.split('!')
+            realname, ip = data.split('@')
+            ip = socket.gethostbyname_ex(ip.strip())[2][0]
+            realname = realname[1:]
+            self.lastrealsender = '%s@%s' % (realname, ip)
+        except:
+            return
+
+        if nick not in self.members:
+            self.members.append(nick)
+
+        self.lastsender = nick
+        self.lastip = ip
+
+        # Determine if the action is a command and the user is
+        # approved.
+        if content[:1] == CONTROL_KEY:
+            if self.lastrealsender not in self.REALUSERS \
+            and content[1:].split()[0] not in self.public_commands \
+            and nick not in self.guests:
+                self.chat('My daddy says not to listen to you.')
+                return
+            
+            self.command(nick, content)
+            return
+
+        # This is a special case for giving people meaningless
+        # points so you can feel like you're in grade school
+        # again.
+        if content[:-2] in self.members and content[-2:] in ['--', '++']:
+            print 'Active'
+            self.values = [content[:-2]]
+            if content[-2:] == '++':
+                self.commands.get('increment')()
+            if content[-2:] == '--':
+                self.commands.get('decrement')()
+            return
+
+        # Grab urls. Mongo automatically tries to get the title
+        # and create a short link.
+        ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+        match_urls = re.compile(ur)
+        urls = match_urls.findall(content)
+        if len(urls):
+            self.linker(urls)
+            return
+
+        # Been messing around with NLTK without much success,
+        # but there's a lot of experimenting in the broca 
+        # meat. At time of writing, it does Mongo's auto responses
+        # in tourettes and adds to the markov chain.
+        if 'broca' in self.brainmeats:
+            self.brainmeats['broca'].tourettes(content, nick)
+            self.brainmeats['broca'].mark(content)
+            if self.autobabble and content.find(NICK) > 0:
+                self.brainmeats['broca'].babble()
+
+    # If it is indeed a command, the cortex stores who sent it,
+    # and any words after the command are split in a values array,
+    # accessible by the brainmeats as self.values.
     def command(self, sender, cmd):
+        chain = cmd.split('|', 1)
+        pipe = False
+
+        if len(chain) is 2:
+            cmd = chain[0].strip()
+            pipe = chain[1].strip()
+
         components = cmd.split()
         what = components.pop(0)[1:]
 
@@ -150,16 +288,64 @@ class Cortex:
         else:
             self.values = False
 
-        self.logit(sender + " sent command: " + what + "\n")
+        self.logit('%s sent command: %s\n' % (sender, what))
         self.lastsender = sender
         self.lastcommand = what
 
-        self.commands.get(what, self.default)()
+        # So you'll notice that some commands return
+        # values that this function sorts out into chats,
+        # while other commands directly run the self.chat,
+        # ._act, and .announce functions attached by the
+        # Dendrite class. Well, it used to be just those
+        # self.chat(whatever) and return, because it's a bot,
+        # right? It's final output is a chat, otherwise it's
+        # not much of a chatbot.
+        #
+        # Then some asshole in our chatroom said something 
+        # like "it'd be cool if we could pipe commands, like
+        # -tweet|babble or something."
+        # 
+        # So THAT got stuck in my head even though it's 
+        # totally ridiculous, but I won't be able to sleep
+        # until it's fully implemented, and the first step 
+        # in that is the ability to do something besides
+        # just chat out at the end of the function. If it's
+        # being piped, the best way to do that is reset
+        # self.values to the result of the command if it's
+        # piped from or to a pipeable function (I know 
+        # 'from or to' should be one or the other, but it's
+        # 1am and I'm drunkenly listening to the Nye vs. 
+        # Ham debate over youtube and it's almost as 
+        # upsetting as realizing I'm going to have to comb
+        # over every goddamn function in this bot to 
+        # determine what's pipeable and change its output).
+        #
+        # Point is, you can return a list or a string at
+        # the end of a brainmeat command, or just use chat.
+        # I probably won't worry about act and announce.
+        result = self.commands.get(what, self.default)()
 
+        if not result:
+            return
+
+        if pipe:
+            self.command(sender, '%s %s' % (pipe, result))
+            return
+
+        if type(result) in [str, unicode]:
+            self.chat(result)
+
+        if type(result) is list:
+            for line in result:
+                self.chat(line)
+
+    # Help menu. It used to just show every command, but there
+    # are so goddamn many at this point, they had to be split
+    # into categories.
     def showlist(self):
         if not self.values or self.values[0] not in self.helpmenu:
-            cats = ", ".join(self.helpcategories)
-            self.chat(CONTROL_KEY + "help WHAT where WHAT is " + cats)
+            cats = ', '.join(self.helpcategories)
+            self.chat('%shelp WHAT where WHAT is %s' % (CONTROL_KEY, cats))
             return
 
         which = self.values[0]
@@ -168,6 +354,7 @@ class Cortex:
             sleep(1)
             self.chat(command)
 
+    # If you want to restrict a command to the bot admin.
     def validate(self):
         if not self.values:
             return False
@@ -175,93 +362,39 @@ class Cortex:
             return False
         return True
 
+    # See who's about.
     def getnames(self):
         self.gettingnames = True
-        self.sock.send('NAMES ' + CHANNEL + '\n')
+        self.sock.send('NAMES %s\n' % CHANNEL)
 
+    # Careful with this one.
     def bored(self):
         if not self.members:
             return
 
-        self.announce("Chirp chirp. Chirp Chirp.")
+        self.announce('Chirp chirp. Chirp Chirp.')
 
         # The behavior below is known to be highly obnoxious
         # self.act("is bored.")
         # self.act(choice(BOREDOM) + " " + choice(self.members))
 
+    # Simple logging.
     def logit(self, what):
         with open(LOG, 'a') as f:
-            f.write(what)
+            f.write('TS:%s;%s' % (time.time(), what))
 
         now = date.today()
         if now.day != 1:
             return
 
         prev = date.today() - timedelta(days=1)
-        backlog = LOGDIR + "/" + prev.strftime("%Y%m") + "-mongo.log"
+        backlog = '%s/%s-mongo.log' % (LOGDIR, prev.strftime('%Y%m'))
         if os.path.isfile(backlog):
             return
 
         shutil.move(LOG, backlog)
 
-    def parse(self, msg):
-        pwd = re.search(":-passwd", msg)
-        if not pwd:
-            print msg
-
-        info, content = msg[1:].split(' :', 1)
-        try:
-            sender, type, room = info.strip().split()
-        except:
-            return
-
-        try:
-            nick, data = sender.split('!')
-            realname, ip = data.split('@')
-            realname = realname[1:]
-        except:
-            return
-
-        self.lastsender = nick
-        self.lastip = ip
-
-        if content[:1] == CONTROL_KEY:
-            if nick.rstrip('_') not in USERS:
-                self.chat("My daddy says not to listen to you.")
-                return
-            
-            print "Executing command: %s" % content
-            _mark = int(mktime(localtime()))
-            self.command(nick, content)
-            print "Finished in: %s" % str(int(mktime(localtime())) - _mark)
-            return
-
-        if content[:-2] in USERS and content[-2:] in ['--', '++']:
-            print "Active"
-            self.values = [content[:-2]]
-            if content[-2:] == '++':
-                self.commands.get('increment')()
-            if content[-2:] == '--':
-                self.commands.get('decrement')()
-            return
-
-        ur = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-        match_urls = re.compile(ur)
-        urls = match_urls.findall(content)
-        if len(urls):
-            self.linker(urls)
-            return
-
-        if 'broca' in self.brainmeats:
-            self.brainmeats['broca'].tourettes(content, nick)
-            # Too slow. Rethink.
-            # self.brainmeats['broca'].parse(content, nick)
-            self.brainmeats['broca'].mark(content)
-
-    def tweet(self, urls):
-        for url in urls:
-            self.brainmeats['twitterapi'].get_tweet(url[1])
-
+    # Sort out urls.
     def linker(self, urls):
         for url in urls:
             # Special behaviour for Twitter URLs
@@ -277,7 +410,7 @@ class Cortex:
 
             if randint(1, 5) == 1:
                 try:
-                    self.commands.get("tweet", self.default)(url)
+                    self.commands.get('tweet', self.default)(url)
                 except:
                     pass
 
@@ -288,9 +421,9 @@ class Cortex:
 
                 urlbase = pageopen(url)
                 if not urlbase:
-                    # we don't have a valid requests object here
-                    # just give up early
-                    self.chat("Total fail")
+                    # If we don't have a valid requests
+                    # object here just give up early
+                    self.chat('Total fail')
                     return
 
                 roasted = shorten(url)
@@ -304,19 +437,26 @@ class Cortex:
                     ext = False
 
                 images = [
-                    "gif",
-                    "png",
-                    "jpg",
-                    "jpeg",
+                    'gif',
+                    'png',
+                    'jpg',
+                    'jpeg',
                 ]
 
                 if ext in images:
-                    title = "Image"
+                    title = 'Image'
+                    if STORE_IMGS:
+                        fname = url.split('/').pop()
+                        path = IMGS + fname
+                        savefromweb(url, path)
                     break
-                elif ext == "pdf":
-                    title = "PDF Document"
+
+                elif ext == 'pdf':
+                    title = 'PDF Document'
                     break
                 else:
+                    # Bit of ugliness here. I blame the W3C. Henry, I'm 
+                    # looking at you.
                     try:
                         soup = bs4(urlbase.text)
                         title = soup.find('title').string.strip()
@@ -328,7 +468,6 @@ class Cortex:
                                                      'Refresh'})
 
                             if redirect:
-                                # Shouldn't this call itself and then return here?
                                 url = redirect['content'].split('url=')[1]
                                 continue
                             else:
@@ -336,64 +475,66 @@ class Cortex:
                         break
 
                     except:
-                        self.chat("Page parsing error - " + roasted)
+                        self.chat('Page parsing error - %s' % roasted)
                         return
 
-            print "Delic"
-            deli = "https://api.del.icio.us/v1/posts/add"
-            params = {
-                "url": url,
-                "description": title,
-                "tags": "okdrink," + self.lastsender,
-            }
-
-            if DELICIOUS_USER:
-                auth = requests.auth.HTTPBasicAuth(DELICIOUS_USER, DELICIOUS_PASS)
-                try:
-                    send = requests.get(deli, params=params, auth=auth)
-                except:
-                    self.chat("(delicious is down)")
-
-                if not send:
-                    self.chat("(delicious problem)")
+            # If you have a delicious account set up. Yes, delicious
+            # still exists. Could be updated to a cooler link 
+            # collecting service.
+            if STORE_URLS:
+                postdelicious(url, title, self.lastsender)
 
             if fubs == 2:
                 self.chat("Total fail")
             else:
-                self.chat(unescape(title) + " @ " + roasted)
+                self.chat("%s @ %s" % (unescape(title), roasted))
 
-            print "All the way"
             break
 
-    def announce(self, message, whom=False):
-        message = message.encode("utf-8")
-        try:
-            self.sock.send('PRIVMSG ' + CHANNEL + ' :' + str(message) + '\n')
-        except:
-            self.sock.send('PRIVMSG ' + CHANNEL + ' :Having trouble saying that for some reason\n')
+    # This shows tweet content if a url is to a tweet.
+    def tweet(self, urls):
+        if 'twitterapi' not in self.brainmeats:
+            return
 
-    @RateLimited(5)
-    def chat(self, message, target=False):
+        for url in urls:
+            self.brainmeats['twitterapi'].get_tweet(url[1])
+
+    # Announce means the chat is always sent to the channel,
+    # never back as a private response.
+    @ratelimited(2)
+    def announce(self, message):
+        self.chat(message, target=CHANNEL)
+
+    # Since chat is mongo's only means of communicating with
+    # a room, the ratelimiting here should prevent any overflow
+    # violations.
+    @ratelimited(2)
+    def chat(self, message, target=False, error=False):
         if target:
             whom = target
         elif self.context == CHANNEL:
             whom = CHANNEL
         else:
             whom = self.lastsender
-        message = message.encode("utf-8")
-        self.logit("___" + NICK + ": " + str(message) + '\n')
+
+        filter(lambda x: x in string.printable, message)
+        message = message.encode('utf-8')
+        self.logit('___%s: %s\n' % (NICK, str(message)))
         try:
-            self.sock.send('PRIVMSG ' + whom + ' :' + str(message) + '\n')
+            m = str(message)
+            if error:
+                m += ' ' + str(error)
+            self.sock.send('PRIVMSG %s :%s\n' % (whom,m))
             if self.replysms:
                 to = self.replysms
                 self.replysms = False
                 self.values = [to, str(message)]
                 self.commands.get('sms')()
         except:
-            self.sock.send('PRIVMSG ' + whom + ' :Having trouble saying that for some reason\n')
+            self.sock.send('PRIVMSG %s :Having trouble saying that for some reason\n' % whom)
 
     def act(self, message, public=False, target=False):
-        message = "\001ACTION " + message + "\001"
+        message = '\001ACTION %s\001' % message
         if public:
             self.announce(message)
         elif target:
@@ -406,5 +547,6 @@ class Cortex:
                 self.values = [to, str(message)]
                 self.commands.get('sms')()
 
+    # When all else fails.
     def default(self):
         self.act(" cannot do this thing :'(")
