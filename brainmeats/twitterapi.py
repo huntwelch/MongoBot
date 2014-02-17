@@ -40,7 +40,7 @@ class Twitterapi(Dendrite):
             return "Twitter error."
 
         if not _message:
-            self.chat('Tweeted "' + status.text + '"')
+            return 'Tweeted "%s"' % status.text
 
     @axon
     @help("ID <retrieve the tweet with ID>")

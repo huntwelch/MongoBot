@@ -1,0 +1,87 @@
+#map {
+  position: relative;
+  margin: 20px auto;
+  width: 1300px;
+}
+
+#map province {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
+province#Adriatic_Sea { left: 505px; top: 690px; }
+province#Albania { left: 633px; top: 782px; }
+province#Ankara { left: 858px; top: 769px; }
+province#Apulia { left: 526px; top: 774px; }
+province#Armenia { left: 1039px; top: 745px; }
+province#Baltic_Sea { left: 524px; top: 371px; }
+province#Barents_Sea { left: 694px; top: 1px; }
+province#Belgium { left: 374px; top: 511px; }
+province#Berlin { left: 524px; top: 458px; }
+province#Black_Sea { left: 784px; top: 622px; }
+province#Bohemia { left: 516px; top: 557px; }
+province#Brest { left: 239px; top: 534px; }
+province#Budapest { left: 602px; top: 612px; }
+province#Bulgaria { left: 687px; top: 733px; }
+province#Burgundy { left: 352px; top: 567px; }
+province#Clyde { left: 284px; top: 295px; }
+province#Constantinople { left: 743px; top: 785px; }
+province#Denmark { left: 483px; top: 378px; }
+province#Eastern_Mediterranean { left: 712px; top: 897px; }
+province#Edinburgh { left: 319px; top: 288px; }
+province#English_Channel { left: 190px; top: 499px; }
+province#Finland { left: 660px; top: 65px; }
+province#Galicia { left: 615px; top: 572px; }
+province#Gascony { left: 253px; top: 622px; }
+province#Greece { left: 634px; top: 800px; }
+province#Gulf_of_Bothnia { left: 601px; top: 170px; }
+province#Gulf_of_Lyon { left: 242px; top: 716px; }
+province#Helgoland_Bight { left: 433px; top: 419px; }
+province#Holland { left: 401px; top: 475px; }
+province#Ionian_Sea { left: 427px; top: 833px; }
+province#Irish_Sea { left: 137px; top: 403px; }
+province#Kiel { left: 436px; top: 456px; } 
+province#Liverpool { left: 294px; top: 370px; }
+province#Livonia { left: 662px; top: 330px; }
+province#London { left: 321px; top: 464px; }
+province#Marseilles { left: 307px; top: 658px; }
+province#Mid-Atlantic_Ocean { left: 1px; top: 486px; }
+province#Moscow { left: 707px; top: 180px; }
+province#Munich { left: 436px; top: 518px; }
+province#Naples { left: 540px; top: 809px; }
+province#North_Africa { left: 1px; top: 852px; }
+province#North_Atlantic_Ocean { left: 1px; top: 1px; }
+province#North_Sea { left: 325px; top: 251px; }
+province#Norway { left: 462px; top: 29px; }
+province#Norwegian_Sea { left: 233px; top: 1px; }
+province#Paris { left: 305px; top: 582px; }
+province#Picardy { left: 325px; top: 522px; }
+province#Piedmont { left: 410px; top: 659px; }
+province#Portugal { left: 54px; top: 682px; }
+province#Prussia { left: 575px; top: 433px; }
+province#Rome { left: 496px; top: 774px; }
+province#Ruhr { left: 430px; top: 518px; }
+province#Rumania { left: 682px; top: 640px; }
+province#Serbia { left: 631px; top: 727px; }
+province#Sevastopol { left: 775px; top: 471px; }
+province#Silesia { left: 548px; top: 509px; }
+province#Skagerrak { left: 465px; top: 314px; }
+province#Smyrna { left: 762px; top: 821px; }
+province#Spain { left: 85px; top: 642px; }
+province#St_Petersburg { left: 740px; top: 1px; }
+province#Sweden { left: 535px; top: 100px; }
+province#Syria { left: 972px; top: 853px; }
+province#Trieste { left: 531px; top: 652px; }
+province#Tunis { left: 389px; top: 900px; }
+province#Tuscany { left: 452px; top: 709px; }
+province#Tyrolia { left: 480px; top: 617px; }
+province#Tyrrhenian_Sea { left: 424px; top: 741px; }
+province#Ukraine { left: 712px; top: 524px; }
+province#Venice { left: 466px; top: 649px; }
+province#Wales { left: 242px; top: 428px; }
+province#Warsaw { left: 616px; top: 490px; }
+province#Western_Mediterranean { left: 109px; top: 809px; }
+province#Yorkshire { left: 334px; top: 393px; }
+

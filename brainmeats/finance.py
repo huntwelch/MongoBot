@@ -28,10 +28,7 @@ class Finance(Dendrite):
             stock = Stock(symbol)
             showit = stock.showquote(self.context)
         except Exception as e:
-            pass
-
-        if not showit:
-            self.chat("Couldn't find company.")
+            self.chat("Couldn't find company.", str(e))
             return
 
         return showit

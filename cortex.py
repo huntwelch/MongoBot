@@ -200,8 +200,8 @@ class Cortex:
         if not pwd:
             print msg
 
-        info, content = msg[1:].split(' :', 1)
         try:
+            info, content = msg[1:].split(' :', 1)
             sender, type, room = info.strip().split()
         except:
             return
@@ -237,12 +237,11 @@ class Cortex:
         # points so you can feel like you're in grade school
         # again.
         if content[:-2] in self.members and content[-2:] in ['--', '++']:
-            print 'Active'
             self.values = [content[:-2]]
             if content[-2:] == '++':
-                self.commands.get('increment')()
+                self.chat(self.commands.get('increment')())
             if content[-2:] == '--':
-                self.commands.get('decrement')()
+                self.chat(self.commands.get('decrement')())
             return
 
         # Grab urls. Mongo automatically tries to get the title
@@ -497,7 +496,7 @@ class Cortex:
             return
 
         for url in urls:
-            self.brainmeats['twitterapi'].get_tweet(url[1])
+            self.chat(self.brainmeats['twitterapi'].get_tweet(url[1]))
 
     # Announce means the chat is always sent to the channel,
     # never back as a private response.
@@ -518,17 +517,23 @@ class Cortex:
             whom = self.lastsender
 
         filter(lambda x: x in string.printable, message)
-        message = message.encode('utf-8')
-        self.logit('___%s: %s\n' % (NICK, str(message)))
         try:
+            message = message.encode('utf-8')
+            self.logit('___%s: %s\n' % (NICK, str(message)))
             m = str(message)
+            if randint(1, 170) == 23:
+                i = m.split()
+                pos = randint(0, len(i))
+                i.insert(pos, 'fnord')
+                m = ' '.join(i)
+
             if error:
                 m += ' ' + str(error)
             self.sock.send('PRIVMSG %s :%s\n' % (whom,m))
             if self.replysms:
                 to = self.replysms
                 self.replysms = False
-                self.values = [to, str(message)]
+                self.values = [to, str(m)]
                 self.commands.get('sms')()
         except:
             self.sock.send('PRIVMSG %s :Having trouble saying that for some reason\n' % whom)

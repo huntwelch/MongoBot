@@ -2,7 +2,7 @@ import time
 
 from autonomic import axon, alias, category, help, Dendrite
 from settings import IMGS, VIDS, GIFS, WEBSITE
-from util import asciiart
+from util import asciiart, getyoutube
 from moviepy.editor import *
 
 
@@ -20,9 +20,13 @@ class Artsy(Dendrite):
 
     @axon
     def getvideo(self):
-        # This shall remain blank until the threading
-        # issue is sorted out.
-        return
+        if not self.values:
+            return 'Get what?'
+
+        url = self.values[0]
+        getyoutube(url, VIDS + '%(title)s.%(ext)s')
+
+        return 'Downloading'
 
     @axon
     def gif(self):

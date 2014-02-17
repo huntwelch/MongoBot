@@ -6,6 +6,7 @@ import pyotp
 import base64
 import random
 import threading
+import os
 
 from PIL import Image
 from bisect import bisect
@@ -242,12 +243,26 @@ def asciiart(image_path):
     return out
 
 
-def savefromweb(url, path):
-    thread = threading.Thread(target=savethread, args=(url, path))
+# TODO: clean this up up into a standard threaded
+# queue attached to cortex
+def threadfromweb(url, path):
+    thread = threading.Thread(target=savefromweb, args=(url, path))
     thread.start()
     return
 
-def savethread(url, path):
+
+def getyoutube(url, path):
+    thread = threading.Thread(target=savevideo, args=(url, path))
+    thread.start()
+    return
+    
+
+def savevideo(url, path):
+    os.system('youtube-dl %s -o %s' % (url, path))
+    return
+
+
+def savefromweb(url, path):
     r = requests.get(url, stream=True)
 
     if r.status_code != 200:

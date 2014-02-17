@@ -23,6 +23,11 @@ def index():
     return render_template('index.html')
 
 
+@app.route("/diplomacy")
+def diplomacy():
+    return render_template('diplomacy.html')
+
+
 @app.route("/api/chat", methods=['GET', 'POST'])
 @requires_auth
 def api_chat():
