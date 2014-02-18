@@ -335,6 +335,31 @@ class Broca(Dendrite):
             self.chat(random.choice(stops))
             return
 
+        techSupportQueries = [
+            'how do i',
+            'how do you',
+            'how does one',
+            'how would i',
+            'how would you',
+            'how would one'
+            'does anyone know how'
+            'do you know how'
+        ]
+        techSupportHits = [sentence.lower().find(t) == -1 for t in techSupportQueries]
+        if True in techSupportHits:
+            #naively parse out the question being asked
+            smartassery = sentence.lower().split(techSupportQueries[techSupportHits.index(True)])[1]
+
+            techSupportResponses = [
+                'Have you tried turning it off an on again?',
+                'Have you tried forcing an unexpected reboot?',
+                'Are you sure your computer is on?',
+                'Have your tried connecting the computer directly to the modem?',
+                'Have you power-cycled it?',
+                'http://lmgtfy.com/?q=' + smartassery.replace(' ', '+')
+            ]
+            self.chat(random.choice(techSupportResponses))
+
         # There's a very good reason for this.
         if sentence == "oh shit its your birthday erikbeta happy birthday" and self.lastsender == "jcb":
             self._act(" slaps jcb")
