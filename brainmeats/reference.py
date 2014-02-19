@@ -172,7 +172,7 @@ class Reference(Dendrite):
             return
 
         try:
-            result = eval(string, {"__builtins__": None}, self.safe_calc)
+            result = "{:,}".format(eval(string, {"__builtins__": None}, self.safe_calc))
         except:
             result = NICK + " not smart enough to do that."
 
