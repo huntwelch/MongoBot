@@ -40,6 +40,7 @@ ENABLED = [
     'artsy',
     'broca',
     'chess',
+    'diplomacy',
     'facebook',
     'finance',
     'holdem',

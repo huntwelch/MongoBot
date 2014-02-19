@@ -20,6 +20,7 @@ class Alien(Dendrite):
 
     @axon
     @help("<grab reddit stuff>")
+    @alias(['r'])
     def reddit(self):
         subreddit = False
         if not self.values:
