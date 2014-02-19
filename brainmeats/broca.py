@@ -345,7 +345,7 @@ class Broca(Dendrite):
             'does anyone know how'
             'do you know how'
         ]
-        techSupportHits = [sentence.lower().find(t) == -1 for t in techSupportQueries]
+        techSupportHits = [sentence.lower().find(t) != -1 for t in techSupportQueries]
         if True in techSupportHits:
             #naively parse out the question being asked
             smartassery = sentence.lower().split(techSupportQueries[techSupportHits.index(True)])[1]
