@@ -2,7 +2,6 @@ from math import *
 from secrets import CHANNEL
 
 # Connection Settings
-
 HOST = 'banks.freenode.net'
 PORT = 6667
 NICK = 'MongoBot'
@@ -10,12 +9,9 @@ NICK = 'MongoBot'
 # Used to filter out pings and server responses from 
 # logs and live checks. Obviously if you're not on
 # freenode, you'll need to update this.
-
 SCAN = '^:\w+\.freenode\.net'
 
-
 # Directory settings
-
 STORAGE = 'hippocampus'
 LOGDIR = STORAGE + '/log'
 LOG = LOGDIR + '/chat.log'
@@ -27,13 +23,11 @@ VIDS = STORAGE + '/downloads/videos/'
 GIFS = 'server/static/gifs/'
 REGISTERED = STORAGE + '/allowed'
 
-
 # Enabled libraries. These are the default brainmeats
 # that load up on start or reboot. You can enable and 
 # disable them with -enable and -disable while the bots
 # running. Comment out anything you don't want to load 
 # here.
-
 ENABLED = [
     'acro',
     'alien',
@@ -56,9 +50,7 @@ ENABLED = [
     'webserver',
 ]
 
-
 # Misc
-
 CONTROL_KEY = '-' # All commands are preceded by this. It can be whatever you want.
 SHORTENER = 'http://roa.st/api.php'
 PATIENCE = 7000
@@ -71,22 +63,17 @@ STORE_URLS = True
 STORE_IMGS = True
 BABBLE_LIMIT = 100
 TIMEZONE = 'EST'
-
+SMARTASS = True
 
 # Web server
-
 WEBSITE = 'http://mongobot.com'
 SERVER_RELOAD = '/tmp/mongo.reload'
 
-
 # Stock game
-
 VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ'])
 STARTING_CASH = 100000
 
-
 # Acro
-
 ACROLIB = 'natwords'
 MINLEN = 5
 MAXLEN = 7
@@ -101,13 +88,11 @@ NO_VOTE_PENALTY = 5
 BREAK = 15
 BOTPLAY = True
 
-
 # These are settings that can be changed during
 # runtime with the -update command. Note that 
 # update actually rewrites this file; changes are
 # permanent. You can also add a setting here if
 # you want to make it available.
-
 SAFESET = [
     ('Bot settings', ':'),
     ('CONTROL_KEY', '"' + CONTROL_KEY + '"'),
@@ -132,10 +117,8 @@ SAFESET = [
     ('BOTPLAY', BOTPLAY),
 ]
 
-
 # If you want an obnoxious bot. INSULT/INSULTS
 # are just used by the acro. game.
-
 INSULTS = [
     'are little bitches',
     'are chumps',
@@ -143,7 +126,6 @@ INSULTS = [
     'are lazy bastards',
     "are busy with dcross's mom",
 ]
-
 INSULT = [
     'is a little bitch',
     'is a chump',
@@ -151,7 +133,6 @@ INSULT = [
     'is a lazy bastard',
     "is busy with dcross's mom",
 ]
-
 BOREDOM = [
     'kicks',
     'slaps',
@@ -159,9 +140,7 @@ BOREDOM = [
     "offers dcross's mom to",
 ]
 
-
 # Math functions available to the -hack command.
-
 SAFE = [
     ('abs', abs),
     ('acos', acos),

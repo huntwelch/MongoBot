@@ -9,7 +9,7 @@ import time
 from threading import Thread
 from autonomic import axon, alias, category, help, Dendrite
 from secrets import WORDNIK_API
-from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, REDIS_SOCK
+from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, REDIS_SOCK, SMARTASS
 from datastore import Words, Learned, Structure
 from random import choice, randint
 from util import pageopen, savefromweb
@@ -345,10 +345,16 @@ class Broca(Dendrite):
             'does anyone know how'
             'do you know how'
         ]
-        techSupportHits = [sentence.lower().find(t) == -1 for t in techSupportQueries]
-        if True in techSupportHits:
+        techSupportHits = [sentence.lower().find(t) != -1 for t in techSupportQueries]
+        if SMARTASS and True in techSupportHits:
             #naively parse out the question being asked
-            smartassery = sentence.lower().split(techSupportQueries[techSupportHits.index(True)])[1]
+
+            print sentence.lower().split(techSupportQueries[techSupportHits.index(True)])
+
+            try:
+                smartassery = sentence.lower().split(techSupportQueries[techSupportHits.index(True)])[1]
+            except:
+                return
 
             techSupportResponses = [
                 'Have you tried turning it off an on again?',
@@ -367,7 +373,7 @@ class Broca(Dendrite):
             return
 
     @axon
-    @help("<command " + NICK + " to speak>")
+    @help("<command %s to speak>" % NICK)
     def speak(self):
         sentence = []
         struct = choice(Structure.objects())
@@ -378,7 +384,7 @@ class Broca(Dendrite):
         self.chat(" ".join(sentence))
 
     @axon
-    @help("WORD <teach " + NICK + " a word>")
+    @help("WORD <teach %s a word>" % NICK)
     def learn(self):
         if not self.values:
             self.chat(NICK + " ponders the emptiness of meaning.")
@@ -392,7 +398,7 @@ class Broca(Dendrite):
         self.chat(NICK + " learn new word!", self.lastsender)
 
     @axon
-    @help("ACRONYM <have " + NICK + " decide the words for an acronym>")
+    @help("ACRONYM <have %s decide the words for an acronym>" % NICK)
     def acronym(self):
         if not self.values:
             self.chat("About what?")
