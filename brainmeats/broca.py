@@ -7,7 +7,7 @@ import redis
 import time
 
 from threading import Thread
-from autonomic import axon, alias, category, help, Dendrite
+from autonomic import axon, alias, help, Dendrite
 from secrets import WORDNIK_API
 from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, REDIS_SOCK, SMARTASS
 from datastore import Words, Learned, Structure
@@ -21,7 +21,6 @@ from wordnik import swagger, WordApi
 # of 5 minutes a month. The miscellaneous language 
 # functions usually work, and of course the markov
 # is done here.
-@category("language")
 class Broca(Dendrite):
 
     markov = redis.StrictRedis(unix_socket_path=REDIS_SOCK) 

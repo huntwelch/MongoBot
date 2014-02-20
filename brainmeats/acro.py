@@ -1,6 +1,6 @@
 import os
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, help, Dendrite
 from random import choice, randint, shuffle
 from time import mktime, localtime, strftime
 from settings import INSULTS, INSULT, STORAGE, TIME_FACTOR, \
@@ -15,7 +15,6 @@ from settings import INSULTS, INSULT, STORAGE, TIME_FACTOR, \
 # even after it was rewritten in the Great Brainmat 
 # Transition. There's at least one bug, but I haven't gotten
 # to it, as it's not a deal breaker, it's just exploitable.
-@category("acro")
 class Acro(Dendrite):
 
     active = False

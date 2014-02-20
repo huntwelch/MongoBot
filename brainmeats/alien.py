@@ -1,14 +1,13 @@
 import praw 
 import random
 
-from autonomic import axon, alias, category, help, Dendrite
+from autonomic import axon, alias, help, Dendrite
 from settings import NICK
 from secrets import REDDIT_APPID, REDDIT_SECRET
 
 
 # It's called 'alien' because (re)ddit conflicted
 # with (re)ference in the help menu.
-@category("alien")
 class Alien(Dendrite):
 
     user_agent = "MongoBot by /u/locrelite and friends, github.com/huntwelch/MongoBot"

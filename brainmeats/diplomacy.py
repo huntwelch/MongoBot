@@ -1,4 +1,4 @@
-from autonomic import axon, alias, category, help, Dendrite
+from autonomic import axon, alias, help, Dendrite
 from settings import WEBSITE
 
 
@@ -35,7 +35,6 @@ Countries = {
     },
 }
 
-@category("diplomacy")
 class Diplomacy(Dendrite):
     def __init__(self, cortex):
         super(Diplomacy, self).__init__(cortex)

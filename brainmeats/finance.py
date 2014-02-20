@@ -1,11 +1,10 @@
 import locale
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, help, Dendrite
 from util import pageopen, Stock
 import simplejson
 
 
-@category("finance")
 class Finance(Dendrite):
     def __init__(self, cortex):
         super(Finance, self).__init__(cortex)

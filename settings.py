@@ -4,7 +4,7 @@ from secrets import CHANNEL
 # Connection Settings
 HOST = 'banks.freenode.net'
 PORT = 6667
-NICK = 'MongoBot'
+NICK = '_MongoBot'
 
 # Used to filter out pings and server responses from 
 # logs and live checks. Obviously if you're not on
@@ -46,7 +46,7 @@ ENABLED = [
     'sms',
     'stockgame',
     'system',
-    'twitterapi',
+    'twitting',
     'webserver',
 ]
 

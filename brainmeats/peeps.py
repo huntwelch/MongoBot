@@ -3,7 +3,7 @@ import dateutil.parser
 import re
 import hashlib
 
-from autonomic import axon, category, help, Dendrite, alias
+from autonomic import axon, help, Dendrite, alias
 from settings import STORAGE, CHANNEL, NICK
 from secrets import MEETUP_LOCATION, MEETUP_NOTIFY, MEETUP_DAY
 from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore, topScores
@@ -17,7 +17,6 @@ from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScor
 # many other functions of other libraries refer to peeps
 # stuff. If you install no other external stuff, I 
 # recommend mongodb.
-@category("peeps")
 class Peeps(Dendrite):
 
     checked = False

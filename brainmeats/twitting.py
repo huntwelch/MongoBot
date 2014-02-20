@@ -1,29 +1,28 @@
 import twitter
 
-from autonomic import axon, alias, category, help, Dendrite
+from autonomic import axon, alias, help, Dendrite
 from settings import NICK
 from secrets import (TWIT_USER, TWIT_PASS, TWIT_ACCESS_TOKEN, TWIT_ACCESS_SECRET,
                      TWIT_CONSUMER_KEY, TWIT_CONSUMER_SECRET, TWIT_PAGE)
 
 
-@category("twitter")
-class Twitterapi(Dendrite):
+class Twitting(Dendrite):
 
     api = twitter.Api(consumer_key=TWIT_CONSUMER_KEY,
-                      consumer_secret=TWIT_CONSUMER_SECRET,
-                      access_token_key=TWIT_ACCESS_TOKEN,
-                      access_token_secret=TWIT_ACCESS_SECRET)
+                   consumer_secret=TWIT_CONSUMER_SECRET,
+                   access_token_key=TWIT_ACCESS_TOKEN,
+                   access_token_secret=TWIT_ACCESS_SECRET)
 
     def __init__(self, cortex):
-        super(Twitterapi, self).__init__(cortex)
+        super(Twitting, self).__init__(cortex)
 
     @axon
-    @help("<show link to " + NICK + "'s twitter feed>")
+    @help("<show link to %s's twitter feed>" % NICK)
     def totw(self):
         return TWIT_PAGE
 
     @axon
-    @help("MESSAGE <post to " + NICK + "'s twitter feed>")
+    @help("MESSAGE <post to %s's twitter feed>" % NICK)
     def tweet(self, _message=False):
         if not self.values and not _message:
             self.chat("Tweet what?")

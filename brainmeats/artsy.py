@@ -1,6 +1,6 @@
 import time
 
-from autonomic import axon, alias, category, help, Dendrite
+from autonomic import axon, alias, help, Dendrite
 from settings import IMGS, VIDS, GIFS, WEBSITE
 from util import asciiart, getyoutube
 from moviepy.editor import *
@@ -10,7 +10,6 @@ from moviepy.editor import *
 # ffmpeg and all kinds of nastiness ye must install.
 # All highly experiemental, and way, way beyond the
 # sorts of things that would belong in a bot.
-@category("artsy")
 class Artsy(Dendrite):
 
     types = ['imgs', 'vids']

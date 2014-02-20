@@ -40,9 +40,9 @@ class Cortex:
     autobabble = False
 
     public_commands = []
-    helpcategories = []
     members = []
     guests = [] 
+    broken = []
     REALUSERS = []
 
     commands = {}
@@ -57,8 +57,6 @@ class Cortex:
         print '* Initializing'
         self.master = master
         self.sock = master.sock
-
-        self.commands['help'] = self.showlist
 
         print '* Loading brainmeats'
         self.loadbrains()
@@ -95,11 +93,12 @@ class Cortex:
                 self.brainmeats[area] = cls(self)
             except Exception as e:
                 self.chat('Failed to load %s.' % area, error=str(e))
+                self.broken.append(area)
                 print 'Failed to load %s.' % area
                 print e
 
         for brainmeat in self.brainmeats:
-            serotonin(self, self.brainmeats[brainmeat], electroshock)
+            serotonin(self, brainmeat, electroshock)
 
     # I'll be frank, I don't have that great a grasp on
     # threading, and despite working with people who do,
@@ -223,7 +222,7 @@ class Cortex:
 
         # Determine if the action is a command and the user is
         # approved.
-        if content[:1] == CONTROL_KEY:
+        if content[:1] == CONTROL_KEY and len(content[1:]):
             if self.lastrealsender not in self.REALUSERS \
             and content[1:].split()[0] not in self.public_commands \
             and nick not in self.guests:
@@ -337,21 +336,6 @@ class Cortex:
         if type(result) is list:
             for line in result:
                 self.chat(line)
-
-    # Help menu. It used to just show every command, but there
-    # are so goddamn many at this point, they had to be split
-    # into categories.
-    def showlist(self):
-        if not self.values or self.values[0] not in self.helpmenu:
-            cats = ', '.join(self.helpcategories)
-            self.chat('%shelp WHAT where WHAT is %s' % (CONTROL_KEY, cats))
-            return
-
-        which = self.values[0]
-
-        for command in self.helpmenu[which]:
-            sleep(1)
-            self.chat(command)
 
     # If you want to restrict a command to the bot admin.
     def validate(self):

@@ -1,7 +1,7 @@
 import os
 import time
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, help, Dendrite
 from settings import STORAGE, ACROLIB, LOGDIR, DISTASTE, NICK, IMGS
 from secrets import FML_API
 from util import colorize, pageopen, shorten, asciiart
@@ -13,7 +13,6 @@ from xml.dom import minidom as dom
 # Every drunk conversation that produces the idea for 
 # a command that just seems funny at the time ends up
 # here.
-@category("nonsense")
 class Nonsense(Dendrite):
     def __init__(self, cortex):
         super(Nonsense, self).__init__(cortex)

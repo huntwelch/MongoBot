@@ -2,7 +2,7 @@ import textwrap
 import socket
 import re
 
-from autonomic import axon, alias, category, help, Dendrite
+from autonomic import axon, alias, help, Dendrite
 from bs4 import BeautifulSoup as bs4
 from settings import REPO, NICK, SAFE
 from secrets import WEATHER_API
@@ -13,7 +13,6 @@ from util import unescape, pageopen
 # in broca, but in general, if it's not about the stockmarket
 # and you want useful iniformation from a simple api or scraper,
 # it goes here.
-@category("reference")
 class Reference(Dendrite):
 
     safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
