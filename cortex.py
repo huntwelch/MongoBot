@@ -2,12 +2,10 @@ import os
 import re
 import shutil
 import pkgutil
-import requests
 import socket
 import time
 import string
 
-from bs4 import BeautifulSoup as bs4
 from datetime import date, timedelta, datetime
 from pytz import timezone
 from time import mktime, localtime, sleep
@@ -17,7 +15,8 @@ from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE
     STORE_IMGS, IMGS, REGISTERED, TIMEZONE
 from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY
 from datastore import Drinker, connectdb
-from util import unescape, pageopen, shorten, ratelimited, postdelicious, savefromweb
+from util import unescape, pageopen, shorten, ratelimited, postdelicious, savefromweb, \
+    Browse
 from autonomic import serotonin
 
 
@@ -406,69 +405,45 @@ class Cortex:
                 except:
                     pass
 
-            while True:
-                fubs = 0
-                title = "Couldn't get title"
+            fubs = 0
+            title = "Couldn't get title"
+
+            site = Browse(url)
+
+            if site.error:
+                self.chat('Total fail: %s' % site.error)
+                continue
+
+            roasted = shorten(url)
+            if not roasted:
                 roasted = "Couldn't roast"
+                fubs += 1
 
-                urlbase = pageopen(url)
-                if not urlbase:
-                    # If we don't have a valid requests
-                    # object here just give up early
-                    self.chat('Total fail')
-                    return
+            try:
+                ext = site.headers()['content-type'].split('/')[1]
+            except:
+                ext = False
 
-                roasted = shorten(url)
-                if not roasted:
-                    roasted = ''
-                    fubs += 1
+            images = [
+                'gif',
+                'png',
+                'jpg',
+                'jpeg',
+            ]
 
-                try:
-                    ext = urlbase.headers['content-type'].split('/')[1]
-                except:
-                    ext = False
+            if ext in images:
+                title = 'Image'
+                # Switch this to a Browse method
+                #if STORE_IMGS:
+                #    fname = url.split('/').pop()
+                #    path = IMGS + fname
+                #    savefromweb(url, path)
 
-                images = [
-                    'gif',
-                    'png',
-                    'jpg',
-                    'jpeg',
-                ]
+            elif ext == 'pdf':
+                title = 'PDF Document'
 
-                if ext in images:
-                    title = 'Image'
-                    if STORE_IMGS:
-                        fname = url.split('/').pop()
-                        path = IMGS + fname
-                        savefromweb(url, path)
-                    break
-
-                elif ext == 'pdf':
-                    title = 'PDF Document'
-                    break
-                else:
-                    # Bit of ugliness here. I blame the W3C. Henry, I'm 
-                    # looking at you.
-                    try:
-                        soup = bs4(urlbase.text)
-                        title = soup.find('title').string.strip()
-                        if title is None:
-                            redirect = soup.find('meta', attrs={'http-equiv':
-                                                 'refresh'})
-                            if not redirect:
-                                redirect = soup.find('meta', attrs={'http-equiv':
-                                                     'Refresh'})
-
-                            if redirect:
-                                url = redirect['content'].split('url=')[1]
-                                continue
-                            else:
-                                raise ValueError('Cannot find title')
-                        break
-
-                    except:
-                        self.chat('Page parsing error - %s' % roasted)
-                        return
+            else:
+                title = site.title()
 
             # If you have a delicious account set up. Yes, delicious
             # still exists. Could be updated to a cooler link 
@@ -480,8 +455,6 @@ class Cortex:
                 self.chat("Total fail")
             else:
                 self.chat("%s @ %s" % (unescape(title), roasted))
-
-            break
 
     # This shows tweet content if a url is to a tweet.
     def tweet(self, urls):

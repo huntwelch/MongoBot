@@ -2,7 +2,9 @@ import time
 import re
 import HTMLParser
 import requests
+import mechanize
 import pyotp
+import urllib
 import base64
 import random
 import threading
@@ -72,10 +74,64 @@ def colorize(text, color):
     return "\x03" + str(color) + ' ' + text + "\x03"
 
 
+class Browse(object):
+    
+    url = False
+    ua = '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'
+    robot = mechanize.Browser()
+    text = False
+    error = False
+
+    def __init__(self, url, params={}, method='GET', userpass=False):
+        self.url = url 
+
+        self.robot.set_handle_equiv(True)
+        self.robot.set_handle_gzip(True)
+        self.robot.set_handle_redirect(True)
+        self.robot.set_handle_referer(True)
+        self.robot.set_handle_robots(False)
+        self.robot.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
+
+        self.robot.addheaders = [('User-agent', self.ua)]
+
+        if userpass:
+            user, password = userpass.split(':')
+            self.robot.add_password(url, user, password)
+
+        try:
+            if params:
+                data = urllib.urlencode(params)
+
+            if params and method == 'GET':
+                self.response = self.robot.open(url + '?%s' % data)
+            elif params and method == 'POST':  
+                self.response = self.robot.open(url, data)
+            else:
+                self.response = self.robot.open(url)
+
+        except Exception as e:
+            self.error = str(e)
+
+    def read(self):
+        return self.response.read()
+
+    def title(self):
+        try:
+            result = self.robot.title().decode('utf-8')
+        except Exception as e:
+            result = str(e)
+
+        return result
+
+    def headers(self):
+        return self.response.info()
+
+
+HEADERS = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36' }
+
 def pageopen(url, params={}):
     try:
-        headers = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'}
-        urlbase = requests.get(url, headers=headers, params=params, timeout=5)
+        urlbase = requests.get(url, headers=HEADERS, params=params, timeout=5)
     except requests.exceptions.RequestException as e:
         print e
         return False

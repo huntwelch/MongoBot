@@ -5,6 +5,7 @@ import string
 import random
 import redis
 import time
+import simplejson
 
 from threading import Thread
 from autonomic import axon, alias, help, Dendrite
@@ -13,8 +14,8 @@ from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, \
     REDIS_SOCK, SMARTASS, TECH_QUESTIONS, IT_HELP, FRUSTRATION
 from datastore import Words, Learned, Structure
 from random import choice, randint
-from util import pageopen, savefromweb
-from bs4 import BeautifulSoup as soup
+from util import savefromweb, Browse
+from bs4 import BeautifulSoup as bs4
 from wordnik import swagger, WordApi
 
 
@@ -436,12 +437,12 @@ class Broca(Dendrite):
         word = self.values[0]
         params = {'allowed_in_frame': '0', 'searchmode': 'term', 'search': word}
 
-        urlbase = pageopen("http://www.etymonline.com/index.php", params)
-        if not urlbase:
-            self.chat("Couldn't find anything")
+        site = Browse("http://www.etymonline.com/index.php", params)
+        if site.error:
+            self.chat(site.error)
             return
 
-        cont = soup(urlbase.text)
+        cont = bs4(site.read())
 
         heads = cont.findAll("dt")
         defs = cont.findAll("dd")
@@ -480,27 +481,16 @@ class Broca(Dendrite):
             self.chat("Enter a word or phrase")
             return
 
-        word = '+'.join(self.values)
-        url = 'http://wordsmith.org/anagram/anagram.cgi?anagram=%s&t=50&a=n' % word
+        word = ''.join(self.values)
+        url = 'http://www.anagramica.com/best/%s' % word
 
-        urlbase = pageopen(url)
-        if not urlbase:
-            self.chat("Fail")
+        site = Browse(url)
+        if site.error:
+            self.chat(site.error)
             return
 
-        cont = soup(urlbase.text)
-
-        if len(cont.findAll("p")) == 6:
-            self.chat("No anagrams found.")
-            return
-
-        # This is a really shaky way to parse a
-        # page, but it's all I had to go on.
         try:
-            paragraph = cont.findAll("p")[3]
-            content = ','.join(paragraph.findAll(text=True))
-            content = content[2:-4]
-            content = content.replace(": ,", ": ")
-            return content
+            json = simplejson.loads(site.read())
+            return json['best']
         except Exception as e:
             self.chat("Couldn't parse.", str(e))
