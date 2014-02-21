@@ -4,7 +4,7 @@ from secrets import CHANNEL
 # Connection Settings
 HOST = 'banks.freenode.net'
 PORT = 6667
-NICK = '_MongoBot'
+NICK = 'MongoBot'
 
 # Used to filter out pings and server responses from 
 # logs and live checks. Obviously if you're not on
@@ -63,7 +63,6 @@ STORE_URLS = True
 STORE_IMGS = True
 BABBLE_LIMIT = 100
 TIMEZONE = 'EST'
-SMARTASS = True
 
 # Web server
 WEBSITE = 'http://mongobot.com'
@@ -138,6 +137,37 @@ BOREDOM = [
     'slaps',
     'throws feces at',
     "offers dcross's mom to",
+]
+
+
+# For James's excellent tourettes feature
+SMARTASS = True
+TECH_QUESTIONS = [
+    'how do i',
+    'how do you',
+    'how does one',
+    'how would i',
+    'how would you',
+    'how would one',
+    'does anyone know how',
+    'do you know how',
+]
+IT_HELP = [
+    'Have you tried turning it off an on again?',
+    'Have you tried forcing an unexpected reboot?',
+    'Are you sure your computer is on?',
+    'Have your tried connecting the computer directly to the modem?',
+    'Have you power-cycled it?',
+]
+
+# Table tossers
+FRUSTRATION = [
+    'fuck',
+    'shit',
+    'dammit',
+    'goddammit',
+    'wtf',
+    'the hell',
 ]
 
 # Math functions available to the -hack command.

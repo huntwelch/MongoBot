@@ -38,6 +38,7 @@ class Cortex:
     gettingnames = True
     memories = False
     autobabble = False
+    lastcommand = False
 
     public_commands = []
     members = []
@@ -222,7 +223,15 @@ class Cortex:
 
         # Determine if the action is a command and the user is
         # approved.
-        if content[:1] == CONTROL_KEY and len(content[1:]):
+        if content[:1] == CONTROL_KEY:
+            
+            # Tack on last command if it's just the control
+            if content == CONTROL_KEY or content[:2] == CONTROL_KEY + ' ':
+                if not self.lastcommand:
+                    return
+
+                content = '%s%s %s' % (CONTROL_KEY, self.lastcommand, content[2:])
+
             if self.lastrealsender not in self.REALUSERS \
             and content[1:].split()[0] not in self.public_commands \
             and nick not in self.guests:
@@ -476,11 +485,11 @@ class Cortex:
 
     # This shows tweet content if a url is to a tweet.
     def tweet(self, urls):
-        if 'twitterapi' not in self.brainmeats:
+        if 'twitting' not in self.brainmeats:
             return
 
         for url in urls:
-            self.chat(self.brainmeats['twitterapi'].get_tweet(url[1]))
+            self.chat(self.brainmeats['twitting'].get_tweet(url[1]))
 
     # Announce means the chat is always sent to the channel,
     # never back as a private response.

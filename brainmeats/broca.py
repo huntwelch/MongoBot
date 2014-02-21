@@ -9,7 +9,8 @@ import time
 from threading import Thread
 from autonomic import axon, alias, help, Dendrite
 from secrets import WORDNIK_API
-from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, REDIS_SOCK, SMARTASS
+from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, \
+    REDIS_SOCK, SMARTASS, TECH_QUESTIONS, IT_HELP, FRUSTRATION
 from datastore import Words, Learned, Structure
 from random import choice, randint
 from util import pageopen, savefromweb
@@ -334,36 +335,25 @@ class Broca(Dendrite):
             self.chat(random.choice(stops))
             return
 
-        techSupportQueries = [
-            'how do i',
-            'how do you',
-            'how does one',
-            'how would i',
-            'how would you',
-            'how would one'
-            'does anyone know how'
-            'do you know how'
-        ]
-        techSupportHits = [sentence.lower().find(t) != -1 for t in techSupportQueries]
-        if SMARTASS and True in techSupportHits:
-            #naively parse out the question being asked
+        if sentence.lower().strip() in FRUSTRATION or sentence.lower().find('stupid') == 0:
+            self.chat(self.cx.commands.get('table')())
 
-            print sentence.lower().split(techSupportQueries[techSupportHits.index(True)])
-
+        inquiries = [sentence.lower().find(t) != -1 for t in TECH_QUESTIONS]
+        
+        if SMARTASS and True in inquiries:
+            # Naively parse out the question being asked
             try:
-                smartassery = sentence.lower().split(techSupportQueries[techSupportHits.index(True)])[1]
+                smartassery = sentence.lower().split(TECH_QUESTIONS[inquiries.index(True)])[1]
             except:
                 return
 
-            techSupportResponses = [
-                'Have you tried turning it off an on again?',
-                'Have you tried forcing an unexpected reboot?',
-                'Are you sure your computer is on?',
-                'Have your tried connecting the computer directly to the modem?',
-                'Have you power-cycled it?',
-                'http://lmgtfy.com/?q=' + smartassery.replace(' ', '+')
-            ]
-            self.chat(random.choice(techSupportResponses))
+            responses = IT_HELP
+
+            # Dynamic cases need to be appended
+            responses.append('http://lmgtfy.com/?q=' + smartassery.replace(' ', '+'))
+                
+            self.chat(random.choice(responses))
+            return
 
         # There's a very good reason for this.
         if sentence == "oh shit its your birthday erikbeta happy birthday" and self.lastsender == "jcb":
