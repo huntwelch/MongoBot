@@ -15,7 +15,7 @@ from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE
     STORE_IMGS, IMGS, REGISTERED, TIMEZONE
 from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY
 from datastore import Drinker, connectdb
-from util import unescape, pageopen, shorten, ratelimited, postdelicious, savefromweb, \
+from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
     Browse
 from autonomic import serotonin
 
@@ -114,8 +114,9 @@ class Cortex:
     #
     # ticker being the function in the class that runs.
     # see brainmeats/sms.y for a good example of this.
-    def addlive(self, func):
-        self.live[func.__name__] = func
+    def addlive(self, func, alt=False):
+        name = alt or func.__name__
+        self.live[name] = func
 
     def droplive(self, name):
         self.live.remove(name)

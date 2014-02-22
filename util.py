@@ -12,6 +12,7 @@ import os
 
 from PIL import Image
 from bisect import bisect
+from Queue import Queue
 
 from settings import CHANNEL, SHORTENER
 from secrets import HTTP_PASS, DELICIOUS_USER, DELICIOUS_PASS
@@ -299,6 +300,8 @@ def asciiart(image_path):
     return out
 
 
+
+
 # TODO: clean this up up into a standard threaded
 # queue attached to cortex
 def threadfromweb(url, path):
@@ -314,7 +317,7 @@ def getyoutube(url, path):
     
 
 def savevideo(url, path):
-    os.system('youtube-dl %s -o %s' % (url, path))
+    os.system('youtube-dl %s -o %s &' % (url, path))
     return
 
 
