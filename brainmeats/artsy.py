@@ -23,7 +23,7 @@ class Artsy(Dendrite):
             return 'Get what?'
 
         url = self.values[0]
-        getyoutube(url, VIDS + '%(title)s.%(ext)s')
+        self.butler.do('Downloaded video', savevideo, (url, VIDS + '%(title)s.%(ext)s'))
 
         return 'Downloading'
 

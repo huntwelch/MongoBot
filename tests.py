@@ -14,7 +14,7 @@ class Delegate(object):
 
     finished = []
     
-    def __init__(self):
+    def __init__(self, cortex):
         return    
     
     def wrap(self, func, note):

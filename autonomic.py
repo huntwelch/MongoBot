@@ -29,6 +29,10 @@ class Dendrite(object):
         return self.cx.values
 
     @property
+    def butler(self):
+        return self.cx.butler
+
+    @property
     def lastsender(self):
         return self.cx.lastsender
 

@@ -1,4 +1,4 @@
-import twitter
+import tweepy
 
 from autonomic import axon, alias, help, Dendrite
 from settings import NICK
@@ -8,13 +8,16 @@ from secrets import (TWIT_USER, TWIT_PASS, TWIT_ACCESS_TOKEN, TWIT_ACCESS_SECRET
 
 class Twitting(Dendrite):
 
-    api = twitter.Api(consumer_key=TWIT_CONSUMER_KEY,
-                   consumer_secret=TWIT_CONSUMER_SECRET,
-                   access_token_key=TWIT_ACCESS_TOKEN,
-                   access_token_secret=TWIT_ACCESS_SECRET)
+    auth = tweepy.OAuthHandler(TWIT_CONSUMER_KEY, TWIT_CONSUMER_SECRET)
+
+    api = False
+    lasttweet = False
 
     def __init__(self, cortex):
         super(Twitting, self).__init__(cortex)
+
+        self.auth.set_access_token(TWIT_ACCESS_TOKEN, TWIT_ACCESS_SECRET)
+        self.api = tweepy.API(self.auth)
 
     @axon
     @help("<show link to %s's twitter feed>" % NICK)
@@ -22,10 +25,28 @@ class Twitting(Dendrite):
         return TWIT_PAGE
 
     @axon
+    @help('[ID] <retweet by id, or just the last tweet>')
+    def retweet(self):
+        id = self.lasttweet
+        if not self.values and not id:
+            self.chat('Provide an id or link a tweet first')
+            return
+        
+        if self.values:
+            id = self.values[0]
+
+        try:
+            status = self.api.retweet(id)
+        except Exception as e:
+            return 'Twitter error: %s' % str(e)
+
+        return 'Retwitted'
+
+    @axon
     @help("MESSAGE <post to %s's twitter feed>" % NICK)
     def tweet(self, _message=False):
         if not self.values and not _message:
-            self.chat("Tweet what?")
+            self.chat('Tweet what?')
             return
 
         if not _message:
@@ -34,12 +55,14 @@ class Twitting(Dendrite):
             message = _message
         
         try:
-            status = self.api.PostUpdate(message)
+            status = self.api.update_status(message)
         except Exception as e:
-            return "Twitter error."
+            return 'Twitter error: %s' % str(e)
 
         if not _message:
-            return 'Tweeted "%s"' % status.text
+            return 'Twitted'
+
+    
 
     @axon
     @help("ID <retrieve the tweet with ID>")
@@ -47,7 +70,9 @@ class Twitting(Dendrite):
         if not id:
             id = '+'.join(self.values)
 
-        status = self.api.GetStatus(id)
+        self.lasttweet = id
+
+        status = self.api.get_status(id)
 
         text = status.text
         screen_name = status.user.screen_name

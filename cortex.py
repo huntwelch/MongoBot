@@ -16,7 +16,7 @@ from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE
 from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY
 from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
-    Browse
+    Browse, Butler
 from autonomic import serotonin
 
 
@@ -38,6 +38,7 @@ class Cortex:
     memories = False
     autobabble = False
     lastcommand = False
+    butler = False
 
     public_commands = []
     members = []
@@ -60,6 +61,9 @@ class Cortex:
 
         print '* Loading brainmeats'
         self.loadbrains()
+
+        print '* Waking butler'
+        self.butler = Butler(self)
 
         print '* Loading users'
         users = open(REGISTERED, 'r')
@@ -435,10 +439,10 @@ class Cortex:
             if ext in images:
                 title = 'Image'
                 # Switch this to a Browse method
-                #if STORE_IMGS:
-                #    fname = url.split('/').pop()
-                #    path = IMGS + fname
-                #    savefromweb(url, path)
+                if STORE_IMGS:
+                    fname = url.split('/').pop()
+                    path = IMGS + fname
+                    self.butler.do('Finished downloading', savefromweb, (url, path))
 
             elif ext == 'pdf':
                 title = 'PDF Document'

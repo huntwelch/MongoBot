@@ -300,24 +300,27 @@ def asciiart(image_path):
     return out
 
 
+# TODO?: interface with addlive
+class Butler(object):
 
-
-# TODO: clean this up up into a standard threaded
-# queue attached to cortex
-def threadfromweb(url, path):
-    thread = threading.Thread(target=savefromweb, args=(url, path))
-    thread.start()
-    return
-
-
-def getyoutube(url, path):
-    thread = threading.Thread(target=savevideo, args=(url, path))
-    thread.start()
-    return
+    cx = False
     
+    def __init__(self, cortex):
+        self.cx = cortex
+        return    
+    
+    def wrap(self, func, args, note, pid):
+        func(*args)
+        self.cx.chat(note)
+        
+    def do(self, note, func, args):
+        pid = 'task-%s' % time.time() 
+        thread = threading.Thread(target=self.wrap, args=(func, args, note, pid))
+        thread.start()
+
 
 def savevideo(url, path):
-    os.system('youtube-dl %s -o %s &' % (url, path))
+    os.system('youtube-dl %s -o %s' % (url, path))
     return
 
 
