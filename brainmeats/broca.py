@@ -65,18 +65,14 @@ class Broca(Dendrite):
         name = "%s_%s.txt" % ( int(time.mktime(time.localtime())), self.lastsender )
         path = BOOKS + name
 
-        try:
+        def comfychair(book, path):
             savefromweb(book, path)    
-        except Exception as e:
-            self.chat("Could not find book.")
-            self.chat(str(e))
-            return
+            with open(path) as b:
+                for line in b:
+                    self.mark(line)
 
-        with open(path) as b:
-            for line in b:
-                self.mark(line)
-
-        self.chat("Eh, I like his older, funnier work.")
+        self.chat('Pulling up a chair...')
+        self.butler.do('Eh, I like his older, funnier work.', comfychair, (book, path))
 
     # MongoBot's ability to run a markov chain is a large
     # part of the reason I started working on mongo in the

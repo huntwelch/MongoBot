@@ -1,5 +1,8 @@
 import time
 import os
+import re
+import subprocess
+import signal
 
 from autonomic import axon, alias, help, Dendrite
 from settings import IMGS, VIDS, GIFS, WEBSITE, DOWNLOADS
@@ -27,9 +30,9 @@ class Artsy(Dendrite):
             return 'Get what?'
 
         url = self.values[0]
-        self.butler.do('Downloaded video', savevideo, (url, VIDS + '%(title)s.%(ext)s'))
+        self.butler.do('Downloaded %s', savevideo, (url, VIDS + '%(title)s.%(ext)s'))
 
-        return 'Downloading'
+        return 'I have begun fetching the video in question'
 
 
     # So this was a frigging nightmare. Besides 
@@ -50,30 +53,82 @@ class Artsy(Dendrite):
     # about IO. Why Zeus's trollops gettin all up
     # in my code is beyond me.
     @axon
+    @help('FILE|YOUTUBE_URL START FINISH <create a gif from a time range in a video>')
     def gif(self):
 
         # allow for varied input
         # try not to crash, yah?
 
         if not self.values or len(self.values) != 3:
-            return 'Please enter movie start end.'
+            return 'Please enter filename|youtubeurl start end.'
 
-        file, start, finis = tuple(self.values)
+        target, start, finis = tuple(self.values)
+        timeformat = re.compile('^\d+,\d{2}\.\d{1,2}$')
 
-        vidpath = VIDS + file
-        filename = '%s%s.gif' % (time.time(), file)
-        gifpath = 'server' + GIFS + filename
+        if not timeformat.match(start) or not timeformat.match(finis):
+            self.chat('Times must be in the format 12,34.56 (^\d+,\d{2}\.\d{1,2}$)')
+            return
+
         start_m, start_s = tuple(start.split(','))
         start = (int(start_m), float(start_s))
-
         finis_m, finis_s = tuple(finis.split(','))
         finis = (int(finis_m), float(finis_s))
-        
-        VideoFileClip(vidpath).subclip(start,finis).resize(0.5).to_gif(gifpath)
 
-        return '%s%s%s' % (WEBSITE, GIFS, filename)
-        
-    
+        note = 'New gif @ %s'
+
+
+        def giffer(WEBSITE, VIDS, GIFS, target, start, finis):
+            youtube = False
+            if target.find('https://www.youtube.com') == 0:
+                youtube = True
+                target = savevideo(target, VIDS + '%(title)s.%(ext)s')
+                target = target.split('/').pop()
+
+            vidpath = VIDS + target
+
+            if not os.path.isfile(vidpath):
+                return 'Video file not found'
+
+            filename = '%s%s.gif' % (time.time(), target)
+            gifpath = 'server' + GIFS + filename
+
+            try:
+                VideoFileClip(vidpath).subclip(start,finis).resize(0.5).to_gif(gifpath)
+            except Exception as e:
+                return 'Error: %s' % str(e)
+
+            # Because of the above mentioned hack to 
+            # moviepy, this has to be done to clear
+            # the ffmpeg processes. Don't run mongo
+            # on dedicated ffmpeg servers.
+            p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE)
+            out, err = p.communicate()
+            for line in out.splitlines():
+                if 'ffmpeg' in line:
+                    pid = int(line.split(None, 1)[0])
+                    os.kill(pid, signal.SIGKILL)
+
+            # I've noticed some people comment lines
+            # like this. But, c'mon, it's so freaking
+            # what this does and why. Maybe in C it'd
+            # need some notes, but python is halfway
+            # to pseudocode as it is. I'm not explaining
+            # this. Seriously.
+            # 
+            # That said, there's a minor bug that if
+            # you've used getvideo to pull a youtube
+            # video, then gif it with a link to the
+            # original, it will nix the previously 
+            # downloaded video. It's a little weird to
+            # deal with that with the threading and all,
+            # and I don't care that much.
+            if youtube:
+                os.remove(vidpath)
+
+            return WEBSITE + GIFS + filename
+
+        self.butler.do(note, giffer, (WEBSITE, VIDS, GIFS, target, start, finis))
+        return 'I have begun giffing.'
 
     # This not as awesome as I thought it would be,
     # and tends to get cut off by rate limits. The

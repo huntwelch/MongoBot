@@ -9,6 +9,7 @@ import base64
 import random
 import threading
 import os
+import subprocess
 
 from PIL import Image
 from bisect import bisect
@@ -310,7 +311,10 @@ class Butler(object):
         return    
     
     def wrap(self, func, args, note, pid):
-        func(*args)
+        results = func(*args)
+        if results:
+            note = note % results
+
         self.cx.chat(note)
         
     def do(self, note, func, args):
@@ -320,10 +324,28 @@ class Butler(object):
 
 
 def savevideo(url, path):
-    cmd = 'youtube-dl --restrict-filenames %s -o "%s"' % (url, path)
-    print '* %s' % cmd
-    os.system(cmd)
-    return
+    args = [
+        'youtube-dl',
+        '--restrict-filenames',
+        url,
+        '-o',
+        path,
+    ]
+    
+    # Save output from the real run in 
+    # for error checks. Someday.
+    feedback = subprocess.check_output(args)
+
+    # Simulated run to get the file name.
+    # Though it pops more proc, there are 
+    # some advantages to this: simple parsing
+    # and handles the already downloaded
+    # error while still being useful.
+    filename = False
+    args.append('--get-filename')
+    filename = subprocess.check_output(args)
+
+    return filename.strip()
 
 
 def savefromweb(url, path):
