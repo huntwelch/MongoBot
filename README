@@ -93,12 +93,15 @@ Philosophies
 To Do
 =====
 
-    TODO: Probably make this readme better
-    TODO: reddit command breaks without specified subreddit
-    TODO: Clean up broca, decide what to do with it
-    TODO: link holdem to db, make persistant, open up sit/in/out functionality
-    TODO: finish holdem, needs testing and split pots probably don't work
-    TODO: stock game: account for splits and reverse splits
-    TODO: remove last of beautiful soup dependencies, if possible
-    TODO: add @requires decorator, check for server, redis, mongo, have -features command to check.
-          Function by function level? 
+    + Probably make this readme better
+    + add tweet at in twitting
+    + merge video download and giffing + remove download
+    + phase out pageopen for Browse (possible phas eout requests module)
+    + reddit command breaks without specified subreddit
+    + Clean up broca, decide what to do with it
+    + link holdem to db, make persistant, open up sit/in/out functionality
+    + finish holdem, needs testing and split pots probably don't work
+    + stock game: account for splits and reverse splits
+    + remove last of beautiful soup dependencies, if possible
+    + add @requires decorator, check for server, redis, mongo, have -features command to check.
+      Function by function level? 

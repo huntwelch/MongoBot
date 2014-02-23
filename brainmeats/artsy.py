@@ -52,6 +52,9 @@ class Artsy(Dendrite):
     @axon
     def gif(self):
 
+        # allow for varied input
+        # try not to crash, yah?
+
         if not self.values or len(self.values) != 3:
             return 'Please enter movie start end.'
 
