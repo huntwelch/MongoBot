@@ -7,6 +7,9 @@ from util import asciiart, savevideo
 from moviepy.editor import *
 
 
+# TODO: push gif to a composite butler task that 
+# downloads, gifs, and deletes a youtube video
+
 # This monstrous meat (heh) depends on things like
 # ffmpeg and all kinds of nastiness ye must install.
 # All highly experiemental, and way, way beyond the
@@ -67,6 +70,7 @@ class Artsy(Dendrite):
 
         return '%s%s%s' % (WEBSITE, GIFS, filename)
         
+    
 
     # This not as awesome as I thought it would be,
     # and tends to get cut off by rate limits. The

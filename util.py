@@ -320,7 +320,9 @@ class Butler(object):
 
 
 def savevideo(url, path):
-    os.system('youtube-dl %s -o %s' % (url, path))
+    cmd = 'youtube-dl --restrict-filenames %s -o "%s"' % (url, path)
+    print '* %s' % cmd
+    os.system(cmd)
     return
 
 
