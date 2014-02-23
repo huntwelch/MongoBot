@@ -18,9 +18,10 @@ LOG = LOGDIR + '/chat.log'
 BOOKS = 'booklearnin/'
 DISTASTE = STORAGE + '/distaste'
 ACROSCORE = STORAGE + '/acro/'
+DOWNLOADS = STORAGE + '/downloads/'
 IMGS = STORAGE + '/downloads/imgs/'
 VIDS = STORAGE + '/downloads/videos/'
-GIFS = 'server/static/gifs/'
+GIFS = '/static/gifs/'
 REGISTERED = STORAGE + '/allowed'
 
 # Enabled libraries. These are the default brainmeats
