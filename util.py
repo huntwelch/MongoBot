@@ -80,6 +80,7 @@ class Browse(object):
     
     url = False
     ua = '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'
+    ieua = 'User-Agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)'
     robot = mechanize.Browser()
     text = False
     error = False
@@ -94,7 +95,14 @@ class Browse(object):
         self.robot.set_handle_robots(False)
         self.robot.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
 
-        self.robot.addheaders = [('User-agent', self.ua)]
+        self.robot.addheaders = [
+            ('User-Agent', self.ua),
+            ('Accept', '*/*'),
+            ('Accept-Encoding', 'gzip,deflate,sdch'),
+            ('Accept-Language', 'en-US,en;q=0.8'),
+            ('Cache-Control', 'max-age=0'),
+            ('Connection', 'keep-alive'),
+        ]
 
         if userpass:
             user, password = userpass.split(':')

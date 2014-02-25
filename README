@@ -26,9 +26,7 @@ Advanced Usage
     first time.
 
     Also, the markov functionality is based on redis, so you'll have to get a 
-    redis server up and running. Also, the markov stuff might be broken, it's
-    pretty recent and so far just spitting out three word phrases, but that
-    might be due to dearth of content.
+    redis server up and running.
 
 
 Secret settings
@@ -95,13 +93,11 @@ To Do
 
     + Probably make this readme better
     + add tweet at in twitting
-    + merge video download and giffing + remove download
-    + phase out pageopen for Browse (possible phas eout requests module)
+    + phase out pageopen for Browse (possibly phaseout requests module)
     + reddit command breaks without specified subreddit
     + Clean up broca, decide what to do with it
     + link holdem to db, make persistant, open up sit/in/out functionality
     + finish holdem, needs testing and split pots probably don't work
     + stock game: account for splits and reverse splits
-    + remove last of beautiful soup dependencies, if possible
     + add @requires decorator, check for server, redis, mongo, have -features command to check.
       Function by function level? 

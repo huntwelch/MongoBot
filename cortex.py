@@ -187,7 +187,12 @@ class Cortex:
             elif line.find('PRIVMSG') != -1:
                 self.boredom = currenttime
                 content = line.split(' ', 3)
-                self.context = content[2]
+
+                try:
+                    self.context = content[2]
+                except Exception as e:
+                    print 'No context, defaulting'
+                    self.context = CHANNEL
 
                 if self.context == NICK:
                     self.lastprivate = content
