@@ -169,12 +169,14 @@ class Cortex:
                 print "* Joined " + CHANNEL
                 self.getnames()
 
-            if self.gettingnames:
-                if line.find('@ ' + CHANNEL) != -1:
-                    all = line.split(':')[2]
+            if self.gettingnames and line.find('@ ' + CHANNEL) != -1:
+                try:
+                    members = line.split(':')[2]
                     self.gettingnames = False
-                    all = re.sub(NICK + ' ', '', all)
-                    self.members += list(set(all.split()) - set(self.members))
+                    members = re.sub(NICK + ' ', '', members)
+                    self.members += list(set(members.split()) - set(self.members))
+                except:
+                    pass
 
             scan = re.search(SCAN, line)
             ping = re.search('^PING', line)
@@ -283,7 +285,7 @@ class Cortex:
     # If it is indeed a command, the cortex stores who sent it,
     # and any words after the command are split in a values array,
     # accessible by the brainmeats as self.values.
-    def command(self, sender, cmd):
+    def command(self, sender, cmd, piped=False):
         chain = cmd.split('|', 1)
         pipe = False
 
@@ -291,7 +293,11 @@ class Cortex:
             cmd = chain[0].strip()
             pipe = chain[1].strip()
 
+        if piped:
+            cmd = '%s %s' % (cmd, piped)
+
         components = cmd.split()
+            
         what = components.pop(0)[1:]
 
         is_nums = re.search("^[0-9]+", what)
@@ -345,7 +351,10 @@ class Cortex:
             return
 
         if pipe:
-            self.command(sender, '%s %s' % (pipe, result))
+            # Piped output must be string!
+            if type(result) is list:
+                result = ' '.join(result)
+            self.command(sender, pipe, result)
             return
 
         if type(result) in [str, unicode]:
