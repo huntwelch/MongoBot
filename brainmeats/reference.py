@@ -214,3 +214,21 @@ class Reference(Dendrite):
         except:
             return 'Dunno bro'
 
+    # TODO: save common regexs
+    @axon
+    @help('REGEX LINE <extract re.search(REGEX, LINE).group(1)>')
+    def rx(self):
+        if not self.values or len(self.values) < 2:
+            self.chat('Please enter REGEX LINE')
+            return
+
+        regex = self.values.pop(0)
+        line = ' '.join(self.values)
+
+        m = re.search(regex, line)
+
+        if not m:
+            self.chat('No match')
+            return
+
+        return m.group(1)
