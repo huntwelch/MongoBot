@@ -12,32 +12,22 @@ class Finance(Dendrite):
     @axon
     @help("STOCK_SYMBOL <get stock quote>")
     def q(self):
-        symbols = self.values
-
-        if not symbols:
+        symbol = self.values[0]
+        if not symbol:
             self.chat("Enter a symbol")
             return
 
-        symbol = self.values[0]
+        showit = False
+        try:
+            stock = Stock(symbol)
+            showit = stock.showquote(self.context)
+        except:
+            pass
 
-        # I feel like this try shouldn't be necessary,
-        # something may have changed in the API
-        showits = []
+        if not showit:
+            showit = "Couldn't find company: " + symbol
 
-        for symbol in symbols:
-            showit = False
-            try:
-                stock = Stock(symbol)
-                showit = stock.showquote(self.context)
-            except:
-                pass
-
-            if not showit:
-                showit = "Couldn't find company: " + symbol
-
-            showits.append(showit)
-
-        return showits
+        return showit
 
     @axon
     @help("<get current Bitcoin trading information>")

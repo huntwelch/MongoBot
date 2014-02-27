@@ -12,7 +12,7 @@ from time import mktime, localtime, sleep
 from random import randint
 
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, \
-    STORE_IMGS, IMGS, REGISTERED, TIMEZONE
+    STORE_IMGS, IMGS, REGISTERED, TIMEZONE, MULTI_PASS
 from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY
 from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
@@ -234,7 +234,7 @@ class Cortex:
 
         # Determine if the action is a command and the user is
         # approved.
-        if content[:1] == CONTROL_KEY:
+        if content[:1] == CONTROL_KEY or content[:1] == MULTI_PASS:
             
             # Tack on last command if it's just the control
             if content == CONTROL_KEY or content[:2] == CONTROL_KEY + ' ':
@@ -298,7 +298,10 @@ class Cortex:
 
         components = cmd.split()
             
-        what = components.pop(0)[1:]
+        _what = components.pop(0)
+
+        what = _what[1:]
+        means = _what[:1]
 
         is_nums = re.search("^[0-9]+", what)
         is_breaky = re.search("^" + CONTROL_KEY + "|[^\w]+", what)
@@ -345,7 +348,22 @@ class Cortex:
         # Point is, you can return a list or a string at
         # the end of a brainmeat command, or just use chat.
         # I probably won't worry about act and announce.
-        result = self.commands.get(what, self.default)()
+        if means == MULTI_PASS:
+            if pipe:
+                self.chat("Pipe dropped")
+
+            pipe = False
+            result = []
+
+            if not components:
+                self.chat("No args to iter. Bitch.")
+
+            for item in components:
+                self.values = [item]
+                _result = self.commands.get(what, self.default)()
+                result.append(_result)
+        else:
+            result = self.commands.get(what, self.default)()
 
         if not result:
             return
@@ -494,6 +512,10 @@ class Cortex:
     # violations.
     @ratelimited(2)
     def chat(self, message, target=False, error=False):
+
+        if not message:
+            return
+
         if target:
             whom = target
         elif self.context == CHANNEL:

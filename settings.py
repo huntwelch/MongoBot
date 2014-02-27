@@ -53,6 +53,8 @@ ENABLED = [
 
 # Misc
 CONTROL_KEY = '-' # All commands are preceded by this. It can be whatever you want.
+MULTI_PASS = '*'
+CKEYS = [CONTROL_KEY, MULTI_PASS]
 SHORTENER = 'http://roa.st/api.php'
 PATIENCE = 7000
 REPO = 'https://github.com/huntwelch/MongoBot' # Used by the -source command.
