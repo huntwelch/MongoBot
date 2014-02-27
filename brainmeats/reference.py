@@ -217,7 +217,8 @@ class Reference(Dendrite):
     # TODO: save common regexs
     @axon
     @help('REGEX LINE <extract re.search(REGEX, LINE).group(1)>')
-    def rx(self):
+    @alias(['regex', 'rx', 'extract'])
+    def regexsearch(self):
         if not self.values or len(self.values) < 2:
             self.chat('Please enter REGEX LINE')
             return
