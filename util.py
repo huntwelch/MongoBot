@@ -312,22 +312,27 @@ def asciiart(image_path):
 # TODO?: interface with addlive
 class Butler(object):
 
+    maxtasks = 8
     cx = False
+    semaphore = False
     
     def __init__(self, cortex):
         self.cx = cortex
+        self.semaphore = threading.BoundedSemaphore(self.maxtasks)
         return    
     
-    def wrap(self, func, args, note, pid):
+    def wrap(self, func, args, semaphore, note, pid):
         results = func(*args)
         if results:
             note = note % results
 
         self.cx.chat(note)
+        semaphore.release()
         
-    def do(self, note, func, args):
+    def do(self, func, args, note=False):
         pid = 'task-%s' % time.time() 
-        thread = threading.Thread(target=self.wrap, args=(func, args, note, pid))
+        self.semaphore.acquire()
+        thread = threading.Thread(target=self.wrap, args=(func, args, self.semaphore, note, pid))
         thread.start()
 
 

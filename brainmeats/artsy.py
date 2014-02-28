@@ -10,9 +10,6 @@ from util import asciiart, savevideo
 from moviepy.editor import *
 
 
-# TODO: push gif to a composite butler task that 
-# downloads, gifs, and deletes a youtube video
-
 # This monstrous meat (heh) depends on things like
 # ffmpeg and all kinds of nastiness ye must install.
 # All highly experiemental, and way, way beyond the
@@ -30,9 +27,9 @@ class Artsy(Dendrite):
             return 'Get what?'
 
         url = self.values[0]
-        self.butler.do('Downloaded %s', savevideo, (url, VIDS + '%(title)s.%(ext)s'))
+        result = savevideo(url, VIDS + '%(title)s.%(ext)s')
 
-        return 'I have begun fetching the video in question'
+        return 'Saved %s' % result
 
 
     # So this was a frigging nightmare. Besides 
@@ -76,59 +73,54 @@ class Artsy(Dendrite):
 
         note = 'New gif @ %s'
 
+        youtube = False
+        if target.find('https://www.youtube.com') == 0:
+            youtube = True
+            target = savevideo(target, VIDS + '%(title)s.%(ext)s')
+            target = target.split('/').pop()
 
-        def giffer(WEBSITE, VIDS, GIFS, target, start, finis):
-            youtube = False
-            if target.find('https://www.youtube.com') == 0:
-                youtube = True
-                target = savevideo(target, VIDS + '%(title)s.%(ext)s')
-                target = target.split('/').pop()
+        vidpath = VIDS + target
 
-            vidpath = VIDS + target
+        if not os.path.isfile(vidpath):
+            return 'Video file not found'
 
-            if not os.path.isfile(vidpath):
-                return 'Video file not found'
+        filename = '%s%s.gif' % (time.time(), target)
+        gifpath = 'server' + GIFS + filename
 
-            filename = '%s%s.gif' % (time.time(), target)
-            gifpath = 'server' + GIFS + filename
+        try:
+            VideoFileClip(vidpath).subclip(start,finis).resize(0.5).to_gif(gifpath)
+        except Exception as e:
+            return 'Error: %s' % str(e)
 
-            try:
-                VideoFileClip(vidpath).subclip(start,finis).resize(0.5).to_gif(gifpath)
-            except Exception as e:
-                return 'Error: %s' % str(e)
+        # Because of the above mentioned hack to 
+        # moviepy, this has to be done to clear
+        # the ffmpeg processes. Don't run mongo
+        # on dedicated ffmpeg servers.
+        p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE)
+        out, err = p.communicate()
+        for line in out.splitlines():
+            if 'ffmpeg' in line:
+                pid = int(line.split(None, 1)[0])
+                os.kill(pid, signal.SIGKILL)
 
-            # Because of the above mentioned hack to 
-            # moviepy, this has to be done to clear
-            # the ffmpeg processes. Don't run mongo
-            # on dedicated ffmpeg servers.
-            p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE)
-            out, err = p.communicate()
-            for line in out.splitlines():
-                if 'ffmpeg' in line:
-                    pid = int(line.split(None, 1)[0])
-                    os.kill(pid, signal.SIGKILL)
+        # I've noticed some people comment lines
+        # like this. But, c'mon, it's so freaking
+        # what this does and why. Maybe in C it'd
+        # need some notes, but python is halfway
+        # to pseudocode as it is. I'm not explaining
+        # this. Seriously.
+        # 
+        # That said, there's a minor bug that if
+        # you've used getvideo to pull a youtube
+        # video, then gif it with a link to the
+        # original, it will nix the previously 
+        # downloaded video. It's a little weird to
+        # deal with that with the threading and all,
+        # and I don't care that much.
+        if youtube:
+            os.remove(vidpath)
 
-            # I've noticed some people comment lines
-            # like this. But, c'mon, it's so freaking
-            # what this does and why. Maybe in C it'd
-            # need some notes, but python is halfway
-            # to pseudocode as it is. I'm not explaining
-            # this. Seriously.
-            # 
-            # That said, there's a minor bug that if
-            # you've used getvideo to pull a youtube
-            # video, then gif it with a link to the
-            # original, it will nix the previously 
-            # downloaded video. It's a little weird to
-            # deal with that with the threading and all,
-            # and I don't care that much.
-            if youtube:
-                os.remove(vidpath)
-
-            return WEBSITE + GIFS + filename
-
-        self.butler.do(note, giffer, (WEBSITE, VIDS, GIFS, target, start, finis))
-        return 'I have begun giffing.'
+        return WEBSITE + GIFS + filename
 
     # This not as awesome as I thought it would be,
     # and tends to get cut off by rate limits. The

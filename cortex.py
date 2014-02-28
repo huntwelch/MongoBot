@@ -5,6 +5,7 @@ import pkgutil
 import socket
 import time
 import string
+import threading
 
 from datetime import date, timedelta, datetime
 from pytz import timezone
@@ -38,6 +39,7 @@ class Cortex:
     memories = False
     autobabble = False
     lastcommand = False
+
     butler = False
 
     public_commands = []
@@ -249,7 +251,7 @@ class Cortex:
                 self.chat('My daddy says not to listen to you.')
                 return
             
-            self.command(nick, content)
+            self.butler.do(self.command, (nick, content))
             return
 
         # This is a special case for giving people meaningless
@@ -470,7 +472,7 @@ class Cortex:
                 if STORE_IMGS:
                     fname = url.split('/').pop()
                     path = IMGS + fname
-                    self.butler.do('Finished downloading', savefromweb, (url, path))
+                    self.butler.do(savefromweb, (url, path), 'Finished downloading')
 
             elif ext == 'pdf':
                 title = 'PDF Document'

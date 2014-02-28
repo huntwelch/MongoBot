@@ -4,6 +4,7 @@
 *.swp
 *.game
 *.notes
+*.rdb
 .project
 .pydevproject
 natwords

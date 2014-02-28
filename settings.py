@@ -2,7 +2,7 @@ from math import *
 from secrets import CHANNEL
 
 # Connection Settings
-HOST = 'banks.freenode.net'
+HOST = 'chat.freenode.net'
 PORT = 6667
 NICK = 'MongoBot'
 

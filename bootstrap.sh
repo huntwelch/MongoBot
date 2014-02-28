@@ -11,6 +11,7 @@ brew install mongodb
 brew install redis
 brew install nginx
 brew install uwsgi
+brew install ImageMagick
 
 mongod &
 redis-server &
