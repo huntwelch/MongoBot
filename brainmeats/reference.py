@@ -226,7 +226,12 @@ class Reference(Dendrite):
         regex = self.values.pop(0)
         line = ' '.join(self.values)
 
-        m = re.search(regex, line)
+        try:
+            m = re.search(regex, line)
+        except Exception as e:
+            self.chat('Regex borked', str(e))
+            return
+
 
         if not m:
             self.chat('No match')
