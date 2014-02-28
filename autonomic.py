@@ -116,8 +116,8 @@ def help(text):
 
 # Don't want to type out findfreechildpornwithukmirrors?
 # @alias(['perv', 'seriouslydude', 'gethelp'])
-def alias(aliases):
+def alias(*args):
     def add(fn):
-        fn.aliases = aliases
+        fn.aliases = args
         return fn
     return add

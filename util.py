@@ -357,7 +357,7 @@ def savevideo(url, path):
 
 
 def savefromweb(url, path):
-    r = requests.get(url, stream=True)
+    r = requests.get(url, stream=True, verify=False)
 
     if r.status_code != 200:
         return

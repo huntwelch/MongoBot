@@ -349,10 +349,6 @@ class Cortex:
         # the end of a brainmeat command, or just use chat.
         # I probably won't worry about act and announce.
         if means == MULTI_PASS:
-            if pipe:
-                self.chat("Pipe dropped")
-
-            pipe = False
             result = []
 
             if not components:

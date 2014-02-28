@@ -24,7 +24,7 @@ class System(Dendrite):
     # into categories.
     @axon
     @help("<show this menu>")
-    @alias(['help'])
+    @alias('help')
     def showhelp(self):
 
         enabled = self.cx.master.ENABLED
@@ -141,7 +141,7 @@ class System(Dendrite):
     # doctor to restart. Some settings and any changes to 
     # medulla.py won't take effect until a reboot.
     @axon
-    @alias(['seppuku', 'harakiri'])
+    @alias('seppuku', 'harakiri')
     @help("<set squirrel on fire and staple it to angel. No, really>")
     def reboot(self):
         self.cx.master.die()

@@ -11,6 +11,7 @@ NICK = 'MongoBot'
 # freenode, you'll need to update this.
 SCAN = '^:\w+\.freenode\.net'
 
+# TODO: Normalize dir pattern endings ('/' or not)
 # Directory settings
 STORAGE = 'hippocampus'
 LOGDIR = STORAGE + '/log'
@@ -23,6 +24,7 @@ IMGS = STORAGE + '/downloads/imgs/'
 VIDS = STORAGE + '/downloads/videos/'
 GIFS = '/static/gifs/'
 REGISTERED = STORAGE + '/allowed'
+POEMS = STORAGE + '/poems/'
 
 # Enabled libraries. These are the default brainmeats
 # that load up on start or reboot. You can enable and 

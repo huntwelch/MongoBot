@@ -5,13 +5,15 @@ import string
 import random
 import redis
 import time
+import os
 import simplejson
 
 from threading import Thread
 from autonomic import axon, alias, help, Dendrite
 from secrets import WORDNIK_API
 from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, \
-    REDIS_SOCK, SMARTASS, TECH_QUESTIONS, IT_HELP, FRUSTRATION
+    REDIS_SOCK, SMARTASS, TECH_QUESTIONS, IT_HELP, FRUSTRATION, POEMS, \
+    WEBSITE
 from datastore import Words, Learned, Structure
 from random import choice, randint
 from util import savefromweb, Browse
@@ -28,9 +30,90 @@ class Broca(Dendrite):
     markov = redis.StrictRedis(unix_socket_path=REDIS_SOCK) 
     readstuff = False
     knowledge = False
+    draft = False
 
     def __init__(self, cortex):
         super(Broca, self).__init__(cortex)
+
+    @axon
+    @help('TITLE <have %s compose poetry>' % NICK)
+    def compose(self):
+        if not self.startpoem():
+            return 'Already wrote that'
+
+        poem = ''
+        seed = self.babble()
+
+        if not seed:
+            return 'Muse not with %s today' % NICK
+
+        seed = seed.split()
+        for word in seed:
+            poem += ' ' + self.babble([word])
+        
+        self.addtext(poem.split())
+
+        return self.finis()
+        
+
+    @axon
+    @alias('begin')
+    def startpoem(self):
+
+        title = 'Untitled'
+        if self.values:
+            title = ' '.join(self.values)
+
+        if self.draft:
+            self.chat('Little busy right now')
+            return False
+
+        filename = '%s.txt' % re.sub('[^0-9a-zA-Z]+', '_', title)
+
+        if os.path.isfile(POEMS + filename):
+            self.chat('Already wrote that')
+            return False
+
+        draft = open(POEMS + filename, 'a') 
+        draft.write('%s\n' % title)
+        draft.close()
+
+        self.draft = filename
+
+        return '%s think "%s" may be masterpiece' % (NICK, title)
+
+    @axon
+    @alias('write', 'explicit')
+    def addtext(self, what=False):
+
+        # TODO: calling with -explicit will disable random line breaks
+
+        if not self.draft:
+            return 'No poems open now.'
+        
+        draft = open(POEMS + self.draft, 'a') 
+
+        what = what or self.values
+
+        text = ''
+        while what:
+            if random.randint(0,10) == 5:
+                addition = '\n'
+            else:
+                addition = what.pop(0) 
+
+            text = '%s %s' % (text, addition)
+
+        draft.write(text)
+        draft.close()
+
+        return 'Coming along real good'
+        
+    @axon
+    def finis(self):
+        link = '%s/poem/%s' % (WEBSITE, self.draft[:-4])
+        self.draft = False
+        return 'Work complete: %s' % link
 
     @axon
     def mark(self, line):
@@ -118,14 +201,17 @@ class Broca(Dendrite):
     # Americans have some seriously fucked up problems with
     # their opinions on the nature and value of intelligence.
     @axon
-    @alias(["waxrhapsodic"])
-    @help("<Make " + NICK + " speak markov chain>")
-    def babble(self):
-        if self.values:
-            if len(self.values) > 1:
-                pattern = "%s %s" % (self.values[0], self.values[1])
+    @alias('waxrhapsodic')
+    @help('<Make %s speak markov chain>' % NICK)
+    def babble(self, what=False):
+
+        what = what or self.values
+
+        if what:
+            if len(what) > 1:
+                pattern = "%s %s" % (what[0], what[1])
             else:
-                pattern = "*%s*" % self.values[0]
+                pattern = "*%s*" % what[0]
 
             matches = self.markov.keys(pattern)
 
