@@ -328,6 +328,7 @@ class Butler(object):
 
         self.cx.chat(note)
         semaphore.release()
+        return
         
     def do(self, func, args, note=False):
         pid = 'task-%s' % time.time() 

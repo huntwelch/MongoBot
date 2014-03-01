@@ -251,6 +251,12 @@ class Cortex:
                 self.chat('My daddy says not to listen to you.')
                 return
             
+            # A hack to maintain reboot until I figure
+            # our something better.
+            if content.find('%sreboot' % CONTROL_KEY) == 0:
+                self.command(nick, content)
+                return
+
             self.butler.do(self.command, (nick, content))
             return
 
@@ -287,6 +293,7 @@ class Cortex:
     # If it is indeed a command, the cortex stores who sent it,
     # and any words after the command are split in a values array,
     # accessible by the brainmeats as self.values.
+    multis = 0
     def command(self, sender, cmd, piped=False):
         chain = cmd.split('|', 1)
         pipe = False
@@ -351,10 +358,27 @@ class Cortex:
         # the end of a brainmeat command, or just use chat.
         # I probably won't worry about act and announce.
         if means == MULTI_PASS:
+
+            # All this multi checking had to be put in 
+            # after Eli decided to enter this:
+            # -babble fork | *babble | *babble | *babble
+            # ... which of course spiked the redis server
+            # to 100% CPU and eventually flooded the chat
+            # room with n^4 chats until the bot had to be
+            # kicked. This is what happens when you try
+            # to give nice things to hackers.
+            self.multis += 1
+            if self.multis > 1:
+                self.chat('This look like fork bomb. You kick puppies too?')
+                self.multis = 0
+                return
+                
             result = []
 
             if not components:
                 self.chat("No args to iter. Bitch.")
+                self.multis = 0
+                return
 
             for item in components:
                 self.values = [item]
@@ -377,8 +401,14 @@ class Cortex:
             self.chat(result)
 
         if type(result) is list:
+            if len(result) > 20:
+                result = result[:20]
+                result.append("Such result. So self throttle. Much erotic. Wow.")
+
             for line in result:
                 self.chat(line)
+        
+        self.multis = 0
 
     # If you want to restrict a command to the bot admin.
     def validate(self):

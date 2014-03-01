@@ -59,9 +59,22 @@ class Artsy(Dendrite):
         if not self.values or len(self.values) != 3:
             return 'Please enter filename|youtubeurl start end.'
 
-        target, start, finis = tuple(self.values)
+        start, finis, target = tuple(self.values)
         timeformat = re.compile('^\d+,\d{2}\.\d{1,2}$')
 
+        # This could all be sorted out better
+        if start.find(',') == -1:
+            start = '0,' + start
+    
+        if finis.find(',') == -1:
+            finis = '0,' + finis 
+    
+        if start.find('.') == -1:
+            start = start + '.0'
+    
+        if finis.find('.') == -1:
+            finis = finis + '.0'
+    
         if not timeformat.match(start) or not timeformat.match(finis):
             self.chat('Times must be in the format 12,34.56 (^\d+,\d{2}\.\d{1,2}$)')
             return
@@ -74,7 +87,7 @@ class Artsy(Dendrite):
         note = 'New gif @ %s'
 
         youtube = False
-        if target.find('https://www.youtube.com') == 0:
+        if target.find('www.youtube.com') != -1:
             youtube = True
             target = savevideo(target, VIDS + '%(title)s.%(ext)s')
             target = target.split('/').pop()
