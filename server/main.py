@@ -58,7 +58,8 @@ def api_chat():
 @requires_auth
 def chatlogs():
     hint = 'Press "/" to search logs.'
-    return render_template('chatlogs.html', hint=hint)
+    onetime = request.args.get('onetime')
+    return render_template('chatlogs.html', hint=hint, onetime=onetime)
 
 
 @app.route("/errorlog")
