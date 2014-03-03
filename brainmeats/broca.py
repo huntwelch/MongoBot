@@ -5,15 +5,19 @@ import string
 import random
 import redis
 import time
+import os
+import simplejson
 
 from threading import Thread
-from autonomic import axon, alias, category, help, Dendrite
+from autonomic import axon, alias, help, Dendrite
 from secrets import WORDNIK_API
-from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, REDIS_SOCK
+from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, \
+    REDIS_SOCK, SMARTASS, TECH_QUESTIONS, IT_HELP, FRUSTRATION, POEMS, \
+    WEBSITE
 from datastore import Words, Learned, Structure
 from random import choice, randint
-from util import pageopen, savefromweb
-from bs4 import BeautifulSoup as soup
+from util import savefromweb, Browse
+from bs4 import BeautifulSoup as bs4
 from wordnik import swagger, WordApi
 
 
@@ -21,15 +25,95 @@ from wordnik import swagger, WordApi
 # of 5 minutes a month. The miscellaneous language 
 # functions usually work, and of course the markov
 # is done here.
-@category("language")
 class Broca(Dendrite):
 
     markov = redis.StrictRedis(unix_socket_path=REDIS_SOCK) 
     readstuff = False
     knowledge = False
+    draft = False
 
     def __init__(self, cortex):
         super(Broca, self).__init__(cortex)
+
+    @axon
+    @help('TITLE <have %s compose poetry>' % NICK)
+    def compose(self):
+        if not self.startpoem():
+            return 'Already wrote that'
+
+        poem = ''
+        seed = self.babble()
+
+        if not seed:
+            return 'Muse not with %s today' % NICK
+
+        seed = seed.split()
+        for word in seed:
+            poem += ' ' + self.babble([word])
+        
+        self.addtext(poem.split())
+
+        return self.finis()
+        
+
+    @axon
+    @alias('begin')
+    def startpoem(self):
+
+        title = 'Untitled'
+        if self.values:
+            title = ' '.join(self.values)
+
+        if self.draft:
+            self.chat('Little busy right now')
+            return False
+
+        filename = '%s.txt' % re.sub('[^0-9a-zA-Z]+', '_', title)
+
+        if os.path.isfile(POEMS + filename):
+            self.chat('Already wrote that')
+            return False
+
+        draft = open(POEMS + filename, 'a') 
+        draft.write('%s\n' % title)
+        draft.close()
+
+        self.draft = filename
+
+        return '%s think "%s" may be masterpiece' % (NICK, title)
+
+    @axon
+    @alias('write', 'explicit')
+    def addtext(self, what=False):
+
+        # TODO: calling with -explicit will disable random line breaks
+
+        if not self.draft:
+            return 'No poems open now.'
+        
+        draft = open(POEMS + self.draft, 'a') 
+
+        what = what or self.values
+
+        text = ''
+        while what:
+            if random.randint(0,10) == 5:
+                addition = '\n'
+            else:
+                addition = what.pop(0) 
+
+            text = '%s %s' % (text, addition)
+
+        draft.write(text)
+        draft.close()
+
+        return 'Coming along real good'
+        
+    @axon
+    def finis(self):
+        link = '%s/poem/%s' % (WEBSITE, self.draft[:-4])
+        self.draft = False
+        return 'Work complete: %s' % link
 
     @axon
     def mark(self, line):
@@ -64,18 +148,13 @@ class Broca(Dendrite):
         name = "%s_%s.txt" % ( int(time.mktime(time.localtime())), self.lastsender )
         path = BOOKS + name
 
-        try:
-            savefromweb(book, path)    
-        except Exception as e:
-            self.chat("Could not find book.")
-            self.chat(str(e))
-            return
-
+        savefromweb(book, path)    
         with open(path) as b:
             for line in b:
                 self.mark(line)
 
-        self.chat("Eh, I like his older, funnier work.")
+        return 'Eh, I like his older, funnier work'
+
 
     # MongoBot's ability to run a markov chain is a large
     # part of the reason I started working on mongo in the
@@ -121,14 +200,17 @@ class Broca(Dendrite):
     # Americans have some seriously fucked up problems with
     # their opinions on the nature and value of intelligence.
     @axon
-    @alias(["waxrhapsodic"])
-    @help("<Make " + NICK + " speak markov chain>")
-    def babble(self):
-        if self.values:
-            if len(self.values) > 1:
-                pattern = "%s %s" % (self.values[0], self.values[1])
+    @alias('waxrhapsodic')
+    @help('<Make %s speak markov chain>' % NICK)
+    def babble(self, what=False):
+
+        what = what or self.values
+
+        if what:
+            if len(what) > 1:
+                pattern = "%s %s" % (what[0], what[1])
             else:
-                pattern = "*%s*" % self.values[0]
+                pattern = "*%s*" % what[0]
 
             matches = self.markov.keys(pattern)
 
@@ -335,30 +417,25 @@ class Broca(Dendrite):
             self.chat(random.choice(stops))
             return
 
-        techSupportQueries = [
-            'how do i',
-            'how do you',
-            'how does one',
-            'how would i',
-            'how would you',
-            'how would one'
-            'does anyone know how'
-            'do you know how'
-        ]
-        techSupportHits = [sentence.lower().find(t) != -1 for t in techSupportQueries]
-        if True in techSupportHits:
-            #naively parse out the question being asked
-            smartassery = sentence.lower().split(techSupportQueries[techSupportHits.index(True)])[1]
+        if sentence.lower().strip() in FRUSTRATION or sentence.lower().find('stupid') == 0:
+            self.chat(self.cx.commands.get('table')())
 
-            techSupportResponses = [
-                'Have you tried turning it off an on again?',
-                'Have you tried forcing an unexpected reboot?',
-                'Are you sure your computer is on?',
-                'Have your tried connecting the computer directly to the modem?',
-                'Have you power-cycled it?',
-                'http://lmgtfy.com/?q=' + smartassery.replace(' ', '+')
-            ]
-            self.chat(random.choice(techSupportResponses))
+        inquiries = [sentence.lower().find(t) != -1 for t in TECH_QUESTIONS]
+        
+        if SMARTASS and True in inquiries:
+            # Naively parse out the question being asked
+            try:
+                smartassery = sentence.lower().split(TECH_QUESTIONS[inquiries.index(True)])[1]
+            except:
+                return
+
+            responses = IT_HELP
+
+            # Dynamic cases need to be appended
+            responses.append('http://lmgtfy.com/?q=' + smartassery.replace(' ', '+'))
+                
+            self.chat(random.choice(responses))
+            return
 
         # There's a very good reason for this.
         if sentence == "oh shit its your birthday erikbeta happy birthday" and self.lastsender == "jcb":
@@ -367,7 +444,7 @@ class Broca(Dendrite):
             return
 
     @axon
-    @help("<command " + NICK + " to speak>")
+    @help("<command %s to speak>" % NICK)
     def speak(self):
         sentence = []
         struct = choice(Structure.objects())
@@ -378,7 +455,7 @@ class Broca(Dendrite):
         self.chat(" ".join(sentence))
 
     @axon
-    @help("WORD <teach " + NICK + " a word>")
+    @help("WORD <teach %s a word>" % NICK)
     def learn(self):
         if not self.values:
             self.chat(NICK + " ponders the emptiness of meaning.")
@@ -392,7 +469,7 @@ class Broca(Dendrite):
         self.chat(NICK + " learn new word!", self.lastsender)
 
     @axon
-    @help("ACRONYM <have " + NICK + " decide the words for an acronym>")
+    @help("ACRONYM <have %s decide the words for an acronym>" % NICK)
     def acronym(self):
         if not self.values:
             self.chat("About what?")
@@ -441,12 +518,12 @@ class Broca(Dendrite):
         word = self.values[0]
         params = {'allowed_in_frame': '0', 'searchmode': 'term', 'search': word}
 
-        urlbase = pageopen("http://www.etymonline.com/index.php", params)
-        if not urlbase:
-            self.chat("Couldn't find anything")
+        site = Browse("http://www.etymonline.com/index.php", params)
+        if site.error:
+            self.chat(site.error)
             return
 
-        cont = soup(urlbase.text)
+        cont = bs4(site.read())
 
         heads = cont.findAll("dt")
         defs = cont.findAll("dd")
@@ -485,27 +562,16 @@ class Broca(Dendrite):
             self.chat("Enter a word or phrase")
             return
 
-        word = '+'.join(self.values)
-        url = 'http://wordsmith.org/anagram/anagram.cgi?anagram=%s&t=50&a=n' % word
+        word = ''.join(self.values)
+        url = 'http://www.anagramica.com/best/%s' % word
 
-        urlbase = pageopen(url)
-        if not urlbase:
-            self.chat("Fail")
+        site = Browse(url)
+        if site.error:
+            self.chat(site.error)
             return
 
-        cont = soup(urlbase.text)
-
-        if len(cont.findAll("p")) == 6:
-            self.chat("No anagrams found.")
-            return
-
-        # This is a really shaky way to parse a
-        # page, but it's all I had to go on.
         try:
-            paragraph = cont.findAll("p")[3]
-            content = ','.join(paragraph.findAll(text=True))
-            content = content[2:-4]
-            content = content.replace(": ,", ": ")
-            return content
+            json = simplejson.loads(site.read())
+            return json['best']
         except Exception as e:
             self.chat("Couldn't parse.", str(e))

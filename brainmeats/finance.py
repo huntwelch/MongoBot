@@ -1,11 +1,10 @@
 import locale
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, help, Dendrite
 from util import pageopen, Stock
 import simplejson
 
 
-@category("finance")
 class Finance(Dendrite):
     def __init__(self, cortex):
         super(Finance, self).__init__(cortex)
@@ -13,23 +12,20 @@ class Finance(Dendrite):
     @axon
     @help("STOCK_SYMBOL <get stock quote>")
     def q(self):
-
-        if not self.values:
+        symbol = self.values[0]
+        if not symbol:
             self.chat("Enter a symbol")
             return
 
-        symbol = self.values[0]
-
-        # I feel like this try shouldn't be necessary,
-        # something may have changed in the API
         showit = False
-
         try:
             stock = Stock(symbol)
             showit = stock.showquote(self.context)
-        except Exception as e:
-            self.chat("Couldn't find company.", str(e))
-            return
+        except:
+            pass
+
+        if not showit:
+            showit = "Couldn't find company: " + symbol
 
         return showit
 

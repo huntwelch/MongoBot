@@ -2,18 +2,18 @@ import textwrap
 import socket
 import re
 
-from autonomic import axon, alias, category, help, Dendrite
+from autonomic import axon, alias, help, Dendrite
 from bs4 import BeautifulSoup as bs4
 from settings import REPO, NICK, SAFE
 from secrets import WEATHER_API
 from util import unescape, pageopen
+from howdoi import howdoi as hownow
 
 
 # There's some semantic overlap between this and some functions
 # in broca, but in general, if it's not about the stockmarket
 # and you want useful iniformation from a simple api or scraper,
 # it goes here.
-@category("reference")
 class Reference(Dendrite):
 
     safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
@@ -100,7 +100,7 @@ class Reference(Dendrite):
         return base % (location, condition, temp, humid, wind, feels)
 
     @axon
-    @alias(["urban"])
+    @alias('urban')
     @help("SEARCH_TERM <get urban dictionary entry>")
     def ud(self):
         if not self.values:
@@ -167,7 +167,7 @@ class Reference(Dendrite):
             return
 
         try:
-            result = eval(string, {"__builtins__": None}, self.safe_calc)
+            result = "{:,}".format(eval(string, {"__builtins__": None}, self.safe_calc))
         except:
             result = NICK + " not smart enough to do that."
 
@@ -197,6 +197,44 @@ class Reference(Dendrite):
     # want to create a solid parser for it, go for it. I'll take
     # that pull request like a crack whore.
     @axon
-    @help("URL <get whois information>")
+    @help('URL <get whois information>')
     def whois(self):
         return "The Doctor"
+
+    @axon
+    @help('QUERY <get a howdoi answer>')
+    def howdoi(self):
+        if not self.values:
+            return 'Howdoi what now?'
+
+        try:
+            parser = hownow.get_parser()
+            args = vars(parser.parse_args(self.values))
+            return hownow.howdoi(args) 
+        except:
+            return 'Dunno bro'
+
+    # TODO: save common regexs
+    @axon
+    @help('REGEX LINE <extract re.search(REGEX, LINE).group(1)>')
+    @alias('regex', 'rx', 'extract')
+    def regexsearch(self):
+        if not self.values or len(self.values) < 2:
+            self.chat('Please enter REGEX LINE')
+            return
+
+        regex = self.values.pop(0)
+        line = ' '.join(self.values)
+
+        try:
+            m = re.search(regex, line)
+        except Exception as e:
+            self.chat('Regex borked', str(e))
+            return
+
+
+        if not m:
+            self.chat('No match')
+            return
+
+        return m.group(1)

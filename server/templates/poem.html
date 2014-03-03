@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+        body {
+            padding: 20px;
+        }
+        p {
+            color: #444;
+            margin: 0;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+        span {
+            color: black;
+        }        
+        poem {
+            display: block;
+            width: 600px;
+            position: relative;
+            margin: 0 auto;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <poem>
+    <h2>{{ title }}</h2>
+    {% for line in poem %}
+        <p>{{ line }}</p>
+    {% endfor %}
+    <br/>
+    <br/>
+    <p>
+        <img src='{{ url_for('static', filename='img/mongo-50px.png') }}' />
+    </p>
+    </poem>
+{% endblock %}

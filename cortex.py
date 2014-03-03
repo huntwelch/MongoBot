@@ -2,22 +2,22 @@ import os
 import re
 import shutil
 import pkgutil
-import requests
 import socket
 import time
 import string
+import threading
 
-from bs4 import BeautifulSoup as bs4
 from datetime import date, timedelta, datetime
 from pytz import timezone
 from time import mktime, localtime, sleep
 from random import randint
 
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, \
-    STORE_IMGS, IMGS, REGISTERED, TIMEZONE
+    STORE_IMGS, IMGS, REGISTERED, TIMEZONE, MULTI_PASS
 from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY
 from datastore import Drinker, connectdb
-from util import unescape, pageopen, shorten, ratelimited, postdelicious, savefromweb
+from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
+    Browse, Butler
 from autonomic import serotonin
 
 
@@ -38,11 +38,14 @@ class Cortex:
     gettingnames = True
     memories = False
     autobabble = False
+    lastcommand = False
+
+    butler = False
 
     public_commands = []
-    helpcategories = []
     members = []
     guests = [] 
+    broken = []
     REALUSERS = []
 
     commands = {}
@@ -58,10 +61,11 @@ class Cortex:
         self.master = master
         self.sock = master.sock
 
-        self.commands['help'] = self.showlist
-
         print '* Loading brainmeats'
         self.loadbrains()
+
+        print '* Waking butler'
+        self.butler = Butler(self)
 
         print '* Loading users'
         users = open(REGISTERED, 'r')
@@ -95,11 +99,12 @@ class Cortex:
                 self.brainmeats[area] = cls(self)
             except Exception as e:
                 self.chat('Failed to load %s.' % area, error=str(e))
+                self.broken.append(area)
                 print 'Failed to load %s.' % area
                 print e
 
         for brainmeat in self.brainmeats:
-            serotonin(self, self.brainmeats[brainmeat], electroshock)
+            serotonin(self, brainmeat, electroshock)
 
     # I'll be frank, I don't have that great a grasp on
     # threading, and despite working with people who do,
@@ -115,8 +120,9 @@ class Cortex:
     #
     # ticker being the function in the class that runs.
     # see brainmeats/sms.y for a good example of this.
-    def addlive(self, func):
-        self.live[func.__name__] = func
+    def addlive(self, func, alt=False):
+        name = alt or func.__name__
+        self.live[name] = func
 
     def droplive(self, name):
         self.live.remove(name)
@@ -165,12 +171,14 @@ class Cortex:
                 print "* Joined " + CHANNEL
                 self.getnames()
 
-            if self.gettingnames:
-                if line.find('@ ' + CHANNEL) != -1:
-                    all = line.split(':')[2]
+            if self.gettingnames and line.find('@ ' + CHANNEL) != -1:
+                try:
+                    members = line.split(':')[2]
                     self.gettingnames = False
-                    all = re.sub(NICK + ' ', '', all)
-                    self.members += list(set(all.split()) - set(self.members))
+                    members = re.sub(NICK + ' ', '', members)
+                    self.members += list(set(members.split()) - set(self.members))
+                except:
+                    pass
 
             scan = re.search(SCAN, line)
             ping = re.search('^PING', line)
@@ -183,7 +191,12 @@ class Cortex:
             elif line.find('PRIVMSG') != -1:
                 self.boredom = currenttime
                 content = line.split(' ', 3)
-                self.context = content[2]
+
+                try:
+                    self.context = content[2]
+                except Exception as e:
+                    print 'No context, defaulting'
+                    self.context = CHANNEL
 
                 if self.context == NICK:
                     self.lastprivate = content
@@ -223,14 +236,28 @@ class Cortex:
 
         # Determine if the action is a command and the user is
         # approved.
-        if content[:1] == CONTROL_KEY:
+        if content[:1] == CONTROL_KEY or content[:1] == MULTI_PASS:
+            
+            # Tack on last command if it's just the control
+            if content == CONTROL_KEY or content[:2] == CONTROL_KEY + ' ':
+                if not self.lastcommand:
+                    return
+
+                content = '%s%s %s' % (CONTROL_KEY, self.lastcommand, content[2:])
+
             if self.lastrealsender not in self.REALUSERS \
             and content[1:].split()[0] not in self.public_commands \
             and nick not in self.guests:
                 self.chat('My daddy says not to listen to you.')
                 return
             
-            self.command(nick, content)
+            # A hack to maintain reboot until I figure
+            # our something better.
+            if content.find('%sreboot' % CONTROL_KEY) == 0:
+                self.command(nick, content)
+                return
+
+            self.butler.do(self.command, (nick, content))
             return
 
         # This is a special case for giving people meaningless
@@ -266,7 +293,8 @@ class Cortex:
     # If it is indeed a command, the cortex stores who sent it,
     # and any words after the command are split in a values array,
     # accessible by the brainmeats as self.values.
-    def command(self, sender, cmd):
+    multis = 0
+    def command(self, sender, cmd, piped=False):
         chain = cmd.split('|', 1)
         pipe = False
 
@@ -274,8 +302,15 @@ class Cortex:
             cmd = chain[0].strip()
             pipe = chain[1].strip()
 
+        if piped:
+            cmd = '%s %s' % (cmd, piped)
+
         components = cmd.split()
-        what = components.pop(0)[1:]
+            
+        _what = components.pop(0)
+
+        what = _what[1:]
+        means = _what[:1]
 
         is_nums = re.search("^[0-9]+", what)
         is_breaky = re.search("^" + CONTROL_KEY + "|[^\w]+", what)
@@ -322,36 +357,58 @@ class Cortex:
         # Point is, you can return a list or a string at
         # the end of a brainmeat command, or just use chat.
         # I probably won't worry about act and announce.
-        result = self.commands.get(what, self.default)()
+        if means == MULTI_PASS:
+
+            # All this multi checking had to be put in 
+            # after Eli decided to enter this:
+            # -babble fork | *babble | *babble | *babble
+            # ... which of course spiked the redis server
+            # to 100% CPU and eventually flooded the chat
+            # room with n^4 chats until the bot had to be
+            # kicked. This is what happens when you try
+            # to give nice things to hackers.
+            self.multis += 1
+            if self.multis > 1:
+                self.chat('This look like fork bomb. You kick puppies too?')
+                self.multis = 0
+                return
+                
+            result = []
+
+            if not components:
+                self.chat("No args to iter. Bitch.")
+                self.multis = 0
+                return
+
+            for item in components:
+                self.values = [item]
+                _result = self.commands.get(what, self.default)()
+                result.append(_result)
+        else:
+            result = self.commands.get(what, self.default)()
 
         if not result:
             return
 
         if pipe:
-            self.command(sender, '%s %s' % (pipe, result))
+            # Piped output must be string!
+            if type(result) is list:
+                result = ' '.join(result)
+            self.command(sender, pipe, result)
             return
 
         if type(result) in [str, unicode]:
             self.chat(result)
 
         if type(result) is list:
+            if len(result) > 20:
+                result = result[:20]
+                result.append("Such result. So self throttle. Much erotic. Wow.")
+
             for line in result:
                 self.chat(line)
-
-    # Help menu. It used to just show every command, but there
-    # are so goddamn many at this point, they had to be split
-    # into categories.
-    def showlist(self):
-        if not self.values or self.values[0] not in self.helpmenu:
-            cats = ', '.join(self.helpcategories)
-            self.chat('%shelp WHAT where WHAT is %s' % (CONTROL_KEY, cats))
-            return
-
-        which = self.values[0]
-
-        for command in self.helpmenu[which]:
-            sleep(1)
-            self.chat(command)
+        
+        self.multis = 0
 
     # If you want to restrict a command to the bot admin.
     def validate(self):
@@ -413,69 +470,45 @@ class Cortex:
                 except:
                     pass
 
-            while True:
-                fubs = 0
-                title = "Couldn't get title"
+            fubs = 0
+            title = "Couldn't get title"
+
+            site = Browse(url)
+
+            if site.error:
+                self.chat('Total fail: %s' % site.error)
+                continue
+
+            roasted = shorten(url)
+            if not roasted:
                 roasted = "Couldn't roast"
+                fubs += 1
 
-                urlbase = pageopen(url)
-                if not urlbase:
-                    # If we don't have a valid requests
-                    # object here just give up early
-                    self.chat('Total fail')
-                    return
+            try:
+                ext = site.headers()['content-type'].split('/')[1]
+            except:
+                ext = False
 
-                roasted = shorten(url)
-                if not roasted:
-                    roasted = ''
-                    fubs += 1
+            images = [
+                'gif',
+                'png',
+                'jpg',
+                'jpeg',
+            ]
 
-                try:
-                    ext = urlbase.headers['content-type'].split('/')[1]
-                except:
-                    ext = False
+            if ext in images:
+                title = 'Image'
+                # Switch this to a Browse method
+                if STORE_IMGS:
+                    fname = url.split('/').pop()
+                    path = IMGS + fname
+                    self.butler.do(savefromweb, (url, path), 'Finished downloading')
 
-                images = [
-                    'gif',
-                    'png',
-                    'jpg',
-                    'jpeg',
-                ]
+            elif ext == 'pdf':
+                title = 'PDF Document'
 
-                if ext in images:
-                    title = 'Image'
-                    if STORE_IMGS:
-                        fname = url.split('/').pop()
-                        path = IMGS + fname
-                        savefromweb(url, path)
-                    break
-
-                elif ext == 'pdf':
-                    title = 'PDF Document'
-                    break
-                else:
-                    # Bit of ugliness here. I blame the W3C. Henry, I'm 
-                    # looking at you.
-                    try:
-                        soup = bs4(urlbase.text)
-                        title = soup.find('title').string.strip()
-                        if title is None:
-                            redirect = soup.find('meta', attrs={'http-equiv':
-                                                 'refresh'})
-                            if not redirect:
-                                redirect = soup.find('meta', attrs={'http-equiv':
-                                                     'Refresh'})
-
-                            if redirect:
-                                url = redirect['content'].split('url=')[1]
-                                continue
-                            else:
-                                raise ValueError('Cannot find title')
-                        break
-
-                    except:
-                        self.chat('Page parsing error - %s' % roasted)
-                        return
+            else:
+                title = site.title()
 
             # If you have a delicious account set up. Yes, delicious
             # still exists. Could be updated to a cooler link 
@@ -488,15 +521,13 @@ class Cortex:
             else:
                 self.chat("%s @ %s" % (unescape(title), roasted))
 
-            break
-
     # This shows tweet content if a url is to a tweet.
     def tweet(self, urls):
-        if 'twitterapi' not in self.brainmeats:
+        if 'twitting' not in self.brainmeats:
             return
 
         for url in urls:
-            self.chat(self.brainmeats['twitterapi'].get_tweet(url[1]))
+            self.chat(self.brainmeats['twitting'].get_tweet(url[1]))
 
     # Announce means the chat is always sent to the channel,
     # never back as a private response.
@@ -509,6 +540,10 @@ class Cortex:
     # violations.
     @ratelimited(2)
     def chat(self, message, target=False, error=False):
+
+        if not message:
+            return
+
         if target:
             whom = target
         elif self.context == CHANNEL:

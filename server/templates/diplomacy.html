@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Rule World, I Say!{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/diplomacy.css') }}" />
+    <script src="{{ url_for('static', filename='js/diplomacy.js') }}"></script>
+{% endblock %}
+{% block content %}
+<div id="map">
+    <img src="{{ url_for('static', filename='img/diplomacy/main.png') }}" alt="">
+    <div id="provinces">
+        <province id="Adriatic_Sea"><img src="{{ url_for('static', filename='img/diplomacy/Adriatic_Sea/pink.html.png') }}" /></province>
+        <province id="Aegean_Sea"><img src="{{ url_for('static', filename='img/diplomacy/Aegean_Sea/pink.html.png') }}" /></province>
+        <province id="Albania"><img src="{{ url_for('static', filename='img/diplomacy/Albania/pink.html.png') }}" /></province>
+        <province id="Ankara"><img src="{{ url_for('static', filename='img/diplomacy/Ankara/pink.html.png') }}" /></province>
+        <province id="Apulia"><img src="{{ url_for('static', filename='img/diplomacy/Apulia/pink.html.png') }}" /></province>
+        <province id="Armenia"><img src="{{ url_for('static', filename='img/diplomacy/Armenia/pink.html.png') }}" /></province>
+        <province id="Baltic_Sea"><img src="{{ url_for('static', filename='img/diplomacy/Baltic_Sea/pink.html.png') }}" /></province>
+        <province id="Barents_Sea"><img src="{{ url_for('static', filename='img/diplomacy/Barents_Sea/pink.html.png') }}" /></province>
+        <province id="Belgium"><img src="{{ url_for('static', filename='img/diplomacy/Belgium/pink.html.png') }}" /></province>
+        <province id="Berlin"><img src="{{ url_for('static', filename='img/diplomacy/Berlin/pink.html.png') }}" /></province>
+        <province id="Black_Sea"><img src="{{ url_for('static', filename='img/diplomacy/Black_Sea/pink.html.png') }}" /></province>
+        <province id="Bohemia"><img src="{{ url_for('static', filename='img/diplomacy/Bohemia/pink.html.png') }}" /></province>
+        <province id="Brest"><img src="{{ url_for('static', filename='img/diplomacy/Brest/pink.html.png') }}" /></province>
+        <province id="Budapest"><img src="{{ url_for('static', filename='img/diplomacy/Budapest/pink.html.png') }}" /></province>
+        <province id="Bulgaria"><img src="{{ url_for('static', filename='img/diplomacy/Bulgaria/pink.html.png') }}" /></province>
+        <province id="Burgundy"><img src="{{ url_for('static', filename='img/diplomacy/Burgundy/pink.html.png') }}" /></province>
+        <province id="Clyde"><img src="{{ url_for('static', filename='img/diplomacy/Clyde/pink.html.png') }}" /></province>
+        <province id="Constantinople"><img src="{{ url_for('static', filename='img/diplomacy/Constantinople/pink.html.png') }}" /></province>
+        <province id="Denmark"><img src="{{ url_for('static', filename='img/diplomacy/Denmark/pink.html.png') }}" /></province>
+        <province id="Eastern_Mediterranean"><img src="{{ url_for('static', filename='img/diplomacy/Eastern_Mediterranean/pink.html.png') }}" /></province>
+        <province id="Edinburgh"><img src="{{ url_for('static', filename='img/diplomacy/Edinburgh/pink.html.png') }}" /></province>
+        <province id="English_Channel"><img src="{{ url_for('static', filename='img/diplomacy/English_Channel/pink.html.png') }}" /></province>
+        <province id="Finland"><img src="{{ url_for('static', filename='img/diplomacy/Finland/pink.html.png') }}" /></province>
+        <province id="Galicia"><img src="{{ url_for('static', filename='img/diplomacy/Galicia/pink.html.png') }}" /></province>
+        <province id="Gascony"><img src="{{ url_for('static', filename='img/diplomacy/Gascony/pink.html.png') }}" /></province>
+        <province id="Greece"><img src="{{ url_for('static', filename='img/diplomacy/Greece/pink.html.png') }}" /></province>
+        <province id="Gulf_of_Bothnia"><img src="{{ url_for('static', filename='img/diplomacy/Gulf_of_Bothnia/pink.html.png') }}" /></province>
+        <province id="Gulf_of_Lyon"><img src="{{ url_for('static', filename='img/diplomacy/Gulf_of_Lyon/pink.html.png') }}" /></province>
+        <province id="Helgoland_Bight"><img src="{{ url_for('static', filename='img/diplomacy/Helgoland_Bight/pink.html.png') }}" /></province>
+        <province id="Holland"><img src="{{ url_for('static', filename='img/diplomacy/Holland/pink.html.png') }}" /></province>
+        <province id="Ionian_Sea"><img src="{{ url_for('static', filename='img/diplomacy/Ionian_Sea/pink.html.png') }}" /></province>
+        <province id="Irish_Sea"><img src="{{ url_for('static', filename='img/diplomacy/Irish_Sea/pink.html.png') }}" /></province>
+        <province id="Kiel"><img src="{{ url_for('static', filename='img/diplomacy/Kiel/pink.html.png') }}" /></province>
+        <province id="Liverpool"><img src="{{ url_for('static', filename='img/diplomacy/Liverpool/pink.html.png') }}" /></province>
+        <province id="Livonia"><img src="{{ url_for('static', filename='img/diplomacy/Livonia/pink.html.png') }}" /></province>
+        <province id="London"><img src="{{ url_for('static', filename='img/diplomacy/London/pink.html.png') }}" /></province>
+        <province id="Marseilles"><img src="{{ url_for('static', filename='img/diplomacy/Marseilles/pink.html.png') }}" /></province>
+        <province id="Mid-Atlantic_Ocean"><img src="{{ url_for('static', filename='img/diplomacy/Mid-Atlantic_Ocean/pink.html.png') }}" /></province>
+        <province id="Moscow"><img src="{{ url_for('static', filename='img/diplomacy/Moscow/pink.html.png') }}" /></province>
+        <province id="Munich"><img src="{{ url_for('static', filename='img/diplomacy/Munich/pink.html.png') }}" /></province>
+        <province id="Naples"><img src="{{ url_for('static', filename='img/diplomacy/Naples/pink.html.png') }}" /></province>
+        <province id="North_Africa"><img src="{{ url_for('static', filename='img/diplomacy/North_Africa/pink.html.png') }}" /></province>
+        <province id="North_Atlantic_Ocean"><img src="{{ url_for('static', filename='img/diplomacy/North_Atlantic_Ocean/pink.html.png') }}" /></province>
+        <province id="North_Sea"><img src="{{ url_for('static', filename='img/diplomacy/North_Sea/pink.html.png') }}" /></province>
+        <province id="Norway"><img src="{{ url_for('static', filename='img/diplomacy/Norway/pink.html.png') }}" /></province>
+        <province id="Norwegian_Sea"><img src="{{ url_for('static', filename='img/diplomacy/Norwegian_Sea/pink.html.png') }}" /></province>
+        <province id="Paris"><img src="{{ url_for('static', filename='img/diplomacy/Paris/pink.html.png') }}" /></province>
+        <province id="Picardy"><img src="{{ url_for('static', filename='img/diplomacy/Picardy/pink.html.png') }}" /></province>
+        <province id="Piedmont"><img src="{{ url_for('static', filename='img/diplomacy/Piedmont/pink.html.png') }}" /></province>
+        <province id="Portugal"><img src="{{ url_for('static', filename='img/diplomacy/Portugal/pink.html.png') }}" /></province>
+        <province id="Prussia"><img src="{{ url_for('static', filename='img/diplomacy/Prussia/pink.html.png') }}" /></province>
+        <province id="Rome"><img src="{{ url_for('static', filename='img/diplomacy/Rome/pink.html.png') }}" /></province>
+        <province id="Ruhr"><img src="{{ url_for('static', filename='img/diplomacy/Ruhr/pink.html.png') }}" /></province>
+        <province id="Rumania"><img src="{{ url_for('static', filename='img/diplomacy/Rumania/pink.html.png') }}" /></province>
+        <province id="Serbia"><img src="{{ url_for('static', filename='img/diplomacy/Serbia/pink.html.png') }}" /></province>
+        <province id="Sevastopol"><img src="{{ url_for('static', filename='img/diplomacy/Sevastopol/pink.html.png') }}" /></province>
+        <province id="Silesia"><img src="{{ url_for('static', filename='img/diplomacy/Silesia/pink.html.png') }}" /></province>
+        <province id="Skagerrak"><img src="{{ url_for('static', filename='img/diplomacy/Skagerrak/pink.html.png') }}" /></province>
+        <province id="Smyrna"><img src="{{ url_for('static', filename='img/diplomacy/Smyrna/pink.html.png') }}" /></province>
+        <province id="Spain"><img src="{{ url_for('static', filename='img/diplomacy/Spain/pink.html.png') }}" /></province>
+        <province id="St_Petersburg"><img src="{{ url_for('static', filename='img/diplomacy/St_Petersburg/pink.html.png') }}" /></province>
+        <province id="Sweden"><img src="{{ url_for('static', filename='img/diplomacy/Sweden/pink.html.png') }}" /></province>
+        <province id="Syria"><img src="{{ url_for('static', filename='img/diplomacy/Syria/pink.html.png') }}" /></province>
+        <province id="Trieste"><img src="{{ url_for('static', filename='img/diplomacy/Trieste/pink.html.png') }}" /></province>
+        <province id="Tunis"><img src="{{ url_for('static', filename='img/diplomacy/Tunis/pink.html.png') }}" /></province>
+        <province id="Tuscany"><img src="{{ url_for('static', filename='img/diplomacy/Tuscany/pink.html.png') }}" /></province>
+        <province id="Tyrolia"><img src="{{ url_for('static', filename='img/diplomacy/Tyrolia/pink.html.png') }}" /></province>
+        <province id="Tyrrhenian_Sea"><img src="{{ url_for('static', filename='img/diplomacy/Tyrrhenian_Sea/pink.html.png') }}" /></province>
+        <province id="Ukraine"><img src="{{ url_for('static', filename='img/diplomacy/Ukraine/pink.html.png') }}" /></province>
+        <province id="Venice"><img src="{{ url_for('static', filename='img/diplomacy/Venice/pink.html.png') }}" /></province>
+        <province id="Vienna"><img src="{{ url_for('static', filename='img/diplomacy/Vienna/pink.html.png') }}" /></province>
+        <province id="Wales"><img src="{{ url_for('static', filename='img/diplomacy/Wales/pink.html.png') }}" /></province>
+        <province id="Warsaw"><img src="{{ url_for('static', filename='img/diplomacy/Warsaw/pink.html.png') }}" /></province>
+        <province id="Western_Mediterranean"><img src="{{ url_for('static', filename='img/diplomacy/Western_Mediterranean/pink.html.png') }}" /></province>
+        <province id="Yorkshire"><img src="{{ url_for('static', filename='img/diplomacy/Yorkshire/pink.html.png') }}" /></province>
+    </div>
+</div>
+{% endblock %}

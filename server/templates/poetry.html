@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Musings of a Simple Bot{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+        body {
+            padding: 20px;
+        }
+        p {
+            font-weight: bold;
+            color: #999;
+            margin: 5px;
+        }
+        span {
+            color: black;
+        }        
+    </style>
+{% endblock %}
+{% block content %}
+    <h3>Poetry by Mongo</h3>
+    {% for poem in poems %}
+        <p><a href='/poem/{{ poem.link }}'>{{ poem.title }}</a></p>
+    {% endfor %}
+{% endblock %}

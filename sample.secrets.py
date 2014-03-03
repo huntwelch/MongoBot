@@ -89,3 +89,9 @@ TWIT_ACCESS_SECRET = ''
 GITHUB_CLIENT_ID = ''
 GITHUB_CLIENT_SECRET = ''
 GITHUB_TOKEN = ''
+
+
+# Marvel. This will be awesome at some point.
+
+MARVEL_PUBLIC_KEY = ""
+MARVEL_PRIVATE_KEY = ""

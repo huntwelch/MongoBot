@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Pigs{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+        p {
+            font-weight: bold;
+            color: #999;
+            margin: 5px;
+        }
+        span {
+            color: black;
+        }        
+    </style>
+{% endblock %}
+{% block content %}
+    <p><span>100</span> Continue</p>
+    <p><span>101</span> Switching Protocols</p>
+    <p><span>200</span> OK</p>
+    <p><span>202</span> Accepted</p>
+    <p><span>204</span> No Content</p>
+    <p><span>300</span> Multiple Choices</p>
+    <p><span>400</span> Bad Request</p>
+    <p><span>402</span> Payment Required</p>
+    <p><span>403</span> Forbidden</p>
+    <p><span>405</span> Method Not Allowed</p>
+    <p><span>406</span> Not Acceptable</p>
+    <p><span>409</span> Conflict</p>
+    <p><span>410</span> Gone</p>
+    <p><span>412</span> Precondition Failed</p>
+    <p><span>413</span> Request Entity Too Large</p>
+    <p><span>417</span> Expectation Failed</p>
+    <p><span>418</span> I'm a teapot</p>
+    <p><span>420</span> Enhance Your Calm</p>
+    <p><span>424</span> Method Failure</p>
+    <p><span>426</span> Upgrade Required</p>
+    <p><span>429</span> Too Many Requests</p>
+    <p><span>444</span> No Response</p>
+    <p><span>449</span> Retry With</p>
+    <p><span>451</span> Unavailable For Legal Reasons</p>
+    <p><span>500</span> Internal Server Error</p>
+    <p><span>502</span> Bad Gateway</p>
+    <p><span>503</span> Service Unavailable</p>
+    <p><span>508</span> Loop Detected</p>
+    <p><span>510</span> Not Extended</p>
+{% endblock %}

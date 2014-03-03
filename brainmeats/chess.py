@@ -1,11 +1,10 @@
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, help, Dendrite
 
 
 # This isn't actually playable without an 
 # enormous ammount of trust between the players.
 # Always wanted to do more with it, but, well,
 # I haven't.
-@category("chess")
 class Chess(Dendrite):
 
     pieces = dict(

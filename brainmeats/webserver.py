@@ -1,13 +1,12 @@
 import random
 import os
 
-from autonomic import axon, alias, category, help, Dendrite
+from autonomic import axon, alias, help, Dendrite
 from settings import WEBSITE, SERVER_RELOAD
 from util import totp
 
 
 # Allz the webs stuff.
-@category("webserver")
 class Webserver(Dendrite):
     def __init__(self, cortex):
         super(Webserver, self).__init__(cortex)

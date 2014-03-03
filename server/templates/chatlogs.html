@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block title %}Dat Chat{% endblock %}
 {% block head %}
     {{ super() }}
     <style>
@@ -114,6 +115,7 @@
                         dataType: "json",
                         method: "get",
                         data: {
+                            onetime: '{{ onetime }}',
                             offset: parseInt(target) - 10,
                             fade: target
                         },
@@ -158,6 +160,7 @@
                         dataType: "json",
                         method: "get",
                         data: {
+                            onetime: '{{ onetime }}',
                             offset: offset
                         },
                         success: function(data) {
@@ -245,6 +248,7 @@
                         dataType: "json",
                         method: "get",
                         data: {
+                            onetime: '{{ onetime }}',
                             search: search.val()
                         },
                         success: function(data) {
@@ -264,6 +268,9 @@
                 {
                     dataType: "json",
                     method: "get",
+                    data: {
+                        onetime: '{{ onetime }}'
+                    },
                     success: render
                 }
             );
