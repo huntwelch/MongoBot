@@ -50,14 +50,14 @@ class Artsy(Dendrite):
     # about IO. Why Zeus's trollops gettin all up
     # in my code is beyond me.
     @axon
-    @help('FILE|YOUTUBE_URL START FINISH <create a gif from a time range in a video>')
+    @help('START FINISH FILE|YOUTUBE_URL <create a gif from a time range in a video>')
     def gif(self):
 
         # allow for varied input
         # try not to crash, yah?
 
         if not self.values or len(self.values) != 3:
-            return 'Please enter filename|youtubeurl start end.'
+            return 'Please enter start end filename|youtubeurl.'
 
         start, finis, target = tuple(self.values)
         timeformat = re.compile('^\d+,\d{2}\.\d{1,2}$')
