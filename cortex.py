@@ -39,6 +39,8 @@ class Cortex:
     memories = False
     autobabble = False
     lastcommand = False
+    joined = False
+    operator = False
 
     butler = False
 
@@ -158,6 +160,10 @@ class Cortex:
         currenttime = int(mktime(localtime()))
         self.parietal(currenttime)
 
+        #if self.joined and not self.operator:
+        #    self.sock.send('PRIVMSG ChanServ :op %s %s\n' % (CHANNEL, NICK)) 
+        #    self.operator = True
+
         self.sock.setblocking(0)
         try:
             lines = self.sock.recv(256)
@@ -167,8 +173,9 @@ class Cortex:
         for line in lines.split('\n'):
             line = line.strip()
 
-            if re.search('^:' + NICK + '!~' + REALNAME + '@.+ JOIN ' + CHANNEL + '$', line):
+            if re.search('^:%s!~%s@.+ JOIN %s$' % (NICK, REALNAME, CHANNEL), line):
                 print "* Joined " + CHANNEL
+                self.joined = True
                 self.getnames()
 
             if self.gettingnames and line.find('@ ' + CHANNEL) != -1:
