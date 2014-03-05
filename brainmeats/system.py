@@ -1,6 +1,7 @@
 import os
 import re
 import pkgutil
+import threading
 
 from autonomic import axon, help, Dendrite, public, alias
 from settings import SAFESET, NICK, HOST, REGISTERED, CONTROL_KEY
@@ -50,6 +51,10 @@ class System(Dendrite):
         return self.cx.helpmenu[which]
 
     @axon
+    def threads(self):
+        return threading.activeCount()
+
+    @axon
     @help("<show editable settings>")
     def settings(self):
         for name, value in SAFESET:
@@ -75,7 +80,7 @@ class System(Dendrite):
             return
 
         real = self.cx.lastrealsender
-        if real in self.cx.REALUSERS:
+        if real and real in self.cx.REALUSERS:
             self.chat("Already know you, bro.")
             return
         

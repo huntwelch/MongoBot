@@ -41,6 +41,7 @@ class Cortex:
     lastcommand = False
     joined = False
     operator = False
+    bequiet = False
 
     butler = False
 
@@ -229,11 +230,16 @@ class Cortex:
         try:
             nick, data = sender.split('!')
             realname, ip = data.split('@')
-            ip = socket.gethostbyname_ex(ip.strip())[2][0]
             realname = realname[1:]
+        except Exception as e:
+            return
+
+        try:
+            ip = socket.gethostbyname_ex(ip.strip())[2][0]
             self.lastrealsender = '%s@%s' % (realname, ip)
         except:
-            return
+            self.lastrealsender = False
+            pass
 
         if nick not in self.members:
             self.members.append(nick)
@@ -547,6 +553,9 @@ class Cortex:
     # violations.
     @ratelimited(2)
     def chat(self, message, target=False, error=False):
+
+        if self.bequiet:
+            return
 
         if not message:
             return

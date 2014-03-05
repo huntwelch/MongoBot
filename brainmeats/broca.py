@@ -52,8 +52,9 @@ class Broca(Dendrite):
             poem += ' ' + self.babble([word])
         
         self.addtext(poem.split())
+        res = self.finis()
 
-        return self.finis()
+        return res 
         
 
     @axon
@@ -231,7 +232,7 @@ class Broca(Dendrite):
         suspense = [
             'and', 'to', 'a', 'but', 'very',
             'the', 'when', 'how', '', ' ', 'my',
-            'its', 'of', 'is',
+            'its', 'of', 'is', 'for',
         ]
 
         while len(words) < BABBLE_LIMIT:
@@ -575,3 +576,17 @@ class Broca(Dendrite):
             return json['best']
         except Exception as e:
             self.chat("Couldn't parse.", str(e))
+
+    # This pair of gems was created because Elliott kept
+    # piping -all to various * commands.
+    @axon
+    def shutup(self):
+        self.chat('Shutting up now.')
+        self.cx.bequiet = True
+        return
+
+    @axon
+    def speakup(self):
+        self.cx.bequiet = False
+        self.chat('Back.')
+        return
