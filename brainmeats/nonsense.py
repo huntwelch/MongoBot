@@ -6,7 +6,7 @@ from settings import STORAGE, ACROLIB, LOGDIR, DISTASTE, NICK, IMGS
 from secrets import FML_API
 from util import colorize, pageopen, shorten, asciiart
 from random import choice
-from datastore import Drinker
+from datastore import Drinker, Alias
 from xml.dom import minidom as dom
 
 
@@ -223,3 +223,88 @@ class Nonsense(Dendrite):
     def pressreturn(self):
         self.cx.autobabble = True
         return "94142243431512659321054872390486828512913474876027671959234602385829583047250165232525929692572765536436346272718401201264304554632945012784226484107566234789626728592858295347502772262646456217613984829519475412398501"
+
+    '''  TO DO:
+
+        1.) Map +<alias_name> to -ralias so that we can call all aliases as +<alias_name> instead of the longer -ralias <alias_name>
+        2.) Allow for global aliases.
+        3.) Allow exisiting drinker aliases to be promoted to global.
+        4.) List other drinker aliases other than our own.
+        5.) Move this shit into its own file
+    '''
+
+    @axon
+    def salias(self):
+        whom = self.lastsender
+        name = self.values[0]
+        evil = ['salias', 'ralias', 'lalias', 'dalias']
+        definition = ' '.join(self.values[1:])
+        drinker = Drinker.objects(name=whom).first()
+        
+        if any(sin in definition for sin in evil):
+            self.chat("You're trying to hurt me aren't you?")
+            return
+
+        if not drinker:
+            drinker = Drinker(name=whom)
+
+        new_alias = Alias(name=name, definition=definition)
+        drinker.aliases.append(new_alias)
+        drinker.save()
+        self.chat(name + " saved.")
+
+    @axon
+    def ralias(self):
+        name = self.values[0]
+        definition = []
+        drinker = self._get_drinker("ralias")
+        
+        if not drinker:
+            return
+
+        for alias in drinker.aliases:
+            if alias.name == name:
+                definition = [elem.strip() for elem in alias.definition.split(';') if len(elem.strip()) > 0]
+                for line in definition:
+                    self.cx.command(drinker.name, line)
+                return
+
+    @axon
+    def lalias(self):
+        drinker = self._get_drinker("lalias")
+        if not drinker:
+            return
+
+        for alias in drinker.aliases:
+            self.chat(alias.name + " " + alias.definition)
+
+    @axon
+    def dalias(self):
+        idx = None
+        name = self.values[0]    
+        drinker = self._get_drinker("dalias")
+        if not drinker:
+            return
+
+        try:
+            del_idx = next(idx for (idx, alias) in enumerate(drinker.aliases) if alias.name == name)
+        except:
+            self.chat("Much Fat Such Finger")
+
+        del drinker.aliases[del_idx]
+        if drinker.save():
+            self.chat(name + " deleted.")
+
+    def _get_drinker(self, caller=""):
+        
+        drinker = Drinker.objects(name=self.lastsender).first()
+        if not drinker:
+            self.chat("Be gone peasant.")
+            return None
+
+        if len(drinker.aliases) == 0:
+            self.chat("You gotta -salias to -" + caller)
+            return None
+
+        return drinker
+
