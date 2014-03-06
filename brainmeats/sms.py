@@ -62,7 +62,7 @@ class Sms(Dendrite):
 
             self.announce(message)
 
-            if item.body[:1] == CONTROL_KEY and drinker and item.from_ != TWILIO_NUMBER:
+            if item.body[:1] == CONTROL_KEY and (drinker and item.from_ != TWILIO_NUMBER or item.from_ in SAFE_NUMBERS):
                 self.cx.context = CHANNEL
                 self.cx.replysms = from_
                 self.cx.command(drinker[0].name, item.body)
