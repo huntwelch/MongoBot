@@ -161,9 +161,9 @@ class Cortex:
         currenttime = int(mktime(localtime()))
         self.parietal(currenttime)
 
-        #if self.joined and not self.operator:
-        #    self.sock.send('PRIVMSG ChanServ :op %s %s\n' % (CHANNEL, NICK)) 
-        #    self.operator = True
+        if self.joined and not self.operator:
+            print self.sock.send('PRIVMSG ChanServ :op %s %s\n' % (CHANNEL, NICK)) 
+            self.operator = True
 
         self.sock.setblocking(0)
         try:

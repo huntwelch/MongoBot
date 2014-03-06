@@ -166,11 +166,11 @@ class System(Dendrite):
             return
 
         self.cx.sock.send('NICK ' + name + '\n')
+        self.cs.sock.send('PRIVMSG NickServ :indentify %s\n' % BOT_PASS)
         self.cx.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
         self.cx.sock.send('JOIN ' + CHANNEL + '\n')
 
         self.update(['NICK', name])
-        self.reboot()
 
     # DANGER ZONE. You merge it, anyone can pull it. If you
     # have a catastrophic failure after this, it's probably
