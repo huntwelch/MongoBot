@@ -1,11 +1,10 @@
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, help, Dendrite
 from datastore import Drinker, Position
 from datetime import datetime
 from settings import STARTING_CASH, VALID_EXCHANGES
 from util import Stock
 
 
-@category("stockgame")
 class Stockgame(Dendrite):
     def __init__(self, cortex):
         super(Stockgame, self).__init__(cortex)

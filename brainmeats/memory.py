@@ -1,8 +1,7 @@
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, help, Dendrite
 from settings import LOG, CONTROL_KEY
 
 
-@category("memory")
 class Memory(Dendrite):
     def __init__(self, cortex):
         super(Memory, self).__init__(cortex)

@@ -7,7 +7,7 @@ import thread
 import ssl
 
 from settings import NICK, HOST, PORT, CHANNEL, SMS_LOCKFILE, PULSE, ENABLED
-from secrets import IDENT, REALNAME, OWNER
+from secrets import IDENT, REALNAME, OWNER, BOT_PASS
 from time import sleep, mktime, localtime
 
 
@@ -26,6 +26,7 @@ class Medulla:
 
         self.sock.send('NICK %s\n' % NICK)
         self.sock.send('USER %s %s bla :%s\n' % (IDENT, HOST, REALNAME))
+        self.sock.send('PRIVMSG NickServ :indentify %s\n' % BOT_PASS)
         self.sock.send('JOIN %s\n' % CHANNEL)
 
         self.sock.setblocking(0)

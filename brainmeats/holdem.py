@@ -3,7 +3,7 @@ import math
 import random
 import sys
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, help, Dendrite
 from datastore import Drinker
 
 
@@ -43,7 +43,6 @@ class Player(object):
         self.hand = []
 
 
-@category("holdem")
 class Holdem(Dendrite):
     def __init__(self, cortex):
         super(Holdem, self).__init__(cortex)

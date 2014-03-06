@@ -1,11 +1,10 @@
 import random
 
-from autonomic import axon, category, help, Dendrite
+from autonomic import axon, help, Dendrite
 from datastore import Quote
 from datetime import datetime
 
 
-@category("quotes")
 class Quotes(Dendrite):
     def __init__(self, cortex):
         super(Quotes, self).__init__(cortex)

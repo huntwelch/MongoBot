@@ -3,7 +3,11 @@ import re
 from datetime import datetime
 from flask import Flask, request, session, make_response, render_template
 from settings import NICK, SCAN, CHANNEL, LOG
+from brainmeats.diplomacy import Countries
 
+
+def diplomacy_state():
+    return Countries
 
 def render_xml(path):
     response = make_response(render_template(path))

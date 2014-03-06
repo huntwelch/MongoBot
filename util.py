@@ -2,13 +2,18 @@ import time
 import re
 import HTMLParser
 import requests
+import mechanize
 import pyotp
+import urllib
 import base64
 import random
 import threading
+import os
+import subprocess
 
 from PIL import Image
 from bisect import bisect
+from Queue import Queue
 
 from settings import CHANNEL, SHORTENER
 from secrets import HTTP_PASS, DELICIOUS_USER, DELICIOUS_PASS
@@ -71,10 +76,72 @@ def colorize(text, color):
     return "\x03" + str(color) + ' ' + text + "\x03"
 
 
+class Browse(object):
+    
+    url = False
+    ua = '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'
+    ieua = 'User-Agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)'
+    robot = mechanize.Browser()
+    text = False
+    error = False
+
+    def __init__(self, url, params={}, method='GET', userpass=False):
+        self.url = url 
+
+        self.robot.set_handle_equiv(True)
+        self.robot.set_handle_gzip(True)
+        self.robot.set_handle_redirect(True)
+        self.robot.set_handle_referer(True)
+        self.robot.set_handle_robots(False)
+        self.robot.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
+
+        self.robot.addheaders = [
+            ('User-Agent', self.ua),
+            ('Accept', '*/*'),
+            ('Accept-Encoding', 'gzip,deflate,sdch'),
+            ('Accept-Language', 'en-US,en;q=0.8'),
+            ('Cache-Control', 'max-age=0'),
+            ('Connection', 'keep-alive'),
+        ]
+
+        if userpass:
+            user, password = userpass.split(':')
+            self.robot.add_password(url, user, password)
+
+        try:
+            if params:
+                data = urllib.urlencode(params)
+
+            if params and method == 'GET':
+                self.response = self.robot.open(url + '?%s' % data)
+            elif params and method == 'POST':  
+                self.response = self.robot.open(url, data)
+            else:
+                self.response = self.robot.open(url)
+
+        except Exception as e:
+            self.error = str(e)
+
+    def read(self):
+        return self.response.read()
+
+    def title(self):
+        try:
+            result = self.robot.title().decode('utf-8')
+        except Exception as e:
+            result = str(e)
+
+        return result
+
+    def headers(self):
+        return self.response.info()
+
+
+HEADERS = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36' }
+
 def pageopen(url, params={}):
     try:
-        headers = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'}
-        urlbase = requests.get(url, headers=headers, params=params, timeout=5)
+        urlbase = requests.get(url, headers=HEADERS, params=params, timeout=5)
     except requests.exceptions.RequestException as e:
         print e
         return False
@@ -242,13 +309,61 @@ def asciiart(image_path):
     return out
 
 
-def savefromweb(url, path):
-    thread = threading.Thread(target=savethread, args=(url, path))
-    thread.start()
-    return
+# TODO?: interface with addlive
+class Butler(object):
 
-def savethread(url, path):
-    r = requests.get(url, stream=True)
+    maxtasks = 8
+    cx = False
+    semaphore = False
+    
+    def __init__(self, cortex):
+        self.cx = cortex
+        self.semaphore = threading.BoundedSemaphore(self.maxtasks)
+        return    
+    
+    def wrap(self, func, args, semaphore, note, pid):
+        results = func(*args)
+        if results:
+            note = note % results
+
+        self.cx.chat(note)
+        semaphore.release()
+        return
+        
+    def do(self, func, args, note=False):
+        pid = 'task-%s' % time.time() 
+        self.semaphore.acquire()
+        thread = threading.Thread(target=self.wrap, args=(func, args, self.semaphore, note, pid))
+        thread.start()
+
+
+def savevideo(url, path):
+    args = [
+        'youtube-dl',
+        '--restrict-filenames',
+        url,
+        '-o',
+        path,
+    ]
+    
+    # Save output from the real run in 
+    # for error checks. Someday.
+    feedback = subprocess.check_output(args)
+
+    # Simulated run to get the file name.
+    # Though it pops more proc, there are 
+    # some advantages to this: simple parsing
+    # and handles the already downloaded
+    # error while still being useful.
+    filename = False
+    args.append('--get-filename')
+    filename = subprocess.check_output(args)
+
+    return filename.strip()
+
+
+def savefromweb(url, path):
+    r = requests.get(url, stream=True, verify=False)
 
     if r.status_code != 200:
         return

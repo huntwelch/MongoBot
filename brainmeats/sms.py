@@ -1,6 +1,6 @@
 import re
 
-from autonomic import axon, alias, category, help, Dendrite
+from autonomic import axon, alias, help, Dendrite
 from time import mktime, localtime, strftime
 from secrets import TWILIO_SID, TWILIO_TOKEN, TWILIO_NUMBER, SAFE_NUMBERS
 from settings import CONTROL_KEY, CHANNEL
@@ -10,7 +10,6 @@ from datastore import Drinker
 
 # This shit be awesome. It requires a twilio account, but
 # there's no better way to hive-mind-fuck with someone.
-@category("sms")
 class Sms(Dendrite):
 
     client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
@@ -63,7 +62,7 @@ class Sms(Dendrite):
 
             self.announce(message)
 
-            if item.body[:1] == CONTROL_KEY and drinker and item.from_ != TWILIO_NUMBER:
+            if item.body[:1] == CONTROL_KEY and (drinker and item.from_ != TWILIO_NUMBER or item.from_ in SAFE_NUMBERS):
                 self.cx.context = CHANNEL
                 self.cx.replysms = from_
                 self.cx.command(drinker[0].name, item.body)
