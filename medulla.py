@@ -31,10 +31,12 @@ class Medulla:
 
         if IRC_PASS:
             self.sock.send('PASS %s\n' % IRC_PASS)
+
         self.sock.send('USER %s %s bla :%s\n' % (IDENT, HOST, REALNAME))
+        self.sock.send('NICK %s\n' % NICK)
+
         if HAS_NICKSERV and BOT_PASS:
             self.sock.send('PRIVMSG NickServ :indentify %s\n' % BOT_PASS)
-        self.sock.send('NICK %s\n' % NICK)
 
         # Some servers require a pause prior to being able to join a channel
         sleep(2)
@@ -50,6 +52,8 @@ class Medulla:
         # long the bot has been spinning its gears
         # in a process. If it can't set the pulse
         # for too long, a signal kills it and reboots.
+        # Note: this has become less of an issue
+        # since all the bot's commands became threaded
         print '* Establishing pulse'
         self.setpulse()
 

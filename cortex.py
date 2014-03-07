@@ -45,6 +45,7 @@ class Cortex:
 
     butler = False
 
+    channels = []
     public_commands = []
     members = []
     guests = []
@@ -398,7 +399,10 @@ class Cortex:
                 _result = self.commands.get(what, self.default)()
                 result.append(_result)
         else:
-            result = self.commands.get(what, self.default)()
+            try:
+                result = self.commands.get(what, self.default)()
+            except Exception as e:
+                self.chat(str(e))
 
         if not result:
             return
