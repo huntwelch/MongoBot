@@ -33,7 +33,7 @@ Secret settings
 ===============
 
     You will need to create a file in the root folder called secrets.py.
-    example.secrets.py has descriptions of each setting, just copy it to
+    sample.secrets.py has descriptions of each setting, just copy it to
     secrets.py and set away.
 
 

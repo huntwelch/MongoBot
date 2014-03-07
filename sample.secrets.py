@@ -4,7 +4,7 @@ CHANNEL = ''
 IDENT = ''
 REALNAME = ''
 OWNER = ''
-
+IRC_PASS = ''
 
 # Password for users to register with the bot
 
@@ -49,7 +49,7 @@ TWILIO_SID = ''
 TWILIO_TOKEN = ''
 TWILIO_NUMBER = ''
 
-# Safe numbers can send commands 
+# Safe numbers can send commands
 # to mongo via text message
 SAFE_NUMBERS = {
     '+1234567890': 'irc_nick',
