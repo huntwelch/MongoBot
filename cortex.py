@@ -230,7 +230,7 @@ class Cortex:
         try:
             nick, data = sender.split('!')
             realname, ip = data.split('@')
-            realname = realname[1:]
+            realname = realname.strip('~')
         except Exception as e:
             return
 
