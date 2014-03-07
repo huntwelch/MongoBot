@@ -13,7 +13,7 @@ from time import mktime, localtime, sleep
 from random import randint
 
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, \
-    STORE_IMGS, IMGS, REGISTERED, TIMEZONE, MULTI_PASS
+    STORE_IMGS, IMGS, REGISTERED, TIMEZONE, MULTI_PASS, HAS_CHANSERV
 from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY
 from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
@@ -47,7 +47,7 @@ class Cortex:
 
     public_commands = []
     members = []
-    guests = [] 
+    guests = []
     broken = []
     REALUSERS = []
 
@@ -78,7 +78,7 @@ class Cortex:
         print '* Connecting to datastore'
         connectdb()
 
-    # Loads up all the files in brainmeats and runs them 
+    # Loads up all the files in brainmeats and runs them
     # through the hookup process.
     def loadbrains(self, electroshock=False):
         self.brainmeats = {}
@@ -114,7 +114,7 @@ class Cortex:
     # there were a number of live processes that thread
     # solutions weren't solving.
     #
-    # The solution was to have everything that needs to 
+    # The solution was to have everything that needs to
     # run live run on one ticker. If you need something
     # to run continuously, add this to the __init__ of
     # your brainmeat:
@@ -161,8 +161,8 @@ class Cortex:
         currenttime = int(mktime(localtime()))
         self.parietal(currenttime)
 
-        if self.joined and not self.operator:
-            print self.sock.send('PRIVMSG ChanServ :op %s %s\n' % (CHANNEL, NICK)) 
+        if HAS_CHANSERV and self.joined and not self.operator:
+            self.sock.send('PRIVMSG ChanServ :op %s %s\n' % (CHANNEL, NICK))
             self.operator = True
 
         self.sock.setblocking(0)
@@ -214,7 +214,7 @@ class Cortex:
                 self.parse(line)
 
     # Le parser. This used to be a very busy function before
-    # most of its actions got moved to the nonsense and 
+    # most of its actions got moved to the nonsense and
     # broca brainmeats.
     def parse(self, msg):
         pwd = re.search(':-passwd', msg)
@@ -250,7 +250,7 @@ class Cortex:
         # Determine if the action is a command and the user is
         # approved.
         if content[:1] == CONTROL_KEY or content[:1] == MULTI_PASS:
-            
+
             # Tack on last command if it's just the control
             if content == CONTROL_KEY or content[:2] == CONTROL_KEY + ' ':
                 if not self.lastcommand:
@@ -263,7 +263,7 @@ class Cortex:
             and nick not in self.guests:
                 self.chat('My daddy says not to listen to you.')
                 return
-            
+
             # A hack to maintain reboot until I figure
             # our something better.
             if content.find('%sreboot' % CONTROL_KEY) == 0:
@@ -294,7 +294,7 @@ class Cortex:
             return
 
         # Been messing around with NLTK without much success,
-        # but there's a lot of experimenting in the broca 
+        # but there's a lot of experimenting in the broca
         # meat. At time of writing, it does Mongo's auto responses
         # in tourettes and adds to the markov chain.
         if 'broca' in self.brainmeats:
@@ -319,7 +319,7 @@ class Cortex:
             cmd = '%s %s' % (cmd, piped)
 
         components = cmd.split()
-            
+
         _what = components.pop(0)
 
         what = _what[1:]
@@ -348,23 +348,23 @@ class Cortex:
         # right? It's final output is a chat, otherwise it's
         # not much of a chatbot.
         #
-        # Then some asshole in our chatroom said something 
+        # Then some asshole in our chatroom said something
         # like "it'd be cool if we could pipe commands, like
         # -tweet|babble or something."
-        # 
-        # So THAT got stuck in my head even though it's 
+        #
+        # So THAT got stuck in my head even though it's
         # totally ridiculous, but I won't be able to sleep
-        # until it's fully implemented, and the first step 
+        # until it's fully implemented, and the first step
         # in that is the ability to do something besides
         # just chat out at the end of the function. If it's
         # being piped, the best way to do that is reset
         # self.values to the result of the command if it's
-        # piped from or to a pipeable function (I know 
+        # piped from or to a pipeable function (I know
         # 'from or to' should be one or the other, but it's
-        # 1am and I'm drunkenly listening to the Nye vs. 
-        # Ham debate over youtube and it's almost as 
+        # 1am and I'm drunkenly listening to the Nye vs.
+        # Ham debate over youtube and it's almost as
         # upsetting as realizing I'm going to have to comb
-        # over every goddamn function in this bot to 
+        # over every goddamn function in this bot to
         # determine what's pipeable and change its output).
         #
         # Point is, you can return a list or a string at
@@ -372,7 +372,7 @@ class Cortex:
         # I probably won't worry about act and announce.
         if means == MULTI_PASS:
 
-            # All this multi checking had to be put in 
+            # All this multi checking had to be put in
             # after Eli decided to enter this:
             # -babble fork | *babble | *babble | *babble
             # ... which of course spiked the redis server
@@ -385,7 +385,7 @@ class Cortex:
                 self.chat('This look like fork bomb. You kick puppies too?')
                 self.multis = 0
                 return
-                
+
             result = []
 
             if not components:
@@ -420,7 +420,7 @@ class Cortex:
 
             for line in result:
                 self.chat(line)
-        
+
         self.multis = 0
 
     # If you want to restrict a command to the bot admin.
@@ -524,7 +524,7 @@ class Cortex:
                 title = site.title()
 
             # If you have a delicious account set up. Yes, delicious
-            # still exists. Could be updated to a cooler link 
+            # still exists. Could be updated to a cooler link
             # collecting service.
             if STORE_URLS:
                 postdelicious(url, title, self.lastsender)
@@ -587,7 +587,10 @@ class Cortex:
                 self.values = [to, str(m)]
                 self.commands.get('sms')()
         except:
-            self.sock.send('PRIVMSG %s :Having trouble saying that for some reason\n' % whom)
+            try:
+                self.sock.send('PRIVMSG %s :Having trouble saying that for some reason\n' % whom)
+            except:
+                print "Unable to say: %s" % message
 
     def act(self, message, public=False, target=False):
         message = '\001ACTION %s\001' % message

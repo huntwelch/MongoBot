@@ -6,27 +6,38 @@ import os
 import thread
 import ssl
 
-from settings import NICK, HOST, PORT, CHANNEL, SMS_LOCKFILE, PULSE, ENABLED
-from secrets import IDENT, REALNAME, OWNER, BOT_PASS
+from settings import NICK, HOST, PORT, USE_SSL, CHANNEL, SMS_LOCKFILE, PULSE, ENABLED, HAS_NICKSERV
+from secrets import IDENT, REALNAME, OWNER, IRC_PASS, BOT_PASS
 from time import sleep, mktime, localtime
 
 
 # Welcome to the beginning of a very strained brain metaphor!
 # This is the shell for running the cortex. Ideally, this will never
-# fail and you never have to reboot. Hah! I make funny, yes? More 
+# fail and you never have to reboot. Hah! I make funny, yes? More
 # important, if you make changes to this file, you have to reboot as
 # a reload won't change it.
 class Medulla:
     def __init__(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         print '* Pinging IRC'
 
-        self.sock.connect((HOST, PORT))
+        raw_socket.connect((HOST, PORT))
 
-        self.sock.send('NICK %s\n' % NICK)
+        if USE_SSL:
+            self.sock = ssl.wrap_socket(raw_socket)
+        else:
+            self.sock = raw_socket
+
+        if IRC_PASS:
+            self.sock.send('PASS %s\n' % IRC_PASS)
         self.sock.send('USER %s %s bla :%s\n' % (IDENT, HOST, REALNAME))
-        self.sock.send('PRIVMSG NickServ :indentify %s\n' % BOT_PASS)
+        if HAS_NICKSERV and BOT_PASS:
+            self.sock.send('PRIVMSG NickServ :indentify %s\n' % BOT_PASS)
+        self.sock.send('NICK %s\n' % NICK)
+
+        # Some servers require a pause prior to being able to join a channel
+        sleep(2)
         self.sock.send('JOIN %s\n' % CHANNEL)
 
         self.sock.setblocking(0)
