@@ -55,6 +55,7 @@ ENABLED = [
     'stockgame',
     'system',
     'twitting',
+    'turing',
     'webserver',
 ]
 
