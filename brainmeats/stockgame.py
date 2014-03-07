@@ -152,7 +152,7 @@ class Stockgame(Dendrite):
         self._create_position('short')
 
     @axon
-    @help("<stock scores of okdrinkers>")
+    @help("<stock scores of players>")
     def stockscore(self):
         if self.values:
             drinkers = Drinker.objects(name__in=self.values)
