@@ -5,8 +5,13 @@ from secrets import CHANNEL
 HOST = 'chat.freenode.net'
 PORT = 6667
 NICK = 'MongoBot'
+USE_SSL = False
 
-# Used to filter out pings and server responses from 
+# ChanServ/NickServ availability
+HAS_CHANSERV = True
+HAS_NICKSERV = True
+
+# Used to filter out pings and server responses from
 # logs and live checks. Obviously if you're not on
 # freenode, you'll need to update this.
 SCAN = '^:\w+\.freenode\.net'
@@ -27,9 +32,9 @@ REGISTERED = STORAGE + '/allowed'
 POEMS = STORAGE + '/poems/'
 
 # Enabled libraries. These are the default brainmeats
-# that load up on start or reboot. You can enable and 
+# that load up on start or reboot. You can enable and
 # disable them with -enable and -disable while the bots
-# running. Comment out anything you don't want to load 
+# running. Comment out anything you don't want to load
 # here.
 ENABLED = [
     'acro',
@@ -93,7 +98,7 @@ BREAK = 15
 BOTPLAY = True
 
 # These are settings that can be changed during
-# runtime with the -update command. Note that 
+# runtime with the -update command. Note that
 # update actually rewrites this file; changes are
 # permanent. You can also add a setting here if
 # you want to make it available.
