@@ -175,7 +175,7 @@ class Cortex:
         for line in lines.split('\n'):
             line = line.strip()
 
-            if re.search('^:%s!~%s@.+ JOIN %s$' % (NICK, REALNAME, CHANNEL), line):
+            if re.search('^:%s!~?%s@.+ JOIN %s$' % (NICK, REALNAME, CHANNEL), line):
                 print "* Joined " + CHANNEL
                 self.joined = True
                 self.getnames()
