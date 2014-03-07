@@ -162,7 +162,7 @@ class Cortex:
         self.parietal(currenttime)
 
         if self.joined and not self.operator:
-            print self.sock.send('PRIVMSG ChanServ :op %s %s\n' % (CHANNEL, NICK)) 
+            self.sock.send('PRIVMSG ChanServ :op %s %s\n' % (CHANNEL, NICK)) 
             self.operator = True
 
         self.sock.setblocking(0)
