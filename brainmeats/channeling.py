@@ -42,7 +42,7 @@ class Channeling(Dendrite):
         if channel not in self.cx.channels:
             return 'Not in that channel'
 
-        self.cx.channels.remove(channel)
+        del self.cx.channels[channel]
         self.cx.sock.send('PART %s\n' % channel)
 
         return 'Left %s' % channel

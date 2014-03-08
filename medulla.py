@@ -5,11 +5,22 @@ import cortex
 import os
 import thread
 import ssl
+import logging
 
 from settings import NICK, HOST, PORT, USE_SSL, CHANNEL, SMS_LOCKFILE, PULSE, \
-    ENABLED, HAS_NICKSERV
+    ENABLED, HAS_NICKSERV, ERRORLOG
 from secrets import IDENT, REALNAME, OWNER, IRC_PASS, BOT_PASS, CHANNEL
 from time import sleep, mktime, localtime
+
+# Setup logging
+logging.basicConfig(level=logging.DEBUG, filename=ERRORLOG,
+    filemode='w')
+
+def errorcatcher(ex_cls, ex, tb):
+    logging.critical('\n'.join(traceback.format_tb(tb))) 
+    logging.critical('{0}: {1}'.format(ex_cls, ex))
+
+sys.excepthook = errorcatcher
 
 
 # Welcome to the beginning of a very strained brain metaphor!
@@ -19,6 +30,7 @@ from time import sleep, mktime, localtime
 # a reload won't change it.
 class Medulla:
     def __init__(self):
+
         raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         print '* Pinging IRC'
@@ -76,7 +88,8 @@ class Medulla:
         else:
             self.brain.act('strokes out.', False, OWNER)
 
-        for channel in self.brain.channels:
+        channels = self.brain.channels.keys()
+        for channel in channels:
             if channel == CHANNEL:
                 continue
             self.brain.brainmeats['channeling'].leave(channel)

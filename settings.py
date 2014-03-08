@@ -20,6 +20,7 @@ SCAN = '^:\w+\.freenode\.net'
 # Directory settings
 STORAGE = 'hippocampus'
 LOGDIR = STORAGE + '/log'
+ERRORLOG = STORAGE + '/log/error.log'
 LOG = LOGDIR + '/chat.log'
 BOOKS = 'booklearnin/'
 DISTASTE = STORAGE + '/distaste'
