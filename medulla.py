@@ -8,7 +8,7 @@ import ssl
 
 from settings import NICK, HOST, PORT, USE_SSL, CHANNEL, SMS_LOCKFILE, PULSE, \
     ENABLED, HAS_NICKSERV
-from secrets import IDENT, REALNAME, OWNER, IRC_PASS, BOT_PASS, CHANNELS
+from secrets import IDENT, REALNAME, OWNER, IRC_PASS, BOT_PASS, CHANNEL
 from time import sleep, mktime, localtime
 
 
@@ -75,6 +75,11 @@ class Medulla:
             self.brain.act('strokes out.')
         else:
             self.brain.act('strokes out.', False, OWNER)
+
+        for channel in self.brain.channels:
+            if channel == CHANNEL:
+                continue
+            self.brain.brainmeats['channeling'].leave(channel)
 
         self.active = False
 

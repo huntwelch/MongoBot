@@ -15,6 +15,31 @@ class Channeling(Dendrite):
             channel = '#' + channel
         return channel
 
+    @axon
+    def chanstat(self):
+        message = ['Connected to %s channels.' % len(self.cx.channels)]
+        for channel in self.cx.channels:
+            message.append('%s (%s)' % (channel, ', '.join(self.cx.channels[channel])))
+        
+        return message
+
+    @axon
+    def leave(self, channel=False):
+        if not self.values and not channel:
+            return 'Leave what?'
+
+        if not channel:
+            channel = self.massage(self.values.pop(0))
+
+        if channel not in self.cx.channels:
+            return 'Not in that channel'
+
+        self.cx.channels.remove(channel)
+        self.cx.sock.send('PART %s\n' % channel)
+
+        return 'Left %s' % channel
+        
+
     # Join another channel
     @axon
     def join(self, channel=False):
@@ -26,8 +51,10 @@ class Channeling(Dendrite):
 
         self.cx.sock.send('JOIN %s\n' % channel)
 
-        if channel not in self.cx.channels:
-            self.cx.channels[channel] = []
+        if channel in self.cx.channels:
+            return 'Already in that channel'
+
+        self.cx.channels[channel] = []
 
         if self.values:
             self.modchan(channel, self.values)

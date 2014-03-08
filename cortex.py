@@ -261,6 +261,7 @@ class Cortex:
         and 'spy' in self.channels[self.context]:
             report = '%s %s: %s' % (self.context, nick, content)
             self.announce(report)
+            return
 
         # Determine if the action is a command and the user is
         # approved.
