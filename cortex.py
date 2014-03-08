@@ -241,6 +241,15 @@ class Cortex:
             realname, ip = data.split('@')
             realname = realname.strip('~')
         except Exception as e:
+            print str(e)
+            return
+
+        # SPY
+        if room in self.channels \
+        and 'spy' in self.channels[room]:
+            self.context = CHANNEL
+            report = '%s %s: %s' % (room, nick, content)
+            self.announce(report)
             return
 
         try:
@@ -256,12 +265,7 @@ class Cortex:
         self.lastsender = nick
         self.lastip = ip
 
-        # SPY
-        if self.context in self.channels \
-        and 'spy' in self.channels[self.context]:
-            report = '%s %s: %s' % (self.context, nick, content)
-            self.announce(report)
-            return
+
 
         # Determine if the action is a command and the user is
         # approved.
@@ -574,9 +578,11 @@ class Cortex:
     # Since chat is mongo's only means of communicating with
     # a room, the ratelimiting here should prevent any overflow
     # violations.
+    # NOTE: 'and not target' may be a sketchy override; test it
     @ratelimited(2)
     def chat(self, message, target=False, error=False):
         if self.context in self.channels \
+        and not target \
         and 'speak' not in self.channels[self.context]:
             return
 

@@ -1,6 +1,5 @@
 from autonomic import axon, alias, help, Dendrite
-
-# TODO: add leave room command, plus speaktoroom through him
+from secrets import CHANNEL
 
 class Channeling(Dendrite):
 
@@ -16,6 +15,13 @@ class Channeling(Dendrite):
         return channel
 
     @axon
+    @alias('mods')
+    @help('<Get list of available mods>')
+    def getmods(self):
+        return ', '.join(self.mods)
+
+    @axon
+    @help('<Get list of channels and mods applied>')
     def chanstat(self):
         message = ['Connected to %s channels.' % len(self.cx.channels)]
         for channel in self.cx.channels:
@@ -24,6 +30,8 @@ class Channeling(Dendrite):
         return message
 
     @axon
+    @alias('part')
+    @help('CHANNEL <leave CHANNEL>')
     def leave(self, channel=False):
         if not self.values and not channel:
             return 'Leave what?'
@@ -42,6 +50,7 @@ class Channeling(Dendrite):
 
     # Join another channel
     @axon
+    @help('CHANNEL [MOD1...MODN] <join CHANNEL, optionally add mods>')
     def join(self, channel=False):
         if not self.values and not channel:
             return 'Join what?'
@@ -62,6 +71,7 @@ class Channeling(Dendrite):
         return 'Joined %s' % channel
 
     @axon
+    @help('CHANNEL +MOD1 [-MOD2...+MODN] <add or remove mods on joined channel>')
     def modchan(self, chan=False, what=False):
 
         if not chan and not self.values:
@@ -88,6 +98,10 @@ class Channeling(Dendrite):
                 action = '+'
             else:
                 mod = mod[1:]
+    
+            if mod == 'spy' and chan == CHANNEL:
+                self.chat('Well not much point in that now, is there?')
+                return
 
             if mod not in self.mods:
                 self.chat('%s is not a mod. Available mods: %s' % (mod, ', '.join(self.mods)))
@@ -100,3 +114,20 @@ class Channeling(Dendrite):
                 self.cx.channels[chan].remove(mod)
                 
         return 'Mods applied to %s' % chan
+
+    @axon
+    @alias('m')
+    @help('CHANNEL MESSAGE <speak to channel>')
+    def talkchannel(self):
+        if not self.values or len(self.values) < 2:
+            return 'Format as #channel your message'
+            
+
+        channel = self.massage(self.values.pop(0))
+        message = ' '.join(self.values)
+
+        if channel not in self.cx.channels:
+            return 'Not in that channel'
+            
+        self.chat(message, channel)            
+        return 'Message sent'

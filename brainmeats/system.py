@@ -135,7 +135,7 @@ class System(Dendrite):
     # Reloads the bot. Any changes make to cortex or brainmeats
     # and most settings will be reflected after a reload.
     @axon
-    @help("<reload " + NICK + ">")
+    @help('<reload %s>' % NICK)
     def reload(self):
         meats = self.cx.brainmeats
         if 'webserver' in meats:
@@ -154,7 +154,7 @@ class System(Dendrite):
     # A shortcut to the update function to change nick. Also
     # tells the irc server.
     @axon
-    @help("NICKNAME <change " + NICK + "'s name>")
+    @help("NICKNAME <change %s's name>" % NICK)
     def nick(self):
         if not self.values:
             self.chat("Change name to what?")
