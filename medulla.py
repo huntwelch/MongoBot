@@ -6,8 +6,9 @@ import os
 import thread
 import ssl
 
-from settings import NICK, HOST, PORT, USE_SSL, CHANNEL, SMS_LOCKFILE, PULSE, ENABLED, HAS_NICKSERV
-from secrets import IDENT, REALNAME, OWNER, IRC_PASS, BOT_PASS
+from settings import NICK, HOST, PORT, USE_SSL, CHANNEL, SMS_LOCKFILE, PULSE, \
+    ENABLED, HAS_NICKSERV
+from secrets import IDENT, REALNAME, OWNER, IRC_PASS, BOT_PASS, CHANNELS
 from time import sleep, mktime, localtime
 
 
@@ -40,7 +41,6 @@ class Medulla:
 
         # Some servers require a pause prior to being able to join a channel
         sleep(2)
-        self.sock.send('JOIN %s\n' % CHANNEL)
 
         self.sock.setblocking(0)
 

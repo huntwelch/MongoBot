@@ -282,14 +282,3 @@ class System(Dendrite):
         }
         for key, val in items.iteritems():
             self.chat(key + ": " + val)
-
-    # Join another channel
-    @axon
-    def join(self):
-        if not self.values:
-            return 'Join what?'
-
-        channel = self.values[0]
-        self.cx.sock.send('JOIN %s\n' % channel)
-
-        return 'Joined %s' % channel

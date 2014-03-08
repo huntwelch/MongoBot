@@ -42,6 +42,7 @@ ENABLED = [
     'artsy',
     'broca',
     'chess',
+    'channeling',
     'diplomacy',
     'facebook',
     'finance',

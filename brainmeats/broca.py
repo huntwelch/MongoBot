@@ -10,7 +10,7 @@ import simplejson
 
 from threading import Thread
 from autonomic import axon, alias, help, Dendrite
-from secrets import WORDNIK_API
+from secrets import WORDNIK_API, BOT_PASS
 from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, \
     REDIS_SOCK, SMARTASS, TECH_QUESTIONS, IT_HELP, FRUSTRATION, POEMS, \
     WEBSITE
@@ -251,6 +251,13 @@ class Broca(Dendrite):
         rep = re.compile('[\()\[\]"]')
         words = rep.sub('', words)
         words = words.split()
+
+        # Mostly, security in babble is your
+        # problem, but BOT_PASS shows up in the
+        # channel a lot.
+        while BOT_PASS in words:
+            words.remove(BOT_PASS)
+
         words = ' '.join(words)
 
         return words

@@ -14,7 +14,7 @@ from random import randint
 
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, \
     STORE_IMGS, IMGS, REGISTERED, TIMEZONE, MULTI_PASS, HAS_CHANSERV
-from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY
+from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY, CHANNELS
 from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
     Browse, Butler
@@ -64,9 +64,17 @@ class Cortex:
         print '* Initializing'
         self.master = master
         self.sock = master.sock
+        self.channels = CHANNELS
+
 
         print '* Loading brainmeats'
         self.loadbrains()
+
+        print '* Joining channels'
+        for channel in self.channels:
+            self.brainmeats['channeling'].join(channel)
+            self.brainmeats['channeling'].modchan(channel, self.channels[channel])
+
 
         print '* Waking butler'
         self.butler = Butler(self)
@@ -248,6 +256,12 @@ class Cortex:
         self.lastsender = nick
         self.lastip = ip
 
+        # SPY
+        if self.context in self.channels \
+        and 'spy' in self.channels[self.context]:
+            report = '%s %s: %s' % (self.context, nick, content)
+            self.announce(report)
+
         # Determine if the action is a command and the user is
         # approved.
         if content[:1] == CONTROL_KEY or content[:1] == MULTI_PASS:
@@ -309,6 +323,10 @@ class Cortex:
     # accessible by the brainmeats as self.values.
     multis = 0
     def command(self, sender, cmd, piped=False):
+        if self.context in self.channels \
+        and 'command' not in self.channels[self.context]:
+            return
+
         chain = cmd.split('|', 1)
         pipe = False
 
@@ -557,6 +575,9 @@ class Cortex:
     # violations.
     @ratelimited(2)
     def chat(self, message, target=False, error=False):
+        if self.context in self.channels \
+        and 'speak' not in self.channels[self.context]:
+            return
 
         if self.bequiet:
             return
@@ -566,8 +587,8 @@ class Cortex:
 
         if target:
             whom = target
-        elif self.context == CHANNEL:
-            whom = CHANNEL
+        elif self.context in self.channels:
+            whom = self.context
         else:
             whom = self.lastsender
 
