@@ -15,7 +15,7 @@ from PIL import Image
 from bisect import bisect
 from Queue import Queue
 
-from settings import CHANNEL, SHORTENER
+from settings import CHANNEL, SHORTENER, THUMBS, THUMB_SIZE, WEBSITE
 from secrets import HTTP_PASS, DELICIOUS_USER, DELICIOUS_PASS
 from collections import OrderedDict
 
@@ -362,8 +362,12 @@ def savevideo(url, path):
     return filename.strip()
 
 
-def savefromweb(url, path):
+# Use of 'thumber' var is crappy, but probably
+# moving this to a Browse method, so not worrying
+# about it right now.
+def savefromweb(url, path, thumber=False):
     r = requests.get(url, stream=True, verify=False)
+
 
     if r.status_code != 200:
         return
@@ -372,3 +376,12 @@ def savefromweb(url, path):
         for chunk in r.iter_content(1024):
             f.write(chunk)
         f.close()
+    
+    if thumber:
+        fname = "%s_%s.jpeg" % ( thumber, int(time.mktime(time.localtime())) )
+        img = Image.open(path)
+        img.thumbnail((THUMB_SIZE, THUMB_SIZE), Image.ANTIALIAS)
+        img.save('server%s%s' % (THUMBS, fname))
+        return '%s%s%s' % (WEBSITE, THUMBS, fname)
+        
+

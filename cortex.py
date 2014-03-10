@@ -6,6 +6,8 @@ import socket
 import time
 import string
 import threading
+import logging
+import traceback
 
 from datetime import date, timedelta, datetime
 from pytz import timezone
@@ -13,13 +15,16 @@ from time import mktime, localtime, sleep
 from random import randint
 
 from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, \
-    STORE_IMGS, IMGS, REGISTERED, TIMEZONE, MULTI_PASS, HAS_CHANSERV
+    STORE_IMGS, IMGS, REGISTERED, TIMEZONE, MULTI_PASS, HAS_CHANSERV, THUMBS, WEBSITE
 from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY, CHANNELS
 from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
     Browse, Butler
 from autonomic import serotonin
 
+# TODO:
+# remove names check, use other means
+# do logging and tracebacks
 
 # Basically all the interesting interaction with
 # irc and command / content parsing happens here.
@@ -425,6 +430,8 @@ class Cortex:
             try:
                 result = self.commands.get(what, self.default)()
             except Exception as e:
+                # proper logging here
+
                 self.chat(str(e))
 
         if not result:
@@ -542,7 +549,7 @@ class Cortex:
                 if STORE_IMGS:
                     fname = url.split('/').pop()
                     path = IMGS + fname
-                    self.butler.do(savefromweb, (url, path), 'Finished downloading')
+                    self.butler.do(savefromweb, (url, path, self.lastsender), 'Thumb @ %s')
 
             elif ext == 'pdf':
                 title = 'PDF Document'

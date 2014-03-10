@@ -5,22 +5,11 @@ import cortex
 import os
 import thread
 import ssl
-import logging
 
 from settings import NICK, HOST, PORT, USE_SSL, CHANNEL, SMS_LOCKFILE, PULSE, \
     ENABLED, HAS_NICKSERV, ERRORLOG
 from secrets import IDENT, REALNAME, OWNER, IRC_PASS, BOT_PASS, CHANNEL
 from time import sleep, mktime, localtime
-
-# Setup logging
-logging.basicConfig(level=logging.DEBUG, filename=ERRORLOG,
-    filemode='w')
-
-def errorcatcher(ex_cls, ex, tb):
-    logging.critical('\n'.join(traceback.format_tb(tb))) 
-    logging.critical('{0}: {1}'.format(ex_cls, ex))
-
-sys.excepthook = errorcatcher
 
 
 # Welcome to the beginning of a very strained brain metaphor!

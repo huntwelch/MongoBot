@@ -29,6 +29,8 @@ DOWNLOADS = STORAGE + '/downloads/'
 IMGS = STORAGE + '/downloads/imgs/'
 VIDS = STORAGE + '/downloads/videos/'
 GIFS = '/static/gifs/'
+THUMBS = '/static/thumbs/'
+THUMB_SIZE = 40
 REGISTERED = STORAGE + '/allowed'
 POEMS = STORAGE + '/poems/'
 

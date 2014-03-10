@@ -20,6 +20,14 @@ class System(Dendrite):
     def __init__(self, cortex):
         super(System, self).__init__(cortex)
 
+    @axon
+    @alias('raw')
+    def rawsock(self):
+        if not self.values:
+            return 'Send what?'
+
+        self.cx.sock.send(' '.join(self.values))
+
     # Help menu. It used to just show every command, but there
     # are so goddamn many at this point, they had to be split
     # into categories.
