@@ -1,0 +1,63 @@
+#
+# This is the MongoBot general settings configuration file.
+# It contains the configuration directives to instruct the bot
+# The configuration file uses standard YAML tags, as well as
+# extended PyYAML specific tag types as documented at
+# http://pyyaml.org/wiki/PythonTagScheme
+#
+# Non-standard tags:
+#   Include another YAML config file
+#     module: !include module.yaml
+#
+#  Dynamic resolution, must be encapsulated in double quotes:
+#    directory:
+#      root: /home/MongoBot
+#      downloads: "{directory.root}/downloads"
+#
+
+# IRC connection settings
+irc:
+  host: chat.freenode.net
+  port: 6697
+  ssl: True
+  chanserv: False
+  nickserv:
+    nick: NickServ
+    password: test
+  scan: ^:\w+\.freenode\.net
+  password: False
+
+bot:
+  nick: SalsaBot
+  ident: SalsaBot
+  realname: SalsaBot
+  password: Null        # The password to the IRC server
+
+# Directories
+directory:
+  storage: "hippocampus"
+  logdir: "{directory.storage}/log"
+  errorlog: "{directory.logdir}/error.log"
+  log: "{directory.logdir}/chat.log"
+  books: "{directory.storage}/booklearnin"
+  distaste: "{directory.storage}/distaste"
+  authfile: "{directory.storage}/users.yaml"
+
+# General configuration options
+general:
+  timezone: EST
+
+# Misc config item
+misc:
+  pulse: /tmp/bot.pulse
+
+# Plugins
+plugins: !include plugins.yaml
+
+
+acro: !include plugins/acro.yaml
+
+
+
+# Test
+test: !include acro.yaml
