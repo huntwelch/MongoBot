@@ -3,24 +3,28 @@ import re
 import shutil
 import pkgutil
 import socket
-import time
 import string
-import threading
-import logging
-import traceback
 
 from datetime import date, timedelta, datetime
 from pytz import timezone
-from time import mktime, localtime, sleep
+from time import time, mktime, localtime, sleep
 from random import randint
+from config import load_config
+from synapse import Neurons, Synapse
+from pprint import pprint
 
-from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, \
-    STORE_IMGS, IMGS, REGISTERED, TIMEZONE, MULTI_PASS, HAS_CHANSERV, THUMBS, WEBSITE
+from settings import NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, \
+    STORE_IMGS, IMGS, MULTI_PASS, HAS_CHANSERV, THUMBS, WEBSITE
 from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY, CHANNELS
+
+
 from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
     Browse, Butler
 from autonomic import serotonin
+
+import traceback
+
 
 # TODO:
 # remove names check, use other means
@@ -69,8 +73,12 @@ class Cortex:
         print '* Initializing'
         self.master = master
         self.sock = master.sock
-        self.channels = CHANNELS
+        self.settings = master.settings
+        self.secrets = master.secrets
+        self.channels = self.secrets.channels[0]
 
+        print '* Exciting neurons'
+        Neurons.cx = self
 
         print '* Loading brainmeats'
         self.loadbrains()
@@ -80,14 +88,11 @@ class Cortex:
             self.brainmeats['channeling'].join(channel)
             self.brainmeats['channeling'].modchan(channel, self.channels[channel])
 
-
         print '* Waking butler'
         self.butler = Butler(self)
 
         print '* Loading users'
-        users = open(REGISTERED, 'r')
-        self.REALUSERS = users.read().splitlines()
-        users.close()
+        self.REALUSERS = load_config(self.settings.directory.authfile)
 
         print '* Connecting to datastore'
         connectdb()
@@ -119,6 +124,8 @@ class Cortex:
                 self.broken.append(area)
                 print 'Failed to load %s.' % area
                 print e
+                print traceback.format_exc()
+
 
         for brainmeat in self.brainmeats:
             serotonin(self, brainmeat, electroshock)
@@ -150,7 +157,7 @@ class Cortex:
 
         # This should really just be an addlive. Maybe
         # the other two functions, too.
-        calendar = datetime.now(timezone(TIMEZONE))
+        calendar = datetime.now(timezone(self.settings.general.timezone))
         if calendar.hour in MEETUP_NOTIFY and 'peeps' in self.brainmeats:
             self.brainmeats['peeps'].meetup(calendar.hour)
 
@@ -231,6 +238,7 @@ class Cortex:
     # most of its actions got moved to the nonsense and
     # broca brainmeats.
     def parse(self, msg):
+
         pwd = re.search(':-passwd', msg)
         if not pwd:
             print msg
@@ -241,6 +249,12 @@ class Cortex:
         except:
             return
 
+        print "info: %s" % info
+        print "content: %s" % content
+        print "sender: %s" % sender
+        print "type: %s" % type
+        print "room: %s" % room
+
         try:
             nick, data = sender.split('!')
             realname, ip = data.split('@')
@@ -249,9 +263,18 @@ class Cortex:
             print str(e)
             return
 
+        print "nick: %s" % nick
+        print "data: %s" % data
+        print "ip: %s" % ip
+        print "realname: %s" % realname
+
+        pprint(room)
+        pprint(self.channels)
+
         # SPY
         if room in self.channels \
-        and 'spy' in self.channels[room]:
+        and 'spy' in self.channels[room] \
+        and self.channels[room].spy:
             self.context = CHANNEL
             report = '%s %s: %s' % (room, nick, content)
             self.announce(report)
@@ -264,13 +287,14 @@ class Cortex:
             self.lastrealsender = False
             pass
 
+        pprint(self.members)
+
         if nick not in self.members:
             self.members.append(nick)
 
         self.lastsender = nick
         self.lastip = ip
         self.lastchat = content
-
 
 
         # Determine if the action is a command and the user is
@@ -328,6 +352,7 @@ class Cortex:
             self.brainmeats['broca'].mark(content)
             if self.autobabble and content.find(NICK) > 0:
                 self.brainmeats['broca'].babble()
+
 
     # If it is indeed a command, the cortex stores who sent it,
     # and any words after the command are split in a values array,
@@ -486,7 +511,7 @@ class Cortex:
     # TODO: chenge to normal python logging
     def logit(self, what):
         with open(LOG, 'a') as f:
-            f.write('TS:%s;%s' % (time.time(), what))
+            f.write('TS:%s;%s' % (time(), what))
 
         now = date.today()
         if now.day != 1:
@@ -500,7 +525,11 @@ class Cortex:
         shutil.move(LOG, backlog)
 
     # Sort out urls.
+    @Synapse('url')
     def linker(self, urls):
+
+        return urls
+
         for url in urls:
             # Special behaviour for Twitter URLs
             match_twitter_urls = re.compile('http[s]?://(www.)?twitter.com/.+/status/([0-9]+)')
