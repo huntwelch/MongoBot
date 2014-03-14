@@ -2,19 +2,19 @@ from math import *
 from secrets import CHANNEL
 
 # Connection Settings
-HOST = 'chat.freenode.net'
-PORT = 6667
-NICK = 'MongoBot'
-USE_SSL = False
+HOST = 'chat.ewr01.tumblr.net'
+PORT = 6697
+NICK = 'StockBot'
+USE_SSL = True
 
-# ChanServ/NickServ availability
-HAS_CHANSERV = True
-HAS_NICKSERV = True
+# ChanServ / NickServ availability
+HAS_CHANSERV = False
+HAS_NICKSERV = False
 
 # Used to filter out pings and server responses from
 # logs and live checks. Obviously if you're not on
 # freenode, you'll need to update this.
-SCAN = '^:\w+\.freenode\.net'
+SCAN = '^:\w+\.tumblr\.net'
 
 # TODO: Normalize dir pattern endings ('/' or not)
 # Directory settings
@@ -47,7 +47,7 @@ ENABLED = [
     'chess',
     'channeling',
     'diplomacy',
-    'facebook',
+    #'facebook',
     'finance',
     'holdem',
     'memory',
@@ -55,12 +55,12 @@ ENABLED = [
     'peeps',
     'quotes',
     'reference',
-    'sms',
+    #'sms',
     'stockgame',
     'system',
-    'twitting',
+    #'twitting',
+    #'webserver',
     'turing',
-    'webserver',
 ]
 
 # Misc
@@ -84,7 +84,7 @@ WEBSITE = 'http://mongobot.com'
 SERVER_RELOAD = '/tmp/mongo.reload'
 
 # Stock game
-VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ'])
+VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ', 'NASDAQNM'])
 STARTING_CASH = 100000
 
 # Acro
