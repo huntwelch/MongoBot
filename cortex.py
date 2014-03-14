@@ -151,7 +151,7 @@ class Cortex:
         self.live[name] = func
 
     def droplive(self, name):
-        self.live.remove(name)
+        del self.live[name]
 
     # Core automatic stuff. I firmly believe boredom to
     # be a fundamental process in both man and machine.
@@ -280,6 +280,7 @@ class Cortex:
 
         self.lastsender = nick
         self.lastip = ip
+        self.lastchat = content
 
 
         # Determine if the action is a command and the user is
@@ -493,6 +494,7 @@ class Cortex:
         # self.act(choice(BOREDOM) + " " + choice(self.members))
 
     # Simple logging.
+    # TODO: chenge to normal python logging
     def logit(self, what):
         with open(LOG, 'a') as f:
             f.write('TS:%s;%s' % (time(), what))

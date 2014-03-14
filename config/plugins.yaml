@@ -2,3 +2,4 @@ plugins:
   - channeling
   - twitting
   - tester
+  - webserver

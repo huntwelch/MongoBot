@@ -110,7 +110,7 @@ class Medulla:
 
     def setpulse(self):
         self.lastpulse = mktime(localtime())
-        pulse = open(self.settings.misc.pulse, 'w')
+        pulse = open(self.settings.sys.pulse, 'w')
         pulse.write(str(self.lastpulse))
         pulse.close()
 

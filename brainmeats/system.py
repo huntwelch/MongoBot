@@ -105,8 +105,8 @@ class System(Dendrite):
     # That's just crazy.
     @axon
     @help("SETTING=VALUE <update a " + NICK + " setting>")
-    def update(self, inhouse=False):
-        if not inhouse:
+    def update(self, vals=False):
+        if not vals:
             vals = self.values
 
         if not vals or len(vals) != 2:
@@ -158,27 +158,6 @@ class System(Dendrite):
     @help("<set squirrel on fire and staple it to angel. No, really>")
     def reboot(self):
         self.cx.master.die()
-
-    # A shortcut to the update function to change nick. Also
-    # tells the irc server.
-    @axon
-    @help("NICKNAME <change %s's name>" % NICK)
-    def nick(self):
-        if not self.values:
-            self.chat("Change name to what?")
-            return
-
-        name = self.values[0]
-        if not re.search("^\w+$", name):
-            self.chat("Invalid name")
-            return
-
-        self.cx.sock.send('NICK ' + name + '\n')
-        self.cs.sock.send('PRIVMSG NickServ :indentify %s\n' % BOT_PASS)
-        self.cx.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
-        self.cx.sock.send('JOIN ' + CHANNEL + '\n')
-
-        self.update(['NICK', name])
 
     # DANGER ZONE. You merge it, anyone can pull it. If you
     # have a catastrophic failure after this, it's probably

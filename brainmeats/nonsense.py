@@ -14,6 +14,10 @@ from xml.dom import minidom as dom
 # a command that just seems funny at the time ends up
 # here.
 class Nonsense(Dendrite):
+
+    anoid = []
+    lastchat = False
+
     def __init__(self, cortex):
         super(Nonsense, self).__init__(cortex)
 
@@ -217,6 +221,30 @@ class Nonsense(Dendrite):
             lines.append(line)
 
         self.chat(choice(lines))
+
+    @axon
+    def annoy(self):
+        if not self.values:
+            return 'Annoy whom?'
+            
+        self.anoid.append(self.values[0])
+        self.cx.addlive(self.repeater)
+        return 'You betcha'
+
+    @axon
+    def stahp(self):
+        self.cx.droplive('repeater')
+        self.anoid = []
+        return 'K'
+
+    def repeater(self):
+        if self.lastsender in self.anoid:
+            if self.lastchat == self.cx.lastchat:
+                return
+
+            self.lastchat = self.cx.lastchat
+            self.chat(self.lastchat)
+            return
 
     # Show Mongo the mind of God
     @axon
