@@ -1,8 +1,5 @@
 import inspect
 
-from settings import CONTROL_KEY
-
-
 # The core of the library methodology used
 # by MongoBot. All brainmeats are Dendrites,
 # inheriting the state of the cortex as the
@@ -48,6 +45,9 @@ class Dendrite(object):
     def members(self):
         return self.cx.members
 
+    @property
+    def ego(self):
+        return self.cx.personality
 
 # This is what the cortex uses to setup the brainmeat
 # libs, according to the decorators on the classes and
@@ -64,7 +64,7 @@ def serotonin(cortex, meatname, electroshock):
             continue
 
         if hasattr(method, 'help'):
-            helps.append('%s%s %s' % (CONTROL_KEY, name, method.help))
+            helps.append('%s%s %s' % (cortex.settings.bot.command_prefix, name, method.help))
 
         if hasattr(method, 'public_command'):
             cortex.public_commands.append(name)
@@ -89,11 +89,11 @@ def serotonin(cortex, meatname, electroshock):
 # Proposed:
 # @requires(vars, connections, installs)
 # @live() to run it in parietal. Iffy.
-# @pipe() can pipe output to another function. 
+# @pipe() can pipe output to another function.
 #         This is kind of just built in right
 #         now.
 
-# Makes the function available as 
+# Makes the function available as
 # a chat command, using the function
 # name.
 def axon(fn):
@@ -106,7 +106,7 @@ def public(fn):
     fn.public_command = True
     return fn
 
-# Tell people your function is 
+# Tell people your function is
 # there and how to use it.
 def help(text):
     def add(fn):

@@ -32,6 +32,7 @@ bot:
   ident: SalsaBot
   realname: SalsaBot
   password: Null        # The password to the IRC server
+  command_prefix: '-'
 
 # Directories
 directory:

@@ -1,3 +1,4 @@
 plugins:
   - channeling
+  - twitting
   - tester

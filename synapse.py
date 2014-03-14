@@ -1,11 +1,9 @@
-from autonomic import Dendrite
-from pprint import pprint
-
 '''
 Neurons hold some vesicles. Vesicles are cool.
 '''
 class Neurons(object):
 
+    cortex = None
     vesicles = dict()
 
 
@@ -20,7 +18,8 @@ def Cerebellum(object):
 
     for name, method in object.__dict__.iteritems():
         if hasattr(method, 'is_receptor'):
-            Neurons.vesicles.update({ method.name: [ Dendrite(object), method.neuron ]})
+
+            Neurons.vesicles.update({ method.name: [ object.__name__.lower(), method.neuron ]})
 
     return object
 
@@ -48,8 +47,8 @@ class Synapse(Neurons):
             neurotransmission = neuron(*args, **kwargs)
 
             vesicle, cell = self.vesicles.get(self.neuron, [])
-            if vesicle:
-                cell(vesicle, *(neurotransmission or []))
+            if vesicle and vesicle in self.cortex.brainmeats:
+                cell(self.cortex.brainmeats[vesicle], *(neurotransmission or []))
 
             return neurotransmission
 
@@ -71,7 +70,6 @@ def Receptor(name, *args, **kwargs):
     class AutoReceptor(Neurons):
 
         def __init__(self, neuron, name=False):
-            print neuron
 
             self.neuron = neuron
             self.name = name
