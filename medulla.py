@@ -38,7 +38,7 @@ class Medulla:
         self.sock.send('NICK %s\n' % NICK)
 
         if HAS_NICKSERV and BOT_PASS:
-            self.sock.send('PRIVMSG NickServ :indentify %s\n' % BOT_PASS)
+            self.sock.send('PRIVMSG NickServ :identify %s\n' % BOT_PASS)
 
         # Some servers require a pause prior to being able to join a channel
         sleep(2)

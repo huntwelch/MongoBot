@@ -404,8 +404,13 @@ class Broca(Dendrite):
             self.chat(nick + "'s MOM" + backatcha)
             return
 
+        # This could be more like a dict
         if sentence.lower().find("oh snap") != -1:
             self.chat("yeah WHAT?? Oh yes he DID")
+            return
+
+        if sentence.lower() == "sup":
+            self.chat("chillin")
             return
 
         if sentence.lower().find("murican") != -1:
