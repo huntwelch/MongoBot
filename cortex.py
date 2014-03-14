@@ -1,10 +1,11 @@
-import os
 import re
 import shutil
 import pkgutil
 import socket
 import string
 
+
+from os import path
 from datetime import date, timedelta, datetime
 from pytz import timezone
 from time import time, mktime, localtime, sleep
@@ -76,9 +77,10 @@ class Cortex:
         self.settings = master.settings
         self.secrets = master.secrets
         self.channels = self.secrets.channels[0]
+        self.personality = self.settings.bot
 
         print '* Exciting neurons'
-        Neurons.cx = self
+        Neurons.cortex = self
 
         print '* Loading brainmeats'
         self.loadbrains()
@@ -249,12 +251,6 @@ class Cortex:
         except:
             return
 
-        print "info: %s" % info
-        print "content: %s" % content
-        print "sender: %s" % sender
-        print "type: %s" % type
-        print "room: %s" % room
-
         try:
             nick, data = sender.split('!')
             realname, ip = data.split('@')
@@ -262,14 +258,6 @@ class Cortex:
         except Exception as e:
             print str(e)
             return
-
-        print "nick: %s" % nick
-        print "data: %s" % data
-        print "ip: %s" % ip
-        print "realname: %s" % realname
-
-        pprint(room)
-        pprint(self.channels)
 
         # SPY
         if room in self.channels \
@@ -286,8 +274,6 @@ class Cortex:
         except:
             self.lastrealsender = False
             pass
-
-        pprint(self.members)
 
         if nick not in self.members:
             self.members.append(nick)
@@ -519,7 +505,7 @@ class Cortex:
 
         prev = date.today() - timedelta(days=1)
         backlog = '%s/%s-mongo.log' % (LOGDIR, prev.strftime('%Y%m'))
-        if os.path.isfile(backlog):
+        if path.isfile(backlog):
             return
 
         shutil.move(LOG, backlog)
@@ -619,9 +605,10 @@ class Cortex:
     # NOTE: 'and not target' may be a sketchy override; test it
     @ratelimited(2)
     def chat(self, message, target=False, error=False):
+
         if self.context in self.channels \
         and not target \
-        and 'speak' not in self.channels[self.context]:
+        and not self.channels[self.context].speak:
             return
 
         if self.bequiet:

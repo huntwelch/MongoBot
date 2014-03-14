@@ -1,0 +1,7 @@
+stockgame:
+  exchanges:
+    - 'NYSE'
+    - 'NYSEARCA'
+    - 'NYSEAMEX'
+    - 'NASDAQ'
+  startupcash: 100000

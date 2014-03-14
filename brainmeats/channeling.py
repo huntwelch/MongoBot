@@ -26,7 +26,7 @@ class Channeling(Dendrite):
         message = ['Connected to %s channels.' % len(self.cx.channels)]
         for channel in self.cx.channels:
             message.append('%s (%s)' % (channel, ', '.join(self.cx.channels[channel])))
-        
+
         return message
 
     @axon
@@ -46,7 +46,7 @@ class Channeling(Dendrite):
         self.cx.sock.send('PART %s\n' % channel)
 
         return 'Left %s' % channel
-        
+
 
     # Join another channel
     @axon
@@ -98,21 +98,21 @@ class Channeling(Dendrite):
                 action = '+'
             else:
                 mod = mod[1:]
-    
+
             if mod == 'spy' and chan == CHANNEL:
-                self.chat('Well not much point in that now, is there?')
+                #self.chat('Well not much point in that now, is there?')
                 return
 
             if mod not in self.mods:
-                self.chat('%s is not a mod. Available mods: %s' % (mod, ', '.join(self.mods)))
+                #self.chat('%s is not a mod. Available mods: %s' % (mod, ', '.join(self.mods)))
                 continue
-        
+
             if action == '+' and mod not in self.cx.channels[chan]:
                 self.cx.channels[chan].append(mod)
-                
+
             if action == '-' and mod in self.cx.channels[chan]:
                 self.cx.channels[chan].remove(mod)
-                
+
         return 'Mods applied to %s' % chan
 
     @axon
@@ -121,13 +121,13 @@ class Channeling(Dendrite):
     def talkchannel(self):
         if not self.values or len(self.values) < 2:
             return 'Format as #channel your message'
-            
+
 
         channel = self.massage(self.values.pop(0))
         message = ' '.join(self.values)
 
         if channel not in self.cx.channels:
             return 'Not in that channel'
-            
-        self.chat(message, channel)            
+
+        self.chat(message, channel)
         return 'Message sent'

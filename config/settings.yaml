@@ -34,6 +34,12 @@ bot:
   ident: 'SalsaBot'
   realname: 'SalsaBot'
   password: Null # The password to the IRC server
+  command_prefix: '-'
+
+sys:
+  pulse: '/tmp/bot.pulse'
+  pulserate: 25
+  redissock: '/tmp/redis.sock'
 
 # Files and directories
 directory:
@@ -44,12 +50,14 @@ directory:
   distaste: "{directory.storage}/distaste"
   authfile: "{directory.storage}/users.yaml"
 
-# Media directories
+# Media
 media:
   books: "{directory.storage}/booklearnin"
   images: "{directory.storage}/imgs"
   videos: "{directory.storage}/videos"
   poems: "{directory.storage}/poems"
+  storeurls: True
+  storeimgs: True
 
 # General configuration options
 general:
@@ -57,7 +65,6 @@ general:
 
 # Misc config item
 misc:
-  pulse: '/tmp/bot.pulse'
   thumbsize: 40
 
 # Plugins
@@ -65,8 +72,6 @@ plugins: !include plugins.yaml
 
 
 acro: !include plugins/acro.yaml
-
-
 
 # Test
 test: !include acro.yaml

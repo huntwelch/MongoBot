@@ -1,28 +1,34 @@
 import tweepy
+import re
 
+from config import load_config
 from autonomic import axon, alias, help, Dendrite
-from settings import NICK
-from secrets import (TWIT_USER, TWIT_PASS, TWIT_ACCESS_TOKEN, TWIT_ACCESS_SECRET,
-                     TWIT_CONSUMER_KEY, TWIT_CONSUMER_SECRET, TWIT_PAGE)
+from synapse import Cerebellum, Receptor
 
+NICK = None
 
+@Cerebellum
 class Twitting(Dendrite):
 
-    auth = tweepy.OAuthHandler(TWIT_CONSUMER_KEY, TWIT_CONSUMER_SECRET)
+    config = load_config('config/twitting.yaml')
+    auth = tweepy.OAuthHandler(config.secrets.consumer_key, config.secrets.consumer_secret)
 
     api = False
     lasttweet = False
 
     def __init__(self, cortex):
+        global NICK
         super(Twitting, self).__init__(cortex)
 
-        self.auth.set_access_token(TWIT_ACCESS_TOKEN, TWIT_ACCESS_SECRET)
+        NICK = self.ego.nick
+
+        self.auth.set_access_token(self.config.secrets.access_token, self.config.secrets.access_secret)
         self.api = tweepy.API(self.auth)
 
     @axon
     @help("<show link to %s's twitter feed>" % NICK)
     def totw(self):
-        return TWIT_PAGE
+        return self.config.url
 
     @axon
     @help('[ID] <retweet by id, or just the last tweet>')
@@ -31,7 +37,7 @@ class Twitting(Dendrite):
         if not self.values and not id:
             self.chat('Provide an id or link a tweet first')
             return
-        
+
         if self.values:
             id = self.values[0]
 
@@ -41,6 +47,7 @@ class Twitting(Dendrite):
             return 'Twitter error: %s' % str(e)
 
         return 'Retwitted'
+
 
     @axon
     @help("MESSAGE <post to %s's twitter feed>" % NICK)
@@ -53,7 +60,7 @@ class Twitting(Dendrite):
             message = ' '.join(self.values)
         else:
             message = _message
-        
+
         try:
             status = self.api.update_status(message)
         except Exception as e:
@@ -62,7 +69,6 @@ class Twitting(Dendrite):
         if not _message:
             return 'Twitted'
 
-    
 
     @axon
     @help("ID <retrieve the tweet with ID>")
@@ -79,3 +85,17 @@ class Twitting(Dendrite):
         name = status.user.name
         if status.text:
             return '%s (%s) tweeted: %s' % (name, screen_name, text)
+
+    @Receptor('url')
+    def auto_get_tweet(self, url):
+        get_twitter_id = re.compile('http[s]?://[www\.]?twitter\.com/.+/status/([0-9]+)')
+        twitter_id = get_twitter_id.findall(url)
+
+        if len(twitter_id):
+            try:
+                self.chat(self.get_tweet(twitter_id.pop()))
+            except:
+                self.chat('Could not get the tweet.')
+
+        return
+
