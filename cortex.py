@@ -11,8 +11,6 @@ from pytz import timezone
 from time import time, mktime, localtime, sleep
 from random import randint
 from config import load_config
-from synapse import Neurons, Synapse
-from pprint import pprint
 
 from settings import NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, \
     STORE_IMGS, IMGS, MULTI_PASS, HAS_CHANSERV, THUMBS, WEBSITE
@@ -22,7 +20,7 @@ from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY, CHANNELS
 from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
     Browse, Butler
-from autonomic import serotonin
+from autonomic import serotonin, Neurons, Synapse
 
 import traceback
 

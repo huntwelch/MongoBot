@@ -2,8 +2,7 @@ import tweepy
 import re
 
 from config import load_config
-from autonomic import axon, alias, help, Dendrite
-from synapse import Cerebellum, Receptor
+from autonomic import axon, alias, help, Dendrite, Cerebellum, Receptor
 
 NICK = None
 
