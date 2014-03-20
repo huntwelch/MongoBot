@@ -91,6 +91,7 @@ Philosophies
 To Do
 =====
 
+    + Add an @empty('message if values is empty') decorator
     + Probably make this readme better
     + add tweet at in twitting
     + phase out pageopen for Browse (possibly phaseout requests module)

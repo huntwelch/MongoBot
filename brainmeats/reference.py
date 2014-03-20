@@ -1,11 +1,12 @@
 import textwrap
 import socket
 import re
+import wolframalpha
 
 from autonomic import axon, alias, help, Dendrite
 from bs4 import BeautifulSoup as bs4
 from settings import REPO, NICK, SAFE
-from secrets import WEATHER_API
+from secrets import WEATHER_API, WOLFRAM_API
 from util import unescape, pageopen
 from howdoi import howdoi as hownow
 
@@ -17,15 +18,36 @@ from howdoi import howdoi as hownow
 class Reference(Dendrite):
 
     safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
+    wolf = wolframalpha.Client(WOLFRAM_API)
 
     def __init__(self, cortex):
         super(Reference, self).__init__(cortex)
 
     @axon
+    @alias('wolfram')
+    @help('SEARCH_TERM <look something up in wolfram alpha>')
+    def w(self):
+        if not self.values:
+            self.chat("Enter a search")
+            return
+        
+        result = self.wolf.query(' '.join(self.values))
+
+        prozac = []
+
+        for pod in result.pods:
+            prozac.append(pod.text)
+
+        prozac.pop(0)
+
+        return prozac
+
+    @axon
     @help("SEARCH_TERM <look something up in google>")
+    @alias('google')
     def g(self):
         if not self.values:
-            self.chat("Enter a word")
+            self.chat("Enter a search")
             return
 
         # If values was a string you don't need the join/etc
