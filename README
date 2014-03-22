@@ -91,6 +91,7 @@ Philosophies
 To Do
 =====
 
+    + Add autostart for server, if components in place
     + Add an @empty('message if values is empty') decorator
     + Probably make this readme better
     + add tweet at in twitting

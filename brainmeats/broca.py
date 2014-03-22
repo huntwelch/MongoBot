@@ -298,6 +298,7 @@ class Broca(Dendrite):
         self.chat(text)
 
     @axon
+    @alias('d')
     @help("WORD <get definition of word>")
     def whatmean(self):
         if not self.values:
