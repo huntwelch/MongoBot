@@ -1,6 +1,4 @@
-from autonomic import axon, alias, help, Dendrite
-
-from synapse import Cerebellum, Receptor
+from autonomic import axon, alias, help, Dendrite, Cerebellum, Receptor
 from pprint import pprint
 
 @Cerebellum

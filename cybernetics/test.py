@@ -1,5 +1,4 @@
-from autonomic import axon, alias, help, Dendrite
-from synapse import Receptor
+from autonomic import axon, alias, help, Dendrite, Receptor
 
 class Tester(Dendrite):
 
