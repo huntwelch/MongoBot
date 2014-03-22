@@ -5,7 +5,7 @@ from pprint import pprint
 class Tester(Dendrite):
 
     def __init__(self, cortex):
-        print "INITIALIZED POOP TESTER"
+
         super(Tester, self).__init__(cortex)
 
     @axon

@@ -1,7 +1,5 @@
 import sys
-import socket
 import cortex
-import ssl
 
 from config import load_config
 from time import sleep, mktime, localtime
@@ -14,39 +12,11 @@ from time import sleep, mktime, localtime
 class Medulla:
     def __init__(self):
 
-        print '* Loading settings'
+        print '* Becoming self-aware'
         self.settings = settings = load_config('config/settings.yaml')
-
-        print '* Loading secrets'
         self.secrets = secrets = load_config('config/secrets.yaml')
 
-        raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        print '* Pinging IRC'
-
-        raw_socket.connect((settings.irc.host, settings.irc.port))
-
-        if hasattr(settings.irc, 'ssl') and settings.irc.ssl:
-            self.sock = ssl.wrap_socket(raw_socket)
-        else:
-            self.sock = raw_socket
-
-        if hasattr(settings.irc, 'password') and settings.irc.password:
-            self.sock.send('PASS %s\n' % settings.irc.password)
-
-        self.sock.send('USER %s %s bla :%s\n' % (settings.bot.ident, settings.bot.ident, settings.bot.realname))
-        self.sock.send('NICK %s\n' % settings.bot.nick)
-
-        if hasattr(settings.irc, 'nickserv') and settings.irc.nickserv:
-            self.sock.send('PRIVMSG %s :identify %s\n' % (settings.irc.nickserv.nick, settings.irc.nickserv.password))
-
-        # Some servers require a pause prior to being able to join a channel
-        sleep(2)
-
-        self.sock.setblocking(0)
-
-
-        self.ENABLED = self.settings.plugins.values()[0]
+        self.ENABLED = self.settings.plugins.values().pop(0)
         self.active = True
         self.brain = cortex.Cortex(self)
 
