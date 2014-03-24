@@ -49,11 +49,14 @@ class Id(object):
         if not self.is_authenticated or not self.prop:
             return False
 
-        if key in self.prop:
-            return self.prop[key]
+        # This can eventually be removed; migrate the data as we go
+        self.migrate(key)
 
         if key in self.prop.data:
             return self.prop.data[key]
+
+        if key in self.prop:
+            return self.prop[key]
 
         return False
 
@@ -70,16 +73,46 @@ class Id(object):
         if not self.is_authenticated or not self.prop:
             return False
 
+        # This can eventually be removed; migrate the data as we go
+        self.migrate(key)
+
+        tainted = False
+
+        if key in self.prop.data:
+            self.prop.data[key] = value
+            tainted = True
+
+        # Even with a migration lets save the changes to the original as well,
+        # no need for an additional check.
         if key in self.prop:
             self.prop[key] = value
-        else:
-            self.prop.data[key] = value
+            tainted = True
 
-        try:
-            self.prop.save()
-        except:
-            return False
+        if tainted:
+            try:
+                self.prop.save()
+            except:
+                return False
 
         return True
 
+    '''
+    Migrate data to new data format as we go
+    '''
+    def migrate(self, key):
 
+        protected = [ 'name', 'password' ]
+
+        if key in protected:
+            # Protected variable that should not get migrated
+            return
+
+        if key in self.prop.data:
+            # Already migrated
+            return
+
+        if key in self.prop:
+            self.prop.data[key] = self.prop[key]
+            self.prop.save()
+
+        return

@@ -88,7 +88,6 @@ class Drinker(mongoengine.Document):
     aliases = ListField(EmbeddedDocumentField(Alias))
     data = DictField()
 
-
 class Words(mongoengine.Document):
     word = StringField(required=True)
     partofspeech = StringField(required=True)
