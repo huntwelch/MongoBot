@@ -47,6 +47,10 @@ class Dendrite(object):
         return self.cx.members
 
     @property
+    def settings(self):
+        return self.cx.settings
+
+    @property
     def ego(self):
         return self.cx.personality
 
@@ -65,7 +69,10 @@ def serotonin(cortex, meatname, electroshock):
             continue
 
         if hasattr(method, 'help'):
-            helps.append('%s%s %s' % (cortex.settings.bot.command_prefix, name, method.help))
+            me = cortex.amnesia()
+            help_text = method.help.replace('%NICK%', me.nick)
+
+            helps.append('%s%s %s' % (cortex.settings.bot.command_prefix, name, help_text))
 
         if hasattr(method, 'public_command'):
             cortex.public_commands.append(name)

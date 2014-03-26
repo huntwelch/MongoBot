@@ -77,7 +77,7 @@ def colorize(text, color):
     if isinstance(color, str):
         color = colors[color]
 
-    return "\x03" + str(color) + ' ' + text + "\x03"
+    return "\x03" + str(color) + text + "\x03\x0f"
 
 
 class Browse(object):
@@ -281,39 +281,6 @@ def postdelicious(url, title, sender):
     #        pass
     pass
 
-# http://stevendkay.wordpress.com/2009/09/08/generating-ascii-art-from-photographs-in-python/
-# Couldn't have done this with the above link,
-# but there are some problems with the script:
-# if you adapt from it, don't use 'str' as a
-# variable name unless you want some troubling
-# error messages when you try to debug by casting
-# exceptions with str(), and im = im.thumbnail
-# modifies the original and returns None, so im
-# is no longer usable.
-def asciiart(image_path):
-    if image_path.find('/') != -1:
-        return
-
-    greyscale = [" "," ",".,-","_ivc=!/|\\~","gjez2]/(YL)t[+T7Vf","mdK4ZGbNDXY5P*Q","W8KMA","#%$"]
-    zonebounds=[36,72,108,144,180,216,252]
-    size = 30
-    out = ""
-
-    img = Image.open(image_path)
-    img.thumbnail((size, size), Image.ANTIALIAS)
-    img = img.resize((size*2, size))
-    img = img.convert("L")
-
-    for y in range(0,img.size[1]):
-        for x in range(0,img.size[0]):
-            lum = 255 - img.getpixel((x,y))
-            row = bisect(zonebounds,lum)
-            possibles = greyscale[row]
-            out += possibles[random.randint(0,len(possibles)-1)]
-        out += "\n"
-
-    return out
-
 
 # TODO?: interface with addlive
 class Butler(object):
@@ -337,10 +304,6 @@ class Butler(object):
         return
 
     def do(self, func, args, note=False):
-
-        print "Args:"
-        pprint(args)
-        print "Note: %s" % note
 
         pid = 'task-%s' % time.time()
         self.semaphore.acquire()

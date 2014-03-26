@@ -4,8 +4,6 @@ import re
 from config import load_config
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Receptor
 
-NICK = None
-
 @Cerebellum
 class Twitting(Dendrite):
 
@@ -16,16 +14,13 @@ class Twitting(Dendrite):
     lasttweet = False
 
     def __init__(self, cortex):
-        global NICK
         super(Twitting, self).__init__(cortex)
-
-        NICK = self.ego.nick
 
         self.auth.set_access_token(self.config.secrets.access_token, self.config.secrets.access_secret)
         self.api = tweepy.API(self.auth)
 
     @axon
-    @help("<show link to %s's twitter feed>" % NICK)
+    @help('<show link to %NICK%\'s twitter feed>')
     def totw(self):
         return self.config.url
 
@@ -49,7 +44,7 @@ class Twitting(Dendrite):
 
 
     @axon
-    @help("MESSAGE <post to %s's twitter feed>" % NICK)
+    @help('MESSAGE <post to %NICK%\'s twitter feed>')
     def tweet(self, _message=False):
         if not self.values and not _message:
             self.chat('Tweet what?')
@@ -70,7 +65,7 @@ class Twitting(Dendrite):
 
 
     @axon
-    @help("ID <retrieve the tweet with ID>")
+    @help('ID <retrieve the tweet with ID>')
     def get_tweet(self, id=False):
         if not id:
             id = '+'.join(self.values)

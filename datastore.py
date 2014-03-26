@@ -65,16 +65,17 @@ class Entity(mongoengine.Document):
     value = IntField(default=0)
 
 
-class Position(mongoengine.EmbeddedDocument):
+class Alias(mongoengine.EmbeddedDocument):
+    name = StringField(required=True)
+    definition = StringField(required=True)
+
+class Position(EmbeddedDocument):
+
     symbol = StringField(required=True)
     date = DateTimeField(required=True)
     price = FloatField(min_value=0)
     quantity = IntField(min_value=0)
     type = StringField()
-
-class Alias(mongoengine.EmbeddedDocument):
-    name = StringField(required=True)
-    definition = StringField(required=True)
 
 class Drinker(mongoengine.Document):
     name = StringField(required=True)

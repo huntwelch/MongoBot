@@ -129,6 +129,7 @@ class Cortex:
             except Exception as e:
                 self.chat('Failed to load %s.' % area, error=str(e))
                 self.broken.append(area)
+                self.master.ENABLED.remove(area)
                 print '[\033[0;31mFAILED\033[0m]'
                 if self.settings.debug.verbose:
                     print e
@@ -137,6 +138,16 @@ class Cortex:
 
         for brainmeat in self.brainmeats:
             serotonin(self, brainmeat, electroshock)
+
+    '''
+    When you get amnesia, it's probably a good time to really
+    think and try to remember who you are.
+    '''
+    def amnesia(self):
+
+        # This is an easy way out for now...
+        return self.personality
+
 
     # I'll be frank, I don't have that great a grasp on
     # threading, and despite working with people who do,
@@ -205,6 +216,8 @@ class Cortex:
     # most of its actions got moved to the nonsense and
     # broca brainmeats.
     def parse(self, msg):
+
+        print "!!! In cortex.parse(%s)" % msg
 
         pwd = re.search(':-passwd', msg)
         if not pwd:
@@ -311,6 +324,10 @@ class Cortex:
     # accessible by the brainmeats as self.values.
     multis = 0
     def command(self, sender, cmd, piped=False):
+
+        print "!!! In cortex.command(%s, %s, %s)" % (sender, cmd, piped)
+        print '] self.context = %s' % self.context
+
         if self.context in self.channels \
         and 'command' not in self.channels[self.context]:
             return
@@ -345,6 +362,8 @@ class Cortex:
         self.logit('%s sent command: %s\n' % (sender, what))
         self.lastsender = sender
         self.lastcommand = what
+
+        result = None
 
         # So you'll notice that some commands return
         # values that this function sorts out into chats,
@@ -411,6 +430,7 @@ class Cortex:
                 # proper logging here
 
                 self.chat(str(e))
+                print traceback.format_exc()
 
         if not result:
             return
@@ -437,6 +457,9 @@ class Cortex:
 
     # If you want to restrict a command to the bot admin.
     def validate(self):
+
+        print "!!! In cortex.validate"
+
         if not self.values:
             return False
         if self.lastsender != OWNER:

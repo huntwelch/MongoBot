@@ -47,10 +47,16 @@ class System(Dendrite):
         if not self.values or self.values[0] not in self.libs:
             cats = sorted(self.libs)
 
-            cats = [colorize(lib, 'lightgrey') if lib not in enabled else lib for lib in self.libs]
+            print 'Cats: %s' % cats
+            print 'Enabled: %s' % enabled
+            print 'Broken: %s' % broken
+
+
+            cats = [colorize(lib, 'green') if lib in enabled else lib for lib in self.libs]
             cats = [colorize(lib, 'red') if lib in broken else lib for lib in cats]
 
             cats = ', '.join(cats)
+            print cats
             self.chat('%shelp WHAT where WHAT is one of the following: %s' % (self.cx.settings.bot.command_prefix, cats))
             return
 
@@ -105,7 +111,7 @@ class System(Dendrite):
 
         self.chat("You in, bro.")
 
-    # Rewite a setting in the settings file. Available settings
+    # Rewrite a setting in the settings file. Available settings
     # are defined in SAFESET. Do not put SAFESET in the SAFESET.
     # That's just crazy.
     @axon
@@ -148,7 +154,7 @@ class System(Dendrite):
     # Reloads the bot. Any changes make to cortex or brainmeats
     # and most settings will be reflected after a reload.
     @axon
-    @help('<reload %s>' % NICK)
+    @help('<reload %NICK%>')
     def reload(self):
         meats = self.cx.brainmeats
         if 'webserver' in meats:

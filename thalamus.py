@@ -259,6 +259,9 @@ class Thalamus(object):
         command = match.group(1)
         arguments = match.group(2)
 
+        print "*** target: %s; user: %s" % (target, user.nick)
+
+
         # Only listen to authenticated users
         if not user.is_authenticated:
             self.send('PRIVMSG %s :My daddy says not to listen to you.' % target)
@@ -275,11 +278,8 @@ class Thalamus(object):
         else:
             self.cx.values = False
 
-        self.cx.butler.do(self.cx.command, (user.nick, args[-1]))
+        self.cx.context = target
+        self.cx.butler.do(self.cx.command, (source, args[-1]))
 
-        #self.cx.commands.get(command, self.cx.default)()
+        return (source, args)
 
-        #self.send('PRIVMSG %s :Trippy! I found the "%s" command, but couldn\'t do that shit.' % (target, command))
-        #print "COMMAND FOUND??? WHOA"
-
-        pass
