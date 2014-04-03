@@ -2,6 +2,7 @@ import textwrap
 import socket
 import re
 import wolframalpha
+import pythonwhois
 
 from autonomic import axon, alias, help, Dendrite
 from bs4 import BeautifulSoup as bs4
@@ -221,7 +222,35 @@ class Reference(Dendrite):
     @axon
     @help('URL <get whois information>')
     def whois(self):
-        return "The Doctor"
+        if not self.values:
+            return "The Doctor"
+            
+        url = self.values[0] 
+        results = pythonwhois.get_whois(url)
+
+        print results
+
+        try:
+            r = results['contacts']['registrant']
+            expires = results['expiration_date'].pop(0).strftime('%m/%d/%Y') 
+            order = [
+                'name',
+                'street',
+                'city',
+                'state',
+                'postalcode',
+                'country',
+                'phone',
+                'email',
+            ]
+            output = []
+            for entry in order:
+                output.append(r[entry])
+
+            reformat = ', '.join(output)
+            return '%s: Registered by %s. Expires %s' % (url, reformat, expires)
+        except:
+            return 'No results, or parsing failure.'
 
     @axon
     @help('QUERY <get a howdoi answer>')
