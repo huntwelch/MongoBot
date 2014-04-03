@@ -1,0 +1,15 @@
+acro:
+  lib: 'natwords'
+  minlen: 5
+  maxlen: 7
+  rounds: 5
+  roundtime: 120
+  warning: 30
+  votetime: 30
+  minplayers: 3
+  timefactor: 2
+  noacropenalty: 2
+  novotepenalty: 5
+  break: 15
+  botplay: True
+

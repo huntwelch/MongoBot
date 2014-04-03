@@ -1,0 +1,9 @@
+plugins:
+  - alien
+  - chess
+  - finance
+  - stockgame
+  - system
+  - twitting
+  - tester
+  - webserver

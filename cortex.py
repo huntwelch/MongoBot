@@ -1,26 +1,33 @@
-import os
 import re
 import shutil
 import pkgutil
 import socket
-import time
 import string
-import threading
-import logging
-import traceback
 
+
+from os import path
 from datetime import date, timedelta, datetime
 from pytz import timezone
-from time import mktime, localtime, sleep
+from time import time, mktime, localtime, sleep
 from random import randint
+from config import load_config
 
-from settings import SAFE, NICK, CONTROL_KEY, LOG, LOGDIR, PATIENCE, SCAN, STORE_URLS, \
-    STORE_IMGS, IMGS, REGISTERED, TIMEZONE, MULTI_PASS, HAS_CHANSERV, THUMBS, WEBSITE
-from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY, CHANNELS
+#from settings import PATIENCE, SCAN, STORE_URLS, \
+#    STORE_IMGS, IMGS, MULTI_PASS, HAS_CHANSERV, THUMBS, WEBSITE
+#from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY, CHANNELS
+
+
 from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
     Browse, Butler
-from autonomic import serotonin
+from autonomic import serotonin, Neurons, Synapse
+from thalamus import Thalamus
+
+import traceback
+
+
+CHANNEL = '#okdrink'
+MULTI_PASS = '*'
 
 # TODO:
 # remove names check, use other means
@@ -64,33 +71,35 @@ class Cortex:
     boredom = int(mktime(localtime()))
     namecheck = int(mktime(localtime()))
 
+    thalamus = False
+
+
     def __init__(self, master):
 
         print '* Initializing'
         self.master = master
-        self.sock = master.sock
-        self.channels = CHANNELS
+        self.settings = master.settings
+        self.secrets = master.secrets
+        self.channels = self.secrets.channels
+        self.personality = self.settings.bot
 
+        print '* Exciting neurons'
+        Neurons.cortex = self
 
         print '* Loading brainmeats'
         self.loadbrains()
-
-        print '* Joining channels'
-        for channel in self.channels:
-            self.brainmeats['channeling'].join(channel)
-            self.brainmeats['channeling'].modchan(channel, self.channels[channel])
-
 
         print '* Waking butler'
         self.butler = Butler(self)
 
         print '* Loading users'
-        users = open(REGISTERED, 'r')
-        self.REALUSERS = users.read().splitlines()
-        users.close()
+        self.REALUSERS = load_config(self.settings.directory.authfile)
 
         print '* Connecting to datastore'
         connectdb()
+
+        print '* Evolving thalamus'
+        self.thalamus = Thalamus(self)
 
     # Loads up all the files in brainmeats and runs them
     # through the hookup process.
@@ -103,10 +112,12 @@ class Cortex:
         areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
 
         for area in areas:
+            print '{0: <25}'.format('  - %s' % area),
+
             if area not in self.master.ENABLED:
+                print '[\033[93mDISABLED\033[0m]'
                 continue
 
-            print area
             try:
                 mod = __import__('brainmeats', fromlist=[area])
                 mod = getattr(mod, area)
@@ -114,14 +125,29 @@ class Cortex:
                     reload(mod)
                 cls = getattr(mod, area.capitalize())
                 self.brainmeats[area] = cls(self)
+                print '[\033[0;32mOK\033[0m]'
             except Exception as e:
                 self.chat('Failed to load %s.' % area, error=str(e))
                 self.broken.append(area)
-                print 'Failed to load %s.' % area
-                print e
+                self.master.ENABLED.remove(area)
+                print '[\033[0;31mFAILED\033[0m]'
+                if self.settings.debug.verbose:
+                    print e
+                    print traceback.format_exc()
+
 
         for brainmeat in self.brainmeats:
             serotonin(self, brainmeat, electroshock)
+
+    '''
+    When you get amnesia, it's probably a good time to really
+    think and try to remember who you are.
+    '''
+    def amnesia(self):
+
+        # This is an easy way out for now...
+        return self.personality
+
 
     # I'll be frank, I don't have that great a grasp on
     # threading, and despite working with people who do,
@@ -150,18 +176,14 @@ class Cortex:
 
         # This should really just be an addlive. Maybe
         # the other two functions, too.
-        calendar = datetime.now(timezone(TIMEZONE))
-        if calendar.hour in MEETUP_NOTIFY and 'peeps' in self.brainmeats:
-            self.brainmeats['peeps'].meetup(calendar.hour)
+#        calendar = datetime.now(timezone(self.settings.general.timezone))
+#        if calendar.hour in MEETUP_NOTIFY and 'peeps' in self.brainmeats:
+#            self.brainmeats['peeps'].meetup(calendar.hour)
 
-        if currenttime - self.namecheck > 60:
-            self.namecheck = int(mktime(localtime()))
-            self.getnames()
-
-        if currenttime - self.boredom > PATIENCE:
-            self.boredom = int(mktime(localtime()))
-            if randint(1, 10) == 7:
-                self.bored()
+#        if currenttime - self.boredom > PATIENCE:
+#            self.boredom = int(mktime(localtime()))
+#            if randint(1, 10) == 7:
+#                self.bored()
 
         for func in self.live:
             self.live[func]()
@@ -172,65 +194,31 @@ class Cortex:
     # info, logs the chat, sends PONG, finds commands, and
     # decides whether to send new information to the parser.
     def monitor(self):
+
         currenttime = int(mktime(localtime()))
         self.parietal(currenttime)
 
-        if HAS_CHANSERV and self.joined and not self.operator:
-            self.sock.send('PRIVMSG ChanServ :op %s %s\n' % (CHANNEL, NICK))
-            self.operator = True
+        self.thalamus.process()
 
-        self.sock.setblocking(0)
-        try:
-            lines = self.sock.recv(256)
-        except:
-            return
+# Synapse this shit so chanserv/nickserv happens on connect
+#        if HAS_CHANSERV and self.joined and not self.operator:
+#            self.sock.send('PRIVMSG ChanServ :op %s %s\n' % (CHANNEL, self.personality.nick))
+#            self.operator = True
 
-        for line in lines.split('\n'):
-            line = line.strip()
+#                self.logit(line + '\n')
 
-            if re.search('^:%s!~?%s@.+ JOIN %s$' % (NICK, REALNAME, CHANNEL), line):
-                print "* Joined " + CHANNEL
-                self.joined = True
-                self.getnames()
+#            elif line.find('PRIVMSG') != -1:
+#                self.boredom = currenttime
+#                content = line.split(' ', 3)
 
-            if self.gettingnames and line.find('@ ' + CHANNEL) != -1:
-                try:
-                    members = line.split(':')[2]
-                    self.gettingnames = False
-                    members = re.sub(NICK + ' ', '', members)
-                    self.members += list(set(members.split()) - set(self.members))
-                except:
-                    pass
-
-            scan = re.search(SCAN, line)
-            ping = re.search('^PING', line)
-            pwd = re.search(':-passwd', line)
-            if line != '' and not scan and not ping and not pwd:
-                self.logit(line + '\n')
-
-            if line.find('PING') != -1:
-                self.sock.send('PONG ' + line.split()[1] + '\n')
-            elif line.find('PRIVMSG') != -1:
-                self.boredom = currenttime
-                content = line.split(' ', 3)
-
-                try:
-                    self.context = content[2]
-                except Exception as e:
-                    print 'No context, defaulting'
-                    self.context = CHANNEL
-
-                if self.context == NICK:
-                    self.lastprivate = content
-                else:
-                    self.lastpublic = content
-
-                self.parse(line)
 
     # Le parser. This used to be a very busy function before
     # most of its actions got moved to the nonsense and
     # broca brainmeats.
     def parse(self, msg):
+
+        print "!!! In cortex.parse(%s)" % msg
+
         pwd = re.search(':-passwd', msg)
         if not pwd:
             print msg
@@ -251,7 +239,8 @@ class Cortex:
 
         # SPY
         if room in self.channels \
-        and 'spy' in self.channels[room]:
+        and 'spy' in self.channels[room] \
+        and self.channels[room].spy:
             self.context = CHANNEL
             report = '%s %s: %s' % (room, nick, content)
             self.announce(report)
@@ -272,17 +261,17 @@ class Cortex:
         self.lastchat = content
 
 
-
         # Determine if the action is a command and the user is
         # approved.
-        if content[:1] == CONTROL_KEY or content[:1] == MULTI_PASS:
+        if content[:1] == self.personality.command_prefix or content[:1] == MULTI_PASS:
 
             # Tack on last command if it's just the control
-            if content == CONTROL_KEY or content[:2] == CONTROL_KEY + ' ':
+            if content == self.personality.command_prefix or content[:2] == self.personality.command_prefix + ' ':
                 if not self.lastcommand:
                     return
 
-                content = '%s%s %s' % (CONTROL_KEY, self.lastcommand, content[2:])
+                content = '%s%s %s' % (self.personality.command_prefix, self.lastcommand, content[2:])
+
 
             if self.lastrealsender not in self.REALUSERS \
             and content[1:].split()[0] not in self.public_commands \
@@ -292,7 +281,7 @@ class Cortex:
 
             # A hack to maintain reboot until I figure
             # our something better.
-            if content.find('%sreboot' % CONTROL_KEY) == 0:
+            if content.find('%sreboot' % self.personality.command_prefix) == 0:
                 self.command(nick, content)
                 return
 
@@ -326,14 +315,19 @@ class Cortex:
         if 'broca' in self.brainmeats:
             self.brainmeats['broca'].tourettes(content, nick)
             self.brainmeats['broca'].mark(content)
-            if self.autobabble and content.find(NICK) > 0:
+            if self.autobabble and content.find(self.personality.nick) > 0:
                 self.brainmeats['broca'].babble()
+
 
     # If it is indeed a command, the cortex stores who sent it,
     # and any words after the command are split in a values array,
     # accessible by the brainmeats as self.values.
     multis = 0
     def command(self, sender, cmd, piped=False):
+
+        print "!!! In cortex.command(%s, %s, %s)" % (sender, cmd, piped)
+        print '] self.context = %s' % self.context
+
         if self.context in self.channels \
         and 'command' not in self.channels[self.context]:
             return
@@ -356,7 +350,7 @@ class Cortex:
         means = _what[:1]
 
         is_nums = re.search("^[0-9]+", what)
-        is_breaky = re.search("^" + CONTROL_KEY + "|[^\w]+", what)
+        is_breaky = re.search("^" + self.personality.command_prefix + "|[^\w]+", what)
         if is_nums or is_breaky or not what:
             return
 
@@ -368,6 +362,8 @@ class Cortex:
         self.logit('%s sent command: %s\n' % (sender, what))
         self.lastsender = sender
         self.lastcommand = what
+
+        result = None
 
         # So you'll notice that some commands return
         # values that this function sorts out into chats,
@@ -434,6 +430,7 @@ class Cortex:
                 # proper logging here
 
                 self.chat(str(e))
+                print traceback.format_exc()
 
         if not result:
             return
@@ -460,16 +457,15 @@ class Cortex:
 
     # If you want to restrict a command to the bot admin.
     def validate(self):
+
+        print "!!! In cortex.validate"
+
         if not self.values:
             return False
         if self.lastsender != OWNER:
             return False
         return True
 
-    # See who's about.
-    def getnames(self):
-        self.gettingnames = True
-        self.sock.send('NAMES %s\n' % CHANNEL)
 
     # Careful with this one.
     def bored(self):
@@ -485,22 +481,27 @@ class Cortex:
     # Simple logging.
     # TODO: chenge to normal python logging
     def logit(self, what):
-        with open(LOG, 'a') as f:
-            f.write('TS:%s;%s' % (time.time(), what))
+        with open(self.settings.directory.log, 'a') as f:
+            f.write('TS:%s;%s' % (time(), what))
 
         now = date.today()
         if now.day != 1:
             return
 
         prev = date.today() - timedelta(days=1)
-        backlog = '%s/%s-mongo.log' % (LOGDIR, prev.strftime('%Y%m'))
-        if os.path.isfile(backlog):
+        backlog = '%s/%s-mongo.log' % (self.settings.directory.log, prev.strftime('%Y%m'))
+
+        if path.isfile(backlog):
             return
 
-        shutil.move(LOG, backlog)
+        shutil.move(self.settings.directory.log, backlog)
 
     # Sort out urls.
+    @Synapse('url')
     def linker(self, urls):
+
+        return urls
+
         for url in urls:
             # Special behaviour for Twitter URLs
             match_twitter_urls = re.compile('http[s]?://(www.)?twitter.com/.+/status/([0-9]+)')
@@ -590,9 +591,10 @@ class Cortex:
     # NOTE: 'and not target' may be a sketchy override; test it
     @ratelimited(2)
     def chat(self, message, target=False, error=False):
+
         if self.context in self.channels \
         and not target \
-        and 'speak' not in self.channels[self.context]:
+        and not self.channels[self.context].speak:
             return
 
         if self.bequiet:
@@ -611,7 +613,7 @@ class Cortex:
         filter(lambda x: x in string.printable, message)
         try:
             message = message.encode('utf-8')
-            self.logit('___%s: %s\n' % (NICK, str(message)))
+            self.logit('___%s: %s\n' % (self.personality.nick, str(message)))
             m = str(message)
             if randint(1, 170) == 23:
                 i = m.split()
@@ -621,7 +623,7 @@ class Cortex:
 
             if error:
                 m += ' ' + str(error)
-            self.sock.send('PRIVMSG %s :%s\n' % (whom,m))
+            self.thalamus.send('PRIVMSG %s :%s' % (whom,m))
             if self.replysms:
                 to = self.replysms
                 self.replysms = False
@@ -629,9 +631,10 @@ class Cortex:
                 self.commands.get('sms')()
         except:
             try:
-                self.sock.send('PRIVMSG %s :Having trouble saying that for some reason\n' % whom)
+                self.thalamus.send('PRIVMSG %s :Having trouble saying that for some reason' % whom)
             except:
-                print "Unable to say: %s" % message
+                pass
+                 #print "Unable to say: %s" % message
 
     def act(self, message, public=False, target=False):
         message = '\001ACTION %s\001' % message
