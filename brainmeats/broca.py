@@ -567,6 +567,19 @@ class Broca(Dendrite):
 
         return "Etymology %s of %s for %s: %s" % (str(ord + 1), str(len(defs)), _word, _def)
 
+    @axon
+    def isitfriday(self):
+        today = time.localtime().tm_wday
+        if today == 4:
+            self.chat('Fuck YEAH it is!')
+            return
+
+        if today < 4:
+            self.chat('No. Fuck. %s more day%s.' % ((4 - today),('s' if today != 3 else '')))
+            return
+
+        self.chat('Get entirely the fuck out of here with that weekday shit')
+        return
 
     # TODO: broken, not sure why
     @axon
