@@ -8,7 +8,7 @@ from autonomic import axon, alias, help, Dendrite
 from bs4 import BeautifulSoup as bs4
 from settings import REPO, NICK, SAFE
 from secrets import WEATHER_API, WOLFRAM_API
-from util import unescape, pageopen
+from util import unescape, pageopen, Browse
 from howdoi import howdoi as hownow
 
 
@@ -289,3 +289,33 @@ class Reference(Dendrite):
             return
 
         return m.group(1)
+
+    @axon
+    @alias('d', 'roll')
+    def random(self):
+        default = [0, 9999, 1, 1]
+
+        if self.values and self.values[0][:1] == 'd':
+            default[0] = 1
+            default[1] = self.values[0][1:]
+            send = default
+        elif self.values:
+            splice = len(self.values)
+            send = self.values + default[splice:]
+        else:
+            send = default
+
+        low, high, sets, nums = send
+            
+        base = 'http://qrng.anu.edu.au/form_handler.php?repeats=no&'            
+        params = "min_num=%s&max_num=%s&numofsets=%s&num_per_set=%s" % (low, high, sets, nums)
+
+        url = base + params
+
+        # Needs to be vastly improved for other sets
+        site = Browse(url)
+        result = site.read().split(':')[2].strip()[:-6]
+
+        return result
+
+

@@ -2,6 +2,7 @@ import datetime
 import dateutil.parser
 import re
 import hashlib
+import random
 
 from autonomic import axon, help, Dendrite, alias
 from settings import STORAGE, CHANNEL, NICK
@@ -68,8 +69,10 @@ class Peeps(Dendrite):
             self.chat("you need to give someone your love")
             return
         entity = " ".join(self.values)
+        if entity == 'jcb': 
+            return
 
-        if not incrementEntity(entity, 1):
+        if not incrementEntity(entity, random.randint(1, 100000)):
             self.chat("mongodb seems borked")
             return
         return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
@@ -81,8 +84,10 @@ class Peeps(Dendrite):
             self.chat("you need to give someone your hate")
             return
         entity = " ".join(self.values)
+        if entity == 'jcb':
+            return
 
-        if not incrementEntity(entity, -1):
+        if not incrementEntity(entity, random.randint(1, 100000) * -1):
             self.chat("mongodb seems borked")
             return
         return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
