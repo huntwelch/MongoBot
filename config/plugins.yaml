@@ -1,5 +1,9 @@
 plugins:
-  - channeling
+  - alien
+  - chess
+  - finance
+  - stockgame
+  - system
   - twitting
   - tester
   - webserver

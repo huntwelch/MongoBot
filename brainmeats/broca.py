@@ -36,7 +36,7 @@ class Broca(Dendrite):
         super(Broca, self).__init__(cortex)
 
     @axon
-    @help('TITLE <have %s compose poetry>' % NICK)
+    @help('TITLE <have %NICK% compose poetry>')
     def compose(self):
         if not self.startpoem():
             return 'Already wrote that'
@@ -135,7 +135,7 @@ class Broca(Dendrite):
                 self.markov.set(prefix, follow)
 
     @axon
-    @help("URL_OF_TEXT_FILE <Make " + NICK + " read something>")
+    @help('URL_OF_TEXT_FILE <Make %NICK% read something>')
     def read(self):
         if not self.values:
             self.chat("Read what?")
@@ -202,7 +202,7 @@ class Broca(Dendrite):
     # their opinions on the nature and value of intelligence.
     @axon
     @alias('waxrhapsodic')
-    @help('<Make %s speak markov chain>' % NICK)
+    @help('<Make %NICK% speak markov chain>')
     def babble(self, what=False):
 
         what = what or self.values
@@ -281,7 +281,7 @@ class Broca(Dendrite):
     #     self.chat("Okay, read all the things.")
 
     @axon
-    @help("<command " + NICK + " to speak>")
+    @help('<command %NICK% to speak>')
     def speak2(self):
         if not self.knowledge:
             self.chat("Can't speak good yet. Must read.")
@@ -298,7 +298,8 @@ class Broca(Dendrite):
         self.chat(text)
 
     @axon
-    @help("WORD <get definition of word>")
+    @alias('d')
+    @help('WORD <get definition of word>')
     def whatmean(self):
         if not self.values:
             self.chat("Ooohhhmmmmm")
@@ -457,7 +458,7 @@ class Broca(Dendrite):
             return
 
     @axon
-    @help("<command %s to speak>" % NICK)
+    @help('<command %NICK% to speak>')
     def speak(self):
         sentence = []
         struct = choice(Structure.objects())
@@ -468,7 +469,7 @@ class Broca(Dendrite):
         self.chat(" ".join(sentence))
 
     @axon
-    @help("WORD <teach %s a word>" % NICK)
+    @help('WORD <teach %NICK% a word>')
     def learn(self):
         if not self.values:
             self.chat(NICK + " ponders the emptiness of meaning.")
@@ -482,7 +483,7 @@ class Broca(Dendrite):
         self.chat(NICK + " learn new word!", self.lastsender)
 
     @axon
-    @help("ACRONYM <have %s decide the words for an acronym>" % NICK)
+    @help('ACRONYM <have %NICK% decide the words for an acronym>')
     def acronym(self):
         if not self.values:
             self.chat("About what?")
@@ -522,7 +523,7 @@ class Broca(Dendrite):
         return " ".join(output)
 
     @axon
-    @help("WORD [WHICH_DEFINITION] <look up etymology of word>")
+    @help('WORD [WHICH_DEFINITION] <look up etymology of word>')
     def ety(self):
         if not self.values:
             self.chat("Enter a word")
@@ -569,7 +570,7 @@ class Broca(Dendrite):
 
     # TODO: broken, not sure why
     @axon
-    @help("WORD_OR_PHRASE <look up anagram>")
+    @help('WORD_OR_PHRASE <look up anagram>')
     def anagram(self):
         if not self.values:
             self.chat("Enter a word or phrase")

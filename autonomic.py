@@ -1,4 +1,5 @@
 import inspect
+from pprint import pprint
 
 # The core of the library methodology used
 # by MongoBot. All brainmeats are Dendrites,
@@ -46,6 +47,10 @@ class Dendrite(object):
         return self.cx.members
 
     @property
+    def settings(self):
+        return self.cx.settings
+
+    @property
     def ego(self):
         return self.cx.personality
 
@@ -64,7 +69,10 @@ def serotonin(cortex, meatname, electroshock):
             continue
 
         if hasattr(method, 'help'):
-            helps.append('%s%s %s' % (cortex.settings.bot.command_prefix, name, method.help))
+            me = cortex.amnesia()
+            help_text = method.help.replace('%NICK%', me.nick)
+
+            helps.append('%s%s %s' % (cortex.settings.bot.command_prefix, name, help_text))
 
         if hasattr(method, 'public_command'):
             cortex.public_commands.append(name)
@@ -90,7 +98,7 @@ Neurons hold some vesicles. Vesicles are cool.
 class Neurons(object):
 
     cortex = None
-    vesicles = dict()
+    vesicles = {}
 
 
 '''
@@ -105,7 +113,9 @@ def Cerebellum(object):
     for name, method in object.__dict__.iteritems():
         if hasattr(method, 'is_receptor'):
 
-            Neurons.vesicles.update({ method.name: [ object.__name__.lower(), method.neuron ]})
+            receptors = Neurons.vesicles.get(method.name, [])
+            receptors.append([ object.__name__.lower(), method.neuron ])
+            Neurons.vesicles.update({ method.name: receptors })
 
     return object
 
@@ -132,9 +142,10 @@ class Synapse(Neurons):
 
             neurotransmission = neuron(*args, **kwargs)
 
-            vesicle, cell = self.vesicles.get(self.neuron, [])
-            if vesicle and vesicle in self.cortex.brainmeats:
-                cell(self.cortex.brainmeats[vesicle], *(neurotransmission or []))
+            vesicles = self.vesicles.get(self.neuron, [])
+#            vesicle, cell = self.vesicles.get(self.neuron, [])
+#            if vesicle and vesicle in self.cortex.brainmeats:
+#                cell(self.cortex.brainmeats[vesicle], *(neurotransmission or []))
 
             return neurotransmission
 

@@ -12,7 +12,7 @@ from settings import INSULTS, INSULT, STORAGE, TIME_FACTOR, \
 # This is probably the first official brainmeat, as we
 # realized it was just to big to stuff into the cortex.
 # It's also some of the oldest and least attended code,
-# even after it was rewritten in the Great Brainmat 
+# even after it was rewritten in the Great Brainmat
 # Transition. There's at least one bug, but I haven't gotten
 # to it, as it's not a deal breaker, it's just exploitable.
 class Acro(Dendrite):

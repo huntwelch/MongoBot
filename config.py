@@ -7,6 +7,8 @@ from collections import OrderedDict, Sequence, Mapping
 
 class Config(yaml.Loader):
 
+    eidetic = dict()
+
     def __init__(self, stream):
 
         self._root = path.split(stream.name)[0]
@@ -37,8 +39,12 @@ class Config(yaml.Loader):
 
     def load(self, path):
 
-        with open(path, 'r') as filename:
-            return yaml.load(filename, Config)
+        if path not in self.eidetic:
+            with open(path, 'r') as filestream:
+                print "==== Loading config file: %s" % path
+                self.eidetic.update({ path: yaml.load(filestream, Config) })
+
+        return self.eidetic.get(path, dict())
 
 
 class YamlDict(OrderedDict):

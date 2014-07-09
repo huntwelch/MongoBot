@@ -4,14 +4,19 @@ import pkgutil
 import threading
 
 from autonomic import axon, help, Dendrite, public, alias
-from settings import SAFESET, NICK, HOST, REGISTERED, CONTROL_KEY
+#from settings import SAFESET, NICK, REGISTERED, CONTROL_KEY
 from secrets import *
 from util import colorize
 from time import sleep
 
 
+# TODO Remove this crap
+SAFESET = []
+NICK = 'REMOVE THIS'
+
+
 # System is stuff relating to the function of the
-# the bot and the server. There's some potentially 
+# the bot and the server. There's some potentially
 # dangerous shit in here.
 class System(Dendrite):
 
@@ -42,11 +47,17 @@ class System(Dendrite):
         if not self.values or self.values[0] not in self.libs:
             cats = sorted(self.libs)
 
-            cats = [colorize(lib, 'lightgrey') if lib not in enabled else lib for lib in self.libs]
+            print 'Cats: %s' % cats
+            print 'Enabled: %s' % enabled
+            print 'Broken: %s' % broken
+
+
+            cats = [colorize(lib, 'green') if lib in enabled else lib for lib in self.libs]
             cats = [colorize(lib, 'red') if lib in broken else lib for lib in cats]
 
             cats = ', '.join(cats)
-            self.chat('%shelp WHAT where WHAT is one of the following: %s' % (CONTROL_KEY, cats))
+            print cats
+            self.chat('%shelp WHAT where WHAT is one of the following: %s' % (self.cx.settings.bot.command_prefix, cats))
             return
 
         which = self.values[0]
@@ -72,7 +83,7 @@ class System(Dendrite):
             self.chat(name + " : " + str(value))
 
     # This should be pretty straightforward. Based on BOT_PASS
-    # in secrets; nobody can use the bot until they're 
+    # in secrets; nobody can use the bot until they're
     # registered. Went with flat file for ease of editing
     # and manipulation.
     @axon
@@ -82,7 +93,7 @@ class System(Dendrite):
         if not self.values:
             self.chat("Please enter a password.")
             return
-        
+
         if self.values[0] != BOT_PASS:
             self.chat("Not the password.")
             return
@@ -91,20 +102,20 @@ class System(Dendrite):
         if real and real in self.cx.REALUSERS:
             self.chat("Already know you, bro.")
             return
-        
+
         self.cx.REALUSERS.append(real)
 
-        users = open(REGISTERED, 'a')
-        users.write(real + "\n")
-        users.close()
+#        users = open(REGISTERED, 'a')
+#        users.write(real + "\n")
+#        users.close()
 
         self.chat("You in, bro.")
 
-    # Rewite a setting in the settings file. Available settings
+    # Rewrite a setting in the settings file. Available settings
     # are defined in SAFESET. Do not put SAFESET in the SAFESET.
     # That's just crazy.
     @axon
-    @help("SETTING=VALUE <update a " + NICK + " setting>")
+    @help("SETTING=VALUE <update a bot setting>")
     def update(self, vals=False):
         if not vals:
             vals = self.values
@@ -143,15 +154,15 @@ class System(Dendrite):
     # Reloads the bot. Any changes make to cortex or brainmeats
     # and most settings will be reflected after a reload.
     @axon
-    @help('<reload %s>' % NICK)
+    @help('<reload %NICK%>')
     def reload(self):
         meats = self.cx.brainmeats
         if 'webserver' in meats:
             meats['webserver'].reloadserver(True)
         self.cx.master.reload()
 
-    # Actually kills the medulla process and waits for the 
-    # doctor to restart. Some settings and any changes to 
+    # Actually kills the medulla process and waits for the
+    # doctor to restart. Some settings and any changes to
     # medulla.py won't take effect until a reboot.
     @axon
     @alias('seppuku', 'harakiri')
@@ -189,7 +200,7 @@ class System(Dendrite):
         broken = []
         for lib in values:
             if lib in self.cx.master.ENABLED:
-                already.append(lib) 
+                already.append(lib)
             elif lib not in self.libs:
                 nonextant.append(lib)
             elif lib in self.cx.broken:
@@ -201,16 +212,16 @@ class System(Dendrite):
         messages = []
         if len(already):
             messages.append('%s already enabled.' % ', '.join(already))
-            
+
         if len(nonextant):
             messages.append('%s nonexistent.' % ', '.join(nonextant))
-            
+
         if len(broken):
             messages.append('%s done borked.' % ', '.join(broken))
-            
+
         if len(enabled):
             messages.append('Enabled %s.' % ', '.join(enabled))
-            
+
         self.cx.master.reload(True)
 
         self.chat(' '.join(messages))
@@ -235,7 +246,7 @@ class System(Dendrite):
             if lib not in self.libs:
                 nonextant.append(lib)
             elif lib not in self.cx.master.ENABLED:
-                already.append(lib) 
+                already.append(lib)
             else:
                 disabled.append(lib)
                 self.cx.master.ENABLED.remove(lib)
@@ -243,13 +254,13 @@ class System(Dendrite):
         messages = []
         if len(already):
             messages.append('%s already disabled.' % ', '.join(already))
-            
+
         if len(nonextant):
             messages.append("%s don't exist." % ', '.join(nonextant))
-            
+
         if len(disabled):
             messages.append("Disabled %s." % ', '.join(disabled))
-            
+
         self.cx.master.reload(True)
 
         self.chat(' '.join(messages))

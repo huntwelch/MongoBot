@@ -10,7 +10,7 @@ from datastore import Drinker
 from xml.dom import minidom as dom
 
 
-# Every drunk conversation that produces the idea for 
+# Every drunk conversation that produces the idea for
 # a command that just seems funny at the time ends up
 # here.
 class Nonsense(Dendrite):
@@ -226,7 +226,7 @@ class Nonsense(Dendrite):
     def annoy(self):
         if not self.values:
             return 'Annoy whom?'
-            
+
         self.anoid.append(self.values[0])
         self.cx.addlive(self.repeater)
         return 'You betcha'
