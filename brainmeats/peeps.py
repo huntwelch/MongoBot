@@ -4,10 +4,10 @@ import re
 import hashlib
 
 from autonomic import axon, help, Dendrite, alias
-from settings import STORAGE, CHANNEL, NICK
-from secrets import MEETUP_LOCATION, MEETUP_NOTIFY, MEETUP_DAY
+#from settings import STORAGE, CHANNEL, NICK
+#from secrets import MEETUP_LOCATION, MEETUP_NOTIFY, MEETUP_DAY
 from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore, topScores
-
+from id import Id
 
 # This loosely encapsulates things having to do with
 # people in the room. Obviously some overlap with
@@ -15,64 +15,60 @@ from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScor
 #
 # Basically everything here depends on mongodb, and
 # many other functions of other libraries refer to peeps
-# stuff. If you install no other external stuff, I 
+# stuff. If you install no other external stuff, I
 # recommend mongodb.
 class Peeps(Dendrite):
 
     checked = False
-    checks = MEETUP_NOTIFY
+#    checks = MEETUP_NOTIFY
     notifymethods = ['sms', 'email', 'prowl', 'pushover']
 
     def __init__(self, cortex):
         super(Peeps, self).__init__(cortex)
 
+
     @axon
-    @help("<show history of " + CHANNEL + ">")
+    @help('<show history of the current channel>')
     def history(self):
-        text = ""
+
         try:
-            with open(STORAGE + "/introductions") as file:
-                for line in file:
-                    if line.strip() == "---":
-                        self.chat(text)
-                        text = ""
-                        continue
-
-                    text += " " + line.strip()
+            intro = self.cx.channels[self.cx.context].intro
+            return [s.strip() for s in intro.splitlines()]
         except:
-            self.chat("No introductions file")
-            return
+            return 'Nothing to introduce!'
 
-        self.chat(text)
 
     @axon
     @help("COMPANY <save your current copmany>")
     def workat(self):
         if not self.values:
-            self.chat("If you're unemployed, that's cool, just don't abuse the bot")
-            return
+            return 'If you\'re unemployed, that\'s cool, just don\'t abuse the bot'
 
-        name = self.lastsender
-        company = " ".join(self.values)
+        user = Id(self.lastsender)
+        if not user.is_authenticated:
+            return 'That\'s cool bro, but I don\'t know you!'
 
-        if not simpleupdate(name, "company", company):
-            self.chat("Busto, bro.")
-            return
+        user.company = ' '.join(self.values)
+        return 'I know where you work... watch your back.'
 
-        self.chat("Company updated.")
 
     @axon
     @help("DRINKER <give somebody a point>")
     def increment(self):
+        print "INCEMERMET"
         if not self.values:
-            self.chat("you need to give someone your love")
-            return
-        entity = " ".join(self.values)
+            return 'you need to give someone your love'
 
-        if not incrementEntity(entity, 1):
-            self.chat("mongodb seems borked")
-            return
-        return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
+        entity = ' '.join(self.values)
+        user = Id(self.lastsender)
+        target = Id(entity)
+        print target
+        if not target.useless_points:
+            target.useless_points = 1
+        else:
+            target.useless_points += 1
+
+        return '%s brought %s to %s' % (user.nick, entity, target.useless_points)
 
     @axon
     @help("DRINKER <take a point away>")
@@ -86,7 +82,7 @@ class Peeps(Dendrite):
             self.chat("mongodb seems borked")
             return
         return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
-    
+
     @axon
     @help("show the leaderboard")
     def leaderboard(self):
@@ -264,7 +260,7 @@ class Peeps(Dendrite):
         if hour not in self.checks:
             return
 
-        period, day = MEETUP_DAY.split()        
+        period, day = MEETUP_DAY.split()
         check = dateutil.parser.parse(day)
 
         if self.checked == check.month:
@@ -287,9 +283,9 @@ class Peeps(Dendrite):
 
         self.all(NICK)
         self.announce('Meetup tonight! %s' % MEETUP_LOCATION)
-        
+
     @axon
     def okdrink(self):
         whenwhere = 'Every %s, %s' % (MEETUP_DAY, MEETUP_LOCATION)
         return whenwhere
-        
+

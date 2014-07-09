@@ -41,7 +41,6 @@ class Config(yaml.Loader):
 
         if path not in self.eidetic:
             with open(path, 'r') as filestream:
-                print "==== Loading config file: %s" % path
                 self.eidetic.update({ path: yaml.load(filestream, Config) })
 
         return self.eidetic.get(path, dict())
@@ -149,9 +148,9 @@ def load_config(config_file):
             data.setAsRoot()
 
         return data
+
     except Exception as e:
-        print str(e)
-        sys.exit()
+        pass
 
 Config.add_constructor('!include', Config.include)
 Config.add_constructor(u'tag:yaml.org,2002:seq', Config.sequence)

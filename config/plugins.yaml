@@ -1,9 +1,17 @@
 plugins:
   - alien
   - chess
+  - diplomacy
+  - facebook
   - finance
+  - holdem
+  - memory
+  - nonsense
+  - peeps
+  - sms
   - stockgame
   - system
-  - twitting
   - tester
+  - turing
+  - twitting
   - webserver

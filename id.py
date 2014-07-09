@@ -1,6 +1,6 @@
 from config import load_config
 from datastore import Drinker
-from pprint import pprint
+
 
 '''
 Not the Ego. Not the Super-Ego. The Id.
@@ -17,13 +17,26 @@ class Id(object):
 
     prop = False
 
-    def __init__(self, user):
+    def __init__(self, *arguments, **keywords):
 
-        try:
-            self.nick, data = user.split('!')
-            self.ident, self.host = data.split('@')
-        except Exception as e:
-            pprint(e)
+        if not len(arguments) and len(keywords):
+            # Prepend 'data__' to all keywords for appropriate searching in data dictfield
+            keywords = dict(map(lambda (key, value): ('data__' + str(key), value), keywords.items()))
+
+            # Search for a user with the data field
+            self.prop = Drinker.objects(**keywords).first()
+            if self.prop:
+                self.nick = self.prop.name
+        else:
+            user = arguments[0]
+
+            try:
+                self.nick, data = user.split('!')
+                self.ident, self.host = data.split('@')
+            except:
+                self.nick = user
+
+        if not self.nick:
             return
 
         settings = load_config('config/settings.yaml')
@@ -35,9 +48,14 @@ class Id(object):
             if 'owner' in auth_data[self.nick] and auth_data[self.nick].owner:
                 self.is_owner = True
 
-            self.prop = Drinker.objects(name=self.nick).first()
-            if not self.prop:
-                self.prop = Drinker(name=self.nick)
+        #print cortex
+        #if self.cx.guests and self.nick in self.cx.guests:
+        #    self.is_guest = True
+        #    return
+
+        self.prop = Drinker.objects(name=self.nick).first()
+        if not self.prop:
+            self.prop = Drinker(name=self.nick)
 
 
     '''
@@ -95,6 +113,7 @@ class Id(object):
                 return False
 
         return True
+
 
     '''
     Migrate data to new data format as we go
