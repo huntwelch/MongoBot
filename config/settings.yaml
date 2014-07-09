@@ -30,9 +30,9 @@ irc:
   password: False
 
 bot:
-  nick: 'SalsaBot'
-  ident: 'SalsaBot'
-  realname: 'SalsaBot'
+  nick: 'DyingPatient'
+  ident: 'DyingPatient'
+  realname: 'DyingPatient'
   password: Null # The password to the IRC server
   command_prefix: '-'
 
