@@ -234,6 +234,7 @@ class Thalamus(object):
 
 
     '''
+    Handle when a user quits
     '''
     def _cmd_QUIT(self, source, args):
 
@@ -249,11 +250,15 @@ class Thalamus(object):
     def _cmd_PRIVMSG(self, source, args):
 
         # Parse the incoming message for a command with the selected command prefix
-        match = re.search('^{0}(\w+)[ ]?(.+)?'.format(self.settings.bot.command_prefix), args[-1])
+        match = re.search('^[{0}|{1}](\w+)[ ]?(.+)?'.format(
+            self.settings.bot.command_prefix,
+            self.settings.bot.multi_command_prefix),
+            args[-1])
         if not match:
             return (source, args)
 
-        # Parse the user, targer, command and arguments information
+        # Parse the user, target, command and arguments information
+        print source
         user = Id(source)
         target = args[0] if args[0] != self.name else user.nick
         command = match.group(1)
@@ -261,9 +266,8 @@ class Thalamus(object):
 
         print "*** target: %s; user: %s" % (target, user.nick)
 
-
         # Only listen to authenticated users
-        if not user.is_authenticated:
+        if not user.is_authenticated and not user.is_guest:
             self.send('PRIVMSG %s :My daddy says not to listen to you.' % target)
             return (source, args)
 

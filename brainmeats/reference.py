@@ -30,7 +30,7 @@ class Reference(Dendrite):
         if not self.values:
             self.chat("Enter a search")
             return
-        
+
         result = self.wolf.query(' '.join(self.values))
 
         prozac = []
@@ -211,7 +211,7 @@ class Reference(Dendrite):
         except:
             self.chat("Couldn't find anything.")
             return
-        
+
         return resolved
 
     # I wanted to do a good whois function, but whois parsing is
@@ -232,7 +232,7 @@ class Reference(Dendrite):
         try:
             parser = hownow.get_parser()
             args = vars(parser.parse_args(self.values))
-            return hownow.howdoi(args) 
+            return hownow.howdoi(args)
         except:
             return 'Dunno bro'
 

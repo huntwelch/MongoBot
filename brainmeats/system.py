@@ -44,21 +44,15 @@ class System(Dendrite):
         enabled = self.cx.master.ENABLED
         broken = self.cx.broken
 
-        if not self.values or self.values[0] not in self.libs:
+        if not self.values or self.values[0] not in self.libs or self.values[0] not in self.cx.helpmenu:
             cats = sorted(self.libs)
-
-            print 'Cats: %s' % cats
-            print 'Enabled: %s' % enabled
-            print 'Broken: %s' % broken
-
 
             cats = [colorize(lib, 'green') if lib in enabled else lib for lib in self.libs]
             cats = [colorize(lib, 'red') if lib in broken else lib for lib in cats]
 
             cats = ', '.join(cats)
-            print cats
-            self.chat('%shelp WHAT where WHAT is one of the following: %s' % (self.cx.settings.bot.command_prefix, cats))
-            return
+
+            return '%shelp WHAT where WHAT is one of the following: %s' % (self.cx.settings.bot.command_prefix, cats)
 
         which = self.values[0]
         if which in broken:

@@ -161,7 +161,7 @@ def shorten(url):
 
     #if short_url:
     #    return short_url.text
-    return ''
+    return url
 
 
 # Utility classes

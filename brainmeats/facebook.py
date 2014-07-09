@@ -1,6 +1,4 @@
-from autonomic import axon, alias, help, Dendrite
-from secrets import FB_USER, FB_PASS, FB_PAGE, FB_MONGOBOT_APPID, FB_MONGOBOT_SECRET
-
+from autonomic import axon, help, Dendrite
 
 # MongoBot itself actually has a facebook page
 # which I think just reposts from twitter, since
@@ -12,5 +10,6 @@ class Facebook(Dendrite):
     @axon
     @help('<show link to %NICK%\'s community page>')
     def fblink(self):
-        return FB_PAGE
+
+        return self.config.page
 

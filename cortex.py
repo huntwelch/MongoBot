@@ -22,6 +22,7 @@ from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
     Browse, Butler
 from autonomic import serotonin, Neurons, Synapse
 from thalamus import Thalamus
+from id import Id
 
 import traceback
 
@@ -44,7 +45,6 @@ class Cortex:
     sock = False
     values = False
     lastpublic = False
-    replysms = False
     lastprivate = False
     lastsender = False
     gettingnames = True
@@ -86,6 +86,9 @@ class Cortex:
         print '* Exciting neurons'
         Neurons.cortex = self
 
+        print '* Connecting to datastore'
+        connectdb()
+
         print '* Loading brainmeats'
         self.loadbrains()
 
@@ -94,9 +97,6 @@ class Cortex:
 
         print '* Loading users'
         self.REALUSERS = load_config(self.settings.directory.authfile)
-
-        print '* Connecting to datastore'
-        connectdb()
 
         print '* Evolving thalamus'
         self.thalamus = Thalamus(self)
@@ -172,7 +172,10 @@ class Cortex:
 
     # Core automatic stuff. I firmly believe boredom to
     # be a fundamental process in both man and machine.
+    @Synapse('twitch')
     def parietal(self, currenttime):
+        # Parietal functions are now synapsed out - is nice!
+        pass
 
         # This should really just be an addlive. Maybe
         # the other two functions, too.
@@ -184,9 +187,8 @@ class Cortex:
 #            self.boredom = int(mktime(localtime()))
 #            if randint(1, 10) == 7:
 #                self.bored()
-
-        for func in self.live:
-            self.live[func]()
+#        for func in self.live:
+#            self.live[func]()
 
     # And this is basic function that runs all the time.
     # The razor qualia edge of consciousness, if you will
@@ -323,10 +325,7 @@ class Cortex:
     # and any words after the command are split in a values array,
     # accessible by the brainmeats as self.values.
     multis = 0
-    def command(self, sender, cmd, piped=False):
-
-        print "!!! In cortex.command(%s, %s, %s)" % (sender, cmd, piped)
-        print '] self.context = %s' % self.context
+    def command(self, sender, cmd, piped=False, silent=False):
 
         if self.context in self.channels \
         and 'command' not in self.channels[self.context]:
@@ -443,6 +442,9 @@ class Cortex:
             return
 
         if type(result) in [str, unicode]:
+            if silent:
+                return result
+
             self.chat(result)
 
         if type(result) is list:
@@ -608,7 +610,8 @@ class Cortex:
         elif self.context in self.channels:
             whom = self.context
         else:
-            whom = self.lastsender
+            user = Id(self.lastsender)
+            whom = user.nick
 
         filter(lambda x: x in string.printable, message)
         try:
@@ -623,18 +626,13 @@ class Cortex:
 
             if error:
                 m += ' ' + str(error)
+
             self.thalamus.send('PRIVMSG %s :%s' % (whom,m))
-            if self.replysms:
-                to = self.replysms
-                self.replysms = False
-                self.values = [to, str(m)]
-                self.commands.get('sms')()
-        except:
+        except Exception as e:
             try:
                 self.thalamus.send('PRIVMSG %s :Having trouble saying that for some reason' % whom)
             except:
                 pass
-                 #print "Unable to say: %s" % message
 
     def act(self, message, public=False, target=False):
         message = '\001ACTION %s\001' % message
@@ -644,11 +642,6 @@ class Cortex:
             self.chat(message, target)
         else:
             self.chat(message)
-            if self.replysms:
-                to = self.replysms
-                self.replysms = False
-                self.values = [to, str(message)]
-                self.commands.get('sms')()
 
     # When all else fails.
     def default(self):

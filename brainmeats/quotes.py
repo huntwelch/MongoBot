@@ -47,9 +47,9 @@ class Quotes(Dendrite):
                 q = Quote.objects(random__lte=rand).first()
 
         if q:
-            self.chat(q.text)
+            return q.text
         else:
-            self.chat("Couldn't find a quote for some reason")
+            return "Couldn't find a quote for some reason"
 
     @axon
     @help("SEARCH_TERM <search for a quote>")

@@ -1,4 +1,6 @@
 import inspect
+from config import load_config
+from id import Id
 from pprint import pprint
 
 # The core of the library methodology used
@@ -7,8 +9,16 @@ from pprint import pprint
 # cortex monitors the chatroom. It also adds
 # some shortcuts to cortex functions.
 class Dendrite(object):
+
+    config = None
+
     def __init__(self, cortex):
         self.cx = cortex
+
+        try:
+            self.config = load_config('config/%s.yaml' % type(self).__name__.lower())
+        except:
+            pass
 
     def chat(self, what, target=False, error=False):
         self.cx.chat(what, target, error)
@@ -54,6 +64,11 @@ class Dendrite(object):
     def ego(self):
         return self.cx.personality
 
+    @property
+    def mysender(self):
+        return Id(self.cx.lastsender)
+
+
 # This is what the cortex uses to setup the brainmeat
 # libs, according to the decorators on the classes and
 # functions in the lib.
@@ -68,7 +83,7 @@ def serotonin(cortex, meatname, electroshock):
         if not hasattr(method, 'create_command'):
             continue
 
-        if hasattr(method, 'help'):
+        if hasattr(method, 'help') and method.help:
             me = cortex.amnesia()
             help_text = method.help.replace('%NICK%', me.nick)
 
@@ -81,7 +96,7 @@ def serotonin(cortex, meatname, electroshock):
             print "Warning: overwriting " + name
 
         cortex.commands[name] = method
-        if hasattr(method, 'aliases'):
+        if hasattr(method, 'aliases') and method.aliases:
             for item in method.aliases:
                 cortex.commands[item] = method
 
@@ -114,7 +129,7 @@ def Cerebellum(object):
         if hasattr(method, 'is_receptor'):
 
             receptors = Neurons.vesicles.get(method.name, [])
-            receptors.append([ object.__name__.lower(), method.neuron ])
+            receptors.append({ object.__name__.lower(): method.neuron })
             Neurons.vesicles.update({ method.name: receptors })
 
     return object
@@ -143,9 +158,10 @@ class Synapse(Neurons):
             neurotransmission = neuron(*args, **kwargs)
 
             vesicles = self.vesicles.get(self.neuron, [])
-#            vesicle, cell = self.vesicles.get(self.neuron, [])
-#            if vesicle and vesicle in self.cortex.brainmeats:
-#                cell(self.cortex.brainmeats[vesicle], *(neurotransmission or []))
+            for vesicle in vesicles:
+                for name in vesicle:
+                    if name and name in self.cortex.brainmeats:
+                        vesicle[name](self.cortex.brainmeats[name], *(neurotransmission or []))
 
             return neurotransmission
 
