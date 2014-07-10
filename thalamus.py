@@ -52,6 +52,8 @@ class Thalamus(object):
     def connect(self):
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        print '[IRC] Connecting to %s:%s' % (self.settings.irc.host, self.settings.irc.port)
         sock.connect((self.settings.irc.host, self.settings.irc.port))
 
         if hasattr(self.settings.irc, 'ssl') and self.settings.irc.ssl:
@@ -163,8 +165,11 @@ class Thalamus(object):
     '''
     def _cmd_001(self, source, args):
 
+        print '[IRC] Connected to %s' % (source)
+
         for channel in self.secrets.channels:
 
+            print '[IRC] Joining %s' % (channel)
             self.send('JOIN %s' % channel)
 
 
@@ -258,7 +263,6 @@ class Thalamus(object):
             return (source, args)
 
         # Parse the user, target, command and arguments information
-        print source
         user = Id(source)
         target = args[0] if args[0] != self.name else user.nick
         command = match.group(1)
