@@ -1,15 +1,27 @@
-acro:
-  lib: 'natwords'
-  minlen: 5
-  maxlen: 7
-  rounds: 5
-  roundtime: 120
-  warning: 30
-  votetime: 30
-  minplayers: 3
-  timefactor: 2
-  noacropenalty: 2
-  novotepenalty: 5
-  break: 15
-  botplay: True
+lib: 'natwords'
+minlen: 5
+maxlen: 7
+rounds: 5
+roundtime: 120
+warning: 30
+votetime: 30
+minplayers: 3
+timefactor: 2
+noacropenalty: 2
+novotepenalty: 5
+rest: 15
+botplay: True
 
+insults:
+  - 'are little bitches',
+  - 'are chumps',
+  - 'are cunt knockers',
+  - 'are lazy bastards',
+  - "are busy with dcross's mom",
+
+insult:
+  - 'is a little bitch',
+  - 'is a chump',
+  - 'is a cunt knocker',
+  - 'is a lazy bastard',
+  - "is busy with dcross's mom",
