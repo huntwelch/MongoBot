@@ -42,6 +42,10 @@ class Dendrite(object):
         return self.cx.validate()
 
     @property
+    def botname(self):
+        return self.cx.thalamus.name
+
+    @property
     def values(self):
         return self.cx.values
 

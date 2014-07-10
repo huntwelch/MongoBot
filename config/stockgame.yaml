@@ -4,4 +4,5 @@ exchanges:
   - 'NYSEAMEX'
   - 'NASDAQ'
   - 'NASDAQNM'
+
 startupcash: 100000

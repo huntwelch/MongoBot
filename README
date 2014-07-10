@@ -102,4 +102,9 @@ To Do
     + finish holdem, needs testing and split pots probably don't work
     + stock game: account for splits and reverse splits
     + add @requires decorator, check for server, redis, mongo, have -features command to check.
-      Function by function level? 
+      Function by function level?
+    + mud-style game
+    + interbot com
+    + streamline web stuff
+    + multi-platform
+
