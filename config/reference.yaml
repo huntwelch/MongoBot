@@ -1,0 +1,30 @@
+math_functions:
+  - abs: abs
+  - acos: acos
+  - asin: asin
+  - atan
+  - atan2
+  - ceil
+  - cos
+  - cosh
+  - degrees
+  - e
+  - exp
+  - fabs
+  - floor
+  - fmod
+  - frexp
+  - hypot
+  - ldexp
+  - log
+  - log10
+  - modf
+  - pi
+  - pow
+  - radians
+  - sin
+  - sinh
+  - sqrt
+  - tan
+  - tanh
+
