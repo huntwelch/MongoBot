@@ -13,9 +13,8 @@ class Medulla:
     def __init__(self):
 
         print '* Becoming self-aware'
-        self.settings = settings = load_config('config/settings.yaml')
-        self.secrets = secrets = load_config('config/secrets.yaml')
-
+        self.settings = load_config('config/settings.yaml')
+        self.secrets = load_config('config/secrets.yaml')
         self.ENABLED = self.settings.plugins.values().pop(0)
         self.active = True
         self.brain = cortex.Cortex(self)

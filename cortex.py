@@ -83,6 +83,7 @@ class Cortex:
         self.channels = self.secrets.channels
         self.personality = self.settings.bot
 
+
         print '* Exciting neurons'
         Neurons.cortex = self
 

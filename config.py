@@ -150,6 +150,7 @@ def load_config(config_file):
         return data
 
     except Exception as e:
+        print e
         pass
 
 Config.add_constructor('!include', Config.include)
