@@ -12,6 +12,7 @@ import subprocess
 
 from PIL import Image
 from bisect import bisect
+from config import load_config
 
 #from settings import CHANNEL, SHORTENER, THUMBS, THUMB_SIZE, WEBSITE
 #from secrets import HTTP_PASS, DELICIOUS_USER, DELICIOUS_PASS
@@ -19,13 +20,12 @@ from collections import OrderedDict
 
 from pprint import pprint
 
-
-# TODO for now some secrets hardcoded; move to config
-HTTP_PASS = 'whatever'
+settings = load_config('config/settings.yaml') 
+secrets = load_config('config/secrets.yaml') 
 
 
 # For onetime stuff
-totp = pyotp.TOTP(base64.b32encode(HTTP_PASS), interval=600)
+totp = pyotp.TOTP(base64.b32encode(settings.http.password), interval=600)
 
 
 # Utility functions

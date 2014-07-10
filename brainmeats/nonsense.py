@@ -60,7 +60,7 @@ class Nonsense(Dendrite):
     def fml(self):
 
         url = 'http://api.fmylife.com'
-        params = {'language': 'en', 'key': self.cx.secrets.fml.key}
+        params = {'language': 'en', 'key': self.secrets.fml_api}
 
         if self.values and self.values[0]:
             url += '/view/search'

@@ -29,9 +29,9 @@ irc:
   password: False
 
 bot:
-  nick: 'Abugrakljsd'
-  ident: 'Abugrakljsd'
-  realname: 'Abugrakljsd'
+  nick: 'Ciazaim'
+  ident: 'Ciazaim'
+  realname: 'Ciazaim'
   password: Null # The password to the IRC server
   command_prefix: '-'
   multi_command_prefix: '*'
@@ -69,6 +69,7 @@ general:
 # Misc config item
 misc:
   thumbsize: 40
+  
 
 # Plugins
 plugins: !include plugins.yaml
