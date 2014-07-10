@@ -56,9 +56,12 @@ directory:
 # Media
 media:
   books: "{directory.storage}/booklearnin"
-  images: "{directory.storage}/imgs"
-  videos: "{directory.storage}/videos"
   poems: "{directory.storage}/poems"
+  downloads: "{directory.storage}/downloads"
+  images: "{media.downloads}/imgs"
+  videos: "{media.downloads}/videos"
+  gifs: '/static/gifs/'
+  thumbs: '/static/thumbs/'
   storeurls: True
   storeimgs: True
 
