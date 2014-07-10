@@ -5,7 +5,6 @@ import threading
 
 from autonomic import axon, help, Dendrite, public, alias
 #from settings import SAFESET, NICK, REGISTERED, CONTROL_KEY
-from secrets import *
 from util import colorize
 from time import sleep
 
@@ -88,7 +87,7 @@ class System(Dendrite):
             self.chat("Please enter a password.")
             return
 
-        if self.values[0] != BOT_PASS:
+        if self.values[0] != self.secrets.botpass:
             self.chat("Not the password.")
             return
 

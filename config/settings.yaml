@@ -35,6 +35,7 @@ bot:
   realname: 'Abugrakljsd'
   password: Null # The password to the IRC server
   command_prefix: '-'
+  multi_command_prefix: '*'
 
 sys:
   pulse: '/tmp/bot.pulse'
