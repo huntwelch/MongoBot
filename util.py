@@ -25,7 +25,7 @@ secrets = load_config('config/secrets.yaml')
 
 
 # For onetime stuff
-totp = pyotp.TOTP(base64.b32encode(settings.http.password), interval=600)
+totp = pyotp.TOTP(base64.b32encode(secrets.http.password), interval=600)
 
 
 # Utility functions

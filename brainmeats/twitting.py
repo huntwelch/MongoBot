@@ -1,14 +1,10 @@
 import tweepy
 import re
 
-from config import load_config
-from autonomic import axon, alias, help, Dendrite, Cerebellum, Receptor
+from autonomic import axon, alias, help, Dendrite, Cerebellum, Receptor, public
 
 @Cerebellum
 class Twitting(Dendrite):
-
-    config = load_config('config/twitting.yaml')
-    auth = tweepy.OAuthHandler(config.secrets.consumer_key, config.secrets.consumer_secret)
 
     api = False
     lasttweet = False
@@ -16,13 +12,14 @@ class Twitting(Dendrite):
     def __init__(self, cortex):
         super(Twitting, self).__init__(cortex)
 
-        self.auth.set_access_token(self.config.secrets.access_token, self.config.secrets.access_secret)
+        self.auth = tweepy.OAuthHandler(self.secrets.consumerkey, self.secrets.consumersecret)
+        self.auth.set_access_token(self.secrets.accesstoken, self.secrets.accesssecret)
         self.api = tweepy.API(self.auth)
 
     @axon
     @help('<show link to %NICK%\'s twitter feed>')
     def totw(self):
-        return self.config.url
+        return self.config.page
 
     @axon
     @help('[ID] <retweet by id, or just the last tweet>')

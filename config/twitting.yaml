@@ -1,11 +1,1 @@
-username: 'twitter username'
-password: 'twitter password'
-url: 'url to twitter page'
-
-secrets:
-  consumer_key: 'consumer key'
-  consumer_secret: 'consumer secret'
-  access_token: 'access token'
-  access_secret: 'access secret'
-
-
+page: 'https://twitter.com/BotMongo'
