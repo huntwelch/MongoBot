@@ -1,5 +1,4 @@
-from autonomic import axon, alias, help, Dendrite
-from secrets import CHANNEL
+from autonomic import axon, alias, help, Dendrite, public
 
 class Channeling(Dendrite):
 
@@ -32,6 +31,7 @@ class Channeling(Dendrite):
     @axon
     @alias('part')
     @help('CHANNEL <leave CHANNEL>')
+    @public
     def leave(self, channel=False):
         if not self.values and not channel:
             return 'Leave what?'
@@ -50,6 +50,7 @@ class Channeling(Dendrite):
 
     # Join another channel
     @axon
+    @public
     @help('CHANNEL [MOD1...MODN] <join CHANNEL, optionally add mods>')
     def join(self, channel=False):
         if not self.values and not channel:
@@ -99,7 +100,7 @@ class Channeling(Dendrite):
             else:
                 mod = mod[1:]
 
-            if mod == 'spy' and chan == CHANNEL:
+            if mod == 'spy' and self.cx.channels[chan].primary:
                 #self.chat('Well not much point in that now, is there?')
                 return
 

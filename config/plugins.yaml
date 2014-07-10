@@ -1,6 +1,7 @@
 plugins:
   - alien
   - broca
+  - channeling
   - chess
   - facebook
   - finance
@@ -8,7 +9,9 @@ plugins:
   - memory
   - nonsense
   - peeps
+  - quotes
   - reference
+  - sms
   - stockgame
   - system
   - tester
