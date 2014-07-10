@@ -26,7 +26,6 @@ irc:
   nickserv:
     nick: 'NickServ'
     password: 'test'
-  scan: '^:\w+\.freenode\.net'
   password: False
 
 bot:
@@ -73,6 +72,3 @@ misc:
 
 # Plugins
 plugins: !include plugins.yaml
-
-# Test
-test: !include acro.yaml

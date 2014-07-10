@@ -26,7 +26,7 @@ class Dendrite(object):
         # Load in config file by the same name as the brainmeats, if available
         try:
             self.config = load_config('config/%s.yaml' % name)
-        except:
+        except Exception:
             pass
 
     def chat(self, what, target=False, error=False):
@@ -73,9 +73,9 @@ class Dendrite(object):
     def ego(self):
         return self.cx.personality
 
-    @property
-    def mysender(self):
-        return Id(self.cx.lastsender)
+    #@property
+    #def mysender(self):
+    #    return Id(self.cx.lastsender)
 
 
 # This is what the cortex uses to setup the brainmeat

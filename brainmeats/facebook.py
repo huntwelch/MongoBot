@@ -11,5 +11,5 @@ class Facebook(Dendrite):
     @help('<show link to %NICK%\'s community page>')
     def fblink(self):
 
-        return self.config.page
+        return self.secrets.page
 
