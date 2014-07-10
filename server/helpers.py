@@ -2,8 +2,9 @@ import re
 
 from datetime import datetime
 from flask import Flask, request, session, make_response, render_template
-from settings import NICK, SCAN, CHANNEL, LOG
+from config import load_config
 
+config = load_config('config/settings.yaml')
 
 def render_xml(path):
     response = make_response(render_template(path))
@@ -12,7 +13,10 @@ def render_xml(path):
 
 
 def fetch_chats(request, offset):
-    log = open(LOG, 'r')
+
+    global config
+
+    log = open(config.directory.log, 'r')
     chats = []
 
     index = 0
@@ -34,11 +38,11 @@ def fetch_chats(request, offset):
 
 
 
-        if line.find(NICK) is 1:
+        if line.find(config.bot.nick) is 1:
             continue
 
         bot = False
-        if line.find('___' + NICK) is 0:
+        if line.find('___' + config.bot.nick) is 0:
             bot = True
 
         if line.find('PRIVMSG') == -1 and not bot:
@@ -46,7 +50,7 @@ def fetch_chats(request, offset):
         if not re.search("^:", line) and not bot:
             continue
 
-        if re.search(SCAN, line) and not bot:
+        if re.search(config.irc.scan, line) and not bot:
             continue
 
         private = ''
@@ -57,8 +61,9 @@ def fetch_chats(request, offset):
                 info, content = line[1:].split(' :', 1)
                 sender, type, room = info.strip().split()
                 nick, data = sender.split('!')
-                if room != CHANNEL:
-                    private = 'private'
+                # Gotta rething this
+                #if room != CHANNEL:
+                #    private = 'private'
             else:
                 nick, content = line.split(': ', 1)
                 nick = nick[3:]
