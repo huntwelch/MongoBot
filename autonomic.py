@@ -43,7 +43,7 @@ class Dendrite(object):
 
     @property
     def botname(self):
-        return self.cx.thalums.name
+        return self.cx.thalamus.name
 
     @property
     def values(self):

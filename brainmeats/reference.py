@@ -4,10 +4,9 @@ import re
 import wolframalpha
 import sys
 
+from math import *
 from autonomic import axon, alias, help, Dendrite
 from bs4 import BeautifulSoup as bs4
-#from settings import REPO, NICK, SAFE
-#from secrets import WEATHER_API, WOLFRAM_API
 from util import unescape, pageopen
 from howdoi import howdoi as hownow
 
@@ -18,16 +17,43 @@ from howdoi import howdoi as hownow
 # it goes here.
 class Reference(Dendrite):
 
-    safe_calc = None
+    safe_func = [
+        ('abs', abs),
+        ('acos', acos),
+        ('asin', asin),
+        ('atan', atan),
+        ('atan2', atan2),
+        ('ceil', ceil),
+        ('cos', cos),
+        ('cosh', cosh),
+        ('degrees', degrees),
+        ('e', e),
+        ('exp', exp),
+        ('fabs', fabs),
+        ('floor', floor),
+        ('fmod', fmod),
+        ('frexp', frexp),
+        ('hypot', hypot),
+        ('ldexp', ldexp),
+        ('log', log),
+        ('log10', log10),
+        ('modf', modf),
+        ('pi', pi),
+        ('pow', pow),
+        ('radians', radians),
+        ('sin', sin),
+        ('sinh', sinh),
+        ('sqrt', sqrt),
+        ('tan', tan),
+        ('tanh', tanh),
+    ]
+
+    safe_calc = dict([(k, locals().get(k, f)) for k, f in safe_func])
     wolf = None
 
     def __init__(self, cortex):
         super(Reference, self).__init__(cortex)
 
-        print "%s" % str(self.config.math_functions)
-        sys.exit()
-
-        self.safe_calc = dict([(k, locals().get(k, f)) for k, f in self.config.math_functions])
         self.wolf = wolframalpha.Client(self.secrets.wolfram_api)
 
 

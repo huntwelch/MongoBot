@@ -6,7 +6,7 @@ import traceback
 
 from autonomic import Synapse
 from config import load_config
-from time import sleep
+from time import sleep, time
 from id import Id
 
 from pprint import pprint
@@ -117,6 +117,10 @@ class Thalamus(object):
     '''
     def process(self):
 
+        if self.name != self.settings.bot.nick and self.regain_nick and time() - self.regain_nick > 20:
+            self.regain_nick = time()
+            self.send('WHOIS %s' % self.settings.bot.nick)
+
         data = self.read()
 
         if not data:
@@ -181,7 +185,7 @@ class Thalamus(object):
         self.name = args.pop(0)
         self.server = args.pop(0)
 
-        self.regain_nick = True
+        self.regain_nick = time()
 
 
     '''
@@ -200,6 +204,16 @@ class Thalamus(object):
             'modes': self.secrets.channels.get(channel, {}),
         }
 
+
+    '''
+    No such username - expected response when WHOIS fails
+    Attempt to regain nick
+    '''
+    def _cmd_401(self, source, args):
+
+        if self.regain_nick and time() - self.regain_nick < 20:
+            self.name = None
+            self.introduce()
 
     '''
     Handle name already being in use
