@@ -30,9 +30,9 @@ irc:
   password: False
 
 bot:
-  nick: 'DyingPatient'
-  ident: 'DyingPatient'
-  realname: 'DyingPatient'
+  nick: 'Abugrakljsd'
+  ident: 'Abugrakljsd'
+  realname: 'Abugrakljsd'
   password: Null # The password to the IRC server
   command_prefix: '-'
 
@@ -40,6 +40,9 @@ sys:
   pulse: '/tmp/bot.pulse'
   pulserate: 25
   redissock: '/tmp/redis.sock'
+
+debug:
+  verbose: True
 
 # Files and directories
 directory:
@@ -69,9 +72,6 @@ misc:
 
 # Plugins
 plugins: !include plugins.yaml
-
-
-acro: !include plugins/acro.yaml
 
 # Test
 test: !include acro.yaml
