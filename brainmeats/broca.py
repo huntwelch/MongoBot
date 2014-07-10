@@ -9,11 +9,8 @@ import os
 import simplejson
 
 from threading import Thread
-from autonomic import axon, alias, help, Dendrite
-from secrets import WORDNIK_API, BOT_PASS
-from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, \
-    REDIS_SOCK, SMARTASS, TECH_QUESTIONS, IT_HELP, FRUSTRATION, POEMS, \
-    WEBSITE
+from autonomic import axon, alias, help, Dendrite, public
+
 from datastore import Words, Learned, Structure
 from random import choice, randint
 from util import savefromweb, Browse
@@ -21,22 +18,28 @@ from bs4 import BeautifulSoup as bs4
 from wordnik import swagger, WordApi
 
 
+botnick = False
+
 # Much fail here. I study up on NLTK at the rate
 # of 5 minutes a month. The miscellaneous language
 # functions usually work, and of course the markov
 # is done here.
 class Broca(Dendrite):
 
-    markov = redis.StrictRedis(unix_socket_path=REDIS_SOCK)
     readstuff = False
     knowledge = False
     draft = False
 
     def __init__(self, cortex):
         super(Broca, self).__init__(cortex)
+        self.markov = redis.StrictRedis(unix_socket_path=self.cx.settings.sys.redissock)
+
+        # Whaddyagonnado
+        global botnick 
+        botnick = self.botconf.nick
 
     @axon
-    @help('TITLE <have %NICK% compose poetry>')
+    @help('TITLE <have %s compose poetry>' % botnick)
     def compose(self):
         if not self.startpoem():
             return 'Already wrote that'
@@ -45,7 +48,7 @@ class Broca(Dendrite):
         seed = self.babble()
 
         if not seed:
-            return 'Muse not with %s today' % NICK
+            return 'Muse not with %s today' % botnick 
 
         seed = seed.split()
         for word in seed:
@@ -71,17 +74,17 @@ class Broca(Dendrite):
 
         filename = '%s.txt' % re.sub('[^0-9a-zA-Z]+', '_', title)
 
-        if os.path.isfile(POEMS + filename):
+        if os.path.isfile('%s/%s' % (self.cx.settings.media.poems, filename)):
             self.chat('Already wrote that')
             return False
 
-        draft = open(POEMS + filename, 'a')
+        draft = open('%s/%s' % (self.cx.settings.media.poems, filename), 'a')
         draft.write('%s\n' % title)
         draft.close()
 
         self.draft = filename
 
-        return '%s think "%s" may be masterpiece' % (NICK, title)
+        return '%s think "%s" may be masterpiece' % (botnick, title)
 
     @axon
     @alias('write', 'explicit')
@@ -92,7 +95,7 @@ class Broca(Dendrite):
         if not self.draft:
             return 'No poems open now.'
 
-        draft = open(POEMS + self.draft, 'a')
+        draft = open('%s/%s' % (self.cx.settings.media.poems, self.draft), 'a')
 
         what = what or self.values
 
@@ -112,7 +115,7 @@ class Broca(Dendrite):
 
     @axon
     def finis(self):
-        link = '%s/poem/%s' % (WEBSITE, self.draft[:-4])
+        link = '%s/poem/%s' % (self.cx.misc.website, self.draft[:-4])
         self.draft = False
         return 'Work complete: %s' % link
 
@@ -135,7 +138,7 @@ class Broca(Dendrite):
                 self.markov.set(prefix, follow)
 
     @axon
-    @help('URL_OF_TEXT_FILE <Make %NICK% read something>')
+    @help('URL_OF_TEXT_FILE <Make %s read something>' % botnick)
     def read(self):
         if not self.values:
             self.chat("Read what?")
@@ -143,11 +146,11 @@ class Broca(Dendrite):
 
         book = self.values[0]
         if book[-4:] != '.txt':
-            self.chat("Plain text file only. %s purist." % NICK)
+            self.chat("Plain text file only. %s purist." % botnick)
             return
 
         name = "%s_%s.txt" % ( int(time.mktime(time.localtime())), self.lastsender )
-        path = BOOKS + name
+        path = self.cx.settings.media.books + name
 
         savefromweb(book, path)
         with open(path) as b:
@@ -202,7 +205,7 @@ class Broca(Dendrite):
     # their opinions on the nature and value of intelligence.
     @axon
     @alias('waxrhapsodic')
-    @help('<Make %NICK% speak markov chain>')
+    @help('<Make %s speak markov chain>' % botnick)
     def babble(self, what=False):
 
         what = what or self.values
@@ -235,7 +238,7 @@ class Broca(Dendrite):
             'its', 'of', 'is', 'for',
         ]
 
-        while len(words) < BABBLE_LIMIT:
+        while len(words) < self.config.babblelim:
             tail = "%s %s" % (words[-2], words[-1])
             follows = self.markov.get(tail)
             if not follows:
@@ -255,8 +258,8 @@ class Broca(Dendrite):
         # Mostly, security in babble is your
         # problem, but BOT_PASS shows up in the
         # channel a lot.
-        while BOT_PASS in words:
-            words.remove(BOT_PASS)
+        while self.cx.secrets.system.botpass in words:
+            words.remove(self.cx.secrets.system.botpass)
 
         words = ' '.join(words)
 
@@ -281,7 +284,7 @@ class Broca(Dendrite):
     #     self.chat("Okay, read all the things.")
 
     @axon
-    @help('<command %NICK% to speak>')
+    @help('<command %s to speak>' % botnick)
     def speak2(self):
         if not self.knowledge:
             self.chat("Can't speak good yet. Must read.")
@@ -331,11 +334,11 @@ class Broca(Dendrite):
         return "Definition %s: %s" % (str(which + 1), definition)
 
     def seekdef(self, word):
-        if not WORDNIK_API:
-            self.chat("WORDNIK_API is not set.")
+        if not self.secrets.wordnik_api:
+            self.chat("No api key is not set.")
             return
 
-        client = swagger.ApiClient(WORDNIK_API, 'http://api.wordnik.com/v4')
+        client = swagger.ApiClient(self.secrets.wordnik_api, 'http://api.wordnik.com/v4')
         wapi = WordApi.WordApi(client)
         results = wapi.getDefinitions(word.strip())
 
@@ -398,10 +401,10 @@ class Broca(Dendrite):
     # function in poor taste? Yes.
     def tourettes(self, sentence, nick):
         if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
-            open(LOGDIR + "/mom.log", 'a').write(sentence + '\n')
+            open("%s/mom.log" % self.cx.settings.logdir, 'a').write(sentence + '\n')
 
-        if re.search("^" + NICK, sentence):
-            backatcha = sentence[len(NICK):]
+        if re.search("^%s" % botnick, sentence):
+            backatcha = sentence[len(botnick):]
             self.chat(nick + "'s MOM" + backatcha)
             return
 
@@ -431,19 +434,19 @@ class Broca(Dendrite):
             self.chat(random.choice(stops))
             return
 
-        if sentence.lower().strip() in FRUSTRATION or sentence.lower().find('stupid') == 0:
+        if sentence.lower().strip() in self.config.frustration or sentence.lower().find('stupid') == 0:
             self.chat(self.cx.commands.get('table')())
 
-        inquiries = [sentence.lower().find(t) != -1 for t in TECH_QUESTIONS]
+        inquiries = [sentence.lower().find(t) != -1 for t in self.config.questions]
 
-        if SMARTASS and True in inquiries:
+        if self.config.smartass and True in inquiries:
             # Naively parse out the question being asked
             try:
-                smartassery = sentence.lower().split(TECH_QUESTIONS[inquiries.index(True)])[1]
+                smartassery = sentence.lower().split(self.config.questions[inquiries.index(True)])[1]
             except:
                 return
 
-            responses = IT_HELP
+            responses = self.config.ithelp
 
             # Dynamic cases need to be appended
             responses.append('http://lmgtfy.com/?q=' + smartassery.replace(' ', '+'))
@@ -458,7 +461,7 @@ class Broca(Dendrite):
             return
 
     @axon
-    @help('<command %NICK% to speak>')
+    @help('<command %s to speak>' % botnick)
     def speak(self):
         sentence = []
         struct = choice(Structure.objects())
@@ -469,21 +472,21 @@ class Broca(Dendrite):
         self.chat(" ".join(sentence))
 
     @axon
-    @help('WORD <teach %NICK% a word>')
+    @help('WORD <teach %s a word>' % botnick)
     def learn(self):
         if not self.values:
-            self.chat(NICK + " ponders the emptiness of meaning.")
+            self.chat("%s ponders the emptiness of meaning." % botnick)
             return
 
         if not re.match("^[A-Za-z]+$", self.values[0].strip()):
-            self.chat(NICK + " doesn't think that's a word.")
+            self.chat("%s doesn't think that's a word." % botnick)
             return
 
-        open(STORAGE + "/natwords", 'a').write(self.values[0].strip() + '\n')
-        self.chat(NICK + " learn new word!", self.lastsender)
+        open("%s/natwords" % self.cx.settings.directory.storage, 'a').write(self.values[0].strip() + '\n')
+        self.chat("%s learn new word!" % botnick, self.lastsender)
 
     @axon
-    @help('ACRONYM <have %NICK% decide the words for an acronym>')
+    @help('ACRONYM <have %s decide the words for an acronym>' % botnick)
     def acronym(self):
         if not self.values:
             self.chat("About what?")
@@ -494,7 +497,7 @@ class Broca(Dendrite):
             return
 
         if not re.match("^[A-Za-z]+$", self.values[0]):
-            self.chat(NICK + " no want to think about that.")
+            self.chat("%s no want to think about that." % botnick)
             return
 
         if self.values[0].lower() == "gross":
@@ -509,7 +512,7 @@ class Broca(Dendrite):
         output = []
 
         wordbank = []
-        for line in open(STORAGE + "/" + ACROLIB):
+        for line in open("%s/%s" % (self.cx.config.directory.storage, self.config.acronymlib)):
             wordbank.append(line.strip())
 
         for letter in acronym:
@@ -524,6 +527,7 @@ class Broca(Dendrite):
 
     @axon
     @help('WORD [WHICH_DEFINITION] <look up etymology of word>')
+    @public
     def ety(self):
         if not self.values:
             self.chat("Enter a word")

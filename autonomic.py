@@ -23,6 +23,9 @@ class Dendrite(object):
         if name in self.cx.secrets:
             self.secrets = self.cx.secrets[name];
 
+        # Load bot settings in ubiquitously for easier access
+        self.botconf = self.cx.settings.bot
+
         # Load in config file by the same name as the brainmeats, if available
         try:
             self.config = load_config('config/%s.yaml' % name)

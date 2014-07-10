@@ -69,6 +69,7 @@ general:
 # Misc config item
 misc:
   thumbsize: 40
+  website: 'http://www.mongobot.com' # Dupped by webserver
   
 
 # Plugins
