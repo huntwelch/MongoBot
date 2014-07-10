@@ -2,6 +2,7 @@ import inspect
 from config import load_config
 from id import Id
 from pprint import pprint
+import sys
 
 # The core of the library methodology used
 # by MongoBot. All brainmeats are Dendrites,
@@ -11,12 +12,20 @@ from pprint import pprint
 class Dendrite(object):
 
     config = None
+    secrets = None
 
     def __init__(self, cortex):
         self.cx = cortex
+        name = type(self).__name__.lower()
 
+        # Load in brainmeats specific secrets and only make those available as first
+        # class secrets to the brainmeats
+        if name in self.cx.secrets:
+            self.secrets = self.cx.secrets[name];
+
+        # Load in config file by the same name as the brainmeats, if available
         try:
-            self.config = load_config('config/%s.yaml' % type(self).__name__.lower())
+            self.config = load_config('config/%s.yaml' % name)
         except:
             pass
 

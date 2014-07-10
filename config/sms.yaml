@@ -1,3 +1,0 @@
-sms:
-  lockfile: '/tmp/sms.lock'
-

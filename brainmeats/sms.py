@@ -25,7 +25,7 @@ class Sms(Dendrite):
     def __init__(self, cortex):
         super(Sms, self).__init__(cortex)
 
-        self.client = TwilioRestClient(self.config.sid, self.config.token)
+        self.client = TwilioRestClient(self.secrets.sid, self.secrets.token)
 
 
     '''
@@ -44,7 +44,7 @@ class Sms(Dendrite):
         self.next_ += 10
 
         try:
-            messages = self.client.sms.messages.list(to=self.config.number)
+            messages = self.client.sms.messages.list(to=self.secrets.number)
         except:
             print "Error fetching"
             return
@@ -89,7 +89,7 @@ class Sms(Dendrite):
                     message = self.client.messages.create(
                         body=resp,
                         to=drinker.phone,
-                        from_=self.config.number
+                        from_=self.secrets.number
                     )
 
                     self.chat('Message sent: ' + message.sid)
@@ -126,7 +126,7 @@ class Sms(Dendrite):
         try:
             params = {
                 'to': to,
-                'from_': self.config.number
+                'from_': self.secrets.number
             }
 
             regex = '^http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+$'
@@ -154,7 +154,7 @@ class Sms(Dendrite):
         num = self.values[0]
 
         try:
-            messages = self.client.messages.list(to=self.config.number, from_=num)
+            messages = self.client.messages.list(to=self.secrets.number, from_=num)
             for item in messages:
                 self.chat(item.from_ + ': ' + item.body)
         except:
