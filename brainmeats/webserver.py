@@ -39,6 +39,6 @@ class Webserver(Dendrite):
     @axon
     @help("<Reload uwsgi server>")
     def reloadserver(self, quiet=False):
-        os.system('touch %' % self.config.website.reload)
+        os.system('touch %' % self.config.website.reloader)
         if not quiet:
             self.chat("Reloaded uwsgi")

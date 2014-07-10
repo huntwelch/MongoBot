@@ -54,7 +54,7 @@ class Reference(Dendrite):
     def __init__(self, cortex):
         super(Reference, self).__init__(cortex)
 
-        self.wolf = wolframalpha.Client(self.secrets.wolfram_api)
+        self.wolf = wolframalpha.Client(self.cx.secrets.apis.wolfram)
 
 
     @axon
@@ -115,7 +115,7 @@ class Reference(Dendrite):
     @axon
     @help("[ZIP|LOCATION (ru/moscow)] <get weather, defaults to geo api>")
     def weather(self):
-        if not self.secrets.weather_api:
+        if not self.cx.secrets.apis.weather:
             self.chat("wundergroun api key is not set")
             return
 
@@ -124,7 +124,7 @@ class Reference(Dendrite):
         else:
             params = "%s.json" % self.values[0]
 
-        base = "http://api.wunderground.com/api/%s/conditions/q/" % self.secrets.weather_api
+        base = "http://api.wunderground.com/api/%s/conditions/q/" % self.cx.secrets.apis.weather
 
         url = base + params
 

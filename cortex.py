@@ -47,6 +47,7 @@ class Cortex:
     lastpublic = False
     lastprivate = False
     lastsender = False
+    lastrealsender = False
     gettingnames = True
     memories = False
     autobabble = False
@@ -62,6 +63,7 @@ class Cortex:
     members = []
     guests = []
     broken = []
+    realuserdata = []
     REALUSERS = []
 
     commands = {}
@@ -97,7 +99,9 @@ class Cortex:
         self.butler = Butler(self)
 
         print '* Loading users'
-        self.REALUSERS = load_config(self.settings.directory.authfile)
+        self.realuserdata = load_config(self.settings.directory.authfile)
+        for username in self.realuserdata:
+            self.REALUSERS.append(username)
 
         print '* Evolving thalamus'
         self.thalamus = Thalamus(self)

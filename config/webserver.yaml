@@ -1,7 +1,7 @@
 # Webserver
 website:
   url: 'http://mongobot.com'
-  reload: '/tmp/mongo.reload'
+  reloader: '/tmp/mongo.reload'
 
   # Server media diretories
   serverstorage: 'server/static'

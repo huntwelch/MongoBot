@@ -285,8 +285,10 @@ class Thalamus(object):
         print "*** target: %s; user: %s" % (target, user.nick)
 
         # Only listen to authenticated users
-        if not user.is_authenticated and not user.is_guest:
-            self.send('PRIVMSG %s :My daddy says not to listen to you.' % target)
+        if not user.is_authenticated \
+        and not user.is_guest \
+        and command not in self.cx.public_commands:
+            self.send('PRIVMSG %s :My * daddy says not to listen to you.' % target)
             return (source, args)
 
         # If there was no command specified, return the source and args so any bound
