@@ -15,7 +15,7 @@ import simplejson as json
 from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash, _app_ctx_stack
 from server.decorators import requires_auth
-from server.helpers import fetch_chats, render_xml, diplomacy_state
+from server.helpers import fetch_chats, render_xml
 from settings import POEMS
 from autonomic import Dendrite
 from brainmeats.broca import Broca
@@ -31,16 +31,6 @@ def page_not_found(e):
 @app.route("/")
 def index():
     return render_template('index.html')
-
-
-@app.route("/api/diplomacy/state")
-def render_provinces():
-    return json.dumps(diplomacy_state())
-
-
-@app.route("/diplomacy")
-def diplomacy():
-    return render_template('diplomacy.html')
 
 
 @app.route("/api/chat", methods=['GET', 'POST'])
