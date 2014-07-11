@@ -299,6 +299,12 @@ class Reference(Dendrite):
             default[0] = 1
             default[1] = self.values[0][1:]
             send = default
+        elif 'd' in self.values[0]:
+            default[0] = 1
+            num, high = self.values[0].split('d')
+            default[1] = high
+            default[3] = num
+            send = default
         elif self.values:
             splice = len(self.values)
             send = self.values + default[splice:]
