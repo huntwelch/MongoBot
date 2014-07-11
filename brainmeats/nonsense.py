@@ -8,6 +8,8 @@ from random import choice
 from datastore import Drinker
 from xml.dom import minidom as dom
 
+from zalgo import zalgo
+
 
 # Every drunk conversation that produces the idea for
 # a command that just seems funny at the time ends up
@@ -19,6 +21,11 @@ class Nonsense(Dendrite):
 
     def __init__(self, cortex):
         super(Nonsense, self).__init__(cortex)
+
+    @axon
+    def zal(self):
+        self.chat(zalgo())
+        
 
     @axon
     @help("<generate bullshit>")
