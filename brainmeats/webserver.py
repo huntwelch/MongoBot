@@ -20,7 +20,7 @@ class Webserver(Dendrite):
     @help("<Get one-time link to chat log>")
     def chatlink(self):
         num = self._setaccess()
-        link = "%s/chatlogs?onetime=%s" % (self.config.website.url, str(num))
+        link = "%s/chatlogs?onetime=%s" % (self.cx.settings.website.url, str(num))
         self.chat(link)
 
     @axon

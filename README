@@ -91,6 +91,60 @@ Philosophies
 To Do
 =====
 
+    SURGERY BUGS
+
+    + multi and piping are ok! woot!
+    + repeat last command with '-' is busted
+    + registration and guesting needs to be sorted out
+    + cortex.py is parse even used anymore?
+    + acro.py 
+        ACROSCORE in needs to be sorted out
+    + alien.py      *OK*
+    + artsy.py 
+        -gif is borked, unsure why. can ignore everything else
+    + broca.py 
+        the global botnick thing isn't working
+        -compose probably broken
+        -read indicates lastsender is a little borked
+        will wait on some of these until deployment with real data
+    + channelling.py
+        I have no idea what's up with this now that we have thalamus
+    + chess.py
+        -resetchess is broken because I'm missing something obvious about copying variables, but who gives a shit
+    + facebook.py   *OK*
+    + finance.py
+        -q colors are weird, not sure what that's about
+    + holdem.py     *PROBABLY OK*
+        should run a test
+    + memory.py     *OK*
+    + nonsense.py 
+        ACROLIB not defined for a couple of things
+    + peeps.py      *PROBABLY OK* 
+        ... except for guestpass
+    + quotes.py
+        -countquote seems broken
+        -addquote seems broken
+    + reference.py
+        I forget how regexsearch takes input
+        -weather works with a zipcode, otherwise throws error
+        -whois broken, but maybe always true
+    + sms.py        *OK*
+    + stockgame.py  *OK*
+    + system.py
+        -update definitely broken, but it was probably a bad idea in the first place
+        -dis/enanble broken
+        -reload broken in very odd way
+    + turing.py
+        dunno. looks like it should be okay. function names need to be better, this is fucking mandarin
+    + twitting.py   *OK*
+    + webserver.py
+        broken because of config, and should sort out where to put web settings
+
+    
+
+
+    OTHER
+
     + Add autostart for server, if components in place
     + Add an @empty('message if values is empty') decorator
     + Probably make this readme better
@@ -109,4 +163,5 @@ To Do
     + interbot com
     + streamline web stuff
     + multi-platform
+    + add reddit bait functions
 

@@ -110,7 +110,7 @@ class Reference(Dendrite):
     @axon
     @help("<display link to bot's github repository>")
     def source(self):
-        return self.config.misc.repo
+        return self.config.repo
 
     @axon
     @help("[ZIP|LOCATION (ru/moscow)] <get weather, defaults to geo api>")

@@ -150,7 +150,7 @@ class Broca(Dendrite):
             return
 
         name = "%s_%s.txt" % ( int(time.mktime(time.localtime())), self.lastsender )
-        path = self.cx.settings.media.books + name
+        path = '%s/%s' % (self.cx.settings.media.books, name)
 
         savefromweb(book, path)
         with open(path) as b:
@@ -512,7 +512,7 @@ class Broca(Dendrite):
         output = []
 
         wordbank = []
-        for line in open("%s/%s" % (self.cx.config.directory.storage, self.config.acronymlib)):
+        for line in open("%s/%s" % (self.cx.settings.directory.storage, self.config.acronymlib)):
             wordbank.append(line.strip())
 
         for letter in acronym:

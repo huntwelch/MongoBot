@@ -97,7 +97,7 @@ class Artsy(Dendrite):
             return 'Video file not found'
 
         filename = '%s%s.gif' % (time.time(), target)
-        gifpath = 'server%s%s' (self.cx.settings.media.gifs, filename) 
+        gifpath = 'server%s%s' % (self.cx.settings.media.gifs, filename) 
 
         try:
             VideoFileClip(vidpath).subclip(start,finis).resize(0.5).to_gif(gifpath)
@@ -138,6 +138,7 @@ class Artsy(Dendrite):
     # and tends to get cut off by rate limits. The
     # nuts and bolts are in util.py
     @axon
+    @help('FILE <make ascii art out of a downloaded file>')
     def ascii(self):
         if not self.values:
             self.chat("Ascii what?")
@@ -161,6 +162,7 @@ class Artsy(Dendrite):
             self.chat(line)
 
     @axon
+    @help('[imgs|videos] <show downloaded items>')
     def downloads(self):
 
         if not self.values:
@@ -174,7 +176,7 @@ class Artsy(Dendrite):
         iter = 0
         lim=5
         files = []
-        for file in os.listdir(self.cx.settings.media.downloads + type):
+        for file in os.listdir('%s/%s' % (self.cx.settings.media.downloads, type)):
             if file == '.gitignore':
                 continue
             if iter == lim:
