@@ -41,6 +41,7 @@ class Cortex:
     context = CHANNEL
 
     master = False
+    thalamus = False
     sock = False
     values = False
     lastpublic = False
@@ -102,8 +103,8 @@ class Cortex:
         for username in self.realuserdata:
             self.REALUSERS.append(username)
 
-        print '* Evolving thalamus'
-        self.thalamus = Thalamus(self, electroshock)
+        #print '* Evolving thalamus'
+        #self.thalamus = Thalamus(self, electroshock)
 
     # Loads up all the files in brainmeats and runs them
     # through the hookup process.

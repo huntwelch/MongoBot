@@ -3,15 +3,14 @@ import cortex
 
 from config import load_config
 from time import sleep, mktime, localtime
+from thalamus import Thalamus
 
 # Welcome to the beginning of a very strained brain metaphor!
 # This is the shell for running the cortex. Ideally, this will never
 # fail and you never have to reboot. Hah! I make funny, yes? More
 # important, if you make changes to this file, you have to reboot as
-# a reload won't change it.
+# a reload won't change it. Same goes for changes to thalamus.py
 class Medulla:
-
-    sock = False
 
     def __init__(self):
 
@@ -21,6 +20,8 @@ class Medulla:
         self.ENABLED = self.settings.plugins.values().pop(0)
         self.active = True
         self.brain = cortex.Cortex(self)
+        self.thalamus = Thalamus(self.brain)
+        self.brain.thalamus = self.thalamus
 
         # The pulse file is set as a measure of how
         # long the bot has been spinning its gears
@@ -66,17 +67,14 @@ class Medulla:
         import util
         import autonomic
         import cortex
-        import thalamus
         reload(datastore)
         reload(autonomic)
         reload(util)
         reload(cortex)
-        reload(thalamus)
         self.brain = cortex.Cortex(self, True)
+        self.brain.thalamus = self.thalamus
         self.active = True
 
-        print 'boo'
-        print quiet
         if not quiet:
             self.brain.act('comes to.')
         else:
