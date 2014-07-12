@@ -21,7 +21,7 @@ from config import load_config
 
 from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
-    Browse, Butler
+    Browse, Butler, zalgo
 from autonomic import serotonin, Neurons, Synapse
 from thalamus import Thalamus
 from cybernetics import metacortex
@@ -619,6 +619,9 @@ class Cortex:
             user = Id(self.lastsender)
             whom = user.nick
 
+        if randint(1, 170) == 13:
+            message = zalgo(message) 
+
         filter(lambda x: x in string.printable, message)
         try:
             message = message.encode('utf-8')
@@ -636,7 +639,7 @@ class Cortex:
             self.thalamus.send('PRIVMSG %s :%s' % (whom,m))
         except Exception as e:
             try:
-                self.thalamus.send('PRIVMSG %s :Having trouble saying that for some reason' % whom)
+                self.thalamus.send('PRIVMSG %s :ERROR: ' % (whom, str(e)))
             except:
                 pass
 

@@ -54,7 +54,7 @@ New features
 
 
 Philosophies
-===========
+============
 
     Don't nest logic when you can short circuit.
 
@@ -87,6 +87,9 @@ Philosophies
     instead of just chatting from the function. 
     
     Why would anyone add piping to a chat bot? I dunno. Things got out of hand.
+
+    All commit messages for commits touching zalgo code must be 'ZALGO' or 'HE COMES',
+    otherwise the pull request will be refused.
 
 To Do
 =====

@@ -3,12 +3,10 @@ import time
 
 from autonomic import axon, help, Dendrite
 #from settings import ACROLIB, NICK
-from util import colorize, pageopen, shorten
+from util import colorize, pageopen, shorten, zalgo
 from random import choice
 from datastore import Drinker
 from xml.dom import minidom as dom
-
-from zalgo import zalgo
 
 
 # Every drunk conversation that produces the idea for
@@ -24,8 +22,7 @@ class Nonsense(Dendrite):
 
     @axon
     def zal(self):
-        self.chat(zalgo())
-        
+        self.chat(zalgo(' '.join(self.values)))
 
     @axon
     @help("<generate bullshit>")
