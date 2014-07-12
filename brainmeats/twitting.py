@@ -2,6 +2,7 @@ import tweepy
 import re
 
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Receptor, public
+from cybernetics import metacortex
 
 @Cerebellum
 class Twitting(Dendrite):
@@ -17,7 +18,7 @@ class Twitting(Dendrite):
         self.api = tweepy.API(self.auth)
 
     @axon
-    @help('<show link to %NICK%\'s twitter feed>')
+    @help('<show link to %s\'s twitter feed>' % metacortex.botnick)
     def totw(self):
         return self.config.page
 
@@ -41,7 +42,7 @@ class Twitting(Dendrite):
 
 
     @axon
-    @help('MESSAGE <post to %NICK%\'s twitter feed>')
+    @help('MESSAGE <post to %s\'s twitter feed>' % metacortex.botnick)
     def tweet(self, _message=False):
         if not self.values and not _message:
             self.chat('Tweet what?')

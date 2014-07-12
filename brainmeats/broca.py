@@ -16,9 +16,9 @@ from random import choice, randint
 from util import savefromweb, Browse
 from bs4 import BeautifulSoup as bs4
 from wordnik import swagger, WordApi
+from cybernetics import metacortex
 
-
-botnick = False
+botnick = metacortex.botnick
 
 # Much fail here. I study up on NLTK at the rate
 # of 5 minutes a month. The miscellaneous language
@@ -34,9 +34,6 @@ class Broca(Dendrite):
         super(Broca, self).__init__(cortex)
         self.markov = redis.StrictRedis(unix_socket_path=self.cx.settings.sys.redissock)
 
-        # Whaddyagonnado
-        global botnick 
-        botnick = self.botconf.nick
 
     @axon
     @help('TITLE <have %s compose poetry>' % botnick)

@@ -3,6 +3,8 @@ import shutil
 import pkgutil
 import socket
 import string
+import traceback
+import __builtin__
 
 
 from os import path
@@ -22,9 +24,8 @@ from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
     Browse, Butler
 from autonomic import serotonin, Neurons, Synapse
 from thalamus import Thalamus
+from cybernetics import metacortex
 from id import Id
-
-import traceback
 
 
 CHANNEL = '#okdrink'
@@ -75,7 +76,6 @@ class Cortex:
 
     thalamus = False
 
-
     def __init__(self, master):
 
         print '* Initializing'
@@ -84,7 +84,8 @@ class Cortex:
         self.secrets = master.secrets
         self.channels = self.secrets.channels
         self.personality = self.settings.bot
-
+         
+        metacortex.botnick = self.personality.nick
 
         print '* Exciting neurons'
         Neurons.cortex = self

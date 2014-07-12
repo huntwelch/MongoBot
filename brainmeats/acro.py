@@ -1,6 +1,7 @@
 import os
 
 from autonomic import axon, help, Dendrite
+from cybernetics import metacortex
 from random import choice, randint, shuffle
 from time import mktime, localtime, strftime
 
@@ -76,11 +77,11 @@ class Acro(Dendrite):
     @help("<print the rules for the acro game>")
     def acrorules(self):
         self.chat("1 of 6 start game with %sacro." % self.botconf.command_prefix)
-        self.chat("2 of 6 when the acronym comes up, type /msg %s your version of what the acronym stands for." % self.botconf.nick)
+        self.chat("2 of 6 when the acronym comes up, type /msg %s your version of what the acronym stands for." % metacortex.botnick)
         self.chat("3 of 6 each word of your submission is automatically uppercased unless you preface it with '-', so 'do -it up' will show as 'Do it Up'.")
-        self.chat("4 of 6 when the voting comes up, msg %s with the number of your vote." % self.botconf.nick)
+        self.chat("4 of 6 when the voting comes up, msg %s with the number of your vote." % metacortex.botnick)
         self.chat("5 of 6 play till the rounds are up.")
-        self.chat("6 of 6 %s plays by default." % (self.botconf.nick))
+        self.chat("6 of 6 %s plays by default." % (metacortex.botnick))
 
     def gimper(self, check, action, penalty):
         gimps = []
@@ -137,7 +138,7 @@ class Acro(Dendrite):
             sender = message[0][1:].split('!')[0]
             entry = message[3][1:]
         else:
-            sender = self.botconf.nick
+            sender = metacortex.botnick
             entry = self.cx.brainmeants["broca"].acronymit(self.currentacronym)
 
         if sender not in self.players and self.round != 1:
@@ -192,8 +193,8 @@ class Acro(Dendrite):
                 self.players.append(sender)
 
         elif self.stage == "voting":
-            if self.config.botplay and self.botconf.nick not in self.voters:
-                self.voters.append(self.botconf.nick)
+            if self.config.botplay and metacortex.botnick not in self.voters:
+                self.voters.append(metacortex.botnick)
 
             if len(self.players) < self.config.minplayers:
                 self.announce("Need at least" + str(self.config.minplayers) + " players. Sorry.")

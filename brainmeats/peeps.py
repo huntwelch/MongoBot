@@ -281,7 +281,7 @@ class Peeps(Dendrite):
         if datetime.date.today().day != check.day:
             return
 
-        self.all(NICK)
+        self.all()
         self.announce('Meetup tonight! %s' % MEETUP_LOCATION)
 
     @axon
