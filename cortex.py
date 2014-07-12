@@ -21,9 +21,9 @@ from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
     Browse, Butler, zalgo
 from autonomic import serotonin, Neurons, Synapse
-from thalamus import Thalamus
 from cybernetics import metacortex
 from id import Id
+from thalamus import Thalamus
 
 
 CHANNEL = '#okdrink'
@@ -72,9 +72,9 @@ class Cortex:
     boredom = int(mktime(localtime()))
     namecheck = int(mktime(localtime()))
 
-    thalamus = False
+    _thalamus = False
 
-    def __init__(self, master):
+    def __init__(self, master, electroshock=False):
 
         print '* Initializing'
         self.master = master
@@ -92,7 +92,7 @@ class Cortex:
         connectdb()
 
         print '* Loading brainmeats'
-        self.loadbrains()
+        self.loadbrains(electroshock)
 
         print '* Waking butler'
         self.butler = Butler(self)
@@ -103,7 +103,7 @@ class Cortex:
             self.REALUSERS.append(username)
 
         print '* Evolving thalamus'
-        self.thalamus = Thalamus(self)
+        self.thalamus = Thalamus(self, electroshock)
 
     # Loads up all the files in brainmeats and runs them
     # through the hookup process.

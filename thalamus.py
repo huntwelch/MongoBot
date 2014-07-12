@@ -36,20 +36,24 @@ class Thalamus(object):
     '''
     Initialize and auto-connect
     '''
-    def __init__(self, cortex):
+    def __init__(self, cortex, electroshock):
 
         self.cx = cortex
 
         self.settings = load_config('config/settings.yaml')
         self.secrets = load_config('config/secrets.yaml')
 
-        self.connect()
+        self.connect(electroshock)
 
 
     '''
     Make those connections, you will feel so much more human.
     '''
-    def connect(self):
+    def connect(self, electroshock):
+
+        if electroshock:
+            self.sock = self.cx.master.sock
+            return
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -64,6 +68,8 @@ class Thalamus(object):
         self.sock.setblocking(0)
 
         self.introduce()
+
+        self.cx.master.sock = self.sock 
 
 
     '''
@@ -97,7 +103,6 @@ class Thalamus(object):
             # TODO: Set up auto-reconnect here
             print 'Connection lost.'
             sys.exit()
-
         return data
 
 

@@ -10,6 +10,9 @@ from time import sleep, mktime, localtime
 # important, if you make changes to this file, you have to reboot as
 # a reload won't change it.
 class Medulla:
+
+    sock = False
+
     def __init__(self):
 
         print '* Becoming self-aware'
@@ -63,18 +66,17 @@ class Medulla:
         import util
         import autonomic
         import cortex
+        import thalamus
         reload(datastore)
         reload(autonomic)
         reload(util)
         reload(cortex)
-        self.brain = cortex.Cortex(self)
-        self.brain.loadbrains(True)
-
-        # TODO SOOOOO BROKEN
-        #self.brain.getnames()
-
+        reload(thalamus)
+        self.brain = cortex.Cortex(self, True)
         self.active = True
 
+        print 'boo'
+        print quiet
         if not quiet:
             self.brain.act('comes to.')
         else:
