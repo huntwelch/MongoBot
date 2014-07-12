@@ -96,8 +96,9 @@ class System(Dendrite):
     @help('<reload %s>' % metacortex.botnick)
     def reload(self):
         meats = self.cx.brainmeats
-        if 'webserver' in meats:
-            meats['webserver'].reloadserver(True)
+        # Don't know why this is broken
+        #if 'webserver' in meats:
+        #    meats['webserver'].reloadserver(True)
         self.cx.master.reload()
 
     # Actually kills the medulla process and waits for the

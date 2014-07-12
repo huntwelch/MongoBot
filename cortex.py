@@ -1,13 +1,11 @@
 import re
+import os
 import shutil
 import pkgutil
 import socket
 import string
 import traceback
-import __builtin__
 
-
-from os import path
 from datetime import date, timedelta, datetime
 from pytz import timezone
 from time import time, mktime, localtime, sleep
@@ -499,7 +497,7 @@ class Cortex:
         prev = date.today() - timedelta(days=1)
         backlog = '%s/%s-mongo.log' % (self.settings.directory.log, prev.strftime('%Y%m'))
 
-        if path.isfile(backlog):
+        if os.path.isfile(backlog):
             return
 
         shutil.move(self.settings.directory.log, backlog)

@@ -47,11 +47,12 @@ class Medulla:
         else:
             self.brain.act('strokes out.', False, self.secrets.owner)
 
-        for channel in self.secrets.channels:
-            name, attr = channel.popitem()
-            if attr.primary:
-                continue
-            self.brain.brainmeats['channeling'].leave(name)
+        # TODO also broken. Reloading is SO BROKEN
+        #for channel in self.secrets.channels:
+        #    name, attr = channel.popitem()
+        #    if attr.primary:
+        #        continue
+        #    self.brain.brainmeats['channeling'].leave(name)
 
         self.active = False
 
@@ -68,7 +69,9 @@ class Medulla:
         reload(cortex)
         self.brain = cortex.Cortex(self)
         self.brain.loadbrains(True)
-        self.brain.getnames()
+
+        # TODO SOOOOO BROKEN
+        #self.brain.getnames()
 
         self.active = True
 

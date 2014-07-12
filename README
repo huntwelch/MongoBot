@@ -96,6 +96,7 @@ To Do
 
     SURGERY BUGS
 
+    + not sure why reload reports lib status twice
     + multi and piping are ok! woot!
     + repeat last command with '-' is busted
     + registration and guesting needs to be sorted out
