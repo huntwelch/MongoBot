@@ -96,15 +96,13 @@ To Do
 
     SURGERY BUGS
 
-    + not sure why reload reports lib status twice
-    + multi and piping are ok! woot!
-    + repeat last command with '-' is busted
+HW  + repeat last command with '-' is busted
     + registration and guesting needs to be sorted out
     + cortex.py is parse even used anymore?
     + acro.py 
         ACROSCORE in needs to be sorted out
     + alien.py      *OK*
-    + artsy.py 
+HW  + artsy.py 
         -gif is borked, unsure why. can ignore everything else
     + broca.py 
         the global botnick thing isn't working
@@ -121,7 +119,7 @@ To Do
     + holdem.py     *PROBABLY OK*
         should run a test
     + memory.py     *OK*
-    + nonsense.py 
+HW  + nonsense.py 
         ACROLIB not defined for a couple of things
     + peeps.py      *PROBABLY OK* 
         ... except for guestpass
@@ -135,13 +133,12 @@ To Do
     + sms.py        *OK*
     + stockgame.py  *OK*
     + system.py
-        -update definitely broken, but it was probably a bad idea in the first place
         -dis/enanble broken
-        -reload broken in very odd way
+HW      -reload broken in very odd way
     + turing.py
         dunno. looks like it should be okay. function names need to be better, this is fucking mandarin
     + twitting.py   *OK*
-    + webserver.py
+HW  + webserver.py
         broken because of config, and should sort out where to put web settings
 
     
@@ -149,6 +146,8 @@ To Do
 
     OTHER
 
+    + remove image after thumbnailing, clear all out on boot
+    + remove video downloads on reboot
     + Add autostart for server, if components in place
     + Add an @empty('message if values is empty') decorator
     + Probably make this readme better
