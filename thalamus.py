@@ -278,6 +278,7 @@ class Thalamus(object):
             return (source, args)
 
         # Parse the user, target, command and arguments information
+        print source
         user = Id(source)
         target = args[0] if args[0] != self.name else user.nick
         command = match.group(1)

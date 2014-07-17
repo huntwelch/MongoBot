@@ -1,7 +1,8 @@
 import locale
 
 from autonomic import axon, help, Dendrite
-from util import pageopen, Stock
+from util import pageopen
+from staff import Broker
 import simplejson
 
 
@@ -19,7 +20,7 @@ class Finance(Dendrite):
 
         showit = False
         try:
-            stock = Stock(symbol)
+            stock = Broker(symbol)
             showit = stock.showquote(self.context)
         except:
             pass

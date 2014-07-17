@@ -122,10 +122,9 @@ HW  + repeat last command with '-' is busted
     + reference.py
         I forget how regexsearch takes input
         -weather works with a zipcode, otherwise throws error
-        -whois broken, but maybe always true
     + system.py
         -dis/enanble broken
-HW      -reload broken in very odd way
+HW      -reload semi-broken in very odd way. works, but doesn't report 'comes to'
     + turing.py
         dunno. looks like it should be okay. function names need to be better, this is fucking mandarin
         

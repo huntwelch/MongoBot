@@ -18,8 +18,8 @@ from config import load_config
 
 
 from datastore import Drinker, connectdb
-from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
-    Browse, Butler, zalgo
+from util import unescape, shorten, ratelimited, postdelicious, savefromweb, zalgo
+from staff import Browser, Butler
 from autonomic import serotonin, Neurons, Synapse
 from cybernetics import metacortex
 from id import Id
@@ -55,6 +55,7 @@ class Cortex:
     joined = False
     operator = False
     bequiet = False
+    lastip = False
 
     butler = False
 
@@ -264,7 +265,6 @@ class Cortex:
             self.members.append(nick)
 
         self.lastsender = nick
-        self.lastip = ip
         self.lastchat = content
 
 

@@ -116,8 +116,7 @@ class Reference(Dendrite):
     @help("[ZIP|LOCATION (ru/moscow)] <get weather, defaults to geo api>")
     def weather(self):
         if not self.secrets.weather_api:
-            self.chat("wundergroun api key is not set")
-            return
+            return "wunderground api key is not set"
 
         if not self.values:
             params = "autoip.json?geo_ip=%s" % self.lastip

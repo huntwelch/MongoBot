@@ -13,7 +13,8 @@ from autonomic import axon, alias, help, Dendrite, public
 
 from datastore import Words, Learned, Structure
 from random import choice, randint
-from util import savefromweb, Browse
+from util import savefromweb
+from staff import Browser
 from bs4 import BeautifulSoup as bs4
 from wordnik import swagger, WordApi
 from cybernetics import metacortex
