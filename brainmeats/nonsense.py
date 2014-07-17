@@ -2,7 +2,6 @@ import os
 import time
 
 from autonomic import axon, help, Dendrite
-#from settings import ACROLIB, NICK
 from util import colorize, pageopen, shorten, zalgo
 from random import choice
 from datastore import Drinker
@@ -105,7 +104,7 @@ class Nonsense(Dendrite):
     def munroesecurity(self):
         output = []
         wordbank = []
-        for line in open(self.settings.directory.storage + "/" + ACROLIB):
+        for line in open(self.config.lib):
             wordbank.append(line.strip())
 
         count = 0

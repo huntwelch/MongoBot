@@ -132,11 +132,10 @@ class Artsy(Dendrite):
         if youtube:
             os.remove(vidpath)
 
-        return '%s%s%s' % (self.cx.settings.misc.website, self.cx.settings.media.gifs, filename)
+        return '%s%s%s' % (self.cx.settings.website.url, self.cx.settings.website.gifs, filename)
 
     # This not as awesome as I thought it would be,
-    # and tends to get cut off by rate limits. The
-    # nuts and bolts are in util.py
+    # and tends to get cut off by rate limits.
     @axon
     @help('FILE <make ascii art out of a downloaded file>')
     def ascii(self):

@@ -26,7 +26,8 @@ class Dendrite(object):
         # Load in config file by the same name as the brainmeats, if available
         try:
             self.config = load_config('config/%s.yaml' % name)
-        except Exception:
+        except Exception as e:
+            print e
             pass
 
     def chat(self, what, target=False, error=False):

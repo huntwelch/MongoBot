@@ -20,6 +20,7 @@ brainmeats in the cortex when commands are recognized.
 class Thalamus(object):
 
     cx = False
+    lastcommand = False
 
     buffer = ''
     connection = False
@@ -273,6 +274,7 @@ class Thalamus(object):
             self.settings.bot.multi_command_prefix),
             args[-1])
         if not match:
+            print 'FAIL'
             return (source, args)
 
         # Parse the user, target, command and arguments information
@@ -283,17 +285,22 @@ class Thalamus(object):
 
         print "*** target: %s; user: %s" % (target, user.nick)
 
+        if not command:
+            command = self.lastcommand
+
         # Only listen to authenticated users
         if not user.is_authenticated \
         and not user.is_guest \
         and command not in self.cx.public_commands:
-            self.send('PRIVMSG %s :My * daddy says not to listen to you.' % target)
+            self.send('PRIVMSG %s :My daddy says not to listen to you.' % target)
             return (source, args)
 
         # If there was no command specified, return the source and args so any bound
         # Receptors can get triggered with the same information
         if not command:
             return (source, args)
+
+        self.lastcommand = command
 
         # Butler that command out yo
         if arguments:

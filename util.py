@@ -25,7 +25,7 @@ secrets = load_config('config/secrets.yaml')
 
 
 # For onetime stuff
-totp = pyotp.TOTP(base64.b32encode(secrets.http.password), interval=600)
+totp = pyotp.TOTP(base64.b32encode(secrets.webserver.password), interval=600)
 
 
 # Utility functions
@@ -341,17 +341,19 @@ def savevideo(url, path):
 # about it right now.
 def savefromweb(url, path, thumber=False):
     # TODO could be a receptor that can also get called with a specific url attached to it
-    #r = requests.get(url, stream=True, verify=False)
+    # TODO deprecate function in favor of Browse. Note dependencies
+    r = requests.get(url, stream=True, verify=False)
 
 
-    #if r.status_code != 200:
-    #    return
+    if r.status_code != 200:
+        return
 
-    #with open(path, 'w+') as f:
-    #    for chunk in r.iter_content(1024):
-    #        f.write(chunk)
-    #    f.close()
+    with open(path, 'w+') as f:
+        for chunk in r.iter_content(1024):
+            f.write(chunk)
+        f.close()
 
+    # TODO this qualifies as either its own method or an artsy method
     #if thumber:
     #    fname = "%s_%s.jpeg" % ( thumber, int(time.mktime(time.localtime())) )
     #    img = Image.open(path)

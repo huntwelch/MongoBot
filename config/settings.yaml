@@ -74,6 +74,8 @@ misc:
   thumbsize: 40
   website: 'http://www.mongobot.com' # Dupped by webserver
   
+# Web stuff
+website: !include webserver.yaml
 
 # Plugins
 plugins: !include plugins.yaml
