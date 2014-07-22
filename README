@@ -97,7 +97,7 @@ To Do
     SURGERY BUGS
 
 HW  + repeat last command with '-' is busted
-    + registration and guesting needs to be sorted out
+EC  + registration and guesting needs to be sorted out
     + cortex.py is parse even used anymore? If not move the comment as appropriately
     + acro.py 
         ACROSCORE in needs to be sorted out
@@ -115,7 +115,7 @@ HW  + repeat last command with '-' is busted
     + holdem.py     *PROBABLY OK*
         should run a test
     + peeps.py      *PROBABLY OK* 
-        ... except for guestpass
+EC      ... except for guestpass
     + quotes.py
         -countquote seems broken
         -addquote seems broken
