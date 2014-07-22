@@ -4,16 +4,15 @@ import re
 import subprocess
 import signal
 
-from autonomic import axon, alias, help, Dendrite
-from settings import IMGS, VIDS, GIFS, WEBSITE, DOWNLOADS
-from util import asciiart, savevideo
+from autonomic import axon, alias, help, Dendrite, public
+from util import savevideo
 from moviepy.editor import *
 
 
 # This monstrous meat (heh) depends on things like
 # ffmpeg and all kinds of nastiness ye must install.
 # All highly experiemental, and way, way beyond the
-# sorts of things that would belong in a bot.
+# sorts of things that belong in a bot.
 class Artsy(Dendrite):
 
     types = ['imgs', 'videos']
@@ -27,7 +26,7 @@ class Artsy(Dendrite):
             return 'Get what?'
 
         url = self.values[0]
-        result = savevideo(url, VIDS + '%(title)s.%(ext)s')
+        result = savevideo(url, self.cx.settings.media.videos + '/%(title)s.%(ext)s')
 
         return 'Saved %s' % result
 
@@ -89,16 +88,16 @@ class Artsy(Dendrite):
         youtube = False
         if target.find('www.youtube.com') != -1:
             youtube = True
-            target = savevideo(target, VIDS + '%(title)s.%(ext)s')
+            target = savevideo(target, self.cx.settings.media.videos + '/%(title)s.%(ext)s')
             target = target.split('/').pop()
 
-        vidpath = VIDS + target
+        vidpath = '%s/%s' % (self.cx.settings.media.videos, target)
 
         if not os.path.isfile(vidpath):
             return 'Video file not found'
 
         filename = '%s%s.gif' % (time.time(), target)
-        gifpath = 'server' + GIFS + filename
+        gifpath = 'server%s%s' % (self.cx.settings.media.gifs, filename) 
 
         try:
             VideoFileClip(vidpath).subclip(start,finis).resize(0.5).to_gif(gifpath)
@@ -133,18 +132,18 @@ class Artsy(Dendrite):
         if youtube:
             os.remove(vidpath)
 
-        return WEBSITE + GIFS + filename
+        return '%s%s%s' % (self.cx.settings.website.url, self.cx.settings.website.gifs, filename)
 
     # This not as awesome as I thought it would be,
-    # and tends to get cut off by rate limits. The
-    # nuts and bolts are in util.py
+    # and tends to get cut off by rate limits.
     @axon
+    @help('FILE <make ascii art out of a downloaded file>')
     def ascii(self):
         if not self.values:
             self.chat("Ascii what?")
             return
 
-        path = IMGS + self.values[0]
+        path = '%s/%s' % (self.cx.settings.media.images, self.values[0])
 
         try:
             preview = asciiart(path)
@@ -162,6 +161,7 @@ class Artsy(Dendrite):
             self.chat(line)
 
     @axon
+    @help('[imgs|videos] <show downloaded items>')
     def downloads(self):
 
         if not self.values:
@@ -175,7 +175,7 @@ class Artsy(Dendrite):
         iter = 0
         lim=5
         files = []
-        for file in os.listdir(DOWNLOADS + type):
+        for file in os.listdir('%s/%s' % (self.cx.settings.media.downloads, type)):
             if file == '.gitignore':
                 continue
             if iter == lim:

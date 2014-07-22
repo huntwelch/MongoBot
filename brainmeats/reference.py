@@ -110,14 +110,13 @@ class Reference(Dendrite):
     @axon
     @help("<display link to bot's github repository>")
     def source(self):
-        return self.config.misc.repo
+        return self.config.repo
 
     @axon
     @help("[ZIP|LOCATION (ru/moscow)] <get weather, defaults to geo api>")
     def weather(self):
         if not self.secrets.weather_api:
-            self.chat("wundergroun api key is not set")
-            return
+            return "wunderground api key is not set"
 
         if not self.values:
             params = "autoip.json?geo_ip=%s" % self.lastip

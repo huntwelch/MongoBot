@@ -3,13 +3,15 @@ import cortex
 
 from config import load_config
 from time import sleep, mktime, localtime
+from thalamus import Thalamus
 
 # Welcome to the beginning of a very strained brain metaphor!
 # This is the shell for running the cortex. Ideally, this will never
 # fail and you never have to reboot. Hah! I make funny, yes? More
 # important, if you make changes to this file, you have to reboot as
-# a reload won't change it.
+# a reload won't change it. Same goes for changes to thalamus.py
 class Medulla:
+
     def __init__(self):
 
         print '* Becoming self-aware'
@@ -18,6 +20,8 @@ class Medulla:
         self.ENABLED = self.settings.plugins.values().pop(0)
         self.active = True
         self.brain = cortex.Cortex(self)
+        self.thalamus = Thalamus(self.brain)
+        self.brain.thalamus = self.thalamus
 
         # The pulse file is set as a measure of how
         # long the bot has been spinning its gears
@@ -47,11 +51,12 @@ class Medulla:
         else:
             self.brain.act('strokes out.', False, self.secrets.owner)
 
-        for channel in self.secrets.channels:
-            name, attr = channel.popitem()
-            if attr.primary:
-                continue
-            self.brain.brainmeats['channeling'].leave(name)
+        # TODO also broken. Reloading is SO BROKEN
+        #for channel in self.secrets.channels:
+        #    name, attr = channel.popitem()
+        #    if attr.primary:
+        #        continue
+        #    self.brain.brainmeats['channeling'].leave(name)
 
         self.active = False
 
@@ -66,10 +71,8 @@ class Medulla:
         reload(autonomic)
         reload(util)
         reload(cortex)
-        self.brain = cortex.Cortex(self)
-        self.brain.loadbrains(True)
-        self.brain.getnames()
-
+        self.brain = cortex.Cortex(self, True)
+        self.brain.thalamus = self.thalamus
         self.active = True
 
         if not quiet:

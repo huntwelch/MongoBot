@@ -2,8 +2,7 @@ import os
 import time
 
 from autonomic import axon, help, Dendrite
-#from settings import ACROLIB, NICK
-from util import colorize, pageopen, shorten
+from util import colorize, pageopen, shorten, zalgo
 from random import choice
 from datastore import Drinker
 from xml.dom import minidom as dom
@@ -19,6 +18,10 @@ class Nonsense(Dendrite):
 
     def __init__(self, cortex):
         super(Nonsense, self).__init__(cortex)
+
+    @axon
+    def zal(self):
+        self.chat(zalgo(' '.join(self.values)))
 
     @axon
     @help("<generate bullshit>")
@@ -60,7 +63,7 @@ class Nonsense(Dendrite):
     def fml(self):
 
         url = 'http://api.fmylife.com'
-        params = {'language': 'en', 'key': self.cx.secrets.fml.key}
+        params = {'language': 'en', 'key': self.secrets.fml_api}
 
         if self.values and self.values[0]:
             url += '/view/search'
@@ -101,7 +104,7 @@ class Nonsense(Dendrite):
     def munroesecurity(self):
         output = []
         wordbank = []
-        for line in open(self.settings.directory.storage + "/" + ACROLIB):
+        for line in open(self.config.lib):
             wordbank.append(line.strip())
 
         count = 0

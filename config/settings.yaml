@@ -29,9 +29,9 @@ irc:
   password: False
 
 bot:
-  nick: 'Abugrakljsd'
-  ident: 'Abugrakljsd'
-  realname: 'Abugrakljsd'
+  nick: 'Ciazaim'
+  ident: 'Ciazaim'
+  realname: 'Ciazaim'
   password: Null # The password to the IRC server
   command_prefix: '-'
   multi_command_prefix: '*'
@@ -56,9 +56,12 @@ directory:
 # Media
 media:
   books: "{directory.storage}/booklearnin"
-  images: "{directory.storage}/imgs"
-  videos: "{directory.storage}/videos"
   poems: "{directory.storage}/poems"
+  downloads: "{directory.storage}/downloads"
+  images: "{media.downloads}/imgs"
+  videos: "{media.downloads}/videos"
+  gifs: '/static/gifs/'
+  thumbs: '/static/thumbs/'
   storeurls: True
   storeimgs: True
 
@@ -69,6 +72,10 @@ general:
 # Misc config item
 misc:
   thumbsize: 40
+  website: 'http://www.mongobot.com' # Dupped by webserver
+  
+# Web stuff
+website: !include webserver.yaml
 
 # Plugins
 plugins: !include plugins.yaml

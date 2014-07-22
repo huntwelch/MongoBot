@@ -1,12 +1,18 @@
 plugins:
+  - acro
   - alien
+  - artsy
+  - broca
+  - channeling
   - chess
   - facebook
   - finance
   - holdem
+  - marvel
   - memory
   - nonsense
   - peeps
+  - quotes
   - reference
   - sms
   - stockgame

@@ -4,14 +4,9 @@ import pkgutil
 import threading
 
 from autonomic import axon, help, Dendrite, public, alias
-#from settings import SAFESET, NICK, REGISTERED, CONTROL_KEY
+from cybernetics import metacortex
 from util import colorize
 from time import sleep
-
-
-# TODO Remove this crap
-SAFESET = []
-NICK = 'REMOVE THIS'
 
 
 # System is stuff relating to the function of the
@@ -66,15 +61,6 @@ class System(Dendrite):
     def threads(self):
         return threading.activeCount()
 
-    @axon
-    @help("<show editable settings>")
-    def settings(self):
-        for name, value in SAFESET:
-            if self.values and name not in self.values:
-                continue
-            sleep(1)
-            self.chat(name + " : " + str(value))
-
     # This should be pretty straightforward. Based on BOT_PASS
     # in secrets; nobody can use the bot until they're
     # registered. Went with flat file for ease of editing
@@ -104,54 +90,15 @@ class System(Dendrite):
 
         self.chat("You in, bro.")
 
-    # Rewrite a setting in the settings file. Available settings
-    # are defined in SAFESET. Do not put SAFESET in the SAFESET.
-    # That's just crazy.
-    @axon
-    @help("SETTING=VALUE <update a bot setting>")
-    def update(self, vals=False):
-        if not vals:
-            vals = self.values
-
-        if not vals or len(vals) != 2:
-            self.chat("Must name SETTING and value, please")
-            return
-
-        pull = ' '.join(vals)
-
-        if pull.find("'") != -1 or pull.find("\\") != -1 or pull.find("`") != -1:
-            self.chat("No single quotes, backtics, or backslashes, thank you.")
-            return
-
-        setting, value = pull.split(' ', 1)
-
-        safe = False
-        for safesetting, val in SAFESET:
-            if setting == safesetting:
-                safe = True
-                break
-
-        if not safe:
-            self.chat("That's not a safe value to change.")
-            return
-
-        rewrite = "sed 's/" + setting + " =.*/" + setting + " = " + value + "/'"
-        targeting = ' <settings.py >tmp'
-        reset = 'mv tmp settings.py'
-
-        os.system(rewrite + targeting)
-        os.system(reset)
-
-        self.chat(NICK + " rewrite brain. Feel smarter.")
-
     # Reloads the bot. Any changes make to cortex or brainmeats
     # and most settings will be reflected after a reload.
     @axon
-    @help('<reload %NICK%>')
+    @help('<reload %s>' % metacortex.botnick)
     def reload(self):
         meats = self.cx.brainmeats
-        if 'webserver' in meats:
-            meats['webserver'].reloadserver(True)
+        # Don't know why this is broken
+        #if 'webserver' in meats:
+        #    meats['webserver'].reloadserver(True)
         self.cx.master.reload()
 
     # Actually kills the medulla process and waits for the
@@ -257,19 +204,3 @@ class System(Dendrite):
         self.cx.master.reload(True)
 
         self.chat(' '.join(messages))
-
-    # Show secret stuff.
-    @axon
-    @help("<print api keys and stuff>")
-    def secrets(self):
-        # TODO: lot of new secrets, add them, or list them and get specific one from values
-        items = {
-            'WEATHER_API': WEATHER_API,
-            'WORDNIK_API': WORDNIK_API,
-            'FML_API': FML_API,
-            'WOLFRAM_API': WOLFRAM_API,
-            'DELICIOUS_USER ': DELICIOUS_USER,
-            'DELICIOUS_PASS ': DELICIOUS_PASS,
-        }
-        for key, val in items.iteritems():
-            self.chat(key + ": " + val)

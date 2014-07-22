@@ -20,6 +20,7 @@ brainmeats in the cortex when commands are recognized.
 class Thalamus(object):
 
     cx = False
+    lastcommand = False
 
     buffer = ''
     connection = False
@@ -97,7 +98,6 @@ class Thalamus(object):
             # TODO: Set up auto-reconnect here
             print 'Connection lost.'
             sys.exit()
-
         return data
 
 
@@ -274,9 +274,11 @@ class Thalamus(object):
             self.settings.bot.multi_command_prefix),
             args[-1])
         if not match:
+            print 'FAIL'
             return (source, args)
 
         # Parse the user, target, command and arguments information
+        print source
         user = Id(source)
         target = args[0] if args[0] != self.name else user.nick
         command = match.group(1)
@@ -284,8 +286,13 @@ class Thalamus(object):
 
         print "*** target: %s; user: %s" % (target, user.nick)
 
+        if not command:
+            command = self.lastcommand
+
         # Only listen to authenticated users
-        if not user.is_authenticated and not user.is_guest:
+        if not user.is_authenticated \
+        and not user.is_guest \
+        and command not in self.cx.public_commands:
             self.send('PRIVMSG %s :My daddy says not to listen to you.' % target)
             return (source, args)
 
@@ -293,6 +300,8 @@ class Thalamus(object):
         # Receptors can get triggered with the same information
         if not command:
             return (source, args)
+
+        self.lastcommand = command
 
         # Butler that command out yo
         if arguments:

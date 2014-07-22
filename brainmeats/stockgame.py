@@ -1,6 +1,5 @@
 from mongoengine import *
 
-
 from autonomic import axon, help, Dendrite
 from datastore import Drinker, Position
 from datetime import datetime
@@ -43,7 +42,7 @@ class Stockgame(Dendrite):
             self.chat("Do you think this is a muthafuckin game?")
             return
 
-        stock = Stock(symbol)
+        stock = Broker(symbol)
 
         if not stock:
             self.chat("Stock not found")
@@ -102,7 +101,7 @@ class Stockgame(Dendrite):
             self.chat("Do you think this is a muthafuckin game?")
             return
 
-        stock = Stock(symbol)
+        stock = Broker(symbol)
 
         if not stock:
             self.chat("Stock not found")
@@ -195,7 +194,7 @@ class Stockgame(Dendrite):
             cash = drinker.cash
 
             for p in drinker.positions:
-                stock = Stock(p.symbol)
+                stock = Broker(p.symbol)
                 if p.type == 'long':
                     net = p.quantity * stock.price
                 else:
@@ -253,7 +252,7 @@ class Stockgame(Dendrite):
 
             total = 0
             for p in drinker.positions:
-                stock = Stock(p.symbol)
+                stock = Broker(p.symbol)
 
                 if p.type == 'long':
                     net = p.quantity * (stock.price - p.price)

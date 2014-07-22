@@ -54,7 +54,7 @@ New features
 
 
 Philosophies
-===========
+============
 
     Don't nest logic when you can short circuit.
 
@@ -88,9 +88,54 @@ Philosophies
     
     Why would anyone add piping to a chat bot? I dunno. Things got out of hand.
 
+    All commit messages for commits touching zalgo code must be 'ZALGO' or 'HE COMES',
+    otherwise the pull request will be refused.
+
 To Do
 =====
 
+    SURGERY BUGS
+
+HW  + repeat last command with '-' is busted
+    + registration and guesting needs to be sorted out
+    + cortex.py is parse even used anymore? If not move the comment as appropriately
+    + acro.py 
+        ACROSCORE in needs to be sorted out
+    + broca.py 
+        the global botnick thing isn't working
+        -compose probably broken
+        -read indicates lastsender is a little borked
+        will wait on some of these until deployment with real data
+    + channelling.py
+        I have no idea what's up with this now that we have thalamus
+    + chess.py
+        -resetchess is broken because I'm missing something obvious about copying variables, but who gives a shit
+    + finance.py
+        -q colors are weird, not sure what that's about
+    + holdem.py     *PROBABLY OK*
+        should run a test
+    + peeps.py      *PROBABLY OK* 
+        ... except for guestpass
+    + quotes.py
+        -countquote seems broken
+        -addquote seems broken
+    + reference.py
+        I forget how regexsearch takes input
+        -weather works with a zipcode, otherwise throws error
+    + system.py
+        -dis/enanble broken
+HW      -reload semi-broken in very odd way. works, but doesn't report 'comes to'
+    + turing.py
+        dunno. looks like it should be okay. function names need to be better, this is fucking mandarin
+        
+
+    
+
+
+    OTHER
+
+    + remove image after thumbnailing, clear all out on boot
+    + remove video downloads on reboot
     + Add autostart for server, if components in place
     + Add an @empty('message if values is empty') decorator
     + Probably make this readme better
@@ -103,8 +148,12 @@ To Do
     + stock game: account for splits and reverse splits
     + add @requires decorator, check for server, redis, mongo, have -features command to check.
       Function by function level?
+    + just take out image relink, make it a thumblink
+    + fix epic, constant crashing
     + mud-style game
     + interbot com
     + streamline web stuff
     + multi-platform
+    + add reddit bait functions
+    + futher abstract thalamus to load an interface depending on connection type
 

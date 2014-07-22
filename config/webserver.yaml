@@ -1,11 +1,6 @@
-# Webserver
-website:
-  url: 'http://mongobot.com'
-  reload: '/tmp/mongo.reload'
+url: 'http://mongobot.com'
+reloader: '/tmp/mongo.reload'
 
-  # Server media diretories
-  serverstorage: 'server/static'
-  gifs: "{directory.serverstorage}/gifs"
-  thumbs: "{directory.serverstorage}/thumbs"
-
-
+serverstorage: 'server/static'
+gifs: '/static/gifs/'
+thumbs: '/static/thumbs/'

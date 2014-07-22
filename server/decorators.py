@@ -12,7 +12,7 @@ def check_auth(username, password):
     password combination is valid.
     """
     global config
-    return username == config.http.user and password == config.http.password 
+    return username == config.webserver.user and password == config.webserver.password 
 
 
 def authenticate():

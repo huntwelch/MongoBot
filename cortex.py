@@ -1,11 +1,11 @@
 import re
+import os
 import shutil
 import pkgutil
 import socket
 import string
+import traceback
 
-
-from os import path
 from datetime import date, timedelta, datetime
 from pytz import timezone
 from time import time, mktime, localtime, sleep
@@ -18,13 +18,12 @@ from config import load_config
 
 
 from datastore import Drinker, connectdb
-from util import unescape, shorten, ratelimited, postdelicious, savefromweb, \
-    Browse, Butler
+from util import unescape, shorten, ratelimited, postdelicious, savefromweb, zalgo
+from staff import Browser, Butler
 from autonomic import serotonin, Neurons, Synapse
-from thalamus import Thalamus
+from cybernetics import metacortex
 from id import Id
-
-import traceback
+from thalamus import Thalamus
 
 
 CHANNEL = '#okdrink'
@@ -42,11 +41,13 @@ class Cortex:
     context = CHANNEL
 
     master = False
+    thalamus = False
     sock = False
     values = False
     lastpublic = False
     lastprivate = False
     lastsender = False
+    lastrealsender = False
     gettingnames = True
     memories = False
     autobabble = False
@@ -54,6 +55,7 @@ class Cortex:
     joined = False
     operator = False
     bequiet = False
+    lastip = False
 
     butler = False
 
@@ -62,6 +64,7 @@ class Cortex:
     members = []
     guests = []
     broken = []
+    realuserdata = []
     REALUSERS = []
 
     commands = {}
@@ -71,10 +74,9 @@ class Cortex:
     boredom = int(mktime(localtime()))
     namecheck = int(mktime(localtime()))
 
-    thalamus = False
+    _thalamus = False
 
-
-    def __init__(self, master):
+    def __init__(self, master, electroshock=False):
 
         print '* Initializing'
         self.master = master
@@ -82,7 +84,8 @@ class Cortex:
         self.secrets = master.secrets
         self.channels = self.secrets.channels
         self.personality = self.settings.bot
-
+         
+        metacortex.botnick = self.personality.nick
 
         print '* Exciting neurons'
         Neurons.cortex = self
@@ -91,16 +94,18 @@ class Cortex:
         connectdb()
 
         print '* Loading brainmeats'
-        self.loadbrains()
+        self.loadbrains(electroshock)
 
         print '* Waking butler'
         self.butler = Butler(self)
 
         print '* Loading users'
-        self.REALUSERS = load_config(self.settings.directory.authfile)
+        self.realuserdata = load_config(self.settings.directory.authfile)
+        for username in self.realuserdata:
+            self.REALUSERS.append(username)
 
-        print '* Evolving thalamus'
-        self.thalamus = Thalamus(self)
+        #print '* Evolving thalamus'
+        #self.thalamus = Thalamus(self, electroshock)
 
     # Loads up all the files in brainmeats and runs them
     # through the hookup process.
@@ -260,7 +265,6 @@ class Cortex:
             self.members.append(nick)
 
         self.lastsender = nick
-        self.lastip = ip
         self.lastchat = content
 
 
@@ -494,7 +498,7 @@ class Cortex:
         prev = date.today() - timedelta(days=1)
         backlog = '%s/%s-mongo.log' % (self.settings.directory.log, prev.strftime('%Y%m'))
 
-        if path.isfile(backlog):
+        if os.path.isfile(backlog):
             return
 
         shutil.move(self.settings.directory.log, backlog)
@@ -614,6 +618,9 @@ class Cortex:
             user = Id(self.lastsender)
             whom = user.nick
 
+        if randint(1, 170) == 13:
+            message = zalgo(message) 
+
         filter(lambda x: x in string.printable, message)
         try:
             message = message.encode('utf-8')
@@ -631,7 +638,7 @@ class Cortex:
             self.thalamus.send('PRIVMSG %s :%s' % (whom,m))
         except Exception as e:
             try:
-                self.thalamus.send('PRIVMSG %s :Having trouble saying that for some reason' % whom)
+                self.thalamus.send('PRIVMSG %s :ERROR: ' % (whom, str(e)))
             except:
                 pass
 

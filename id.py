@@ -1,3 +1,5 @@
+import socket
+
 from config import load_config
 from datastore import Drinker
 
@@ -10,6 +12,7 @@ class Id(object):
     nick = False
     ident = False
     host = False
+    ip = False
 
     is_authenticated = False
     is_guest = False
@@ -35,6 +38,12 @@ class Id(object):
                 self.ident, self.host = data.split('@')
             except:
                 self.nick = user
+
+            try:
+                self.ip = socket.gethostbyname_ex(self.host.strip())[2][0]
+            except:
+                pass
+
 
         if not self.nick:
             return
