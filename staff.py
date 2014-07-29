@@ -2,9 +2,10 @@ import mechanize
 import urllib
 import threading
 import re
+import time
 
 from collections import OrderedDict
-from util import colorize
+from util import colorize, shorten, pageopen
 
 
 # TODO?: interface with addlive
@@ -136,6 +137,7 @@ class Broker(object):
             raw_list = raw_string.strip().replace('"', '').split(',')
             data = {key: raw_list.pop(0) for (key) in fields.keys()}
         except Exception as e:
+            print e
             return
 
         if data['exchange'] == 'N/A':
