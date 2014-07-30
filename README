@@ -136,6 +136,7 @@ HW      -reload semi-broken in very odd way. works, but doesn't report 'comes to
 
     + remove image after thumbnailing, clear all out on boot
     + remove video downloads on reboot
+    + create bootstrap install
     + Add autostart for server, if components in place
     + Add an @empty('message if values is empty') decorator
     + Probably make this readme better

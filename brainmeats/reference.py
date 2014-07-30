@@ -211,15 +211,13 @@ class Reference(Dendrite):
                 if f is not None:
                     printout.append(n)
 
-            self.chat("Available functions: " + ", ".join(printout))
-            return
+            return 'Available functions: %s' % ', '.join(printout)
+            
 
         string = ' '.join(self.values)
 
         # This is to stop future Kens
-        if "__" in string:
-            self.chat("Rejected.")
-            return
+        if "__" in string: return 'Rejected.'
 
         try:
             result = "{:,}".format(eval(string, {"__builtins__": None}, self.safe_calc))
@@ -230,9 +228,7 @@ class Reference(Dendrite):
 
     @axon
     def ns(self):
-        if not self.values:
-            self.chat("Lookup what?")
-            return
+        if not self.values: return 'Lookup what?'
 
         lookup = self.values[0]
 
@@ -259,8 +255,7 @@ class Reference(Dendrite):
     @axon
     @help('QUERY <get a howdoi answer>')
     def howdoi(self):
-        if not self.values:
-            return 'Howdoi what now?'
+        if not self.values: return 'Howdoi what now?'
 
         try:
             parser = hownow.get_parser()
@@ -281,15 +276,15 @@ class Reference(Dendrite):
         regex = self.values.pop(0)
         line = ' '.join(self.values)
 
+        if '(' not in regex:
+            regex = '(%s)' % regex
+
         try:
             m = re.search(regex, line)
         except Exception as e:
             self.chat('Regex borked', str(e))
             return
 
-
-        if not m:
-            self.chat('No match')
-            return
-
+        if not m: return 'No match'
+            
         return m.group(1)
