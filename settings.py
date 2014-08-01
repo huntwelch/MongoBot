@@ -49,6 +49,7 @@ ENABLED = [
     'diplomacy',
     'facebook',
     'finance',
+    'hangman',
     'holdem',
     'memory',
     'nonsense',
