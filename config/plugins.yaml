@@ -8,6 +8,7 @@ plugins:
   - facebook
   - finance
   - holdem
+  - linker
   - marvel
   - memory
   - nonsense

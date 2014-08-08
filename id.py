@@ -1,8 +1,8 @@
 import socket
+import hashlib
 
 from config import load_config
 from datastore import Drinker
-
 
 '''
 Not the Ego. Not the Super-Ego. The Id.
@@ -15,7 +15,7 @@ class Id(object):
     ip = False
 
     is_authenticated = False
-    is_guest = False
+    is_recognized = False
     is_owner = False
 
     prop = False
@@ -34,8 +34,8 @@ class Id(object):
             user = arguments[0]
 
             try:
-                self.nick, data = user.split('!')
-                self.ident, self.host = data.split('@')
+                self.nick, self.ident = user.split('!')
+                self.host = self.ident.split('@', 1)[1]
             except:
                 self.nick = user
 
@@ -44,27 +44,22 @@ class Id(object):
             except:
                 pass
 
-
         if not self.nick:
             return
 
-        settings = load_config('config/settings.yaml')
-        auth_data = load_config(settings.directory.authfile)
-
-        if self.nick in auth_data:
-            self.is_authenticated = True
-
-            if 'owner' in auth_data[self.nick] and auth_data[self.nick].owner:
-                self.is_owner = True
-
-        #print cortex
-        #if self.cx.guests and self.nick in self.cx.guests:
-        #    self.is_guest = True
-        #    return
+        self.is_recognized = True
 
         self.prop = Drinker.objects(name=self.nick).first()
         if not self.prop:
             self.prop = Drinker(name=self.nick)
+
+        if self.ident in self.prop['idents']:
+            self.is_authenticated = True
+
+        secrets = load_config('config/secrets.yaml')
+
+        if self.nick == secrets.owner and self.is_authenticated:
+            self.is_owner = True
 
 
     '''
@@ -73,7 +68,7 @@ class Id(object):
     '''
     def __getattr__(self, key):
 
-        if not self.is_authenticated or not self.prop:
+        if not self.is_recognized or not self.prop:
             return False
 
         # This can eventually be removed; migrate the data as we go
@@ -144,3 +139,34 @@ class Id(object):
             self.prop.save()
 
         return
+
+    '''
+    Set the users password
+    '''
+    def setpassword(self, password, skip_auth_check=False):
+
+        if (not self.is_authenticated or not self.prop) and not skip_auth_check:
+            return False
+
+        obj = hashlib.sha256(password)
+        self.prop['password'] = obj.hexdigest()
+
+        self.is_authenticated = True
+
+        self.prop.save()
+
+    '''
+    Identify a user by password, and add ident if successful
+    '''
+    def identify(self, password):
+
+        obj = hashlib.sha256(password)
+        if obj.hexdigest() != self.prop['password']:
+            return False
+
+        self.is_authenticated = True
+        self.prop['idents'].append(self.ident)
+
+        self.prop.save()
+
+        return True

@@ -1,7 +1,7 @@
 import os
 import time
 
-from autonomic import axon, help, Dendrite
+from autonomic import axon, help, Dendrite, public
 from util import colorize, pageopen, shorten, zalgo
 from random import choice
 from datastore import Drinker
@@ -22,6 +22,19 @@ class Nonsense(Dendrite):
     @axon
     def zal(self):
         self.chat(zalgo(' '.join(self.values)))
+
+    @axon
+    @public
+    @help("<get cat fact>")
+    def catfact(self):
+        url = 'http://catfacts-api.appspot.com/api/facts'
+
+        try:
+            json = pageopen(url).json()
+        except:
+            return 'No meow facts.'
+
+        return json['facts'][0]
 
     @axon
     @help("<generate bullshit>")

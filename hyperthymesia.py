@@ -1,6 +1,6 @@
 from config import load_config
 import logging
-import logging.config
+from logging import config, Handler
 
 settings = load_config('config/settings.yaml')
 
@@ -16,8 +16,6 @@ class Hyperthymesia(object):
     def __init__(self, *arguments, **keywords):
 
         logging.config.dictConfig(settings.logging)
-
-	self.__set_log_level('debug')
 
     def __set_log_level(self, level):
 
@@ -45,4 +43,10 @@ class Hyperthymesia(object):
         self.__set_log_level('warn')
         self.logger.warn(message, exc_info=True)
 
+class ChatHandler(logging.Handler):
+	def __init__(self, cx):
+		logging.Handler.__init__(self)
+		self.cortex = cx
 
+	def emit(self, record):
+		self.brain.thalamus.send(record)

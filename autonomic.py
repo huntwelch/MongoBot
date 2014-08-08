@@ -67,6 +67,10 @@ class Dendrite(object):
         return self.cx.context
 
     @property
+    def context_is_channel(self):
+        return self.cx.context.startswith('#')
+
+    @property
     def members(self):
         return self.cx.members
 
