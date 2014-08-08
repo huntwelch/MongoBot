@@ -243,7 +243,7 @@ class Stockgame(Dendrite):
             return
 
         if not drinker.positions:
-            self.chat("%s doesn't have one" % whom)
+            self.chat("%s doesn't have one" % drinker.name)
         else:
             drinker.positions.sort(key=lambda p: p.symbol)
 

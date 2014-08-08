@@ -48,3 +48,4 @@ update-checker==0.8
 wordnik==2.1.2
 wsgiref==0.1.2
 youtube-dl==2014.02.22.1
+wolframalpha==1.2

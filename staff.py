@@ -169,7 +169,7 @@ class Broker(object):
         if self.change < 0:
             changestring = colorize(changestring, 'red')
         else:
-            changestring = colorize(changestring, 'green')
+            changestring = colorize(changestring, 'lightgreen')
 
         message = [
             name,

@@ -64,6 +64,9 @@ class Thalamus(object):
 
         self.sock.setblocking(0)
 
+        if hasattr(self.settings.irc, 'password') and self.settings.irc.password:
+            self.send('PASS %s' % self.settings.irc.password)
+
         self.introduce()
 
 
@@ -274,26 +277,26 @@ class Thalamus(object):
             self.settings.bot.multi_command_prefix),
             args[-1])
         if not match:
-            print 'FAIL'
             return (source, args)
 
         # Parse the user, target, command and arguments information
-        print source
         user = Id(source)
         target = args[0] if args[0] != self.name else user.nick
         command = match.group(1)
         arguments = match.group(2)
-
-        print "*** target: %s; user: %s" % (target, user.nick)
 
         if not command:
             command = self.lastcommand
 
         # Only listen to authenticated users
         if not user.is_authenticated \
-        and not user.is_guest \
         and command not in self.cx.public_commands:
             self.send('PRIVMSG %s :My daddy says not to listen to you.' % target)
+
+            # If we recognize the username, at least let them know that we know
+            if user.is_recognized:
+                self.send('PRIVMSG %s :I recognize you, but first user %sidentify...' % (user.nick, self.settings.bot.command_prefix))
+
             return (source, args)
 
         # If there was no command specified, return the source and args so any bound

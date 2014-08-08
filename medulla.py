@@ -4,6 +4,9 @@ import cortex
 from config import load_config
 from time import sleep, mktime, localtime
 from thalamus import Thalamus
+from hyperthymesia import Hyperthymesia
+
+from pprint import pprint
 
 # Welcome to the beginning of a very strained brain metaphor!
 # This is the shell for running the cortex. Ideally, this will never
@@ -19,9 +22,17 @@ class Medulla:
         self.secrets = load_config('config/secrets.yaml')
         self.ENABLED = self.settings.plugins.values().pop(0)
         self.active = True
-        self.brain = cortex.Cortex(self)
+        self.logger = Hyperthymesia()
+
+        try:
+            self.brain = cortex.Cortex(self)
+        except Exception as e:
+            self.logger.warn('Drain bamaged... Stroking... out...')
+            sys.exit()
+
         self.thalamus = Thalamus(self.brain)
         self.brain.thalamus = self.thalamus
+        self.brain.logger = self.logger
 
         # The pulse file is set as a measure of how
         # long the bot has been spinning its gears

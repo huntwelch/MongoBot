@@ -79,7 +79,8 @@ class Position(EmbeddedDocument):
 
 class Drinker(mongoengine.Document):
     name = StringField(required=True)
-    password = StringField(min_length=40, max_length=40)
+    password = StringField(min_length=64, max_length=64)
+    idents = ListField(StringField(), default=list)
     company = StringField()
     phone = StringField()
     rewards = IntField(default=0)

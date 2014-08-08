@@ -3,8 +3,13 @@ import re
 from datetime import datetime
 from flask import Flask, request, session, make_response, render_template
 from config import load_config
+import pyotp
+import base64
 
 config = load_config('config/settings.yaml')
+secrets = load_config('config/secrets.yaml')
+
+totp = pyotp.TOTP(base64.b32encode(secrets.webserver.password), interval=600)
 
 def render_xml(path):
     response = make_response(render_template(path))

@@ -2,7 +2,7 @@ import random
 import os
 
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Receptor
-from util import totp
+from server.helpers import totp
 
 
 # Allz the webs stuff.

@@ -3,10 +3,11 @@ import dateutil.parser
 import re
 import hashlib
 
-from autonomic import axon, help, Dendrite, alias
+from autonomic import axon, help, Dendrite, alias, public
 #from settings import STORAGE, CHANNEL, NICK
 #from secrets import MEETUP_LOCATION, MEETUP_NOTIFY, MEETUP_DAY
 from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore, topScores
+from server.helpers import totp
 from id import Id
 
 # This loosely encapsulates things having to do with
@@ -178,41 +179,70 @@ class Peeps(Dendrite):
         except:
             self.chat("Couldn't parse that out.")
 
-    @axon
-    @help("USERNAME <give temporary access to USERNAME>")
-    def guestpass(self):
-        if not self.values or not re.match("^[\w_]+$", self.values[0]):
-            self.chat("Invalid entry.")
-            return
-        else:
-            guest = self.values[0]
-
-        self.cx.guests.append(guest)
-
-        return "Hi " + guest + ". You seem okay."
 
     @axon
-    @help("PASSWORD <set admin password>")
+    @help("PASSWD <set admin password>")
     def passwd(self):
+        whom = Id(self.lastsender)
+
+        if not whom.is_authenticated:
+            self.chat('STRANGER DANGER!')
+            return
+
         if not self.values:
-            self.chat("Enter a password.")
+            self.chat('Enter a password.')
             return
 
-        if self.context == CHANNEL:
-            self.chat("Not in the main channel, you twit.")
+        if self.context_is_channel:
+            self.chat('Not in the channel, you twit.')
             return
 
-        whom = self.lastsender
+        whom.setpassword(' '.join(self.values))
+        self.chat('All clear.')
 
-        h = hashlib.sha1()
-        h.update(' '.join(self.values))
-        pwd = h.hexdigest()
-
-        if not simpleupdate(whom, "password", pwd):
-            self.chat("Fail.")
+    @axon
+    @public
+    @help("IDENTIFY <password>")
+    def identify(self):
+        if not self.values:
+            self.chat('Enter a password.')
             return
 
-        self.chat("Password set.")
+        if self.context_is_channel:
+            self.chat('Not in the channel, you twit.')
+            return
+
+        whom = Id(self.lastsender)
+
+        if not whom.identify(' '.join(self.values)):
+            self.chat('I don\'t know you... go away...')
+            return
+
+        self.chat('Welcome back %s' % whom.name)
+
+
+    @axon
+    @help("ADDUSER <username>")
+    def adduser(self):
+        if not self.values:
+            self.chat("Who are you trying to add?")
+            return
+
+        whom = Id(self.lastsender)
+
+        if not whom.is_authenticated:
+            self.chat('I\'m sorry, Dave, I\'m afraid I can\'t do that')
+            return
+
+        new_user = Id(self.values[0])
+        tmp_pass = str(totp.now())
+        new_user.setpassword(tmp_pass, True)
+
+        self.chat('Hi %s, your temporary password is %s. Please set up your user '
+        'by identifying yourself to me via private message (.identify %s) and '
+        'then changing your password (.passwd <newpass>).' % (new_user.name,
+        tmp_pass, tmp_pass), target=new_user.name)
+
 
     @axon
     @help("PHONE_NUMBER <add your phone number to your profile for sms access>")
