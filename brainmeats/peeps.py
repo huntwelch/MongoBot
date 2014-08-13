@@ -2,10 +2,9 @@ import datetime
 import dateutil.parser
 import re
 import hashlib
+import random
 
 from autonomic import axon, help, Dendrite, alias, public
-#from settings import STORAGE, CHANNEL, NICK
-#from secrets import MEETUP_LOCATION, MEETUP_NOTIFY, MEETUP_DAY
 from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore, topScores
 from server.helpers import totp
 from id import Id
@@ -58,18 +57,16 @@ class Peeps(Dendrite):
     def increment(self):
         print "INCEMERMET"
         if not self.values:
-            return 'you need to give someone your love'
+            self.chat("you need to give someone your love")
+            return
+        entity = " ".join(self.values)
+        if entity == 'jcb':
+            return
 
-        entity = ' '.join(self.values)
-        user = Id(self.lastsender)
-        target = Id(entity)
-        print target
-        if not target.useless_points:
-            target.useless_points = 1
-        else:
-            target.useless_points += 1
-
-        return '%s brought %s to %s' % (user.nick, entity, target.useless_points)
+        if not incrementEntity(entity, random.randint(1, 100000)):
+            self.chat("mongodb seems borked")
+            return
+        return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
 
     @axon
     @help("DRINKER <take a point away>")
@@ -78,8 +75,10 @@ class Peeps(Dendrite):
             self.chat("you need to give someone your hate")
             return
         entity = " ".join(self.values)
+        if entity == 'jcb':
+            return
 
-        if not incrementEntity(entity, -1):
+        if not incrementEntity(entity, random.randint(1, 100000) * -1):
             self.chat("mongodb seems borked")
             return
         return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))

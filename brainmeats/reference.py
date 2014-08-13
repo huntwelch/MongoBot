@@ -3,6 +3,7 @@ import socket
 import re
 import wolframalpha
 import sys
+import pythonwhois
 
 from math import *
 from autonomic import axon, alias, help, Dendrite
@@ -212,7 +213,7 @@ class Reference(Dendrite):
                     printout.append(n)
 
             return 'Available functions: %s' % ', '.join(printout)
-            
+
 
         string = ' '.join(self.values)
 
@@ -250,7 +251,35 @@ class Reference(Dendrite):
     @axon
     @help('URL <get whois information>')
     def whois(self):
-        return "The Doctor"
+        if not self.values:
+            return "The Doctor"
+
+        url = self.values[0]
+        results = pythonwhois.get_whois(url)
+
+        print results
+
+        try:
+            r = results['contacts']['registrant']
+            expires = results['expiration_date'].pop(0).strftime('%m/%d/%Y')
+            order = [
+                'name',
+                'street',
+                'city',
+                'state',
+                'postalcode',
+                'country',
+                'phone',
+                'email',
+            ]
+            output = []
+            for entry in order:
+                output.append(r[entry])
+
+            reformat = ', '.join(output)
+            return '%s: Registered by %s. Expires %s' % (url, reformat, expires)
+        except:
+            return 'No results, or parsing failure.'
 
     @axon
     @help('QUERY <get a howdoi answer>')
@@ -286,5 +315,41 @@ class Reference(Dendrite):
             return
 
         if not m: return 'No match'
-            
+
         return m.group(1)
+
+    @axon
+    @alias('d', 'roll')
+    def random(self):
+        default = [0, 9999, 1, 1]
+
+        if self.values and self.values[0][:1] == 'd':
+            default[0] = 1
+            default[1] = self.values[0][1:]
+            send = default
+        elif 'd' in self.values[0]:
+            default[0] = 1
+            num, high = self.values[0].split('d')
+            default[1] = high
+            default[3] = num
+            send = default
+        elif self.values:
+            splice = len(self.values)
+            send = self.values + default[splice:]
+        else:
+            send = default
+
+        low, high, sets, nums = send
+
+        base = 'http://qrng.anu.edu.au/form_handler.php?repeats=no&'
+        params = "min_num=%s&max_num=%s&numofsets=%s&num_per_set=%s" % (low, high, sets, nums)
+
+        url = base + params
+
+        # Needs to be vastly improved for other sets
+        site = Browse(url)
+        result = site.read().split(':')[2].strip()[:-6]
+
+        return result
+
+
