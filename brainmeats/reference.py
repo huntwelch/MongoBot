@@ -1,12 +1,14 @@
 import textwrap
 import socket
 import re
+import wolframalpha
+import pythonwhois
 
 from autonomic import axon, alias, help, Dendrite
 from bs4 import BeautifulSoup as bs4
 from settings import REPO, NICK, SAFE
-from secrets import WEATHER_API
-from util import unescape, pageopen
+from secrets import WEATHER_API, WOLFRAM_API
+from util import unescape, pageopen, Browse
 from howdoi import howdoi as hownow
 
 
@@ -17,15 +19,36 @@ from howdoi import howdoi as hownow
 class Reference(Dendrite):
 
     safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
+    wolf = wolframalpha.Client(WOLFRAM_API)
 
     def __init__(self, cortex):
         super(Reference, self).__init__(cortex)
 
     @axon
+    @alias('wolfram')
+    @help('SEARCH_TERM <look something up in wolfram alpha>')
+    def w(self):
+        if not self.values:
+            self.chat("Enter a search")
+            return
+        
+        result = self.wolf.query(' '.join(self.values))
+
+        prozac = []
+
+        for pod in result.pods:
+            prozac.append(pod.text)
+
+        prozac.pop(0)
+
+        return prozac
+
+    @axon
     @help("SEARCH_TERM <look something up in google>")
+    @alias('google')
     def g(self):
         if not self.values:
-            self.chat("Enter a word")
+            self.chat("Enter a search")
             return
 
         # If values was a string you don't need the join/etc
@@ -199,7 +222,35 @@ class Reference(Dendrite):
     @axon
     @help('URL <get whois information>')
     def whois(self):
-        return "The Doctor"
+        if not self.values:
+            return "The Doctor"
+            
+        url = self.values[0] 
+        results = pythonwhois.get_whois(url)
+
+        print results
+
+        try:
+            r = results['contacts']['registrant']
+            expires = results['expiration_date'].pop(0).strftime('%m/%d/%Y') 
+            order = [
+                'name',
+                'street',
+                'city',
+                'state',
+                'postalcode',
+                'country',
+                'phone',
+                'email',
+            ]
+            output = []
+            for entry in order:
+                output.append(r[entry])
+
+            reformat = ', '.join(output)
+            return '%s: Registered by %s. Expires %s' % (url, reformat, expires)
+        except:
+            return 'No results, or parsing failure.'
 
     @axon
     @help('QUERY <get a howdoi answer>')
@@ -238,3 +289,39 @@ class Reference(Dendrite):
             return
 
         return m.group(1)
+
+    @axon
+    @alias('d', 'roll')
+    def random(self):
+        default = [0, 9999, 1, 1]
+
+        if self.values and self.values[0][:1] == 'd':
+            default[0] = 1
+            default[1] = self.values[0][1:]
+            send = default
+        elif 'd' in self.values[0]:
+            default[0] = 1
+            num, high = self.values[0].split('d')
+            default[1] = high
+            default[3] = num
+            send = default
+        elif self.values:
+            splice = len(self.values)
+            send = self.values + default[splice:]
+        else:
+            send = default
+
+        low, high, sets, nums = send
+            
+        base = 'http://qrng.anu.edu.au/form_handler.php?repeats=no&'            
+        params = "min_num=%s&max_num=%s&numofsets=%s&num_per_set=%s" % (low, high, sets, nums)
+
+        url = base + params
+
+        # Needs to be vastly improved for other sets
+        site = Browse(url)
+        result = site.read().split(':')[2].strip()[:-6]
+
+        return result
+
+

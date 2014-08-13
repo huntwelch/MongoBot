@@ -65,6 +65,7 @@ class Sms(Dendrite):
             if item.body[:1] == CONTROL_KEY and (drinker and item.from_ != TWILIO_NUMBER or item.from_ in SAFE_NUMBERS):
                 self.cx.context = CHANNEL
                 self.cx.replysms = from_
+                # TODO: make this a butler call
                 self.cx.command(drinker[0].name, item.body)
 
         self.loaded = True

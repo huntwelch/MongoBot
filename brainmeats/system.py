@@ -4,14 +4,19 @@ import pkgutil
 import threading
 
 from autonomic import axon, help, Dendrite, public, alias
-from settings import SAFESET, NICK, HOST, REGISTERED, CONTROL_KEY
+#from settings import SAFESET, NICK, REGISTERED, CONTROL_KEY
 from secrets import *
 from util import colorize
 from time import sleep
 
 
+# TODO Remove this crap
+SAFESET = []
+NICK = 'REMOVE THIS'
+
+
 # System is stuff relating to the function of the
-# the bot and the server. There's some potentially 
+# the bot and the server. There's some potentially
 # dangerous shit in here.
 class System(Dendrite):
 
@@ -20,6 +25,18 @@ class System(Dendrite):
     def __init__(self, cortex):
         super(System, self).__init__(cortex)
 
+    @axon
+    @alias('raw')
+    def rawsock(self):
+        if not self.values:
+            return 'Send what?'
+
+        self.cx.sock.send(' '.join(self.values))
+
+    @axon
+    def echo(self):
+        return ' '.join(self.values)
+    
     # Help menu. It used to just show every command, but there
     # are so goddamn many at this point, they had to be split
     # into categories.
@@ -34,11 +51,17 @@ class System(Dendrite):
         if not self.values or self.values[0] not in self.libs:
             cats = sorted(self.libs)
 
-            cats = [colorize(lib, 'lightgrey') if lib not in enabled else lib for lib in self.libs]
+            print 'Cats: %s' % cats
+            print 'Enabled: %s' % enabled
+            print 'Broken: %s' % broken
+
+
+            cats = [colorize(lib, 'green') if lib in enabled else lib for lib in self.libs]
             cats = [colorize(lib, 'red') if lib in broken else lib for lib in cats]
 
             cats = ', '.join(cats)
-            self.chat('%shelp WHAT where WHAT is one of the following: %s' % (CONTROL_KEY, cats))
+            print cats
+            self.chat('%shelp WHAT where WHAT is one of the following: %s' % (self.cx.settings.bot.command_prefix, cats))
             return
 
         which = self.values[0]
@@ -64,7 +87,7 @@ class System(Dendrite):
             self.chat(name + " : " + str(value))
 
     # This should be pretty straightforward. Based on BOT_PASS
-    # in secrets; nobody can use the bot until they're 
+    # in secrets; nobody can use the bot until they're
     # registered. Went with flat file for ease of editing
     # and manipulation.
     @axon
@@ -74,7 +97,7 @@ class System(Dendrite):
         if not self.values:
             self.chat("Please enter a password.")
             return
-        
+
         if self.values[0] != BOT_PASS:
             self.chat("Not the password.")
             return
@@ -83,22 +106,22 @@ class System(Dendrite):
         if real and real in self.cx.REALUSERS:
             self.chat("Already know you, bro.")
             return
-        
+
         self.cx.REALUSERS.append(real)
 
-        users = open(REGISTERED, 'a')
-        users.write(real + "\n")
-        users.close()
+#        users = open(REGISTERED, 'a')
+#        users.write(real + "\n")
+#        users.close()
 
         self.chat("You in, bro.")
 
-    # Rewite a setting in the settings file. Available settings
+    # Rewrite a setting in the settings file. Available settings
     # are defined in SAFESET. Do not put SAFESET in the SAFESET.
     # That's just crazy.
     @axon
-    @help("SETTING=VALUE <update a " + NICK + " setting>")
-    def update(self, inhouse=False):
-        if not inhouse:
+    @help("SETTING=VALUE <update a bot setting>")
+    def update(self, vals=False):
+        if not vals:
             vals = self.values
 
         if not vals or len(vals) != 2:
@@ -135,42 +158,21 @@ class System(Dendrite):
     # Reloads the bot. Any changes make to cortex or brainmeats
     # and most settings will be reflected after a reload.
     @axon
-    @help("<reload " + NICK + ">")
+    @help('<reload %NICK%>')
     def reload(self):
         meats = self.cx.brainmeats
         if 'webserver' in meats:
             meats['webserver'].reloadserver(True)
         self.cx.master.reload()
 
-    # Actually kills the medulla process and waits for the 
-    # doctor to restart. Some settings and any changes to 
+    # Actually kills the medulla process and waits for the
+    # doctor to restart. Some settings and any changes to
     # medulla.py won't take effect until a reboot.
     @axon
     @alias('seppuku', 'harakiri')
     @help("<set squirrel on fire and staple it to angel. No, really>")
     def reboot(self):
         self.cx.master.die()
-
-    # A shortcut to the update function to change nick. Also
-    # tells the irc server.
-    @axon
-    @help("NICKNAME <change " + NICK + "'s name>")
-    def nick(self):
-        if not self.values:
-            self.chat("Change name to what?")
-            return
-
-        name = self.values[0]
-        if not re.search("^\w+$", name):
-            self.chat("Invalid name")
-            return
-
-        self.cx.sock.send('NICK ' + name + '\n')
-        self.cs.sock.send('PRIVMSG NickServ :indentify %s\n' % BOT_PASS)
-        self.cx.sock.send('USER ' + IDENT + ' ' + HOST + ' bla :' + REALNAME + '\n')
-        self.cx.sock.send('JOIN ' + CHANNEL + '\n')
-
-        self.update(['NICK', name])
 
     # DANGER ZONE. You merge it, anyone can pull it. If you
     # have a catastrophic failure after this, it's probably
@@ -202,7 +204,7 @@ class System(Dendrite):
         broken = []
         for lib in values:
             if lib in self.cx.master.ENABLED:
-                already.append(lib) 
+                already.append(lib)
             elif lib not in self.libs:
                 nonextant.append(lib)
             elif lib in self.cx.broken:
@@ -214,16 +216,16 @@ class System(Dendrite):
         messages = []
         if len(already):
             messages.append('%s already enabled.' % ', '.join(already))
-            
+
         if len(nonextant):
             messages.append('%s nonexistent.' % ', '.join(nonextant))
-            
+
         if len(broken):
             messages.append('%s done borked.' % ', '.join(broken))
-            
+
         if len(enabled):
             messages.append('Enabled %s.' % ', '.join(enabled))
-            
+
         self.cx.master.reload(True)
 
         self.chat(' '.join(messages))
@@ -248,7 +250,7 @@ class System(Dendrite):
             if lib not in self.libs:
                 nonextant.append(lib)
             elif lib not in self.cx.master.ENABLED:
-                already.append(lib) 
+                already.append(lib)
             else:
                 disabled.append(lib)
                 self.cx.master.ENABLED.remove(lib)
@@ -256,13 +258,13 @@ class System(Dendrite):
         messages = []
         if len(already):
             messages.append('%s already disabled.' % ', '.join(already))
-            
+
         if len(nonextant):
             messages.append("%s don't exist." % ', '.join(nonextant))
-            
+
         if len(disabled):
             messages.append("Disabled %s." % ', '.join(disabled))
-            
+
         self.cx.master.reload(True)
 
         self.chat(' '.join(messages))
@@ -282,5 +284,3 @@ class System(Dendrite):
         }
         for key, val in items.iteritems():
             self.chat(key + ": " + val)
-
-    

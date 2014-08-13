@@ -8,16 +8,20 @@ import urllib
 import base64
 import random
 import threading
-import os
 import subprocess
 
 from PIL import Image
 from bisect import bisect
-from Queue import Queue
 
-from settings import CHANNEL, SHORTENER
-from secrets import HTTP_PASS, DELICIOUS_USER, DELICIOUS_PASS
+#from settings import CHANNEL, SHORTENER, THUMBS, THUMB_SIZE, WEBSITE
+#from secrets import HTTP_PASS, DELICIOUS_USER, DELICIOUS_PASS
 from collections import OrderedDict
+
+from pprint import pprint
+
+
+# TODO for now some secrets hardcoded; move to config
+HTTP_PASS = 'whatever'
 
 
 # For onetime stuff
@@ -73,11 +77,11 @@ def colorize(text, color):
     if isinstance(color, str):
         color = colors[color]
 
-    return "\x03" + str(color) + ' ' + text + "\x03"
+    return "\x03" + str(color) + text + "\x03\x0f"
 
 
 class Browse(object):
-    
+
     url = False
     ua = '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36'
     ieua = 'User-Agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)'
@@ -86,7 +90,7 @@ class Browse(object):
     error = False
 
     def __init__(self, url, params={}, method='GET', userpass=False):
-        self.url = url 
+        self.url = url
 
         self.robot.set_handle_equiv(True)
         self.robot.set_handle_gzip(True)
@@ -114,7 +118,7 @@ class Browse(object):
 
             if params and method == 'GET':
                 self.response = self.robot.open(url + '?%s' % data)
-            elif params and method == 'POST':  
+            elif params and method == 'POST':
                 self.response = self.robot.open(url, data)
             else:
                 self.response = self.robot.open(url)
@@ -152,10 +156,11 @@ def pageopen(url, params={}):
 
 
 def shorten(url):
-    short_url = pageopen(SHORTENER, params={'roast': url})
+    # TODO uhg needs to be a class that knows it's specifc to roa.st
+    #short_url = pageopen(SHORTENER, params={'roast': url})
 
-    if short_url:
-        return short_url.text
+    #if short_url:
+    #    return short_url.text
     return ''
 
 
@@ -243,11 +248,12 @@ class Stock(object):
             ("Market cap", "market_cap"),
         ]
 
-        if context != CHANNEL:
-            for item in otherinfo:
-                pretty, id = item
-                addon = pretty + ": " + getattr(self, id, 'N/A')
-                message.append(addon)
+        # TODO: Don't do this for not in channel, ensure it's a privmsg only. Currently not compatible with channeling
+        #if context != CHANNEL:
+        #    for item in otherinfo:
+        #        pretty, id = item
+        #        addon = pretty + ": " + getattr(self, id, 'N/A')
+        #        message.append(addon)
 
         link = 'http://finance.yahoo.com/q?s=' + self.symbol
         roasted = shorten(link)
@@ -259,54 +265,21 @@ class Stock(object):
 
 
 def postdelicious(url, title, sender):
+    # TODO Just commenting this all out since we don't want to make this use config; should be a brainmeat
+    #deli = "https://api.del.icio.us/v1/posts/add"
+    #params = {
+    #    "url": url,
+    #    "description": title,
+    #    "tags": "%s,%s" % (CHANNEL, sender),
+    #}
 
-    deli = "https://api.del.icio.us/v1/posts/add"
-    params = {
-        "url": url,
-        "description": title,
-        "tags": "%s,%s" % (CHANNEL, sender),
-    }
-
-    if DELICIOUS_USER:
-        auth = requests.auth.HTTPBasicAuth(DELICIOUS_USER, DELICIOUS_PASS)
-        try:
-            send = requests.get(deli, params=params, auth=auth)
-        except:
-            pass
-            
-
-# http://stevendkay.wordpress.com/2009/09/08/generating-ascii-art-from-photographs-in-python/
-# Couldn't have done this with the above link,
-# but there are some problems with the script:
-# if you adapt from it, don't use 'str' as a 
-# variable name unless you want some troubling
-# error messages when you try to debug by casting
-# exceptions with str(), and im = im.thumbnail
-# modifies the original and returns None, so im 
-# is no longer usable.
-def asciiart(image_path):
-    if image_path.find('/') != -1:
-        return
-
-    greyscale = [" "," ",".,-","_ivc=!/|\\~","gjez2]/(YL)t[+T7Vf","mdK4ZGbNDXY5P*Q","W8KMA","#%$"]
-    zonebounds=[36,72,108,144,180,216,252]
-    size = 30
-    out = ""
-
-    img = Image.open(image_path)
-    img.thumbnail((size, size), Image.ANTIALIAS)
-    img = img.resize((size*2, size))
-    img = img.convert("L")
-
-    for y in range(0,img.size[1]):
-        for x in range(0,img.size[0]):
-            lum = 255 - img.getpixel((x,y))
-            row = bisect(zonebounds,lum)
-            possibles = greyscale[row]
-            out += possibles[random.randint(0,len(possibles)-1)]
-        out += "\n"
-
-    return out
+    #if DELICIOUS_USER:
+    #    auth = requests.auth.HTTPBasicAuth(DELICIOUS_USER, DELICIOUS_PASS)
+    #    try:
+    #        send = requests.get(deli, params=params, auth=auth)
+    #    except:
+    #        pass
+    pass
 
 
 # TODO?: interface with addlive
@@ -315,12 +288,12 @@ class Butler(object):
     maxtasks = 8
     cx = False
     semaphore = False
-    
+
     def __init__(self, cortex):
         self.cx = cortex
         self.semaphore = threading.BoundedSemaphore(self.maxtasks)
-        return    
-    
+        return
+
     def wrap(self, func, args, semaphore, note, pid):
         results = func(*args)
         if results:
@@ -329,9 +302,10 @@ class Butler(object):
         self.cx.chat(note)
         semaphore.release()
         return
-        
+
     def do(self, func, args, note=False):
-        pid = 'task-%s' % time.time() 
+
+        pid = 'task-%s' % time.time()
         self.semaphore.acquire()
         thread = threading.Thread(target=self.wrap, args=(func, args, self.semaphore, note, pid))
         thread.start()
@@ -345,13 +319,13 @@ def savevideo(url, path):
         '-o',
         path,
     ]
-    
-    # Save output from the real run in 
+
+    # Save output from the real run in
     # for error checks. Someday.
     feedback = subprocess.check_output(args)
 
     # Simulated run to get the file name.
-    # Though it pops more proc, there are 
+    # Though it pops more proc, there are
     # some advantages to this: simple parsing
     # and handles the already downloaded
     # error while still being useful.
@@ -362,13 +336,27 @@ def savevideo(url, path):
     return filename.strip()
 
 
-def savefromweb(url, path):
-    r = requests.get(url, stream=True, verify=False)
+# Use of 'thumber' var is crappy, but probably
+# moving this to a Browse method, so not worrying
+# about it right now.
+def savefromweb(url, path, thumber=False):
+    # TODO could be a receptor that can also get called with a specific url attached to it
+    #r = requests.get(url, stream=True, verify=False)
 
-    if r.status_code != 200:
-        return
 
-    with open(path, 'w+') as f:
-        for chunk in r.iter_content(1024):
-            f.write(chunk)
-        f.close()
+    #if r.status_code != 200:
+    #    return
+
+    #with open(path, 'w+') as f:
+    #    for chunk in r.iter_content(1024):
+    #        f.write(chunk)
+    #    f.close()
+
+    #if thumber:
+    #    fname = "%s_%s.jpeg" % ( thumber, int(time.mktime(time.localtime())) )
+    #    img = Image.open(path)
+    #    img.thumbnail((THUMB_SIZE, THUMB_SIZE), Image.ANTIALIAS)
+    #    img.save('server%s%s' % (THUMBS, fname))
+    #    return '%s%s%s' % (WEBSITE, THUMBS, fname)
+    pass
+

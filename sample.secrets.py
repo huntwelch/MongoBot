@@ -1,6 +1,21 @@
 # Basic
 
-CHANNEL = ''
+# Some explanation: CHANNEL is the *main* channel,
+# but you must also set the main channel in the 
+# CHANNELS dict, as that's what the cortex connections
+# are based on (this will likely change soon). The mods
+# are as follows 'command' means you can run commands
+# from the channel, 'speak' means the bot will reply,
+# 'spy' means the bot will announce text in the spied
+# upon room to the main channel. This is a very early 
+# implementation and doesn't make complete sense; for
+# instance you need both spy and command to really have
+# a function bot presense. 
+CHANNEL = '#mainchannel'
+CHANNELS = {
+    '#mainchannel': ['command', 'speak'],
+    '#otherchannel': ['spy'],
+}
 IDENT = ''
 REALNAME = ''
 OWNER = ''

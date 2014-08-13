@@ -1,15 +1,8 @@
 import sys
-import socket
-import settings
 import cortex
-import os
-import thread
-import ssl
 
-from settings import NICK, HOST, PORT, USE_SSL, CHANNEL, SMS_LOCKFILE, PULSE, ENABLED, HAS_NICKSERV
-from secrets import IDENT, REALNAME, OWNER, IRC_PASS, BOT_PASS
+from config import load_config
 from time import sleep, mktime, localtime
-
 
 # Welcome to the beginning of a very strained brain metaphor!
 # This is the shell for running the cortex. Ideally, this will never
@@ -18,31 +11,12 @@ from time import sleep, mktime, localtime
 # a reload won't change it.
 class Medulla:
     def __init__(self):
-        raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        print '* Pinging IRC'
+        print '* Becoming self-aware'
+        self.settings = settings = load_config('config/settings.yaml')
+        self.secrets = secrets = load_config('config/secrets.yaml')
 
-        raw_socket.connect((HOST, PORT))
-
-        if USE_SSL:
-            self.sock = ssl.wrap_socket(raw_socket)
-        else:
-            self.sock = raw_socket
-
-        if IRC_PASS:
-            self.sock.send('PASS %s\n' % IRC_PASS)
-        self.sock.send('USER %s %s bla :%s\n' % (IDENT, HOST, REALNAME))
-        if HAS_NICKSERV and BOT_PASS:
-            self.sock.send('PRIVMSG NickServ :indentify %s\n' % BOT_PASS)
-        self.sock.send('NICK %s\n' % NICK)
-
-        # Some servers require a pause prior to being able to join a channel
-        sleep(2)
-        self.sock.send('JOIN %s\n' % CHANNEL)
-
-        self.sock.setblocking(0)
-
-        self.ENABLED = ENABLED
+        self.ENABLED = self.settings.plugins.values().pop(0)
         self.active = True
         self.brain = cortex.Cortex(self)
 
@@ -50,6 +24,8 @@ class Medulla:
         # long the bot has been spinning its gears
         # in a process. If it can't set the pulse
         # for too long, a signal kills it and reboots.
+        # Note: this has become less of an issue
+        # since all the bot's commands became threaded
         print '* Establishing pulse'
         self.setpulse()
 
@@ -70,18 +46,23 @@ class Medulla:
         if not quiet:
             self.brain.act('strokes out.')
         else:
-            self.brain.act('strokes out.', False, OWNER)
+            self.brain.act('strokes out.', False, self.secrets.owner)
+
+        for channel in self.secrets.channels:
+            name, attr = channel.popitem()
+            if attr.primary:
+                continue
+            self.brain.brainmeats['channeling'].leave(name)
 
         self.active = False
 
-        import settings
-        import secrets
+        self.settings = settings = load_config('config/settings.yaml')
+        self.secrets = secrets = load_config('config/secrets.yaml')
+
         import datastore
         import util
         import autonomic
         import cortex
-        reload(settings)
-        reload(secrets)
         reload(datastore)
         reload(autonomic)
         reload(util)
@@ -95,15 +76,17 @@ class Medulla:
         if not quiet:
             self.brain.act('comes to.')
         else:
-            self.brain.act('comes to.', False, OWNER)
+            self.brain.act('comes to.', False, self.secrets.owner)
 
     def setpulse(self):
         self.lastpulse = mktime(localtime())
-        pulse = open(PULSE, 'w')
+        pulse = open(self.settings.sys.pulse, 'w')
         pulse.write(str(self.lastpulse))
         pulse.close()
 
-    def die(self):
+    def die(self, msg=None):
+        if msg is not None:
+            print msg
         sys.exit()
 
 connect = Medulla()

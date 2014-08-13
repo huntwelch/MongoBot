@@ -1,10 +1,9 @@
 import mongoengine
 
 from mongoengine import *
-from settings import STARTING_CASH
 
 
-# All mongodb stuff. I've been told this would be 
+# All mongodb stuff. I've been told this would be
 # better done with sqlite. Some day.
 
 def connectdb():
@@ -66,16 +65,17 @@ class Entity(mongoengine.Document):
     value = IntField(default=0)
 
 
-class Position(mongoengine.EmbeddedDocument):
+class Alias(mongoengine.EmbeddedDocument):
+    name = StringField(required=True)
+    definition = StringField(required=True)
+
+class Position(EmbeddedDocument):
+
     symbol = StringField(required=True)
     date = DateTimeField(required=True)
     price = FloatField(min_value=0)
     quantity = IntField(min_value=0)
     type = StringField()
-
-class Alias(mongoengine.EmbeddedDocument):
-    name = StringField(required=True)
-    definition = StringField(required=True)
 
 class Drinker(mongoengine.Document):
     name = StringField(required=True)
@@ -84,9 +84,10 @@ class Drinker(mongoengine.Document):
     phone = StringField()
     rewards = IntField(default=0)
     awaiting = StringField()
-    cash = FloatField(default=STARTING_CASH)
+    cash = FloatField(default=100000)
     positions = ListField(EmbeddedDocumentField(Position))
     aliases = ListField(EmbeddedDocumentField(Alias))
+    data = DictField()
 
 class Words(mongoengine.Document):
     word = StringField(required=True)

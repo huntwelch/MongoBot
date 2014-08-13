@@ -10,7 +10,7 @@ import simplejson
 
 from threading import Thread
 from autonomic import axon, alias, help, Dendrite
-from secrets import WORDNIK_API
+from secrets import WORDNIK_API, BOT_PASS
 from settings import NICK, STORAGE, ACROLIB, LOGDIR, BOOKS, BABBLE_LIMIT, \
     REDIS_SOCK, SMARTASS, TECH_QUESTIONS, IT_HELP, FRUSTRATION, POEMS, \
     WEBSITE
@@ -22,12 +22,12 @@ from wordnik import swagger, WordApi
 
 
 # Much fail here. I study up on NLTK at the rate
-# of 5 minutes a month. The miscellaneous language 
+# of 5 minutes a month. The miscellaneous language
 # functions usually work, and of course the markov
 # is done here.
 class Broca(Dendrite):
 
-    markov = redis.StrictRedis(unix_socket_path=REDIS_SOCK) 
+    markov = redis.StrictRedis(unix_socket_path=REDIS_SOCK)
     readstuff = False
     knowledge = False
     draft = False
@@ -36,7 +36,7 @@ class Broca(Dendrite):
         super(Broca, self).__init__(cortex)
 
     @axon
-    @help('TITLE <have %s compose poetry>' % NICK)
+    @help('TITLE <have %NICK% compose poetry>')
     def compose(self):
         if not self.startpoem():
             return 'Already wrote that'
@@ -50,12 +50,12 @@ class Broca(Dendrite):
         seed = seed.split()
         for word in seed:
             poem += ' ' + self.babble([word])
-        
+
         self.addtext(poem.split())
         res = self.finis()
 
-        return res 
-        
+        return res
+
 
     @axon
     @alias('begin')
@@ -75,7 +75,7 @@ class Broca(Dendrite):
             self.chat('Already wrote that')
             return False
 
-        draft = open(POEMS + filename, 'a') 
+        draft = open(POEMS + filename, 'a')
         draft.write('%s\n' % title)
         draft.close()
 
@@ -91,8 +91,8 @@ class Broca(Dendrite):
 
         if not self.draft:
             return 'No poems open now.'
-        
-        draft = open(POEMS + self.draft, 'a') 
+
+        draft = open(POEMS + self.draft, 'a')
 
         what = what or self.values
 
@@ -101,7 +101,7 @@ class Broca(Dendrite):
             if random.randint(0,10) == 5:
                 addition = '\n'
             else:
-                addition = what.pop(0) 
+                addition = what.pop(0)
 
             text = '%s %s' % (text, addition)
 
@@ -109,7 +109,7 @@ class Broca(Dendrite):
         draft.close()
 
         return 'Coming along real good'
-        
+
     @axon
     def finis(self):
         link = '%s/poem/%s' % (WEBSITE, self.draft[:-4])
@@ -119,7 +119,7 @@ class Broca(Dendrite):
     @axon
     def mark(self, line):
         words = line.split()
-        
+
         while len(words) > 2:
             word = words.pop(0)
             prefix = "%s %s" % (word, words[0])
@@ -135,7 +135,7 @@ class Broca(Dendrite):
                 self.markov.set(prefix, follow)
 
     @axon
-    @help("URL_OF_TEXT_FILE <Make " + NICK + " read something>")
+    @help('URL_OF_TEXT_FILE <Make %NICK% read something>')
     def read(self):
         if not self.values:
             self.chat("Read what?")
@@ -149,7 +149,7 @@ class Broca(Dendrite):
         name = "%s_%s.txt" % ( int(time.mktime(time.localtime())), self.lastsender )
         path = BOOKS + name
 
-        savefromweb(book, path)    
+        savefromweb(book, path)
         with open(path) as b:
             for line in b:
                 self.mark(line)
@@ -160,27 +160,27 @@ class Broca(Dendrite):
     # MongoBot's ability to run a markov chain is a large
     # part of the reason I started working on mongo in the
     # first place.
-    # 
+    #
     # (cough)
     #
-    # So MongoBot was made on a whim in the chatroom of his 
+    # So MongoBot was made on a whim in the chatroom of his
     # birth just because I wanted to know how to make a bot.
     # Since at the time I was pretty checked out of my job
     # I put an awful lot of work into him, and he eventually
     # edged out ExStaffRobot as the dominant bot.
-    # 
-    # ExStaffRobot itself was a descendent of StaffRobot, 
+    #
+    # ExStaffRobot itself was a descendent of StaffRobot,
     # the dev irc chatbot that warned us about failures and
     # stuff at OkCupid (the Staff Robot that pops up all
     # over OkCupid is itself a rendering of this StaffRobot
     # by one of the frontend designers. He and I never got
     # on, but he does draw a mean bot). This StaffRobot had
-    # a markov chat function in it, which I didn't really 
+    # a markov chat function in it, which I didn't really
     # understand at the time, as I was scared of all these
     # awesome CS majors, and was, essentially, an out-of-work
     # film student who only got the job because a few of the
     # powers that were didn't think frontend programmers
-    # needed to be very smart. But I really wanted to put a 
+    # needed to be very smart. But I really wanted to put a
     # markov chain in my bot, partly to understand and because
     # I missed the old bot after one of the founders bitched
     # about it being annoying until we had to turn it off,
@@ -197,12 +197,12 @@ class Broca(Dendrite):
     # me on an internship, and I asked him how to do split
     # screen and he said he didn't think I was ready for that
     # yet, so I just taught myself. When he found out, he
-    # got so upset he walked out of the room. Point is, 
+    # got so upset he walked out of the room. Point is,
     # Americans have some seriously fucked up problems with
     # their opinions on the nature and value of intelligence.
     @axon
     @alias('waxrhapsodic')
-    @help('<Make %s speak markov chain>' % NICK)
+    @help('<Make %NICK% speak markov chain>')
     def babble(self, what=False):
 
         what = what or self.values
@@ -240,7 +240,7 @@ class Broca(Dendrite):
             follows = self.markov.get(tail)
             if not follows:
                 if words[-1].lower().strip() in suspense:
-                    seed = self.markov.randomkey() 
+                    seed = self.markov.randomkey()
                     follows = self.markov.get(seed)
                 else:
                     break
@@ -251,6 +251,13 @@ class Broca(Dendrite):
         rep = re.compile('[\()\[\]"]')
         words = rep.sub('', words)
         words = words.split()
+
+        # Mostly, security in babble is your
+        # problem, but BOT_PASS shows up in the
+        # channel a lot.
+        while BOT_PASS in words:
+            words.remove(BOT_PASS)
+
         words = ' '.join(words)
 
         return words
@@ -274,7 +281,7 @@ class Broca(Dendrite):
     #     self.chat("Okay, read all the things.")
 
     @axon
-    @help("<command " + NICK + " to speak>")
+    @help('<command %NICK% to speak>')
     def speak2(self):
         if not self.knowledge:
             self.chat("Can't speak good yet. Must read.")
@@ -291,7 +298,8 @@ class Broca(Dendrite):
         self.chat(text)
 
     @axon
-    @help("WORD <get definition of word>")
+    @alias('d')
+    @help('WORD <get definition of word>')
     def whatmean(self):
         if not self.values:
             self.chat("Ooohhhmmmmm")
@@ -383,7 +391,7 @@ class Broca(Dendrite):
         except:
             pass
 
-    # This is where all the conversational tics and 
+    # This is where all the conversational tics and
     # automatic reactions are set up. Also, for some
     # reason, the mom log, because it's awesome but
     # maybe not cortex material. Is the name of this
@@ -397,8 +405,13 @@ class Broca(Dendrite):
             self.chat(nick + "'s MOM" + backatcha)
             return
 
+        # This could be more like a dict
         if sentence.lower().find("oh snap") != -1:
             self.chat("yeah WHAT?? Oh yes he DID")
+            return
+
+        if sentence.lower() == "sup":
+            self.chat("chillin")
             return
 
         if sentence.lower().find("murican") != -1:
@@ -422,7 +435,7 @@ class Broca(Dendrite):
             self.chat(self.cx.commands.get('table')())
 
         inquiries = [sentence.lower().find(t) != -1 for t in TECH_QUESTIONS]
-        
+
         if SMARTASS and True in inquiries:
             # Naively parse out the question being asked
             try:
@@ -434,7 +447,7 @@ class Broca(Dendrite):
 
             # Dynamic cases need to be appended
             responses.append('http://lmgtfy.com/?q=' + smartassery.replace(' ', '+'))
-                
+
             self.chat(random.choice(responses))
             return
 
@@ -445,7 +458,7 @@ class Broca(Dendrite):
             return
 
     @axon
-    @help("<command %s to speak>" % NICK)
+    @help('<command %NICK% to speak>')
     def speak(self):
         sentence = []
         struct = choice(Structure.objects())
@@ -456,7 +469,7 @@ class Broca(Dendrite):
         self.chat(" ".join(sentence))
 
     @axon
-    @help("WORD <teach %s a word>" % NICK)
+    @help('WORD <teach %NICK% a word>')
     def learn(self):
         if not self.values:
             self.chat(NICK + " ponders the emptiness of meaning.")
@@ -470,7 +483,7 @@ class Broca(Dendrite):
         self.chat(NICK + " learn new word!", self.lastsender)
 
     @axon
-    @help("ACRONYM <have %s decide the words for an acronym>" % NICK)
+    @help('ACRONYM <have %NICK% decide the words for an acronym>')
     def acronym(self):
         if not self.values:
             self.chat("About what?")
@@ -510,7 +523,7 @@ class Broca(Dendrite):
         return " ".join(output)
 
     @axon
-    @help("WORD [WHICH_DEFINITION] <look up etymology of word>")
+    @help('WORD [WHICH_DEFINITION] <look up etymology of word>')
     def ety(self):
         if not self.values:
             self.chat("Enter a word")
@@ -554,10 +567,23 @@ class Broca(Dendrite):
 
         return "Etymology %s of %s for %s: %s" % (str(ord + 1), str(len(defs)), _word, _def)
 
+    @axon
+    def isitfriday(self):
+        today = time.localtime().tm_wday
+        if today == 4:
+            self.chat('Fuck YEAH it is!')
+            return
+
+        if today < 4:
+            self.chat('No. Fuck. %s more day%s.' % ((4 - today),('s' if today != 3 else '')))
+            return
+
+        self.chat('Get entirely the fuck out of here with that weekday shit')
+        return
 
     # TODO: broken, not sure why
     @axon
-    @help("WORD_OR_PHRASE <look up anagram>")
+    @help('WORD_OR_PHRASE <look up anagram>')
     def anagram(self):
         if not self.values:
             self.chat("Enter a word or phrase")

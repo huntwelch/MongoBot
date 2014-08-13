@@ -1,7 +1,7 @@
 from autonomic import axon, help, Dendrite
 
 
-# This isn't actually playable without an 
+# This isn't actually playable without an
 # enormous ammount of trust between the players.
 # Always wanted to do more with it, but, well,
 # I haven't.
