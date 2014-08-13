@@ -2,15 +2,17 @@ import os
 
 from functools import wraps
 from flask import request, Response
-from secrets import HTTP_USER, HTTP_PASS
-from util import totp
+from helpers import totp
+from config import load_config
 
+config = load_config('config/secrets.yaml')
 
 def check_auth(username, password):
     """This function is called to check if a username /
     password combination is valid.
     """
-    return username == HTTP_USER and password == HTTP_PASS
+    global config
+    return username == config.webserver.user and password == config.webserver.password 
 
 
 def authenticate():

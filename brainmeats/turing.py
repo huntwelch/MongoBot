@@ -1,6 +1,6 @@
 from autonomic import axon, help, Dendrite
 from datastore import Drinker, Alias
-
+from id import Id
 
 '''  TO DO:
 
@@ -21,22 +21,24 @@ class Turing(Dendrite):
         name = self.values[0]
         evil = ['salias', 'ralias', 'lalias', 'dalias']
         definition = ' '.join(self.values[1:])
-        drinker = Drinker.objects(name=whom).first()
 
-        if not name:
+        drinker = Id(whom)
+        # drinker = Drinker.objects(name=whom).first()
+
+        if not drinker.is_authenticated:
             self.chat("Nope.")
-            return         
+            return
 
         if any(sin in definition for sin in evil):
             self.chat("You're trying to hurt me aren't you?")
             return
 
-        if not drinker:
-            drinker = Drinker(name=whom)
+        #if not drinker:
+        #    drinker = Drinker(name=whom)
 
         new_alias = Alias(name=name, definition=definition)
         drinker.aliases.append(new_alias)
-        drinker.save()
+        # drinker.save()
         self.chat(name + " saved.")
 
     @axon
@@ -44,7 +46,7 @@ class Turing(Dendrite):
         name = self.values[0]
         definition = []
         drinker = self._get_drinker()
-        
+
         if not drinker:
             return
 
@@ -60,9 +62,9 @@ class Turing(Dendrite):
         drinker = self._get_drinker()
         if not drinker:
             return
-        
+
         if len(drinker.aliases) == 0:
-            self.chat("Nada.")        
+            self.chat("Nada.")
 
         for alias in drinker.aliases:
             self.chat(alias.name + " " + alias.definition)
@@ -70,12 +72,12 @@ class Turing(Dendrite):
     @axon
     def dalias(self):
         idx = None
-        name = self.values[0]    
+        name = self.values[0]
 
         if not name:
-            self.chat("Much Fat Such Finger")            
+            self.chat("Much Fat Such Finger")
 
-        drinker = self._get_drinker()            
+        drinker = self._get_drinker()
         if not drinker:
             return
 
@@ -90,9 +92,11 @@ class Turing(Dendrite):
             self.chat(name + " deleted.")
 
     def _get_drinker(self):
-        drinker = Drinker.objects(name=self.lastsender).first()
-        if not drinker:
-            self.chat("Be gone peasant.")
+        drinker = Id(self.lastsender)
+
+        if not drinker.is_authenticated:
+            self.chat('Be gone peasant.')
             return None
 
         return drinker
+

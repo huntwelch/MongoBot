@@ -1,7 +1,9 @@
+import copy
+
 from autonomic import axon, help, Dendrite
 
 
-# This isn't actually playable without an 
+# This isn't actually playable without an
 # enormous ammount of trust between the players.
 # Always wanted to do more with it, but, well,
 # I haven't.
@@ -33,7 +35,7 @@ class Chess(Dendrite):
         ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr'],
     ]
 
-    chessgrid = basegrid
+    chessgrid = copy.copy(basegrid)
 
     def __init__(self, cortex):
         super(Chess, self).__init__(cortex)
@@ -41,7 +43,7 @@ class Chess(Dendrite):
     @axon
     @help("<reset chessboard>")
     def resetchess(self):
-        self.chessgrid = self.basegrid
+        self.chessgrid = copy.copy(self.basegrid)
 
     @axon
     @help("<show chessboard>")

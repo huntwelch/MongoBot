@@ -4,11 +4,10 @@ import re
 import hashlib
 import random
 
-from autonomic import axon, help, Dendrite, alias
-from settings import STORAGE, CHANNEL, NICK
-from secrets import MEETUP_LOCATION, MEETUP_NOTIFY, MEETUP_DAY
+from autonomic import axon, help, Dendrite, alias, public
 from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore, topScores
-
+from server.helpers import totp
+from id import Id
 
 # This loosely encapsulates things having to do with
 # people in the room. Obviously some overlap with
@@ -16,60 +15,52 @@ from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScor
 #
 # Basically everything here depends on mongodb, and
 # many other functions of other libraries refer to peeps
-# stuff. If you install no other external stuff, I 
+# stuff. If you install no other external stuff, I
 # recommend mongodb.
 class Peeps(Dendrite):
 
     checked = False
-    checks = MEETUP_NOTIFY
+#    checks = MEETUP_NOTIFY
     notifymethods = ['sms', 'email', 'prowl', 'pushover']
 
     def __init__(self, cortex):
         super(Peeps, self).__init__(cortex)
 
+
     @axon
-    @help("<show history of " + CHANNEL + ">")
+    @help('<show history of the current channel>')
     def history(self):
-        text = ""
+
         try:
-            with open(STORAGE + "/introductions") as file:
-                for line in file:
-                    if line.strip() == "---":
-                        self.chat(text)
-                        text = ""
-                        continue
-
-                    text += " " + line.strip()
+            intro = self.cx.channels[self.cx.context].intro
+            return [s.strip() for s in intro.splitlines()]
         except:
-            self.chat("No introductions file")
-            return
+            return 'Nothing to introduce!'
 
-        self.chat(text)
 
     @axon
     @help("COMPANY <save your current copmany>")
     def workat(self):
         if not self.values:
-            self.chat("If you're unemployed, that's cool, just don't abuse the bot")
-            return
+            return 'If you\'re unemployed, that\'s cool, just don\'t abuse the bot'
 
-        name = self.lastsender
-        company = " ".join(self.values)
+        user = Id(self.lastsender)
+        if not user.is_authenticated:
+            return 'That\'s cool bro, but I don\'t know you!'
 
-        if not simpleupdate(name, "company", company):
-            self.chat("Busto, bro.")
-            return
+        user.company = ' '.join(self.values)
+        return 'I know where you work... watch your back.'
 
-        self.chat("Company updated.")
 
     @axon
     @help("DRINKER <give somebody a point>")
     def increment(self):
+        print "INCEMERMET"
         if not self.values:
             self.chat("you need to give someone your love")
             return
         entity = " ".join(self.values)
-        if entity == 'jcb': 
+        if entity == 'jcb':
             return
 
         if not incrementEntity(entity, random.randint(1, 100000)):
@@ -91,7 +82,7 @@ class Peeps(Dendrite):
             self.chat("mongodb seems borked")
             return
         return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
-    
+
     @axon
     @help("show the leaderboard")
     def leaderboard(self):
@@ -187,41 +178,70 @@ class Peeps(Dendrite):
         except:
             self.chat("Couldn't parse that out.")
 
-    @axon
-    @help("USERNAME <give temporary access to USERNAME>")
-    def guestpass(self):
-        if not self.values or not re.match("^[\w_]+$", self.values[0]):
-            self.chat("Invalid entry.")
-            return
-        else:
-            guest = self.values[0]
-
-        self.cx.guests.append(guest)
-
-        return "Hi " + guest + ". You seem okay."
 
     @axon
-    @help("PASSWORD <set admin password>")
+    @help("PASSWD <set admin password>")
     def passwd(self):
+        whom = Id(self.lastsender)
+
+        if not whom.is_authenticated:
+            self.chat('STRANGER DANGER!')
+            return
+
         if not self.values:
-            self.chat("Enter a password.")
+            self.chat('Enter a password.')
             return
 
-        if self.context == CHANNEL:
-            self.chat("Not in the main channel, you twit.")
+        if self.context_is_channel:
+            self.chat('Not in the channel, you twit.')
             return
 
-        whom = self.lastsender
+        whom.setpassword(' '.join(self.values))
+        self.chat('All clear.')
 
-        h = hashlib.sha1()
-        h.update(' '.join(self.values))
-        pwd = h.hexdigest()
-
-        if not simpleupdate(whom, "password", pwd):
-            self.chat("Fail.")
+    @axon
+    @public
+    @help("IDENTIFY <password>")
+    def identify(self):
+        if not self.values:
+            self.chat('Enter a password.')
             return
 
-        self.chat("Password set.")
+        if self.context_is_channel:
+            self.chat('Not in the channel, you twit.')
+            return
+
+        whom = Id(self.lastsender)
+
+        if not whom.identify(' '.join(self.values)):
+            self.chat('I don\'t know you... go away...')
+            return
+
+        self.chat('Welcome back %s' % whom.name)
+
+
+    @axon
+    @help("ADDUSER <username>")
+    def adduser(self):
+        if not self.values:
+            self.chat("Who are you trying to add?")
+            return
+
+        whom = Id(self.lastsender)
+
+        if not whom.is_authenticated:
+            self.chat('I\'m sorry, Dave, I\'m afraid I can\'t do that')
+            return
+
+        new_user = Id(self.values[0])
+        tmp_pass = str(totp.now())
+        new_user.setpassword(tmp_pass, True)
+
+        self.chat('Hi %s, your temporary password is %s. Please set up your user '
+        'by identifying yourself to me via private message (.identify %s) and '
+        'then changing your password (.passwd <newpass>).' % (new_user.name,
+        tmp_pass, tmp_pass), target=new_user.name)
+
 
     @axon
     @help("PHONE_NUMBER <add your phone number to your profile for sms access>")
@@ -236,12 +256,8 @@ class Peeps(Dendrite):
             self.chat("Just one good ol'merican ten-digit number, thank ya kindly.")
             return
 
-        name = self.lastsender
-
-        if not simpleupdate(name, "phone", phone):
-            self.chat("Some shit borked.")
-            return
-
+        whom = Id(self.lastsender)
+        whom.phone = phone
         self.chat("Number updated.")
 
     @axon
@@ -258,7 +274,7 @@ class Peeps(Dendrite):
         else:
             search_for = self.values[0]
 
-        user = Drinker.objects(name=search_for).first()
+        user = Id(search_for)
         if not user or not user.phone:
             return "No such numba. No such zone."
         else:
@@ -269,7 +285,7 @@ class Peeps(Dendrite):
         if hour not in self.checks:
             return
 
-        period, day = MEETUP_DAY.split()        
+        period, day = MEETUP_DAY.split()
         check = dateutil.parser.parse(day)
 
         if self.checked == check.month:
@@ -290,11 +306,11 @@ class Peeps(Dendrite):
         if datetime.date.today().day != check.day:
             return
 
-        self.all(NICK)
+        self.all()
         self.announce('Meetup tonight! %s' % MEETUP_LOCATION)
-        
+
     @axon
     def okdrink(self):
         whenwhere = 'Every %s, %s' % (MEETUP_DAY, MEETUP_LOCATION)
         return whenwhere
-        
+

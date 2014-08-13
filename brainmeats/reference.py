@@ -2,13 +2,13 @@ import textwrap
 import socket
 import re
 import wolframalpha
+import sys
 import pythonwhois
 
+from math import *
 from autonomic import axon, alias, help, Dendrite
 from bs4 import BeautifulSoup as bs4
-from settings import REPO, NICK, SAFE
-from secrets import WEATHER_API, WOLFRAM_API
-from util import unescape, pageopen, Browse
+from util import unescape, pageopen
 from howdoi import howdoi as hownow
 
 
@@ -18,11 +18,45 @@ from howdoi import howdoi as hownow
 # it goes here.
 class Reference(Dendrite):
 
-    safe_calc = dict([(k, locals().get(k, f)) for k, f in SAFE])
-    wolf = wolframalpha.Client(WOLFRAM_API)
+    safe_func = [
+        ('abs', abs),
+        ('acos', acos),
+        ('asin', asin),
+        ('atan', atan),
+        ('atan2', atan2),
+        ('ceil', ceil),
+        ('cos', cos),
+        ('cosh', cosh),
+        ('degrees', degrees),
+        ('e', e),
+        ('exp', exp),
+        ('fabs', fabs),
+        ('floor', floor),
+        ('fmod', fmod),
+        ('frexp', frexp),
+        ('hypot', hypot),
+        ('ldexp', ldexp),
+        ('log', log),
+        ('log10', log10),
+        ('modf', modf),
+        ('pi', pi),
+        ('pow', pow),
+        ('radians', radians),
+        ('sin', sin),
+        ('sinh', sinh),
+        ('sqrt', sqrt),
+        ('tan', tan),
+        ('tanh', tanh),
+    ]
+
+    safe_calc = dict([(k, locals().get(k, f)) for k, f in safe_func])
+    wolf = None
 
     def __init__(self, cortex):
         super(Reference, self).__init__(cortex)
+
+        self.wolf = wolframalpha.Client(self.secrets.wolfram_api)
+
 
     @axon
     @alias('wolfram')
@@ -31,7 +65,7 @@ class Reference(Dendrite):
         if not self.values:
             self.chat("Enter a search")
             return
-        
+
         result = self.wolf.query(' '.join(self.values))
 
         prozac = []
@@ -77,21 +111,20 @@ class Reference(Dendrite):
     @axon
     @help("<display link to bot's github repository>")
     def source(self):
-        return REPO
+        return self.config.repo
 
     @axon
     @help("[ZIP|LOCATION (ru/moscow)] <get weather, defaults to geo api>")
     def weather(self):
-        if not WEATHER_API:
-            self.chat("WEATHER_API is not set")
-            return
+        if not self.secrets.weather_api:
+            return "wunderground api key is not set"
 
         if not self.values:
             params = "autoip.json?geo_ip=%s" % self.lastip
         else:
             params = "%s.json" % self.values[0]
 
-        base = "http://api.wunderground.com/api/%s/conditions/q/" % WEATHER_API
+        base = "http://api.wunderground.com/api/%s/conditions/q/" % self.secrets.weather_api
 
         url = base + params
 
@@ -175,32 +208,28 @@ class Reference(Dendrite):
     def hack(self):
         if not self.values:
             printout = []
-            for n, f in SAFE:
+            for n, f in self.config.math_functions:
                 if f is not None:
                     printout.append(n)
 
-            self.chat("Available functions: " + ", ".join(printout))
-            return
+            return 'Available functions: %s' % ', '.join(printout)
+
 
         string = ' '.join(self.values)
 
         # This is to stop future Kens
-        if "__" in string:
-            self.chat("Rejected.")
-            return
+        if "__" in string: return 'Rejected.'
 
         try:
             result = "{:,}".format(eval(string, {"__builtins__": None}, self.safe_calc))
         except:
-            result = NICK + " not smart enough to do that."
+            result = self.botname + " not smart enough to do that."
 
         return str(result)
 
     @axon
     def ns(self):
-        if not self.values:
-            self.chat("Lookup what?")
-            return
+        if not self.values: return 'Lookup what?'
 
         lookup = self.values[0]
 
@@ -212,7 +241,7 @@ class Reference(Dendrite):
         except:
             self.chat("Couldn't find anything.")
             return
-        
+
         return resolved
 
     # I wanted to do a good whois function, but whois parsing is
@@ -224,15 +253,15 @@ class Reference(Dendrite):
     def whois(self):
         if not self.values:
             return "The Doctor"
-            
-        url = self.values[0] 
+
+        url = self.values[0]
         results = pythonwhois.get_whois(url)
 
         print results
 
         try:
             r = results['contacts']['registrant']
-            expires = results['expiration_date'].pop(0).strftime('%m/%d/%Y') 
+            expires = results['expiration_date'].pop(0).strftime('%m/%d/%Y')
             order = [
                 'name',
                 'street',
@@ -255,13 +284,12 @@ class Reference(Dendrite):
     @axon
     @help('QUERY <get a howdoi answer>')
     def howdoi(self):
-        if not self.values:
-            return 'Howdoi what now?'
+        if not self.values: return 'Howdoi what now?'
 
         try:
             parser = hownow.get_parser()
             args = vars(parser.parse_args(self.values))
-            return hownow.howdoi(args) 
+            return hownow.howdoi(args)
         except:
             return 'Dunno bro'
 
@@ -277,16 +305,16 @@ class Reference(Dendrite):
         regex = self.values.pop(0)
         line = ' '.join(self.values)
 
+        if '(' not in regex:
+            regex = '(%s)' % regex
+
         try:
             m = re.search(regex, line)
         except Exception as e:
             self.chat('Regex borked', str(e))
             return
 
-
-        if not m:
-            self.chat('No match')
-            return
+        if not m: return 'No match'
 
         return m.group(1)
 
@@ -312,8 +340,8 @@ class Reference(Dendrite):
             send = default
 
         low, high, sets, nums = send
-            
-        base = 'http://qrng.anu.edu.au/form_handler.php?repeats=no&'            
+
+        base = 'http://qrng.anu.edu.au/form_handler.php?repeats=no&'
         params = "min_num=%s&max_num=%s&numofsets=%s&num_per_set=%s" % (low, high, sets, nums)
 
         url = base + params

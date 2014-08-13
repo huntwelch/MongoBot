@@ -1,0 +1,6 @@
+url: 'http://mongobot.com'
+reloader: '/tmp/mongo.reload'
+
+serverstorage: 'server/static'
+gifs: '/static/gifs/'
+thumbs: '/static/thumbs/'

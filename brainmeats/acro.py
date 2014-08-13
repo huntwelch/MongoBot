@@ -1,18 +1,16 @@
 import os
 
 from autonomic import axon, help, Dendrite
+from cybernetics import metacortex
 from random import choice, randint, shuffle
 from time import mktime, localtime, strftime
-from settings import INSULTS, INSULT, STORAGE, TIME_FACTOR, \
-    MIN_PLAYERS, ROUNDS, ROUNDTIME, VOTETIME, NO_VOTE_PENALTY, \
-    NO_ACRO_PENALTY, BREAK, ACROSCORE, MAXLEN, MINLEN, WARNING, \
-    BOTPLAY, NICK
 
+ACROSCORE = False
 
 # This is probably the first official brainmeat, as we
 # realized it was just to big to stuff into the cortex.
 # It's also some of the oldest and least attended code,
-# even after it was rewritten in the Great Brainmat 
+# even after it was rewritten in the Great Brainmat
 # Transition. There's at least one bug, but I haven't gotten
 # to it, as it's not a deal breaker, it's just exploitable.
 class Acro(Dendrite):
@@ -78,12 +76,12 @@ class Acro(Dendrite):
     @axon
     @help("<print the rules for the acro game>")
     def acrorules(self):
-        self.chat("1 of 6 start game with %sacro." % CONTROL_KEY)
-        self.chat("2 of 6 when the acronym comes up, type /msg %s your version of what the acronym stands for." % NICK)
+        self.chat("1 of 6 start game with %sacro." % self.botconf.command_prefix)
+        self.chat("2 of 6 when the acronym comes up, type /msg %s your version of what the acronym stands for." % metacortex.botnick)
         self.chat("3 of 6 each word of your submission is automatically uppercased unless you preface it with '-', so 'do -it up' will show as 'Do it Up'.")
-        self.chat("4 of 6 when the voting comes up, msg %s with the number of your vote." % NICK)
+        self.chat("4 of 6 when the voting comes up, msg %s with the number of your vote." % metacortex.botnick)
         self.chat("5 of 6 play till the rounds are up.")
-        self.chat("6 of 6 %s plays by default. Run %supdate BOTPLAY False to turn it off." % (NICK, CONTROL_KEY))
+        self.chat("6 of 6 %s plays by default." % (metacortex.botnick))
 
     def gimper(self, check, action, penalty):
         gimps = []
@@ -91,7 +89,7 @@ class Acro(Dendrite):
             if player not in check:
                 gimps.append(player)
 
-        use = INSULT
+        use = self.config.insult 
 
         if gimps:
             trail = 0
@@ -99,7 +97,7 @@ class Acro(Dendrite):
             for gimp in gimps:
                 post = ""
                 if trail == 1:
-                    use = INSULTS
+                    use = self.config.insults
                     post = " and "
                 elif trail > 1:
                     post = ", "
@@ -140,7 +138,7 @@ class Acro(Dendrite):
             sender = message[0][1:].split('!')[0]
             entry = message[3][1:]
         else:
-            sender = NICK
+            sender = metacortex.botnick
             entry = self.cx.brainmeants["broca"].acronymit(self.currentacronym)
 
         if sender not in self.players and self.round != 1:
@@ -164,7 +162,7 @@ class Acro(Dendrite):
             if not selfsub:
                 _time = int(mktime(localtime()) - self.mark)
             else:
-                _time = int(ROUNDTIME / 2)
+                _time = int(self.config.roundtime / 2)
 
             words = entry.split()
             temp = []
@@ -173,7 +171,7 @@ class Acro(Dendrite):
                     temp.append(word[1:])
                 else:
                     temp.append(word.capitalize())
-                    open(STORAGE + "/natwords", 'a').write(word.capitalize() + "\n")
+                    open(self.cx.settings.directory.storage + "/natwords", 'a').write(word.capitalize() + "\n")
 
             entry = ' '.join(temp)
 
@@ -195,11 +193,11 @@ class Acro(Dendrite):
                 self.players.append(sender)
 
         elif self.stage == "voting":
-            if BOTPLAY and NICK not in self.voters:
-                self.voters.append(NICK)
+            if self.config.botplay and metacortex.botnick not in self.voters:
+                self.voters.append(metacortex.botnick)
 
-            if len(self.players) < MIN_PLAYERS:
-                self.announce("Need at least" + str(MIN_PLAYERS) + " players. Sorry.")
+            if len(self.players) < self.config.minplayers:
+                self.announce("Need at least" + str(self.config.minplayers) + " players. Sorry.")
 
             try:
                 vote = int(entry)
@@ -246,7 +244,7 @@ class Acro(Dendrite):
 
     def run(self):
         self.setup()
-        self.announce("New game commencing in " + str(BREAK) + " seconds")
+        self.announce("New game commencing in " + str(self.config.rest) + " seconds")
         self.cx.addlive(self.ticker)
 
     def ticker(self):
@@ -269,17 +267,17 @@ class Acro(Dendrite):
         }.get(self.stage)()
 
     def waiting(self):
-        if self.current <= self.mark + BREAK:
+        if self.current <= self.mark + self.config.rest:
             return
 
         letters = []
-        for line in open(STORAGE + "/letters"):
+        for line in open(self.cx.settings.directory.storage + "/letters"):
             addition = line.split()
             addition.pop()
             letters.extend(addition)
 
         acronym = ""
-        length = randint(MINLEN, MAXLEN)
+        length = randint(self.config.minlen, self.config.maxlen)
         for i in range(1, length):
             acronym = acronym + choice(letters).upper()
 
@@ -291,16 +289,16 @@ class Acro(Dendrite):
         self.stage = "submit"
 
     def submit(self):
-        if self.current > self.mark + ROUNDTIME - WARNING and not self.warned:
+        if self.current > self.mark + self.config.roundtime - self.config.warning and not self.warned:
             self.warned = True
-            self.announce(str(WARNING) + " seconds left...")
+            self.announce(str(self.config.warning) + " seconds left...")
             return
 
-        if BOTPLAY and not self.selfsubbed:
+        if self.config.botplay and not self.selfsubbed:
             self.input(True)
             self.selfsubbed = True
 
-        if self.current <= self.mark + ROUNDTIME and not self.bypass:
+        if self.current <= self.mark + self.config.roundtime and not self.bypass:
             return
 
         if self.round == 1:
@@ -339,14 +337,14 @@ class Acro(Dendrite):
             # sys.exit()
 
         if self.round != 1:
-            self.gimper(submitters, "submitting", NO_ACRO_PENALTY)
+            self.gimper(submitters, "submitting", self.config.noacropenalty)
 
-        self.announce("You have " + str(VOTETIME) + " seconds to vote.")
+        self.announce("You have " + str(self.config.votetime) + " seconds to vote.")
         self.mark = mktime(localtime())
         self.stage = "voting"
 
     def voting(self):
-        if self.current <= self.mark + VOTETIME and not self.bypass:
+        if self.current <= self.mark + self.config.votetime and not self.bypass:
             return
 
         self.bypass = False
@@ -362,7 +360,7 @@ class Acro(Dendrite):
 
             self.announce(r['player'] + "'s \"" + r['entry'] + "\" got " + note)
 
-        self.gimper(self.voters, "voting", NO_VOTE_PENALTY)
+        self.gimper(self.voters, "voting", self.config.novotepenalty)
 
         results = {}
         for player in self.players:
@@ -377,8 +375,8 @@ class Acro(Dendrite):
             if r['votes'] != 0:
                 results[r['player']]['score'] += r['votes'] * 10
                 results[r['player']]['votes'] = r['votes']
-                if int(r['time']) < ROUNDTIME / 2:
-                    timebonus = int((ROUNDTIME / 2 - int(r['time'])) / TIME_FACTOR)
+                if int(r['time']) < self.config.roundtime / 2:
+                    timebonus = int((self.config.roundtime / 2 - int(r['time'])) / self.config.timefactor)
                 else:
                     timebonus = 0
 
@@ -406,7 +404,7 @@ class Acro(Dendrite):
 
         # Record in game tally
 
-        if self.round == ROUNDS:
+        if self.round == self.config.rounds:
             self.killgame = True
             return
 
@@ -415,6 +413,6 @@ class Acro(Dendrite):
         self.contenders = []
         self.gimps = {}
         self.mark = mktime(localtime())
-        self.announce("Next round in " + str(BREAK) + " seconds.")
+        self.announce("Next round in " + str(self.config.rest) + " seconds.")
         self.round += 1
         self.stage = "waiting"
