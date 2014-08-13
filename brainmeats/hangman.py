@@ -11,16 +11,17 @@ class Hangman(Dendrite):
     correct = []
     wrong = ''
     active = False
-
-    states = [
-        {'2': '|    O    '},
-        {'3': '|    |    ', '4': '|    |    '},
-        {'5':'|   /     '},
-        {'5':'|   / \   '},
-        {'3': '|  --|    '},
-        {'3': '|  --|--  '},
+    monster = u'*---m^^^m\u00B0{'
+    quotes = [
+        'BRAAP',
+        'Tastes like chicken',
+        'Mmmmm... programmer',
+        'Gonna regret that in the morning',
+        'I should go on a diet',
+        'That was gluten free, right?',
+        'Still a better love story than Twilight',
     ]
-
+    
 
     def __init__(self, cortex):
         super(Hangman, self).__init__(cortex)
@@ -42,17 +43,7 @@ class Hangman(Dendrite):
 
         wordbank = []
 
-        self.display = [
-            '|-----    ',
-            '|    |    ',
-            '|         ',
-            '|         ',
-            '|         ',
-            '|         ',
-            '|         ',
-            '|_________',
-            '',
-        ]
+        self.display = ' ,__oo-O'
 
         for line in open("%s/%s" % (STORAGE, ACROLIB)):
             wordbank.append(line.strip())
@@ -76,10 +67,13 @@ class Hangman(Dendrite):
             return 'Enter "-guess one_letter|whole_word"'
         
         if self.values[0].upper() == ''.join(self.word):
-            self.chat('"%s"' % display)
+            self.chat('"%s"' % ''.join(self.word))
             self.win()
+        elif len(self.values[0]) > 1:
+            self.addhang()
+            return
         
-        _g = self.values[0][:1].upper()
+        _g = self.values[0].upper()
 
         if _g in self.word:
             correct = [ i for i,l in enumerate(self.word) if l == _g ]
@@ -89,8 +83,6 @@ class Hangman(Dendrite):
 
         self.wrong += _g
         self.addhang()
-
-        return self.display
 
     def showword(self):
         
@@ -112,7 +104,7 @@ class Hangman(Dendrite):
 
 
     def lose(self):
-        self.chat("You're dead. It was \"%s\"" % ''.join(self.word))
+        self.chat("You're dead. %sc--\"%s\" It was \"%s\"" % (self.monster[:-1], choice(self.quotes), ''.join(self.word)))
         self.reset()
 
 
@@ -124,14 +116,13 @@ class Hangman(Dendrite):
 
 
     def addhang(self):
-        numwrong = len(self.wrong)
-        for i in range(0, numwrong):
-            alt = self.states[i]
-            for state in alt:
-                self.display[int(state)] = alt[state]
+        self.display = self.display[1:]
         
-        self.chat(self.wrong)
+        wrongness = u'%s  %s%s' % (self.wrong, self.monster, self.display)
 
-        if len(self.wrong) == len(self.states):
+        if len(self.display):
+            self.chat(wrongness)
+        else:
             self.lose()
+
 

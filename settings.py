@@ -89,7 +89,7 @@ VALID_EXCHANGES = frozenset(['NYSE', 'NYSEARCA', 'NYSEAMEX', 'NASDAQ'])
 STARTING_CASH = 100000
 
 # Acro
-ACROLIB = 'natwords'
+ACROLIB = 'wordbank'
 MINLEN = 5
 MAXLEN = 7
 ROUNDS = 5
