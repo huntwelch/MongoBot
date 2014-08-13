@@ -4,9 +4,8 @@ import hashlib
 from config import load_config
 from datastore import Drinker
 
-'''
-Not the Ego. Not the Super-Ego. The Id.
-'''
+
+# Not the Ego. Not the Super-Ego. The Id.
 class Id(object):
 
     nick = False
@@ -62,10 +61,8 @@ class Id(object):
             self.is_owner = True
 
 
-    '''
-    Dynamicaly retrieve data from the datastore connection that are linked to the current
-    authenticated user.
-    '''
+    # Dynamicaly retrieve data from the datastore connection that are linked to the current
+    # authenticated user.
     def __getattr__(self, key):
 
         if not self.is_recognized or not self.prop:
@@ -83,9 +80,7 @@ class Id(object):
         return False
 
 
-    '''
-    Update an attribute in the datastore when a linked variable is accessed
-    '''
+    # Update an attribute in the datastore when a linked variable is accessed
     def __setattr__(self, key, value):
 
         if hasattr(self.__class__, key):
@@ -113,9 +108,7 @@ class Id(object):
         return True
 
 
-    '''
-    Migrate data to new data format as we go
-    '''
+    # Migrate data to new data format as we go
     def migrate(self, key):
 
         protected = [ 'name', 'password' ]
@@ -134,9 +127,7 @@ class Id(object):
 
         return
 
-    '''
-    Set the users password
-    '''
+    # Set the users password
     def setpassword(self, password, skip_auth_check=False):
 
         if (not self.is_authenticated or not self.prop) and not skip_auth_check:
@@ -149,9 +140,7 @@ class Id(object):
 
         self.prop.save()
 
-    '''
-    Identify a user by password, and add ident if successful
-    '''
+    # Identify a user by password, and add ident if successful
     def identify(self, password):
 
         obj = hashlib.sha256(password)

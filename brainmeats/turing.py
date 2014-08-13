@@ -2,13 +2,13 @@ from autonomic import axon, help, Dendrite
 from datastore import Drinker, Alias
 from id import Id
 
-'''  TO DO:
+# TO DO:
 
-        1.) Map +<alias_name> to -ralias so that we can call all aliases as +<alias_name> instead of the longer -ralias <alias_name>
-        2.) Allow for global aliases.
-        3.) Allow exisiting drinker aliases to be promoted to global.
-        4.) List other drinker aliases other than our own.
-'''
+#    1.) Map +<alias_name> to -ralias so that we can call all aliases as +<alias_name> instead of the longer -ralias <alias_name>
+#    2.) Allow for global aliases.
+#    3.) Allow exisiting drinker aliases to be promoted to global.
+#    4.) List other drinker aliases other than our own.
+
 
 
 class Turing(Dendrite):

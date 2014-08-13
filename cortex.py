@@ -13,11 +13,6 @@ from random import randint
 from config import load_config
 from getpass import getpass
 
-#from settings import PATIENCE, SCAN, STORE_URLS, \
-#    STORE_IMGS, IMGS, HAS_CHANSERV, THUMBS, WEBSITE
-#from secrets import CHANNEL, OWNER, REALNAME, MEETUP_NOTIFY, CHANNELS
-
-
 from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, postdelicious, savefromweb, zalgo
 from staff import Browser, Butler
@@ -156,10 +151,9 @@ class Cortex:
         for brainmeat in self.brainmeats:
             serotonin(self, brainmeat, electroshock)
 
-    '''
-    When you get amnesia, it's probably a good time to really
-    think and try to remember who you are.
-    '''
+    
+    # When you get amnesia, it's probably a good time to really
+    # think and try to remember who you are.
     def amnesia(self):
 
         # This is an easy way out for now...
