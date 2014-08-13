@@ -14,4 +14,6 @@ allowed
 python.core
 secrets.py
 junk/*
+deprecated/*
 config/secrets.yaml
+
