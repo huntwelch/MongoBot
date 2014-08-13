@@ -257,12 +257,8 @@ class Peeps(Dendrite):
             self.chat("Just one good ol'merican ten-digit number, thank ya kindly.")
             return
 
-        name = self.lastsender
-
-        if not simpleupdate(name, "phone", phone):
-            self.chat("Some shit borked.")
-            return
-
+        whom = Id(self.lastsender)
+        whom.phone = phone
         self.chat("Number updated.")
 
     @axon
@@ -279,7 +275,7 @@ class Peeps(Dendrite):
         else:
             search_for = self.values[0]
 
-        user = Drinker.objects(name=search_for).first()
+        user = Id(search_for)
         if not user or not user.phone:
             return "No such numba. No such zone."
         else:

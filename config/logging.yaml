@@ -1,10 +1,10 @@
 version: 1
 disable_existing_loggers: true
- 
+
 root:
   level: !!python/name:logging.NOTSET
   handlers: [console]
- 
+
 loggers:
   info:
     level: !!python/name:logging.INFO
@@ -13,15 +13,15 @@ loggers:
     propagate: false
   debug:
     level: !!python/name:logging.DEBUG
-    handlers: [console, logfile]
+    handlers: [logfile]
     qualname: debug
     propagate: false
   warn:
     level: !!python/name:logging.WARN
-    handlers: [logfile]
+    handlers: [console, logfile]
     qualname: warn
     propagate: false
- 
+
 handlers:
   console:
     class: logging.StreamHandler
@@ -33,7 +33,7 @@ handlers:
     filename: sample.log
     formatter: extended
     level: !!python/name:logging.NOTSET
- 
+
 formatters:
   simple:
     class: !!python/name:logging.Formatter

@@ -116,7 +116,7 @@ class Sms(Dendrite):
         msg = ' '.join(self.values[1:])
 
         if not re.search('^[+0-9]+$', to):
-            user = Drinker.objects(name=to).first()
+            user = Id(to)
             if not user or not user.phone:
                 self.chat('Don\'t know who that is :(')
                 return

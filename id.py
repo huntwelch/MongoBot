@@ -98,23 +98,17 @@ class Id(object):
         # This can eventually be removed; migrate the data as we go
         self.migrate(key)
 
-        tainted = False
-
-        if key in self.prop.data:
-            self.prop.data[key] = value
-            tainted = True
+        self.prop.data[key] = value
 
         # Even with a migration lets save the changes to the original as well,
         # no need for an additional check.
         if key in self.prop:
             self.prop[key] = value
-            tainted = True
 
-        if tainted:
-            try:
-                self.prop.save()
-            except:
-                return False
+        try:
+            self.prop.save()
+        except:
+            return False
 
         return True
 

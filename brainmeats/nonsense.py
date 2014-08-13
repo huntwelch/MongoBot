@@ -103,13 +103,15 @@ class Nonsense(Dendrite):
     @axon
     @help("<generate start-up elevator pitch>")
     def startup(self):
-        url = 'http://itsthisforthat.com/api.php?text'
+        url = 'http://itsthisforthat.com/api.php?json'
 
         try:
             out = pageopen(url).text
-            return out.lower().capitalize()
+            json = response.json()
+            return 'It\'s a %s for %s' % (json.this.lower().capitalize(),
+                    json.that.lower().capitalize())
         except:
-            self.chat("Done broke")
+            self.chat('It\'s a replacement for itsthisforthat.com... (Request failed)')
             return
 
     @axon

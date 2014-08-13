@@ -72,7 +72,7 @@ class Linker(Dendrite):
 
         if randint(1, 5) == 1:
             try:
-            self.cx.commands.get('tweet')(url)
+                self.cx.commands.get('tweet')(url)
             except:
                 pass
 
