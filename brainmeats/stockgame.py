@@ -9,14 +9,9 @@ from config import load_config
 from id import Id
 
 
-'''
-The stock game, it's awesome. It has stocks. Nice.
-'''
+# The stock game, it's awesome. It has stocks. Nice.
 class Stockgame(Dendrite):
 
-    '''
-    Constructor
-    '''
     def __init__(self, cortex):
 
         self.config = load_config('config/stockgame.yaml')
@@ -24,9 +19,7 @@ class Stockgame(Dendrite):
         super(Stockgame, self).__init__(cortex)
 
 
-    '''
-    Helper method to create a position
-    '''
+    # Helper method to create a position
     def _create_position(self, ptype):
 
         whom = self.lastsender

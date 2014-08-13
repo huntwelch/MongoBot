@@ -125,22 +125,20 @@ def serotonin(cortex, meatname, electroshock):
         cortex.helpmenu[meatname] = sorted(helps)
 
 
-'''
-Neurons hold some vesicles. Vesicles are cool.
-'''
+# Neurons hold some vesicles. Vesicles are cool.
 class Neurons(object):
 
     cortex = None
     vesicles = {}
 
 
-'''
-Cerebellum is needed on any class that has methods that will be used as receptors - this is
-due to pythons way of handling decorators and not binding them until the class is defined,
-which is not how receptors should be utilized.
-
-aka, this be a hack
-'''
+# Cerebellum is needed on any class that has 
+# methods that will be used as receptors - this is
+# due to pythons way of handling decorators and 
+# not binding them until the class is defined,
+# which is not how receptors should be utilized.
+# 
+# aka, this be a hack
 def Cerebellum(object):
 
     for name, method in object.__dict__.iteritems():
@@ -153,16 +151,15 @@ def Cerebellum(object):
     return object
 
 
-'''
-Synapse is an event emitting decorator that will fire off a neuron to all receptors that
-are listening for the passed keyword.
-
-Usage:
-
-    @Synapse('my_keyword')
-    def some_method():
-        ...
-'''
+# Synapse is an event emitting decorator that will 
+# fire off a neuron to all receptors that are
+# listening for the passed keyword.
+# 
+# Usage:
+# 
+#     @Synapse('my_keyword')
+#     def some_method():
+#         ...
 class Synapse(Neurons):
 
     def __init__(self, neuron):
@@ -186,16 +183,14 @@ class Synapse(Neurons):
         return glutamate
 
 
-'''
-Receptor is an observer decorator that will auto trigger when a neuron is fired using
-a keyword the receptor is listening for.
-
-Usage:
-
-    @Receptor('my_keyword')
-    def do_something():
-        ....
-'''
+# Receptor is an observer decorator that will auto trigger when a neuron is fired using
+# a keyword the receptor is listening for.
+# 
+# Usage:
+# 
+#     @Receptor('my_keyword')
+#     def do_something():
+#         ....
 def Receptor(name, *args, **kwargs):
 
     class AutoReceptor(Neurons):

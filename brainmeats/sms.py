@@ -19,19 +19,17 @@ class Sms(Dendrite):
     current = mktime(localtime())
     next_ = current + 10
 
-    '''
-    Set up the SMS brainmeat and the Twilio client
-    '''
+    # Set up the SMS brainmeat and the Twilio client
     def __init__(self, cortex):
         super(Sms, self).__init__(cortex)
 
         self.client = TwilioRestClient(self.secrets.sid, self.secrets.token)
 
 
-    '''
-    smsticker is a receptor that responds to twitch broadcasts - which happen on every iteration of
-    monitor. to prevent hitting twilio too hard, this gets self limited to every 10 seconds.
-    '''
+    # smsticker is a receptor that responds to twitch 
+    # broadcasts - which happen on every iteration of
+    # monitor. to prevent hitting twilio too hard, 
+    # this gets self limited to every 10 seconds.
     @Receptor('twitch')
     def smsticker(self):
 

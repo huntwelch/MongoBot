@@ -11,12 +11,12 @@ from id import Id
 
 from pprint import pprint
 
-'''
-Welcome to the thalamus - the switchboard of the brain.  It connects the cortex and brainmeats
-to the rest of the body, or in this case IRC. It is responsible for relaying input and out to
-the IRC server in a sane (well... yeah... whatever) manner; and triggering the necessary
-brainmeats in the cortex when commands are recognized.
-'''
+# Welcome to the thalamus - the switchboard of the brain.  
+# It connects the cortex and brainmeats to the rest of the 
+# body, or in this case IRC. It is responsible for relaying 
+# input and out to the IRC server in a sane (well... yeah... 
+# whatever) manner; and triggering the necessary brainmeats 
+# in the cortex when commands are recognized.
 class Thalamus(object):
 
     cx = False
@@ -34,9 +34,7 @@ class Thalamus(object):
     regain_nick = False
 
 
-    '''
-    Initialize and auto-connect
-    '''
+    # Initialize and auto-connect
     def __init__(self, cortex):
 
         self.cx = cortex
@@ -47,9 +45,7 @@ class Thalamus(object):
         self.connect()
 
 
-    '''
-    Make those connections, you will feel so much more human.
-    '''
+    # Make those connections, you will feel so much more human.
     def connect(self):
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -70,9 +66,7 @@ class Thalamus(object):
         self.introduce()
 
 
-    '''
-    Introduce yourself to the IRC server; it's only polite.
-    '''
+    # Introduce yourself to the IRC server; it's only polite.
     def introduce(self):
 
         if not self.name:
@@ -87,9 +81,7 @@ class Thalamus(object):
         self.send('NICK %s' % self.name)
 
 
-    '''
-    Read data in from the socket
-    '''
+    # Read data in from the socket
     def read(self):
 
         try:
@@ -104,9 +96,7 @@ class Thalamus(object):
         return data
 
 
-    '''
-    Send data out to the bound socket
-    '''
+    # Send data out to the bound socket
     def send(self, data):
 
         # Temporary backwards compatibility as everything gets ported to the thalamus send
@@ -115,9 +105,7 @@ class Thalamus(object):
         self.sock.send('%s%s%s' % (data, chr(015), chr(012)))
 
 
-    '''
-    Process incoming data
-    '''
+    # Process incoming data
     def process(self):
 
         if self.name != self.settings.bot.nick and self.regain_nick and time() - self.regain_nick > 20:
@@ -167,9 +155,8 @@ class Thalamus(object):
                 continue
 
 
-    '''
-    Handle the welcome to the server message by joining channels at this point
-    '''
+    # Handle the welcome to the server message 
+    # by joining channels at this point
     def _cmd_001(self, source, args):
 
         print '[IRC] Connected to %s' % (source)
@@ -180,9 +167,7 @@ class Thalamus(object):
             self.send('JOIN %s' % channel)
 
 
-    '''
-    Handle incoming server information
-    '''
+    # Handle incoming server information
     def _cmd_004(self, source, args):
 
         self.name = args.pop(0)
@@ -191,9 +176,7 @@ class Thalamus(object):
         self.regain_nick = time()
 
 
-    '''
-    Handle joining a room
-    '''
+    # Handle joining a room
     def _cmd_353(self, source, args):
 
         users = args[-1]
@@ -208,36 +191,28 @@ class Thalamus(object):
         }
 
 
-    '''
-    No such username - expected response when WHOIS fails
-    Attempt to regain nick
-    '''
+    # No such username - expected response when WHOIS fails
+    # Attempt to regain nick
     def _cmd_401(self, source, args):
 
         if self.regain_nick and time() - self.regain_nick < 20:
             self.name = None
             self.introduce()
 
-    '''
-    Handle name already being in use
-    '''
+    # Handle name already being in use
     def _cmd_433(self, source, args):
 
         self.name += '_'
         self.introduce()
 
 
-    '''
-    Respond to server PING request for keep-alive
-    '''
+    # Respond to server PING request for keep-alive
     def _cmd_PING(self, source, args):
 
         self.send('PONG %s' % args[-1])
 
 
-    '''
-    Re-get all the names in the channel when a user leaves
-    '''
+    # Re-get all the names in the channel when a user leaves
     def _cmd_PART(self, source, args):
 
         channel = args.pop(0)
@@ -245,9 +220,7 @@ class Thalamus(object):
         self.send('NAMES %s' % channel)
 
 
-    '''
-    Handle when a new user joins the room
-    '''
+    # Handle when a new user joins the room
     def _cmd_JOIN(self, source, args):
 
         channel = args.pop(0)
@@ -255,9 +228,7 @@ class Thalamus(object):
         self.send('NAMES %s' % channel)
 
 
-    '''
-    Handle when a user quits
-    '''
+    # Handle when a user quits
     def _cmd_QUIT(self, source, args):
 
         channel = args.pop(0)
@@ -265,9 +236,7 @@ class Thalamus(object):
         self.send('NAMES %s' % channel)
 
 
-    '''
-    Handle all incoming messages
-    '''
+    # Handle all incoming messages
     @Synapse('IRC_PRIVMSG')
     def _cmd_PRIVMSG(self, source, args):
 
