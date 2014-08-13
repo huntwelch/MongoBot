@@ -79,3 +79,5 @@ website: !include webserver.yaml
 
 # Plugins
 plugins: !include plugins.yaml
+
+logging: !include logging.yaml
