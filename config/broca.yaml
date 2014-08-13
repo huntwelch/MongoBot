@@ -1,0 +1,27 @@
+smartass: True
+babblelim: 100
+acronymlib: 'natwords'
+questions:
+  - 'how do i'
+  - 'how do you'
+  - 'how does one'
+  - 'how would i'
+  - 'how would you'
+  - 'how would one'
+  - 'does anyone know how'
+  - 'do you know how'
+
+ithelp:
+  - 'Have you tried turning it off an on again?'
+  - 'Have you tried forcing an unexpected reboot?'
+  - 'Are you sure your computer is on?'
+  - 'Have your tried connecting the computer directly to the modem?'
+  - 'Have you power-cycled it?'
+
+frustration:
+  - 'fuck'
+  - 'shit'
+  - 'dammit'
+  - 'goddammit'
+  - 'wtf'
+  - 'the hell'

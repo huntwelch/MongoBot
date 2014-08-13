@@ -15,10 +15,11 @@ import simplejson as json
 from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash, _app_ctx_stack
 from server.decorators import requires_auth
-from server.helpers import fetch_chats, render_xml, diplomacy_state
-from settings import POEMS
+from server.helpers import fetch_chats, render_xml
+#from settings import POEMS
 from autonomic import Dendrite
-from brainmeats.broca import Broca
+# Commented out until broca is fixed
+# from brainmeats.broca import Broca
 
 app = Flask(__name__)
 
@@ -31,16 +32,6 @@ def page_not_found(e):
 @app.route("/")
 def index():
     return render_template('index.html')
-
-
-@app.route("/api/diplomacy/state")
-def render_provinces():
-    return json.dumps(diplomacy_state())
-
-
-@app.route("/diplomacy")
-def diplomacy():
-    return render_template('diplomacy.html')
 
 
 @app.route("/api/chat", methods=['GET', 'POST'])
@@ -88,24 +79,24 @@ def poetry():
 
     return render_template('poetry.html', poems=display)
 
-
-@app.route("/random_poem")
-def randompoem():
-    b = Broca(Dendrite)
-
-    starter = random.choice(['e', 'a', 'i', 'o', 'u'])
-
-    seed = b.babble([starter])
-    title = seed
-
-    poem = []
-    seed = seed.split()
-    for word in seed:
-        line = b.babble([word])
-        line = ''.join([i if ord(i) < 128 else '' for i in line])
-        poem.append(line)
-
-    return render_template('poem.html', title=title, poem=poem)
+# Commented out until broca is fixed
+#@app.route("/random_poem")
+#def randompoem():
+#    b = Broca(Dendrite)
+#
+#    starter = random.choice(['e', 'a', 'i', 'o', 'u'])
+#
+#    seed = b.babble([starter])
+#    title = seed
+#
+#    poem = []
+#    seed = seed.split()
+#    for word in seed:
+#        line = b.babble([word])
+#        line = ''.join([i if ord(i) < 128 else '' for i in line])
+#        poem.append(line)
+#
+#    return render_template('poem.html', title=title, poem=poem)
 
 
 # There's a weird bug in some of the poems that crashes. Not sure what.

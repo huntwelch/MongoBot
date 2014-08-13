@@ -1,10 +1,7 @@
-import praw 
+import praw
 import random
 
 from autonomic import axon, alias, help, Dendrite
-from settings import NICK
-from secrets import REDDIT_APPID, REDDIT_SECRET
-
 
 # It's called 'alien' because (re)ddit conflicted
 # with (re)ference in the help menu.
@@ -25,7 +22,7 @@ class Alien(Dendrite):
         if not self.values:
             if self.last:
                 subreddit = self.last
-            else:                
+            else:
                 # currently broken if blank, so:
                 return "Enter a subreddit"
         else:

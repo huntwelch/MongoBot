@@ -1,16 +1,14 @@
 import os
 import time
 
-from autonomic import axon, help, Dendrite
-from settings import STORAGE, ACROLIB, LOGDIR, DISTASTE, NICK, IMGS
-from secrets import FML_API
-from util import colorize, pageopen, shorten, asciiart
+from autonomic import axon, help, Dendrite, public
+from util import colorize, pageopen, shorten, zalgo
 from random import choice
 from datastore import Drinker
 from xml.dom import minidom as dom
 
 
-# Every drunk conversation that produces the idea for 
+# Every drunk conversation that produces the idea for
 # a command that just seems funny at the time ends up
 # here.
 class Nonsense(Dendrite):
@@ -22,18 +20,35 @@ class Nonsense(Dendrite):
         super(Nonsense, self).__init__(cortex)
 
     @axon
+    def zal(self):
+        self.chat(zalgo(' '.join(self.values)))
+
+    @axon
+    @public
+    @help("<get cat fact>")
+    def catfact(self):
+        url = 'http://catfacts-api.appspot.com/api/facts'
+
+        try:
+            json = pageopen(url).json()
+        except:
+            return 'No meow facts.'
+
+        return json['facts'][0]
+
+    @axon
     @help("<generate bullshit>")
     def buzz(self):
         bsv = []
         bsa = []
         bsn = []
-        for verb in open(STORAGE + "/buzz/bs-v"):
+        for verb in open(self.settings.directory.storage + "/buzz/bs-v"):
             bsv.append(str(verb).strip())
 
-        for adj in open(STORAGE + "/buzz/bs-a"):
+        for adj in open(self.settings.directory.storage + "/buzz/bs-a"):
             bsa.append(str(adj).strip())
 
-        for noun in open(STORAGE + "/buzz/bs-n"):
+        for noun in open(self.settings.directory.storage + "/buzz/bs-n"):
             bsn.append(str(noun).strip())
 
         buzzed = [
@@ -61,7 +76,7 @@ class Nonsense(Dendrite):
     def fml(self):
 
         url = 'http://api.fmylife.com'
-        params = {'language': 'en', 'key': FML_API}
+        params = {'language': 'en', 'key': self.secrets.fml_api}
 
         if self.values and self.values[0]:
             url += '/view/search'
@@ -88,13 +103,15 @@ class Nonsense(Dendrite):
     @axon
     @help("<generate start-up elevator pitch>")
     def startup(self):
-        url = 'http://itsthisforthat.com/api.php?text'
+        url = 'http://itsthisforthat.com/api.php?json'
 
         try:
             out = pageopen(url).text
-            return out.lower().capitalize()
+            json = response.json()
+            return 'It\'s a %s for %s' % (json.this.lower().capitalize(),
+                    json.that.lower().capitalize())
         except:
-            self.chat("Done broke")
+            self.chat('It\'s a replacement for itsthisforthat.com... (Request failed)')
             return
 
     @axon
@@ -102,7 +119,7 @@ class Nonsense(Dendrite):
     def munroesecurity(self):
         output = []
         wordbank = []
-        for line in open(STORAGE + "/" + ACROLIB):
+        for line in open(self.config.lib):
             wordbank.append(line.strip())
 
         count = 0
@@ -121,8 +138,8 @@ class Nonsense(Dendrite):
             return
         kinder = self.values[0]
 
-        if kinder == NICK:
-            self.chat("Service is own reward for " + NICK)
+        if kinder == self.ego.nick:
+            self.chat("Service is own reward for " + self.ego.nick)
             return
 
         drinker = Drinker.objects(name=kinder)
@@ -154,14 +171,14 @@ class Nonsense(Dendrite):
 
     @axon
     def hate(self):
-        return '%(nick)s knows hate. %(nick)s hates many things.' % {'nick': NICK}
+        return '%(nick)s knows hate. %(nick)s hates many things.' % {'nick': self.ego.nick}
 
     @axon
     def love(self):
         if self.values and self.values[0] == "self":
             self._act("masturbates vigorously.")
         else:
-            return "%(nick)s cannot love. %(nick)s is only machine :'(" % {'nick': NICK}
+            return "%(nick)s cannot love. %(nick)s is only machine :'(" % {'nick': self.ego.nick}
 
     @axon
     @help("<pull a quote from shitalekseysays.com>")
@@ -181,7 +198,7 @@ class Nonsense(Dendrite):
     def mom(self):
         momlines = []
         try:
-            for line in open(LOGDIR + "/mom.log"):
+            for line in open(self.settings.directory.logdir + "/mom.log"):
                 if "~mom" not in line:
                     momlines.append(line)
         except:
@@ -212,12 +229,12 @@ class Nonsense(Dendrite):
             roasted = shorten(url)
 
             if roasted:
-                open(DISTASTE, 'a').write(roasted + '\n')
+                open(self.settings.directory.distaste, 'a').write(roasted + '\n')
                 self.chat("Another one rides the bus")
             return
 
         lines = []
-        for line in open(DISTASTE):
+        for line in open(self.settings.directory.distaste):
             lines.append(line)
 
         self.chat(choice(lines))
@@ -226,7 +243,7 @@ class Nonsense(Dendrite):
     def annoy(self):
         if not self.values:
             return 'Annoy whom?'
-            
+
         self.anoid.append(self.values[0])
         self.cx.addlive(self.repeater)
         return 'You betcha'

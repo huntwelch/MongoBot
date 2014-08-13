@@ -1,17 +1,20 @@
 import os
 
 from time import mktime, localtime, sleep
-from settings import PULSE_RATE
+from config import load_config
 
 # The doctor checkout the pulse file set by
-# medulla. If it's been gone too long, 
-# according to PULSE_RATE, it kills it 
+# medulla. If it's been gone too long,
+# according to PULSE_RATE, it kills it
 # with some awkward command line fu.
+
+settings = load_config('config/settings.yaml')
 
 print "The doctor is in"
 while True:
-    pulse = open('/tmp/bot.pulse', 'r')
+    pulse = open(settings.sys.pulse, 'r')
     lastpulse = pulse.readline()
+
     try:
         if mktime(localtime()) - float(lastpulse) > PULSE_RATE:
             print "He's dead, Jim"

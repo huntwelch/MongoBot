@@ -1,0 +1,81 @@
+#
+# This is the MongoBot general settings configuration file.
+# It contains the configuration directives to instruct the bot
+# The configuration file uses standard YAML tags, as well as
+# extended PyYAML specific tag types as documented at
+# http://pyyaml.org/wiki/PythonTagScheme
+#
+# Non-standard tags:
+#   Include another YAML config file
+#     module: !include module.yaml
+#
+#  By convention, all strings are in single quotes, except
+#  dynamic resolution which must be in double quotes:
+#    directory:
+#      root: '/home/MongoBot'
+#      downloads: "{directory.root}/downloads"
+#
+#
+
+# IRC connection settings
+irc:
+  host: 'chat.freenode.net'
+  port: 6697
+  ssl: True
+  chanserv: False
+  nickserv:
+    nick: 'NickServ'
+    password: 'test'
+  password: False
+
+bot:
+  nick: 'Ciazaim'
+  ident: 'Ciazaim'
+  realname: 'Ciazaim'
+  password: Null # The password to the IRC server
+  command_prefix: '-'
+  multi_command_prefix: '*'
+
+sys:
+  pulse: '/tmp/bot.pulse'
+  pulserate: 25
+  redissock: '/tmp/redis.sock'
+
+debug:
+  verbose: True
+
+# Files and directories
+directory:
+  storage: 'hippocampus'
+  logdir: "{directory.storage}/log"
+  errorlog: "{directory.logdir}/error.log"
+  log: "{directory.logdir}/chat.log"
+  distaste: "{directory.storage}/distaste"
+  authfile: "{directory.storage}/users.yaml"
+
+# Media
+media:
+  books: "{directory.storage}/booklearnin"
+  poems: "{directory.storage}/poems"
+  downloads: "{directory.storage}/downloads"
+  images: "{media.downloads}/imgs"
+  videos: "{media.downloads}/videos"
+  gifs: '/static/gifs/'
+  thumbs: '/static/thumbs/'
+  storeurls: True
+  storeimgs: True
+
+# General configuration options
+general:
+  timezone: 'EST'
+
+# Misc config item
+misc:
+  thumbsize: 40
+  website: 'http://www.mongobot.com' # Dupped by webserver
+  
+# Web stuff
+website: !include webserver.yaml
+
+# Plugins
+plugins: !include plugins.yaml

@@ -1,5 +1,4 @@
 from autonomic import axon, help, Dendrite
-from settings import LOG, CONTROL_KEY
 
 
 class Memory(Dendrite):
@@ -16,7 +15,7 @@ class Memory(Dendrite):
         self.chat("Recalling...")
         self.memories = []
         thinkingof = ' '.join(self.values)
-        for line in open(LOG):
+        for line in open(self.settings.directory.log):
             if line.find(thinkingof) != -1:
                 try:
                     if line[:2] == 'TS':
@@ -25,7 +24,7 @@ class Memory(Dendrite):
                     whom, message = line[1:].split(":", 1)
                 except:
                     continue
-                if message.find("%smem" % CONTROL_KEY) == 0:
+                if message.find("%smem" % self.settings.bot.command_prefix) == 0:
                     continue
                 whom = whom.split("!")[0]
                 self.memories.append(whom + ": " + message)
