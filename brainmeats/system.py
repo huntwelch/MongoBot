@@ -92,7 +92,11 @@ class System(Dendrite):
     @axon
     @help("<update from git repo>")
     def gitpull(self):
-        os.system("git pull origin master")
+        if not self.values: return 'Which branch?'
+
+        branch = self.values[0]
+
+        os.system("git pull origin %s" % branch)
         self.cx.master.reload(True)
         self.chat("I know kung-fu.")
 

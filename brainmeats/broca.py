@@ -534,7 +534,7 @@ class Broca(Dendrite):
         word = self.values[0]
         params = {'allowed_in_frame': '0', 'searchmode': 'term', 'search': word}
 
-        site = Browse("http://www.etymonline.com/index.php", params)
+        site = Browser("http://www.etymonline.com/index.php", params)
         if site.error:
             self.chat(site.error)
             return
@@ -594,7 +594,7 @@ class Broca(Dendrite):
         word = ''.join(self.values)
         url = 'http://www.anagramica.com/best/%s' % word
 
-        site = Browse(url)
+        site = Browser(url)
         if site.error:
             self.chat(site.error)
             return
