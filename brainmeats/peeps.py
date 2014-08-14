@@ -118,23 +118,23 @@ class Peeps(Dendrite):
     @axon
     @help("<ping everyone in the room>")
     def all(self, whom=False):
-        peeps = self.members
-
-        if not peeps:
-            self.chat('List incoherrent')
-            return
-
-        if not whom:
-            try:
-                peeps.remove(self.lastsender)
-            except:
-                self.chat('List incoherrent')
-                return
+        peeps = self.cx.thalamus.channels[self.cx.context]['users']
 
         announcer = whom or self.lastsender
+        announcer = Id(announcer)
 
-        peeps = ', '.join(peeps)
-        return '%s, %s has something very important to say.' % (peeps, announcer)
+        try:
+            del peeps[announcer.name]
+            del peeps[self.botname]
+        except:
+            pass
+
+        if not peeps:
+            return 'Is this real life? No one to announce anything to...'
+
+        peeps = ', '.join('%s' % (key) for (key, val) in peeps.iteritems())
+        return '%s, %s has something very important to say.' % (peeps,
+                announcer.name)
 
     @axon
     @help("YYYY/MM/DD=EVENT_DESCRIPTION <save what you're waiting for>")
