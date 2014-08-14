@@ -21,7 +21,7 @@ class Nonsense(Dendrite):
 
     @axon
     def zal(self):
-        self.chat(zalgo(' '.join(self.values)))
+        return zalgo(' '.join(self.values))
 
     @axon
     @public
