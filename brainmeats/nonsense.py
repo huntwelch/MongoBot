@@ -108,8 +108,8 @@ class Nonsense(Dendrite):
         try:
             out = pageopen(url).text
             json = response.json()
-            return 'It\'s a %s for %s' % (json.this.lower().capitalize(),
-                    json.that.lower().capitalize())
+            return 'It\'s a %s for %s' % (json['this'].lower().capitalize(),
+                    json['that'].lower().capitalize())
         except:
             self.chat('It\'s a replacement for itsthisforthat.com... (Request failed)')
             return
