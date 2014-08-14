@@ -65,35 +65,6 @@ class System(Dendrite):
     def threads(self):
         return threading.activeCount()
 
-    # This should be pretty straightforward. Based on BOT_PASS
-    # in secrets; nobody can use the bot until they're
-    # registered. Went with flat file for ease of editing
-    # and manipulation.
-    @axon
-    @public
-    @help("PASSWORD <register your nick and host to use the bot>")
-    def regme(self):
-        if not self.values:
-            self.chat("Please enter a password.")
-            return
-
-        if self.values[0] != self.secrets.botpass:
-            self.chat("Not the password.")
-            return
-
-        real = self.cx.lastrealsender
-        if real and real in self.cx.REALUSERS:
-            self.chat("Already know you, bro.")
-            return
-
-        self.cx.REALUSERS.append(real)
-
-#        users = open(REGISTERED, 'a')
-#        users.write(real + "\n")
-#        users.close()
-
-        self.chat("You in, bro.")
-
     # Reloads the bot. Any changes make to cortex or brainmeats
     # and most settings will be reflected after a reload.
     @axon
