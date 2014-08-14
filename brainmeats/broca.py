@@ -593,13 +593,12 @@ class Broca(Dendrite):
         word = ''.join(self.values)
         url = 'http://www.anagramica.com/best/%s' % word
 
-        site = Browse(url)
-        if site.error:
-            self.chat(site.error)
-            return
+        site = pageopen(url)
+        if not site:
+            return 'Error'
 
         try:
-            json = simplejson.loads(site.read())
+            json = site.json()
             return json['best']
         except Exception as e:
             self.chat("Couldn't parse.", str(e))
