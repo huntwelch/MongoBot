@@ -1,8 +1,10 @@
 import os
 import time
+import simplejson
 
 from autonomic import axon, help, Dendrite, public
 from util import colorize, pageopen, shorten, zalgo
+from staff import Browser
 from random import choice
 from datastore import Drinker
 from xml.dom import minidom as dom
