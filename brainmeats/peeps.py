@@ -4,7 +4,7 @@ import re
 import hashlib
 import random
 
-from autonomic import axon, help, Dendrite, alias, public
+from autonomic import axon, help, Dendrite, alias, public, Receptor, Cerebellum
 from datastore import simpleupdate, Drinker, incrementEntity, Entity, entityScore, topScores
 from server.helpers import totp
 from id import Id
@@ -17,6 +17,7 @@ from id import Id
 # many other functions of other libraries refer to peeps
 # stuff. If you install no other external stuff, I
 # recommend mongodb.
+@Cerebellum
 class Peeps(Dendrite):
 
     checked = False
@@ -55,7 +56,6 @@ class Peeps(Dendrite):
     @axon
     @help("DRINKER <give somebody a point>")
     def increment(self):
-        print "INCEMERMET"
         if not self.values:
             self.chat("you need to give someone your love")
             return
@@ -118,23 +118,23 @@ class Peeps(Dendrite):
     @axon
     @help("<ping everyone in the room>")
     def all(self, whom=False):
-        peeps = self.members
-
-        if not peeps:
-            self.chat('List incoherrent')
-            return
-
-        if not whom:
-            try:
-                peeps.remove(self.lastsender)
-            except:
-                self.chat('List incoherrent')
-                return
+        peeps = self.cx.thalamus.channels[self.cx.context]['users']
 
         announcer = whom or self.lastsender
+        announcer = Id(announcer)
 
-        peeps = ', '.join(peeps)
-        return '%s, %s has something very important to say.' % (peeps, announcer)
+        try:
+            del peeps[announcer.name]
+            del peeps[self.botname]
+        except:
+            pass
+
+        if not peeps:
+            return 'Is this real life? No one to announce anything to...'
+
+        peeps = ', '.join('%s' % (key) for (key, val) in peeps.iteritems())
+        return '%s, %s has something very important to say.' % (peeps,
+                announcer.name)
 
     @axon
     @help("YYYY/MM/DD=EVENT_DESCRIPTION <save what you're waiting for>")
@@ -313,4 +313,37 @@ class Peeps(Dendrite):
     def okdrink(self):
         whenwhere = 'Every %s, %s' % (MEETUP_DAY, MEETUP_LOCATION)
         return whenwhere
+
+    '''
+    Detect when people are getting incremented, decremented with ++/--
+    '''
+    @Receptor('IRC_PRIVMSG')
+    def peep_incdec(self, target, source, args):
+        input = args[-1]
+        matches = re.match('^([a-zA-Z0-9_\\\[\]\{\}\^`\|]+)([\+\+|\-\-]).*', input)
+
+        if not matches:
+            return
+
+        entity = matches.group(1)
+        method = matches.group(2)
+
+        if not entity:
+            return
+
+        source = Id(source)
+
+        if not source.name or not source.is_authenticated:
+            return
+
+        mod = 1
+        if method == '--':
+            mod = -1
+
+        if not incrementEntity(entity, random.randint(1, 100000) * mod):
+            self.chat("mongodb seems borked", target=target)
+            return
+
+        self.chat('%s brought %s to %d' % (source.name, entity,
+            entityScore(entity)), target=target)
 
