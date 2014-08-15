@@ -113,7 +113,7 @@ class Broca(Dendrite):
 
     @axon
     def finis(self):
-        link = '%s/poem/%s' % (self.cx.website.url, self.draft[:-4])
+        link = '%s/poem/%s' % (self.cx.settings.website.url, self.draft[:-4])
         self.draft = False
         return 'Work complete: %s' % link
 
