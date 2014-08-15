@@ -151,7 +151,7 @@ class Cortex:
         for brainmeat in self.brainmeats:
             serotonin(self, brainmeat, electroshock)
 
-    
+
     # When you get amnesia, it's probably a good time to really
     # think and try to remember who you are.
     def amnesia(self):
@@ -174,8 +174,8 @@ class Cortex:
     #
     # ticker being the function in the class that runs.
     # see brainmeats/sms.y for a good example of this.
-    # 
-    # Update: may be obsolete now that @Cerebellum is 
+    #
+    # Update: may be obsolete now that @Cerebellum is
     # working n stuff.
     def addlive(self, func, alt=False):
         name = alt or func.__name__
@@ -380,8 +380,8 @@ class Cortex:
     # Announce means the chat is always sent to the channel,
     # never back as a private response.
     @ratelimited(2)
-    def announce(self, message):
-        self.chat(message, target=CHANNEL)
+    def announce(self, message, target):
+        self.chat(message, target=target)
 
     # Since chat is mongo's only means of communicating with
     # a room, the ratelimiting here should prevent any overflow
@@ -436,7 +436,7 @@ class Cortex:
     def act(self, message, public=False, target=False):
         message = '\001ACTION %s\001' % message
         if public:
-            self.announce(message)
+            self.announce(message, target)
         elif target:
             self.chat(message, target)
         else:
