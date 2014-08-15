@@ -174,6 +174,9 @@ class Cortex:
     #
     # ticker being the function in the class that runs.
     # see brainmeats/sms.y for a good example of this.
+    # 
+    # Update: may be obsolete now that @Cerebellum is 
+    # working n stuff.
     def addlive(self, func, alt=False):
         name = alt or func.__name__
         self.live[name] = func
