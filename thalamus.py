@@ -11,11 +11,11 @@ from id import Id
 
 from pprint import pprint
 
-# Welcome to the thalamus - the switchboard of the brain.  
-# It connects the cortex and brainmeats to the rest of the 
-# body, or in this case IRC. It is responsible for relaying 
-# input and out to the IRC server in a sane (well... yeah... 
-# whatever) manner; and triggering the necessary brainmeats 
+# Welcome to the thalamus - the switchboard of the brain.
+# It connects the cortex and brainmeats to the rest of the
+# body, or in this case IRC. It is responsible for relaying
+# input and out to the IRC server in a sane (well... yeah...
+# whatever) manner; and triggering the necessary brainmeats
 # in the cortex when commands are recognized.
 class Thalamus(object):
 
@@ -155,7 +155,7 @@ class Thalamus(object):
                 continue
 
 
-    # Handle the welcome to the server message 
+    # Handle the welcome to the server message
     # by joining channels at this point
     def _cmd_001(self, source, args):
 
@@ -240,17 +240,18 @@ class Thalamus(object):
     @Synapse('IRC_PRIVMSG')
     def _cmd_PRIVMSG(self, source, args):
 
+        user = Id(source)
+        target = args[0] if args[0] != self.name else user.nick
+
         # Parse the incoming message for a command with the selected command prefix
         match = re.search('^[{0}|{1}](\w+)[ ]?(.+)?'.format(
             self.settings.bot.command_prefix,
             self.settings.bot.multi_command_prefix),
             args[-1])
         if not match:
-            return (source, args)
+            return (target, source, args)
 
         # Parse the user, target, command and arguments information
-        user = Id(source)
-        target = args[0] if args[0] != self.name else user.nick
         command = match.group(1)
         arguments = match.group(2)
 
@@ -266,12 +267,12 @@ class Thalamus(object):
             if user.is_recognized:
                 self.send('PRIVMSG %s :I recognize you, but first user %sidentify...' % (user.nick, self.settings.bot.command_prefix))
 
-            return (source, args)
+            return (target, source, args)
 
         # If there was no command specified, return the source and args so any bound
         # Receptors can get triggered with the same information
         if not command:
-            return (source, args)
+            return (target, source, args)
 
         self.lastcommand = command
 
@@ -284,5 +285,5 @@ class Thalamus(object):
         self.cx.context = target
         self.cx.butler.do(self.cx.command, (source, args[-1]))
 
-        return (source, args)
+        return (target, source, args)
 
