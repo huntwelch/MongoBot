@@ -9,7 +9,7 @@ import os
 import simplejson
 
 from threading import Thread
-from autonomic import axon, alias, help, Dendrite, public
+from autonomic import axon, alias, help, Dendrite, public, Receptor, Cerebellum
 
 from datastore import Words, Learned, Structure
 from random import choice, randint
@@ -25,6 +25,7 @@ botnick = metacortex.botnick
 # of 5 minutes a month. The miscellaneous language
 # functions usually work, and of course the markov
 # is done here.
+@Cerebellum
 class Broca(Dendrite):
 
     readstuff = False
@@ -397,30 +398,35 @@ class Broca(Dendrite):
     # reason, the mom log, because it's awesome but
     # maybe not cortex material. Is the name of this
     # function in poor taste? Yes.
-    def tourettes(self, sentence, nick):
+    @Receptor('IRC_PRIVMSG')
+    def tourettes(self, target, source, args):
+        sentence = args[-1]
+        whom = Id(source)
+        nick = whom.name
+
         if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
             open("%s/mom.log" % self.cx.settings.logdir, 'a').write(sentence + '\n')
 
         if re.search("^%s" % botnick, sentence):
             backatcha = sentence[len(botnick):]
-            self.chat(nick + "'s MOM" + backatcha)
+            self.chat(nick + "'s MOM" + backatcha, target=target)
             return
 
         # This could be more like a dict
         if sentence.lower().find("oh snap") != -1:
-            self.chat("yeah WHAT?? Oh yes he DID")
+            self.chat("yeah WHAT?? Oh yes he DID", target=target)
             return
 
         if sentence.lower() == "sup":
-            self.chat("chillin")
+            self.chat("chillin", target=target)
             return
 
         if sentence.lower().find("murican") != -1:
-            self.chat("fuck yeah")
+            self.chat("fuck yeah", target=target)
             return
 
         if sentence.lower().find("rimshot") != -1:
-            self.chat("*ting*")
+            self.chat("*ting*", target=target)
             return
 
         if sentence.lower().find("stop") == len(sentence) - 4 and len(sentence) != 3:
@@ -429,11 +435,11 @@ class Broca(Dendrite):
                 "Children, what's that sound",
                 'Collaborate and listen',
             ]
-            self.chat(random.choice(stops))
+            self.chat(random.choice(stops), target=target)
             return
 
         if sentence.lower().strip() in self.config.frustration or sentence.lower().find('stupid') == 0:
-            self.chat(self.cx.commands.get('table')())
+            self.chat(self.cx.commands.get('table')(), target=target)
 
         inquiries = [sentence.lower().find(t) != -1 for t in self.config.questions]
 
@@ -449,13 +455,13 @@ class Broca(Dendrite):
             # Dynamic cases need to be appended
             responses.append('http://lmgtfy.com/?q=' + smartassery.replace(' ', '+'))
 
-            self.chat(random.choice(responses))
+            self.chat(random.choice(responses), target=target)
             return
 
         # There's a very good reason for this.
-        if sentence == "oh shit its your birthday erikbeta happy birthday" and self.lastsender == "jcb":
+        if sentence == "oh shit its your birthday erikbeta happy birthday" and nick == "jcb":
             self._act(" slaps jcb")
-            self.chat("LEAVE ERIK ALONE!")
+            self.chat("LEAVE ERIK ALONE!", target=target)
             return
 
     @axon
