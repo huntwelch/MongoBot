@@ -20,7 +20,7 @@ class Linker(Dendrite):
     urlfinder locates urls in incoming irc messages
     '''
     @Receptor('IRC_PRIVMSG')
-    def urlfinder(self, source, args):
+    def urlfinder(self, target, source, args):
         pattern = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         match_urls = re.compile(pattern)
         urls = match_urls.findall(args[-1])

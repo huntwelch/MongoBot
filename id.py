@@ -51,6 +51,7 @@ class Id(object):
         self.prop = Drinker.objects(name=self.nick).first()
         if not self.prop:
             self.prop = Drinker(name=self.nick)
+            self.is_recognized = False
 
         if self.ident in self.prop['idents']:
             self.is_authenticated = True
