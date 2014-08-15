@@ -18,6 +18,7 @@ from staff import Browser
 from bs4 import BeautifulSoup as bs4
 from wordnik import swagger, WordApi
 from cybernetics import metacortex
+from id import Id
 
 botnick = metacortex.botnick
 
@@ -402,7 +403,7 @@ class Broca(Dendrite):
     def tourettes(self, target, source, args):
         sentence = args[-1]
         whom = Id(source)
-        nick = whom.name
+        nick = whom.nick
 
         if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
             open("%s/mom.log" % self.cx.settings.logdir, 'a').write(sentence + '\n')
