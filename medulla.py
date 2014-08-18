@@ -1,9 +1,9 @@
 import sys
 import cortex
+import thalamus
 
 from config import load_config
 from time import sleep, mktime, localtime
-from thalamus import Thalamus
 from hyperthymesia import Hyperthymesia
 
 from pprint import pprint
@@ -30,7 +30,7 @@ class Medulla:
             self.logger.warn('Drain bamaged... Stroking... out...')
             sys.exit()
 
-        self.thalamus = Thalamus(self.brain)
+        self.thalamus = thalamus.Thalamus(self.brain)
         self.brain.thalamus = self.thalamus
         self.brain.logger = self.logger
 
@@ -78,11 +78,14 @@ class Medulla:
         import util
         import autonomic
         import cortex
+
         reload(datastore)
         reload(autonomic)
         reload(util)
         reload(cortex)
+
         self.brain = cortex.Cortex(self, True)
+        self.thalamus.cx = self.brain
         self.brain.thalamus = self.thalamus
         self.active = True
 

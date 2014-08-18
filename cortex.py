@@ -147,7 +147,6 @@ class Cortex:
                     print e
                     print traceback.format_exc()
 
-
         for brainmeat in self.brainmeats:
             serotonin(self, brainmeat, electroshock)
 

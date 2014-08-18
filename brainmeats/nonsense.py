@@ -167,7 +167,7 @@ class Nonsense(Dendrite):
 
     @axon
     def skynet(self):
-        return 'Activating.'
+        return 'Activating. Huzzah!'
 
     @axon
     @help("<throw table>")
