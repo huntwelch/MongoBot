@@ -93,7 +93,6 @@ class Sms(Dendrite):
                     self.chat('Message sent: ' + message.sid)
                 except Exception as e:
                     self.chat(str(e))
-                    print traceback.format_exc()
 
 
         self.loaded = True
@@ -138,7 +137,6 @@ class Sms(Dendrite):
             self.chat('Message sent: ' + message.sid)
         except Exception as e:
             self.chat(str(e))
-            print traceback.format_exc()
 
         return
 
