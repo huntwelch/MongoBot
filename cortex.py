@@ -70,8 +70,6 @@ class Cortex:
     boredom = int(mktime(localtime()))
     namecheck = int(mktime(localtime()))
 
-    _thalamus = False
-
     def __init__(self, master, electroshock=False):
 
         print '* Initializing'
@@ -109,9 +107,6 @@ class Cortex:
         self.realuserdata = load_config(self.settings.directory.authfile)
         for username in self.realuserdata:
             self.REALUSERS.append(username)
-
-        #print '* Evolving thalamus'
-        #self.thalamus = Thalamus(self, electroshock)
 
     # Loads up all the files in brainmeats and runs them
     # through the hookup process.
@@ -192,7 +187,7 @@ class Cortex:
     @Synapse('twitch')
     def monitor(self):
 
-        currenttime = int(mktime(localtime()))
+        #currenttime = int(mktime(localtime()))
         #self.parietal(currenttime)
 
         self.thalamus.process()
@@ -423,7 +418,7 @@ class Cortex:
                 m = ' '.join(i)
 
             if error:
-                m += ' ' + str(error)
+                m += ' %s' % str(error)
 
             self.thalamus.send('PRIVMSG %s :%s' % (whom,m))
         except Exception as e:

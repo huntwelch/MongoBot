@@ -41,8 +41,7 @@ class Broca(Dendrite):
     @axon
     @help('TITLE <have %s compose poetry>' % botnick)
     def compose(self):
-        if not self.startpoem():
-            return 'Already wrote that'
+        if not self.startpoem(): return
 
         poem = ''
         seed = self.babble()
@@ -52,7 +51,10 @@ class Broca(Dendrite):
 
         seed = seed.split()
         for word in seed:
-            poem += ' ' + self.babble([word])
+            mas = self.babble([word])
+            if not mas: continue
+
+            poem = '%s %s' % (poem, mas)
 
         self.addtext(poem.split())
         res = self.finis()
@@ -84,7 +86,8 @@ class Broca(Dendrite):
 
         self.draft = filename
 
-        return '%s think "%s" may be masterpiece' % (botnick, title)
+        self.chat('%s think "%s" may be masterpiece' % (botnick, title))
+        return True
 
     @axon
     @alias('write', 'explicit')
@@ -208,6 +211,10 @@ class Broca(Dendrite):
     @help('<Make %s speak markov chain>' % botnick)
     def babble(self, what=False):
 
+        suppress = False
+        if what:
+            suppress = True
+
         what = what or self.values
 
         if what:
@@ -219,8 +226,9 @@ class Broca(Dendrite):
             matches = self.markov.keys(pattern)
 
             if not matches:
-                self.chat('Got nothin')
-                return
+                if not suppress:
+                    self.chat('Got nothin')
+                return False
 
             seed = random.choice(matches)
         else:

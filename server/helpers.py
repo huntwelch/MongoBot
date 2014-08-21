@@ -19,8 +19,6 @@ def render_xml(path):
 
 def fetch_chats(request, offset):
 
-    global config
-
     log = open(config.directory.log, 'r')
     chats = []
 

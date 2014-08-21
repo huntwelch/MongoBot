@@ -16,13 +16,15 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash, _app_ctx_stack
 from server.decorators import requires_auth
 from server.helpers import fetch_chats, render_xml
-#from settings import POEMS
 from autonomic import Dendrite
+from config import load_config
+
 # Commented out until broca is fixed
 # from brainmeats.broca import Broca
 
 app = Flask(__name__)
 
+conf = load_config('config/settings.yaml') 
 
 @app.errorhandler(500)
 def page_not_found(e):
@@ -67,12 +69,12 @@ def codez():
 
 @app.route("/poetry")
 def poetry():
-    poems = os.listdir(POEMS) 
+    poems = os.listdir(conf.media.poems) 
     display = []
     for poem in poems:
         if poem == '.gitignore':
             continue
-        f = open(POEMS + poem, 'r')
+        f = open('%s/%s' % (conf.media.poems, poem), 'r')
         title = f.readline()
         f.close()
         display.append({'title': title, 'link': poem[:-4]})
@@ -106,7 +108,7 @@ def showpoem(title):
         return render_template('poem.html', title='Have not written that', poem=[])
 
     try:
-        f = open('%s%s.txt' % (POEMS, title), 'r')
+        f = open('%s/%s.txt' % (conf.media.poems, title), 'r')
         title = f.readline()
         text = [line for line in f]
         f.close()
