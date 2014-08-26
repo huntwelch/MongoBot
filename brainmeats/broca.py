@@ -447,6 +447,10 @@ class Broca(Dendrite):
             self.chat(random.choice(stops), target=target)
             return
 
+        if sentence.lower().find("idk") != -1:
+            self.chat(u'\u00AF\u005C\u005F\u0028\u30C4\u0029\u005F\u002F\u00AF', target=target)
+            return
+
         if sentence.lower().strip() in self.config.frustration or sentence.lower().find('stupid') == 0:
             self.chat(self.cx.commands.get('table')(), target=target)
 
