@@ -170,6 +170,13 @@ class Nonsense(Dendrite):
         return 'Activating.'
 
     @axon
+    def rules(self):
+        return [
+            '1. Do not talk about MongoBot.',
+            '2. Do not talk about what the skynet command really does.',
+        ]
+
+    @axon
     @help("<throw table>")
     def table(self):
         return u'\u0028\u256F\u00B0\u25A1\u00B0\uFF09\u256F\uFE35\u0020\u253B\u2501\u253B'

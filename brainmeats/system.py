@@ -39,7 +39,7 @@ class System(Dendrite):
     @alias('help')
     def showhelp(self):
 
-        enabled = self.cx.master.ENABLED
+        enabled = self.cx.enabled
         broken = self.cx.broken
 
         if not self.values or self.values[0] not in self.libs or self.values[0] not in self.cx.helpmenu:
@@ -118,7 +118,7 @@ class System(Dendrite):
         enabled = []
         broken = []
         for lib in values:
-            if lib in self.cx.master.ENABLED:
+            if lib in self.cx.enabled:
                 already.append(lib)
             elif lib not in self.libs:
                 nonextant.append(lib)
@@ -126,7 +126,7 @@ class System(Dendrite):
                 broken.append(lib)
             else:
                 enabled.append(lib)
-                self.cx.master.ENABLED.append(lib)
+                self.cx.enabled.append(lib)
 
         messages = []
         if len(already):
@@ -164,11 +164,11 @@ class System(Dendrite):
         for lib in self.values:
             if lib not in self.libs:
                 nonextant.append(lib)
-            elif lib not in self.cx.master.ENABLED:
+            elif lib not in self.cx.enabled:
                 already.append(lib)
             else:
                 disabled.append(lib)
-                self.cx.master.ENABLED.remove(lib)
+                self.cx.enabled.remove(lib)
 
         messages = []
         if len(already):

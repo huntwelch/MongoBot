@@ -102,7 +102,6 @@ HW  + repeat last command with '-' is busted
         ACROSCORE in needs to be sorted out
     + broca.py 
         the global botnick thing isn't working
-        -compose probably broken
         -read indicates lastsender is a little borked
         will wait on some of these until deployment with real data
     + channelling.py

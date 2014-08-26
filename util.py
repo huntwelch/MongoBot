@@ -59,7 +59,7 @@ def colorize(text, color):
     if isinstance(color, str):
         color = colors[color]
 
-    return "\x03" + str(color) + text + "\x03\x0f"
+    return "\x03%s %s\x03\x0f" % (str(color), text)
 
 HEADERS = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36' }
 

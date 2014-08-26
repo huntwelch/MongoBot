@@ -61,6 +61,7 @@ class Cortex:
     members = []
     broken = []
     realuserdata = []
+    enabled = []
     REALUSERS = []
 
     commands = {}
@@ -78,6 +79,8 @@ class Cortex:
         self.secrets = master.secrets
         self.channels = self.secrets.channels
         self.personality = self.settings.bot
+
+        self.enabled = self.settings.plugins.values().pop(0)
 
         metacortex.botnick = self.personality.nick
 
@@ -121,7 +124,7 @@ class Cortex:
         for area in areas:
             print '{0: <25}'.format('  - %s' % area),
 
-            if area not in self.master.ENABLED:
+            if area not in self.enabled:
                 print '[\033[93mDISABLED\033[0m]'
                 continue
 
@@ -136,7 +139,7 @@ class Cortex:
             except Exception as e:
                 self.chat('Failed to load %s.' % area, error=str(e))
                 self.broken.append(area)
-                self.master.ENABLED.remove(area)
+                self.enabled.remove(area)
                 print '[\033[0;31mFAILED\033[0m]'
                 if self.settings.debug.verbose:
                     print e

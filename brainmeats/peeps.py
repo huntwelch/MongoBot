@@ -95,6 +95,16 @@ class Peeps(Dendrite):
             self.chat(drinker.name + " has " + str(drinker.value) + " points")
 
     @axon
+    @help("WHAT <show cumulative score for random thing>")
+    def score(self):
+        if not self.values: return "For what?"
+
+        s = entityScore(self.values[0])
+        if not s: return "Couldn't retrieve score"
+
+        return str(s)
+
+    @axon
     @help("<show where everyone works>")
     def companies(self):
         for drinker in Drinker.objects:
@@ -214,7 +224,7 @@ class Peeps(Dendrite):
         whom = Id(self.lastsender)
 
         if not whom.identify(' '.join(self.values)):
-            self.chat('I don\'t know you... go away...')
+            self.chat("I don't know you... go away...")
             return
 
         self.chat('Welcome back %s' % whom.name)
@@ -230,7 +240,7 @@ class Peeps(Dendrite):
         whom = Id(self.lastsender)
 
         if not whom.is_authenticated:
-            self.chat('I\'m sorry, Dave, I\'m afraid I can\'t do that')
+            self.chat("I'm sorry, Dave, I'm afraid I can't do that")
             return
 
         new_user = Id(self.values[0])
@@ -239,7 +249,7 @@ class Peeps(Dendrite):
 
         self.chat('Hi %s, your temporary password is %s. Please set up your user '
         'by identifying yourself to me via private message (.identify %s) and '
-        'then changing your password (.passwd <newpass>).' % (new_user.name,
+        'then changing your password (.passwd <newpass>).' % (new_user.nick,
         tmp_pass, tmp_pass), target=new_user.name)
 
 

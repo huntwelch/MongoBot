@@ -20,7 +20,6 @@ class Medulla:
         print '* Becoming self-aware'
         self.settings = load_config('config/settings.yaml')
         self.secrets = load_config('config/secrets.yaml')
-        self.ENABLED = self.settings.plugins.values().pop(0)
         self.active = True
         self.logger = Hyperthymesia()
 

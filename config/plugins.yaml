@@ -7,6 +7,7 @@ plugins:
   - chess
   - facebook
   - finance
+  - hangman
   - holdem
   - linker
   - marvel

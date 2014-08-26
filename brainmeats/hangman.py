@@ -1,7 +1,6 @@
 from random import choice
 
 from autonomic import axon, alias, help, Dendrite
-from settings import STORAGE, ACROLIB
 
 
 # Because why not
@@ -45,7 +44,7 @@ class Hangman(Dendrite):
 
         self.display = ' ,__oo-O'
 
-        for line in open("%s/%s" % (STORAGE, ACROLIB)):
+        for line in open(self.config.wordsource):
             wordbank.append(line.strip())
 
         word = ''
