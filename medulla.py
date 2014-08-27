@@ -75,12 +75,14 @@ class Medulla:
 
         import datastore
         import util
+        import staff
         import autonomic
         import cortex
 
         reload(datastore)
         reload(autonomic)
         reload(util)
+        reload(staff)
         reload(cortex)
 
         self.brain = cortex.Cortex(self, True)
