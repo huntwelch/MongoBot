@@ -62,8 +62,11 @@ class Sms(Dendrite):
 
             clipped = item.from_[2:]
             drinker = Id(phone=clipped)
-
-            if drinker.is_authenticated:
+            
+            # Note that this trusts the phone number, on the grounds
+            # there must have been access to the system to get the
+            # number in there. Normal ident auths can't be applied.
+            if drinker:
                 from_ = drinker.name
             else:
                 from_ = item.from_
@@ -76,8 +79,9 @@ class Sms(Dendrite):
             self.announce(message)
 
             # Check if the incoming message contained a command
-            match = re.search('^{0}(\w+)[ ]?(.+)?'.format(self.cx.settings.bot.command_prefix), item.body)
-            if match and drinker.is_authenticated:
+            match = re.search('^\{0}(\w+)[ ]?(.+)?'.format(self.cx.settings.bot.command_prefix), item.body)
+            if match and drinker:
+
                 command = match.group(1)
                 arguments = match.group(2)
 

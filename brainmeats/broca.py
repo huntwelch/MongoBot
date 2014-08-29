@@ -491,35 +491,52 @@ class Broca(Dendrite):
     @axon
     @help('WORD <teach %s a word>' % botnick)
     def learn(self):
-        if not self.values:
-            self.chat("%s ponders the emptiness of meaning." % botnick)
-            return
-
-        if not re.match("^[A-Za-z]+$", self.values[0].strip()):
-            self.chat("%s doesn't think that's a word." % botnick)
-            return
+        if not self.values: return "%s ponders the emptiness of meaning." % botnick
+        if not re.match("^[A-Za-z]+$", self.values[0].strip()): return "%s doesn't think that's a word." % botnick
 
         open("%s/natwords" % self.cx.settings.directory.storage, 'a').write(self.values[0].strip() + '\n')
         self.chat("%s learn new word!" % botnick, self.lastsender)
 
     @axon
+    @alias('scrabble')
+    @help('LETTERS <cheat at Scrabble>')
+    def scrabblecheat(self):
+        if not self.values: return "Nothing to check"
+
+        letters = sorted(self.values[0].lower())
+        letters = ''.join(letters)
+
+        matchlen = False if 'x' in self.flags else True
+        truth = False if 'f' in self.flags else True
+
+        words = []
+
+        for line in open(self.config.scrabbledict):
+            word = line.strip()
+            if len(word) == 1: continue
+
+            if matchlen and len(letters) != len(word): continue
+
+            # TODO: account for wild cards :( may need regex
+            
+            test = ''.join(sorted(word))
+            if test in letters:
+                words.append(word)
+
+
+        if truth and words: return 'Yup'
+        if truth and not words: return 'Nope'
+        if not words: return 'Nothing found'
+
+        return ', '.join(words)
+
+    @axon
     @help('ACRONYM <have %s decide the words for an acronym>' % botnick)
     def acronym(self):
-        if not self.values:
-            self.chat("About what?")
-            return
-
-        if not re.match("^[A-Za-z]+$", self.values[0]) and self.lastsender == "erikbeta":
-            self.chat("Fuck off erik.")
-            return
-
-        if not re.match("^[A-Za-z]+$", self.values[0]):
-            self.chat("%s no want to think about that." % botnick)
-            return
-
-        if self.values[0].lower() == "gross":
-            self.chat("Get Rid Of Slimey girlS")
-            return
+        if not self.values: return "About what?"
+        if not re.match("^[A-Za-z]+$", self.values[0]) and self.lastsender == "erikbeta": return "Fuck off erik."
+        if not re.match("^[A-Za-z]+$", self.values[0]): return "%s no want to think about that." % botnick
+        if self.values[0].lower() == "gross": return "Get Rid Of Slimey girlS"
 
         output = self.acronymit(self.values[0])
         return output

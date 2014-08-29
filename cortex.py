@@ -64,6 +64,7 @@ class Cortex:
     enabled = []
     REALUSERS = []
 
+    flags = {} 
     commands = {}
     live = {}
     helpmenu = {}
@@ -225,13 +226,30 @@ class Cortex:
 
         is_nums = re.search("^[0-9]+", what)
         is_breaky = re.search("^" + re.escape(self.personality.command_prefix) + "|[^\w]+", what)
-        if is_nums or is_breaky or not what:
-            return
+
+        if is_nums or is_breaky or not what: return
+
+        self.values = False
+        self.flags = {}
+        flags = []
 
         if components:
+            for component in components:
+                if component[:1] == self.personality.flag_prefix:    
+                    flags.append(component)
+
             self.values = components
-        else:
-            self.values = False
+
+        if flags:
+            for flag in flags:
+                self.values.remove(flag)
+                value = True
+                if '=' in flag:
+                    flag, value = flag.split('=')
+                flag = flag[1:]
+                self.flags[flag] = value
+
+            print self.flags
 
         self.logit('%s sent command: %s\n' % (sender, what))
         self.lastsender = sender
@@ -250,7 +268,7 @@ class Cortex:
         #
         # Then some asshole in our chatroom said something
         # like "it'd be cool if we could pipe commands, like
-        # -tweet|babble or something."
+        # -tweet | babble or something."
         #
         # So THAT got stuck in my head even though it's
         # totally ridiculous, but I won't be able to sleep
@@ -377,8 +395,8 @@ class Cortex:
     # Announce means the chat is always sent to the channel,
     # never back as a private response.
     @ratelimited(2)
-    def announce(self, message, target):
-        self.chat(message, target=target)
+    def announce(self, message):
+        self.chat(message, target=self.secrets.primary_channel)
 
     # Since chat is mongo's only means of communicating with
     # a room, the ratelimiting here should prevent any overflow

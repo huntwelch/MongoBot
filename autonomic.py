@@ -51,6 +51,10 @@ class Dendrite(object):
         return self.cx.values
 
     @property
+    def flags(self):
+        return self.cx.flags
+
+    @property
     def butler(self):
         return self.cx.butler
 
