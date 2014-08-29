@@ -1,5 +1,4 @@
 import mongoengine
-import nltk
 import re
 import string
 import random
@@ -22,9 +21,8 @@ from id import Id
 
 botnick = metacortex.botnick
 
-# Much fail here. I study up on NLTK at the rate
-# of 5 minutes a month. The miscellaneous language
-# functions usually work, and of course the markov
+# The miscellaneous language functions
+# usually work, and of course the markov
 # is done here.
 @Cerebellum
 class Broca(Dendrite):
@@ -89,6 +87,7 @@ class Broca(Dendrite):
         self.chat('%s think "%s" may be masterpiece' % (botnick, title))
         return True
 
+
     @axon
     @alias('write', 'explicit')
     def addtext(self, what=False):
@@ -116,12 +115,14 @@ class Broca(Dendrite):
 
         return 'Coming along real good'
 
+
     @axon
     def finis(self):
         link = '%s/poem/%s' % (self.cx.settings.website.url, self.draft[:-4])
         self.draft = False
         return 'Work complete: %s' % link
 
+    
     @axon
     def mark(self, line):
         words = line.split()
@@ -140,17 +141,18 @@ class Broca(Dendrite):
                 follow = ','.join(follows)
                 self.markov.set(prefix, follow)
 
+    
     @axon
     @help('URL_OF_TEXT_FILE <Make %s read something>' % botnick)
     def read(self):
         if not self.values:
-            self.chat("Read what?")
-            return
+            return "Read what?"
+            
 
         book = self.values[0]
         if book[-4:] != '.txt':
-            self.chat("Plain text file only. %s purist." % botnick)
-            return
+            return "Plain text file only. %s purist." % botnick
+            
 
         name = "%s_%s.txt" % ( int(time.mktime(time.localtime())), self.lastsender )
         path = '%s/%s' % (self.cx.settings.media.books, name)
@@ -225,10 +227,8 @@ class Broca(Dendrite):
 
             matches = self.markov.keys(pattern)
 
-            if not matches:
-                if not suppress:
-                    self.chat('Got nothin')
-                return False
+            if not matches and not suppress:
+                return 'Got nothin'
 
             seed = random.choice(matches)
         else:
@@ -243,7 +243,7 @@ class Broca(Dendrite):
         suspense = [
             'and', 'to', 'a', 'but', 'very',
             'the', 'when', 'how', '', ' ', 'my',
-            'its', 'of', 'is', 'for',
+            'its', 'of', 'is', 'for', 'the',
         ]
 
         while len(words) < self.config.babblelim:
@@ -264,7 +264,7 @@ class Broca(Dendrite):
         words = words.split()
 
         # Mostly, security in babble is your
-        # problem, but BOT_PASS shows up in the
+        # problem, but botbass shows up in the
         # channel a lot.
         while self.cx.secrets.system.botpass in words:
             words.remove(self.cx.secrets.system.botpass)
@@ -273,41 +273,7 @@ class Broca(Dendrite):
 
         return words
 
-    # This is kind of sluggish and kldugey,
-    # and sort of spiritually been replaced by
-    # the read function above.
-    #
-    # @axon
-    # def readup(self):
-    #     if self.knowledge:
-    #         self.chat("Already read today.")
-    #         return
-
-    #     self.chat("This may take a minute.")
-    #     books = open(RAW_TEXT, 'r')
-    #     data = books.read().replace('\n', ' ')
-    #     tokens = nltk.word_tokenize(data)
-    #     self.knowledge = nltk.Text(tokens)
-
-    #     self.chat("Okay, read all the things.")
-
-    @axon
-    @help('<command %s to speak>' % botnick)
-    def speak2(self):
-        if not self.knowledge:
-            self.chat("Can't speak good yet. Must read.")
-            return
-
-        if not self.readstuff:
-            self.chat("Just one sec...")
-            self.knowledge.generate()
-
-        length = randint(10, 100)
-        text = ' '.join(self.knowledge._trigram_model.generate(length))
-
-        self.readstuff = True
-        self.chat(text)
-
+    
     @axon
     @alias('d')
     @help('WORD <get definition of word>')
@@ -374,33 +340,6 @@ class Broca(Dendrite):
             self.chat("Definition 1:" + tempdef)
         else:
             self.chat("I got nothin.")
-
-    def parse(self, sentence, nick):
-        tokens = nltk.word_tokenize(sentence)
-        tagged = nltk.pos_tag(tokens)
-
-        structure = []
-        contents = []
-        for word, type in tagged:
-            records = Learned.objects(word=word)
-            if not records:
-                record = Learned(word=word, partofspeech=type)
-                try:
-                    record.save()
-                except:
-                    pass
-
-            try:
-                structure.append(type)
-                contents.append(word)
-            except:
-                pass
-
-        try:
-            struct = Structure(structure=structure, contents=contents)
-            struct.save()
-        except:
-            pass
 
     # This is where all the conversational tics and
     # automatic reactions are set up. Also, for some
@@ -477,17 +416,7 @@ class Broca(Dendrite):
             self.chat("LEAVE ERIK ALONE!", target=target)
             return
 
-    @axon
-    @help('<command %s to speak>' % botnick)
-    def speak(self):
-        sentence = []
-        struct = choice(Structure.objects())
-        for pos in struct.structure:
-            _word = choice(Learned.objects(partofspeech=pos))
-            sentence.append(_word.word)
-
-        self.chat(" ".join(sentence))
-
+    
     @axon
     @help('WORD <teach %s a word>' % botnick)
     def learn(self):
@@ -497,6 +426,7 @@ class Broca(Dendrite):
         open("%s/natwords" % self.cx.settings.directory.storage, 'a').write(self.values[0].strip() + '\n')
         self.chat("%s learn new word!" % botnick, self.lastsender)
 
+    
     @axon
     @alias('scrabble')
     @help('LETTERS <cheat at Scrabble>')
@@ -530,6 +460,7 @@ class Broca(Dendrite):
 
         return ', '.join(words)
 
+    
     @axon
     @help('ACRONYM <have %s decide the words for an acronym>' % botnick)
     def acronym(self):
@@ -559,9 +490,9 @@ class Broca(Dendrite):
 
         return " ".join(output)
 
+    
     @axon
     @help('WORD [WHICH_DEFINITION] <look up etymology of word>')
-    @public
     def ety(self):
         if not self.values:
             self.chat("Enter a word")
@@ -604,21 +535,7 @@ class Broca(Dendrite):
 
         return "Etymology %s of %s for %s: %s" % (str(ord + 1), str(len(defs)), _word, _def)
 
-    @axon
-    def isitfriday(self):
-        today = time.localtime().tm_wday
-        if today == 4:
-            self.chat('Fuck YEAH it is!')
-            return
-
-        if today < 4:
-            self.chat('No. Fuck. %s more day%s.' % ((4 - today),('s' if today != 3 else '')))
-            return
-
-        self.chat('Get entirely the fuck out of here with that weekday shit')
-        return
-
-    # TODO: broken, not sure why
+    
     @axon
     @help('WORD_OR_PHRASE <look up anagram>')
     def anagram(self):
@@ -639,6 +556,7 @@ class Broca(Dendrite):
         except Exception as e:
             self.chat("Couldn't parse.", str(e))
 
+    
     # This pair of gems was created because Elliott kept
     # piping -all to various * commands.
     @axon
@@ -647,6 +565,7 @@ class Broca(Dendrite):
         self.cx.bequiet = True
         return
 
+    
     @axon
     def speakup(self):
         self.cx.bequiet = False

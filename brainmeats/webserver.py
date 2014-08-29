@@ -12,8 +12,10 @@ class Webserver(Dendrite):
     def __init__(self, cortex):
         super(Webserver, self).__init__(cortex)
 
+
     def _setaccess(self):
         return totp.now()
+
 
     @axon
     @help("<Get one-time link to chat log>")
@@ -22,6 +24,7 @@ class Webserver(Dendrite):
         link = "%s/chatlogs?onetime=%s" % (self.config.url, str(num))
         self.chat(link)
 
+
     @axon
     @help("<Get one-time link to error log>")
     def errorlink(self):
@@ -29,11 +32,13 @@ class Webserver(Dendrite):
         link = "%s/errorlog?onetime=%s" % (self.config.url, str(num))
         self.chat(link)
 
+
     @axon
     @help("<get link to appropriate [sic] http codes for describing dating>")
     def pigs(self):
         link = "%s/codez" % self.config.url
         self.chat(link)
+
 
     @axon
     @help("<Reload uwsgi server>")

@@ -9,6 +9,7 @@ class Quotes(Dendrite):
     def __init__(self, cortex):
         super(Quotes, self).__init__(cortex)
 
+
     @axon
     @help("QUOTE <add quote to database>")
     def addquote(self):
@@ -25,6 +26,8 @@ class Quotes(Dendrite):
                       date=datetime.utcnow(),
                       random=random.random())
         quote.save()
+        return 'Quote saved'
+
 
     @axon
     @help("<show a random quote>")
@@ -51,6 +54,7 @@ class Quotes(Dendrite):
         else:
             return "Couldn't find a quote for some reason"
 
+
     @axon
     @help("SEARCH_TERM <search for a quote>")
     def quote(self):
@@ -76,6 +80,7 @@ class Quotes(Dendrite):
                 q = quotes.first()
             self.chat(q.text)
 
+
     @axon
     @help("SEARCH_TERM <returns the count of the quotes found")
     def countquote(self):
@@ -95,4 +100,4 @@ class Quotes(Dendrite):
             self.chat("No quotes found")
         else:
             total = len(quotes)
-            self.chat("Found %d quotes", total)
+            self.chat("Found %d quotes" % total)

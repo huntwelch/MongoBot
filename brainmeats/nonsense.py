@@ -21,9 +21,11 @@ class Nonsense(Dendrite):
     def __init__(self, cortex):
         super(Nonsense, self).__init__(cortex)
 
+
     @axon
     def zal(self):
         return zalgo(' '.join(self.values))
+
 
     @axon
     @public
@@ -37,6 +39,7 @@ class Nonsense(Dendrite):
             return 'No meow facts.'
 
         return json['facts'][0]
+
 
     @axon
     @help("<generate bullshit>")
@@ -61,6 +64,7 @@ class Nonsense(Dendrite):
 
         return ' '.join(buzzed)
 
+
     @axon
     @help("<grab a little advice>")
     def advice(self):
@@ -72,6 +76,7 @@ class Nonsense(Dendrite):
             return 'Use a rubber if you sleep with dcross2\'s mother.'
 
         return json['slip']['advice'] + ".. in bed."
+
 
     @axon
     @help("SEARCHTERM <grab random fml entry>")
@@ -102,6 +107,7 @@ class Nonsense(Dendrite):
                 self.chat("Exception: " + str(e))
             return
 
+
     @axon
     @help("<generate start-up elevator pitch>")
     def startup(self):
@@ -119,6 +125,7 @@ class Nonsense(Dendrite):
         except Exception as e:
             return 'It\'s a replacement for itsthisforthat.com... (Request failed)'
 
+
     @axon
     @help("<generate password according to http://xkcd.com/936/>")
     def munroesecurity(self):
@@ -134,6 +141,7 @@ class Nonsense(Dendrite):
             count += 1
 
         return " ".join(output)
+
 
     @axon
     @help("USERNAME <reward someone>")
@@ -161,13 +169,16 @@ class Nonsense(Dendrite):
         self.chat("Good job, " + kinder + ". Here's your star: " + colorize(u'\u2605', "yellow"))
         self._act(" pats " + kinder + "'s head.")
 
+
     @axon
     def cry(self):
         self._act("cries.")
 
+
     @axon
     def skynet(self):
         return 'Activating.'
+
 
     @axon
     def rules(self):
@@ -176,14 +187,17 @@ class Nonsense(Dendrite):
             '2. Do not talk about what the skynet command really does.',
         ]
 
+
     @axon
     @help("<throw table>")
     def table(self):
         return u'\u0028\u256F\u00B0\u25A1\u00B0\uFF09\u256F\uFE35\u0020\u253B\u2501\u253B'
 
+
     @axon
     def hate(self):
         return '%(nick)s knows hate. %(nick)s hates many things.' % {'nick': self.ego.nick}
+
 
     @axon
     def love(self):
@@ -191,6 +205,7 @@ class Nonsense(Dendrite):
             self._act("masturbates vigorously.")
         else:
             return "%(nick)s cannot love. %(nick)s is only machine :'(" % {'nick': self.ego.nick}
+
 
     @axon
     @help("<pull a quote from shitalekseysays.com>")
@@ -205,6 +220,7 @@ class Nonsense(Dendrite):
         entry = choice(json['feed']['entry'])
         return entry['title']['$t']
 
+
     @axon
     @help("<pull up a mom quote from logs>")
     def mom(self):
@@ -218,21 +234,24 @@ class Nonsense(Dendrite):
 
         return choice(momlines)
 
+
     @axon
     def whatvinaylost(self):
         self.chat("Yep. Vinay used to have 655 points at 16 points per round. Now they're all gone, due to technical issues. Poor, poor baby.")
         self._act("weeps for Vinay's points.")
         self.chat("The humanity!")
 
+
+    # these two functions used to be restricted to the owner. maybe use an alias now
     @axon
     def say(self):
-        if self.validate():
-            self.announce(" ".join(self.values))
+        self.announce(" ".join(self.values))
+
 
     @axon
     def act(self):
-        if self.validate():
-            self._act(" ".join(self.values), True)
+        self._act(" ".join(self.values), True)
+
 
     @axon
     @help("URL <pull from distaste entries or add url to distate options>")
@@ -251,6 +270,7 @@ class Nonsense(Dendrite):
 
         self.chat(choice(lines))
 
+
     @axon
     def annoy(self):
         if not self.values:
@@ -259,6 +279,7 @@ class Nonsense(Dendrite):
         self.anoid.append(self.values[0])
         self.cx.addlive(self.repeater)
         return 'You betcha'
+
 
     @axon
     def stahp(self):
@@ -274,6 +295,7 @@ class Nonsense(Dendrite):
             self.lastchat = self.cx.lastchat
             self.chat(self.lastchat)
             return
+
 
     # Show Mongo the mind of God
     @axon

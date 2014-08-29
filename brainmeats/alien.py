@@ -14,6 +14,7 @@ class Alien(Dendrite):
     def __init__(self, cortex):
         super(Alien, self).__init__(cortex)
 
+
     @axon
     @help("<grab reddit stuff>")
     @alias('r')

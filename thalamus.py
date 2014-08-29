@@ -244,7 +244,7 @@ class Thalamus(object):
         target = args[0] if args[0] != self.name else user.nick
 
         # Parse the incoming message for a command with the selected command prefix
-        match = re.search('^[{0}|{1}](\w+)[ ]?(.+)?'.format(
+        match = re.search('^[\{0}|\{1}](\w*)[ ]?(.+)?'.format(
             self.settings.bot.command_prefix,
             self.settings.bot.multi_command_prefix),
             args[-1])
@@ -256,7 +256,7 @@ class Thalamus(object):
         arguments = match.group(2)
 
         if not command:
-            command = self.lastcommand
+            command = self.cx.lastcommand
 
         # Only listen to authenticated users
         if not user.is_authenticated \
@@ -273,8 +273,6 @@ class Thalamus(object):
         # Receptors can get triggered with the same information
         if not command:
             return (target, source, args)
-
-        self.lastcommand = command
 
         # Butler that command out yo
         if arguments:

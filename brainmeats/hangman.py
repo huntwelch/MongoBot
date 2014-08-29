@@ -20,10 +20,10 @@ class Hangman(Dendrite):
         'That was gluten free, right?',
         'Still a better love story than Twilight',
     ]
-    
 
     def __init__(self, cortex):
         super(Hangman, self).__init__(cortex)
+
 
     # Example command function
     # The axon decorator adds it to the available chatroom commands,
@@ -56,6 +56,7 @@ class Hangman(Dendrite):
         self.showword()
 
         return self.display
+
 
     @axon
     def guess(self):

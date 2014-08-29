@@ -96,26 +96,17 @@ To Do
 
     SURGERY BUGS
 
-HW  + repeat last command with '-' is busted
-    + cortex.py is parse even used anymore? If not move the comment as appropriately
     + acro.py 
         ACROSCORE in needs to be sorted out
     + broca.py 
-        the global botnick thing isn't working
+        -the global botnick thing isn't working
         -read indicates lastsender is a little borked
-        will wait on some of these until deployment with real data
     + channelling.py
         I have no idea what's up with this now that we have thalamus
     + chess.py
         -resetchess is broken because I'm missing something obvious about copying variables, but who gives a shit
-    + finance.py
-        -q colors are weird, not sure what that's about
     + holdem.py     *PROBABLY OK*
         should run a test
-    + peeps.py      *PROBABLY OK* 
-    + quotes.py
-        -countquote seems broken
-        -addquote seems broken
     + reference.py
         I forget how regexsearch takes input
         -weather works with a zipcode, otherwise throws error

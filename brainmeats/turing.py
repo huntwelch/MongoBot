@@ -12,8 +12,10 @@ from id import Id
 
 
 class Turing(Dendrite):
+
     def __init__(self, cortex):
         super(Turing, self).__init__(cortex)
+
 
     @axon
     def salias(self):
@@ -41,6 +43,7 @@ class Turing(Dendrite):
         # drinker.save()
         self.chat(name + " saved.")
 
+    
     @axon
     def ralias(self):
         name = self.values[0]
@@ -57,6 +60,7 @@ class Turing(Dendrite):
                     self.cx.command(drinker.name, line)
                 return
 
+
     @axon
     def lalias(self):
         drinker = self._get_drinker()
@@ -68,6 +72,7 @@ class Turing(Dendrite):
 
         for alias in drinker.aliases:
             self.chat(alias.name + " " + alias.definition)
+
 
     @axon
     def dalias(self):

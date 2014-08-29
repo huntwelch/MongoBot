@@ -13,9 +13,6 @@ from id import Id
 class Stockgame(Dendrite):
 
     def __init__(self, cortex):
-
-        self.config = load_config('config/stockgame.yaml')
-
         super(Stockgame, self).__init__(cortex)
 
 
@@ -78,6 +75,7 @@ class Stockgame(Dendrite):
         self.chat("%s %s %d shares of %s (%s) at %s" %
                   (drinker.nick, verb, position.quantity, stock.company,
                    position.symbol, position.price))
+
 
     def _close_position(self, ptype):
 
@@ -147,25 +145,30 @@ class Stockgame(Dendrite):
 
         drinker.positions = keep
 
+
     @axon
     @help("QUANTITY STOCK_SYMBOL <buy QUANTITY shares of the stock>")
     def buy(self):
         self._create_position('long')
+
 
     @axon
     @help("QUANTITY STOCK_SYMBOL <sell QUANTITY shares of the stock>")
     def sell(self):
         self._close_position('long')
 
+
     @axon
     @help("QUANTITY STOCK_SYMBOL <cover QUANTITY shares of the stock>")
     def cover(self):
         self._close_position('short')
 
+
     @axon
     @help("QUANTITY STOCK_SYMBOL <short QUANTITY shares of the stock>")
     def short(self):
         self._create_position('short')
+
 
     @axon
     @help("<stock scores of players>")
@@ -212,6 +215,7 @@ class Stockgame(Dendrite):
             for s in scores:
                 self.chat("%15s %10.02f %10.02f %10.02f %10.02f" % s)
 
+
     @axon
     @help("<show cash money>")
     def cashmoney(self):
@@ -221,6 +225,7 @@ class Stockgame(Dendrite):
         drinker = Id(whom)
 
         self.chat("You gots $%.02f" % drinker.cash)
+
 
     @axon
     @help("[USERNAME] <show person's portfolio>")
@@ -263,6 +268,7 @@ class Stockgame(Dendrite):
                 total += net
 
             self.chat("%8s %10s %10s %10s %10s %10.02f" % ('', '', '', '', '', total))
+
 
     @axon
     def clearstockgamepleasedontbeadickaboutthis(self):

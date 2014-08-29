@@ -40,11 +40,13 @@ class Chess(Dendrite):
     def __init__(self, cortex):
         super(Chess, self).__init__(cortex)
 
+
     @axon
     @help("<reset chessboard>")
     def resetchess(self):
         self.chessgrid = copy.copy(self.basegrid)
 
+    
     @axon
     @help("<show chessboard>")
     def chess(self):
@@ -66,6 +68,7 @@ class Chess(Dendrite):
             self.chat(' '.join(rowset))
 
         self.chat(u'  a\u00a0b\u00a0c\u00a0d\u00a0e\u00a0f\u00a0g\u00a0h')
+
 
     @axon
     @help("[a-f][1-8] [a-f][1-8] <move piece [from] [to]>")

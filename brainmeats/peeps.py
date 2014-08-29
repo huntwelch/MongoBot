@@ -21,7 +21,6 @@ from id import Id
 class Peeps(Dendrite):
 
     checked = False
-#    checks = MEETUP_NOTIFY
     notifymethods = ['sms', 'email', 'prowl', 'pushover']
 
     def __init__(self, cortex):
@@ -68,6 +67,7 @@ class Peeps(Dendrite):
             return
         return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
 
+
     @axon
     @help("DRINKER <take a point away>")
     def decrement(self):
@@ -83,6 +83,7 @@ class Peeps(Dendrite):
             return
         return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
 
+
     @axon
     @help("show the leaderboard")
     def leaderboard(self):
@@ -94,6 +95,7 @@ class Peeps(Dendrite):
         for drinker in topScores(limit):
             self.chat(drinker.name + " has " + str(drinker.value) + " points")
 
+
     @axon
     @help("WHAT <show cumulative score for random thing>")
     def score(self):
@@ -104,12 +106,14 @@ class Peeps(Dendrite):
 
         return str(s)
 
+
     @axon
     @help("<show where everyone works>")
     def companies(self):
         for drinker in Drinker.objects:
             if "_" not in drinker.name and drinker.company != None:
                 self.chat("%s: %s" % (drinker.name, drinker.company))
+
 
     @axon
     @help("[USERNAME] <show where you or USERNAME works>")
@@ -124,6 +128,7 @@ class Peeps(Dendrite):
             self.chat("Tell that deadbeat %s to get a damn job already..." % search_for)
         else:
             self.chat(user.name + ": " + user.company)
+
 
     @axon
     @help("<ping everyone in the room>")
@@ -146,6 +151,7 @@ class Peeps(Dendrite):
         return '%s, %s has something very important to say.' % (peeps,
                 announcer.name)
 
+
     @axon
     @help("YYYY/MM/DD=EVENT_DESCRIPTION <save what you're waiting for>")
     def awaiting(self):
@@ -165,6 +171,7 @@ class Peeps(Dendrite):
 
         drinker.save()
         return "Antici..... pating."
+
 
     @axon
     @help("[USERNAME] <show what you are or USERNAME is waiting for>")
@@ -208,6 +215,7 @@ class Peeps(Dendrite):
 
         whom.setpassword(' '.join(self.values))
         self.chat('All clear.')
+
 
     @axon
     @public
@@ -270,11 +278,15 @@ class Peeps(Dendrite):
         whom.phone = phone
         self.chat("Number updated.")
 
+
+    # Placeholder for eventual mutli-platform
+    # bot awesomeness
     @axon
     def notifyme(self):
         if not self.values or len(self.values) != 2 or self.values[0] not in notifymethods:
             self.chat('Please enter "sms|email|prowl|pushover and your code/info"')
             return
+
 
     @axon
     @help("[USERNAME] <view your own phone number or another drinker's>")
@@ -289,6 +301,7 @@ class Peeps(Dendrite):
             return "No such numba. No such zone."
         else:
             return user.name + ': ' + user.phone
+
 
     def meetup(self, hour):
 
@@ -319,14 +332,14 @@ class Peeps(Dendrite):
         self.all()
         self.announce('Meetup tonight! %s' % MEETUP_LOCATION)
 
+
     @axon
     def okdrink(self):
         whenwhere = 'Every %s, %s' % (MEETUP_DAY, MEETUP_LOCATION)
         return whenwhere
 
-    '''
-    Detect when people are getting incremented, decremented with ++/--
-    '''
+
+    # Detect when people are getting incremented, decremented with ++/--
     @Receptor('IRC_PRIVMSG')
     def peep_incdec(self, target, source, args):
         input = args[-1]

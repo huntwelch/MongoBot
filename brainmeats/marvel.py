@@ -12,8 +12,10 @@ from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse
 # nerdy enough.
 @Cerebellum
 class Marvel(Dendrite):
+
     def __init__(self, cortex):
         super(Marvel, self).__init__(cortex)
+
 
     def _call(self, params):
         ts = str(time.time())
@@ -31,6 +33,7 @@ class Marvel(Dendrite):
         self.apiurl = '%s%s?%s' % (self.config.gateway, category, urllib.urlencode(params))
 
         return self.apiurl
+
 
     @axon
     def mtest(self):

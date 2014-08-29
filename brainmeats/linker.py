@@ -9,16 +9,11 @@ from random import randint
 @Cerebellum
 class Linker(Dendrite):
 
-    '''
-    Set up the brainmeat
-    '''
     def __init__(self, cortex):
         super(Linker, self).__init__(cortex)
 
 
-    '''
-    urlfinder locates urls in incoming irc messages
-    '''
+    # urlfinder locates urls in incoming irc messages
     @Receptor('IRC_PRIVMSG')
     def urlfinder(self, target, source, args):
         # Ignore urls in commands
@@ -34,6 +29,7 @@ class Linker(Dendrite):
             self.urlparse(url)
 
         return
+
 
     @Synapse('url')
     def urlparse(self, url):
@@ -57,6 +53,7 @@ class Linker(Dendrite):
         self.chat('%s @ %s' % (unescape(site.title()), roasted))
         return [url]
 
+
     def cleanse(self, url):
         # Don't parse certain URLs - return false for these
         if (url.find('roa.st') != -1 or
@@ -69,6 +66,7 @@ class Linker(Dendrite):
 
         return
 
+
     @Receptor('url')
     def random_tweet(self, url):
 
@@ -80,5 +78,4 @@ class Linker(Dendrite):
                 self.cx.commands.get('tweet')(url)
             except:
                 pass
-
 

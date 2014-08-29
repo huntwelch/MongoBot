@@ -8,17 +8,20 @@ class Channeling(Dendrite):
     def __init__(self, cortex):
         super(Channeling, self).__init__(cortex)
 
+    
     def massage(self, channel):
         if channel[:1] != '#':
             channel = '#' + channel
         return channel
 
+    
     @axon
     @alias('mods')
     @help('<Get list of available mods>')
     def getmods(self):
         return ', '.join(self.mods)
 
+    
     @axon
     @help('<Get list of channels and mods applied>')
     def chanstat(self):
@@ -28,6 +31,7 @@ class Channeling(Dendrite):
 
         return message
 
+    
     @axon
     @alias('part')
     @help('CHANNEL <leave CHANNEL>')
@@ -71,6 +75,7 @@ class Channeling(Dendrite):
 
         return 'Joined %s' % channel
 
+    
     @axon
     @help('CHANNEL +MOD1 [-MOD2...+MODN] <add or remove mods on joined channel>')
     def modchan(self, chan=False, what=False):
@@ -116,6 +121,7 @@ class Channeling(Dendrite):
 
         return 'Mods applied to %s' % chan
 
+    
     @axon
     @alias('m')
     @help('CHANNEL MESSAGE <speak to channel>')

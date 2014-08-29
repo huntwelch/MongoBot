@@ -77,6 +77,7 @@ class Reference(Dendrite):
 
         return prozac
 
+
     @axon
     @help("SEARCH_TERM <look something up in google>")
     @alias('google')
@@ -108,14 +109,20 @@ class Reference(Dendrite):
 
         return "%s @ %s" % (title, link)
 
+
     @axon
     @help("<display link to bot's github repository>")
     def source(self):
         return self.config.repo
 
+
     @axon
     @help("[ZIP|LOCATION (ru/moscow)] <get weather, defaults to geo api>")
     def weather(self):
+
+        if not self.values:
+            return "Please enter a zip/location"
+
         if not self.secrets.weather_api:
             return "wunderground api key is not set"
 
@@ -155,6 +162,7 @@ class Reference(Dendrite):
         base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s"
         return base % (location, condition, temp, humid, wind, feels)
 
+
     @axon
     @alias('urban')
     @help("SEARCH_TERM <get urban dictionary entry>")
@@ -190,6 +198,7 @@ class Reference(Dendrite):
                     self.chat(unescape(line))
         else:
             self.chat("couldn't find anything")
+
 
     # This function used to be called calc, but was changed to hack in
     # honor of Ken's incredibly sick exploitation of the eval function,
@@ -227,6 +236,7 @@ class Reference(Dendrite):
 
         return str(result)
 
+
     @axon
     def ns(self):
         if not self.values: return 'Lookup what?'
@@ -244,10 +254,7 @@ class Reference(Dendrite):
 
         return resolved
 
-    # I wanted to do a good whois function, but whois parsing is
-    # a shitshow even stackoverflow balked at. If you know of or
-    # want to create a solid parser for it, go for it. I'll take
-    # that pull request like a crack whore.
+
     @axon
     @help('URL <get whois information>')
     def whois(self):
@@ -281,6 +288,7 @@ class Reference(Dendrite):
         except:
             return 'No results, or parsing failure.'
 
+
     @axon
     @help('QUERY <get a howdoi answer>')
     def howdoi(self):
@@ -293,7 +301,7 @@ class Reference(Dendrite):
         except:
             return 'Dunno bro'
 
-    # TODO: save common regexs
+
     @axon
     @help('REGEX LINE <extract re.search(REGEX, LINE).group(1)>')
     @alias('regex', 'rx', 'extract')
@@ -317,6 +325,7 @@ class Reference(Dendrite):
         if not m: return 'No match'
 
         return m.group(1)
+
 
     @axon
     @alias('d', 'roll')
@@ -351,5 +360,20 @@ class Reference(Dendrite):
         result = site.read().split(':')[2].strip()[:-6]
 
         return result
+
+
+    @axon
+    def isitfriday(self):
+        today = time.localtime().tm_wday
+        if today == 4:
+            self.chat('Fuck YEAH it is!')
+            return
+
+        if today < 4:
+            self.chat('No. Fuck. %s more day%s.' % ((4 - today),('s' if today != 3 else '')))
+            return
+
+        self.chat('Get entirely the fuck out of here with that weekday shit')
+        return
 
 

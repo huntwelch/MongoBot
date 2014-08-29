@@ -36,6 +36,7 @@ bot:
   command_prefix: '.'
   multi_command_prefix: ':'
   flag_prefix: '-'
+  throttle: 8
 
 sys:
   pulse: '/tmp/bot.pulse'

@@ -7,8 +7,10 @@ import simplejson
 
 
 class Finance(Dendrite):
+
     def __init__(self, cortex):
         super(Finance, self).__init__(cortex)
+
 
     @axon
     @help("STOCK_SYMBOL <get stock quote>")
@@ -29,6 +31,7 @@ class Finance(Dendrite):
             showit = "Couldn't find company: " + symbol
 
         return showit
+
 
     @axon
     @help("<get current Bitcoin trading information>")
@@ -62,6 +65,7 @@ class Finance(Dendrite):
         else:
             return 'Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high)
 
+
     @axon
     @help("<get current Litecoin trading information>")
     def ltc(self):
@@ -93,6 +97,7 @@ class Finance(Dendrite):
             return 'Value of %s LTC is %s' % (self.values[0], value)
         else:
             return 'Litecoin, Last: %s, Low: %s, High: %s' % (last, low, high)
+
 
     @axon
     @help("<get current Dogecoin trading information>")

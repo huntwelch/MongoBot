@@ -19,7 +19,6 @@ class Sms(Dendrite):
     current = mktime(localtime())
     next_ = current + 10
 
-    # Set up the SMS brainmeat and the Twilio client
     def __init__(self, cortex):
         super(Sms, self).__init__(cortex)
 
@@ -56,7 +55,8 @@ class Sms(Dendrite):
 
             self.incoming.append(sid)
 
-            # Don't parse previously received messages until the incoming list has been fully parsed
+            # Don't parse previously received messages until the 
+            # incoming list has been fully parsed
             if not self.loaded:
                 continue
 
@@ -101,6 +101,7 @@ class Sms(Dendrite):
 
         self.loaded = True
 
+
     @axon
     @help('NUMBER|USERNAME MESSAGE <send an sms message to unsuspecting victim>')
     def sms(self):
@@ -143,6 +144,7 @@ class Sms(Dendrite):
             self.chat(str(e))
 
         return
+
 
     @axon
     @help('[FROM NUMBER] <check for sms replies to messages previously sent to unsuspecting victims>')

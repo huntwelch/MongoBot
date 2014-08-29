@@ -19,6 +19,7 @@ class System(Dendrite):
     def __init__(self, cortex):
         super(System, self).__init__(cortex)
 
+
     @axon
     @alias('raw')
     def rawsock(self):
@@ -27,10 +28,12 @@ class System(Dendrite):
 
         self.cx.sock.send(' '.join(self.values))
 
+
     @axon
     def echo(self):
         return ' '.join(self.values)
     
+
     # Help menu. It used to just show every command, but there
     # are so goddamn many at this point, they had to be split
     # into categories.
@@ -61,9 +64,11 @@ class System(Dendrite):
 
         return self.cx.helpmenu[which]
 
+
     @axon
     def threads(self):
         return threading.activeCount()
+
 
     # Reloads the bot. Any changes make to cortex or brainmeats
     # and most settings will be reflected after a reload.
@@ -76,6 +81,7 @@ class System(Dendrite):
         #    meats['webserver'].reloadserver(True)
         self.cx.master.reload()
 
+
     # Actually kills the medulla process and waits for the
     # doctor to restart. Some settings and any changes to
     # medulla.py won't take effect until a reboot.
@@ -84,6 +90,7 @@ class System(Dendrite):
     @help("<set squirrel on fire and staple it to angel. No, really>")
     def reboot(self):
         self.cx.master.die()
+
 
     # DANGER ZONE. You merge it, anyone can pull it. If you
     # have a catastrophic failure after this, it's probably
@@ -99,6 +106,7 @@ class System(Dendrite):
         os.system("git pull origin %s" % branch)
         self.cx.master.reload(True)
         self.chat("I know kung-fu.")
+
 
     # Turn libs on.
     @axon
@@ -144,6 +152,7 @@ class System(Dendrite):
         self.cx.master.reload(True)
 
         self.chat(' '.join(messages))
+
 
     # Turn libs off. Why all this lib stuff? Helps when developing, so
     # you can just turn stuff off while you tinker and prevent crashes.

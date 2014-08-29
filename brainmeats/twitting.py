@@ -17,10 +17,12 @@ class Twitting(Dendrite):
         self.auth.set_access_token(self.secrets.accesstoken, self.secrets.accesssecret)
         self.api = tweepy.API(self.auth)
 
+
     @axon
     @help('<show link to %s\'s twitter feed>' % metacortex.botnick)
     def totw(self):
         return self.config.page
+
 
     @axon
     @help('[ID] <retweet by id, or just the last tweet>')
@@ -77,6 +79,7 @@ class Twitting(Dendrite):
         name = status.user.name
         if status.text:
             return '%s (%s) tweeted: %s' % (name, screen_name, text)
+
 
     @Receptor('url')
     def auto_get_tweet(self, url):

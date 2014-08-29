@@ -115,7 +115,7 @@ def serotonin(cortex, meatname, electroshock):
             cortex.public_commands.append(name)
 
         if name in cortex.commands and not electroshock:
-            print "Warning: overwriting " + name
+            print "Warning: overwriting %s command" % name
 
         cortex.commands[name] = method
         if hasattr(method, 'aliases') and method.aliases:
@@ -216,10 +216,6 @@ def Receptor(name, *args, **kwargs):
 
 # Proposed:
 # @requires(vars, connections, installs)
-# @live() to run it in parietal. Iffy.
-# @pipe() can pipe output to another function.
-#         This is kind of just built in right
-#         now.
 
 # Makes the function available as
 # a chat command, using the function

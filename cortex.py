@@ -204,8 +204,7 @@ class Cortex:
     def command(self, sender, cmd, piped=False, silent=False):
 
         if self.context in self.channels \
-        and 'command' not in self.channels[self.context]:
-            return
+        and 'command' not in self.channels[self.context]: return
 
         chain = cmd.split('|', 1)
         pipe = False
@@ -227,7 +226,11 @@ class Cortex:
         is_nums = re.search("^[0-9]+", what)
         is_breaky = re.search("^" + re.escape(self.personality.command_prefix) + "|[^\w]+", what)
 
-        if is_nums or is_breaky or not what: return
+        if is_nums or is_breaky: return
+
+        if not what:
+           if not self.lastcommand: return
+           what = self.lastcommand
 
         self.values = False
         self.flags = {}
@@ -324,8 +327,7 @@ class Cortex:
                 self.chat(str(e))
                 print traceback.format_exc()
 
-        if not result:
-            return
+        if not result: return
 
         if pipe:
             # Piped output must be string!
@@ -341,8 +343,8 @@ class Cortex:
             self.chat(result)
 
         if type(result) is list:
-            if len(result) > 20:
-                result = result[:20]
+            if len(result) > self.personality.throttle:
+                result = result[:self.personality.throttle]
                 result.append("Such result. So self throttle. Much erotic. Wow.")
 
             for line in result:
@@ -350,22 +352,9 @@ class Cortex:
 
         self.multis = 0
 
-    # If you want to restrict a command to the bot admin.
-    def validate(self):
-
-        print "!!! In cortex.validate"
-
-        if not self.values:
-            return False
-        if self.lastsender != OWNER:
-            return False
-        return True
-
-
     # Careful with this one.
     def bored(self):
-        if not self.members:
-            return
+        if not self.members: return
 
         self.announce('Chirp chirp. Chirp Chirp.')
 
@@ -380,14 +369,12 @@ class Cortex:
             f.write('TS:%s;%s' % (time(), what))
 
         now = date.today()
-        if now.day != 1:
-            return
+        if now.day != 1: return
 
         prev = date.today() - timedelta(days=1)
         backlog = '%s/%s-mongo.log' % (self.settings.directory.logdir, prev.strftime('%Y%m'))
 
-        if os.path.isfile(backlog):
-            return
+        if os.path.isfile(backlog): return
 
         shutil.move(self.settings.directory.log, backlog)
 
@@ -407,14 +394,11 @@ class Cortex:
 
         if self.context in self.channels \
         and not target \
-        and not self.channels[self.context].speak:
-            return
+        and not self.channels[self.context].speak: return
 
-        if self.bequiet:
-            return
+        if self.bequiet: return
 
-        if not message:
-            return
+        if not message: return
 
         if target:
             whom = target
