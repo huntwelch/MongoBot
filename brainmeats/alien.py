@@ -42,7 +42,6 @@ class Alien(Dendrite):
             entry = random.choice(entries)
 
         except Exception as e:
-            self.chat('Reddit fail.', str(e))
-            return
+            return 'Reddit fail. %s' % str(e)
 
         return str(entry)

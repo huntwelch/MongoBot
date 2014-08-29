@@ -81,16 +81,13 @@ class Channeling(Dendrite):
     def modchan(self, chan=False, what=False):
 
         if not chan and not self.values:
-            self.chat('Mod what?')
-            return
+            return 'Mod what?'
 
         if not what and not self.values:
-            self.chat('Mod how?')
-            return
+            return 'Mod how?'
 
         if not what and not chan and len(self.values) < 2:
-            self.chat('Usage: -modchan #channel +mod1 -mod2')
-            return
+            return 'Usage: -modchan #channel +mod1 -mod2'
 
         if not chan:
             chan = self.massage(self.values.pop(0))

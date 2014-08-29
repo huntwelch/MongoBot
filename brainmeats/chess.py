@@ -67,19 +67,17 @@ class Chess(Dendrite):
 
             self.chat(' '.join(rowset))
 
-        self.chat(u'  a\u00a0b\u00a0c\u00a0d\u00a0e\u00a0f\u00a0g\u00a0h')
+        return u'  a\u00a0b\u00a0c\u00a0d\u00a0e\u00a0f\u00a0g\u00a0h'
 
 
     @axon
     @help("[a-f][1-8] [a-f][1-8] <move piece [from] [to]>")
     def move(self):
         if not self.values:
-            self.chat("Bad format")
-            return
+            return "Bad format"
 
         if len(self.values) < 2:
-            self.chat("Not enough values")
-            return
+            return "Not enough values"
 
         start = self.values[0]
         finis = self.values[1]
@@ -93,8 +91,8 @@ class Chess(Dendrite):
 
             piece = self.chessgrid[x][y]
             if not piece:
-                self.chat("No piece there")
-                return
+                return "No piece there"
+
             self.chessgrid[x][y] = ''
 
         x = 8 - int(finis[1:])

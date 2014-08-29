@@ -99,7 +99,8 @@ class System(Dendrite):
     @axon
     @help("<update from git repo>")
     def gitpull(self):
-        if not self.values: return 'Which branch?'
+        if not self.values:
+            return 'Which branch?'
 
         branch = self.values[0]
 
@@ -113,8 +114,7 @@ class System(Dendrite):
     @help("LIB_1 [LIB_n] <activate libraries>")
     def enable(self):
         if not self.values:
-            self.chat("Enable what?")
-            return
+            return "Enable what?"
 
         if self.values[0] == '*':
             values = self.libs
@@ -160,12 +160,10 @@ class System(Dendrite):
     @help("LIB_1 [LIB_n] <deactivate libraries>")
     def disable(self):
         if not self.values:
-            self.chat("Disable what?")
-            return
+            return "Disable what?"
 
         if 'system' in self.values:
-            self.chat("You can't disable the system, jackass.")
-            return
+            return "You can't disable the system, jackass."
 
         already = []
         nonextant = []

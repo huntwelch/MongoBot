@@ -17,8 +17,7 @@ class Finance(Dendrite):
     def q(self):
         symbol = self.values[0]
         if not symbol:
-            self.chat("Enter a symbol")
-            return
+            return "Enter a symbol"
 
         showit = False
         try:
@@ -40,14 +39,12 @@ class Finance(Dendrite):
 
         response = pageopen(url)
         if not response:
-            self.chat("Couldn't retrieve BTC data.")
-            return
+            return "Couldn't retrieve BTC data."
 
         try:
             json = response.json()
         except:
-            self.chat("Couldn't parse BTC data.")
-            return
+            return "Couldn't parse BTC data."
 
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
         last = locale.currency(json['ticker']['last'])
@@ -58,8 +55,7 @@ class Finance(Dendrite):
             try:
                 value = locale.currency(float(json['ticker']['last']) * float(self.values[0]))
             except:
-                self.chat("Couldn't compute BTC value.")
-                return
+                return "Couldn't compute BTC value."
 
             return 'Value of %s BTC is %s' % (self.values[0], value)
         else:
@@ -73,14 +69,12 @@ class Finance(Dendrite):
 
         response = pageopen(url)
         if not response:
-            self.chat("Couldn't retrieve LTC data.")
-            return
+            return "Couldn't retrieve LTC data."
 
         try:
             json = response.json()
         except:
-            self.chat("Couldn't parse LTC data.")
-            return
+            return "Couldn't parse LTC data."
 
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
         last = locale.currency(json['ticker']['last'])
@@ -91,8 +85,7 @@ class Finance(Dendrite):
             try:
                 value = locale.currency(float(json['ticker']['last']) * float(self.values[0]))
             except:
-                self.chat("Couldn't compute LTC value.")
-                return
+                return "Couldn't compute LTC value."
 
             return 'Value of %s LTC is %s' % (self.values[0], value)
         else:
@@ -106,14 +99,12 @@ class Finance(Dendrite):
 
         response = pageopen(url)
         if not response:
-            self.chat("Couldn't retrieve DOGE data.")
-            return
+            return "Couldn't retrieve DOGE data."
 
         try:
             json = simplejson.loads(response.text)
         except:
-            self.chat("Couldn't parse DOGE data.")
-            return
+            return "Couldn't parse DOGE data."
 
         weighted = float(json['vwap'])
 
@@ -122,8 +113,7 @@ class Finance(Dendrite):
                 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
                 value = locale.currency(weighted * float(self.values[0]))
             except:
-                self.chat("Couldn't compute DOGE value.")
-                return
+                return "Couldn't compute DOGE value."
 
             return 'Value of %s DOGE is %s' % (self.values[0], value)
         else:

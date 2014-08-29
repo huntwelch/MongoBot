@@ -279,8 +279,7 @@ class Broca(Dendrite):
     @help('WORD <get definition of word>')
     def whatmean(self):
         if not self.values:
-            self.chat("Ooohhhmmmmm")
-            return
+            return "Ooohhhmmmmm"
 
         word = self.values[0]
         which = 0
@@ -309,8 +308,7 @@ class Broca(Dendrite):
 
     def seekdef(self, word):
         if not self.secrets.wordnik_api:
-            self.chat("No api key is not set.")
-            return
+            return "No api key is not set."
 
         client = swagger.ApiClient(self.secrets.wordnik_api, 'http://api.wordnik.com/v4')
         wapi = WordApi.WordApi(client)
@@ -339,7 +337,8 @@ class Broca(Dendrite):
             self.chat("Wordnik coughed up " + str(count) + " definitions.")
             self.chat("Definition 1:" + tempdef)
         else:
-            self.chat("I got nothin.")
+            return "I got nothin."
+    
 
     # This is where all the conversational tics and
     # automatic reactions are set up. Also, for some
@@ -431,7 +430,8 @@ class Broca(Dendrite):
     @alias('scrabble')
     @help('LETTERS <cheat at Scrabble>')
     def scrabblecheat(self):
-        if not self.values: return "Nothing to check"
+        if not self.values:
+            return "Nothing to check"
 
         letters = sorted(self.values[0].lower())
         letters = ''.join(letters)
@@ -454,9 +454,14 @@ class Broca(Dendrite):
                 words.append(word)
 
 
-        if truth and words: return 'Yup'
-        if truth and not words: return 'Nope'
-        if not words: return 'Nothing found'
+        if truth and words:
+            return 'Yup'
+
+        if truth and not words:
+            return 'Nope'
+
+        if not words:
+            return 'Nothing found'
 
         return ', '.join(words)
 
@@ -464,10 +469,18 @@ class Broca(Dendrite):
     @axon
     @help('ACRONYM <have %s decide the words for an acronym>' % botnick)
     def acronym(self):
-        if not self.values: return "About what?"
-        if not re.match("^[A-Za-z]+$", self.values[0]) and self.lastsender == "erikbeta": return "Fuck off erik."
-        if not re.match("^[A-Za-z]+$", self.values[0]): return "%s no want to think about that." % botnick
-        if self.values[0].lower() == "gross": return "Get Rid Of Slimey girlS"
+        if not self.values:
+            return "About what?"
+
+        if not re.match("^[A-Za-z]+$", self.values[0]) \
+        and self.lastsender == "erikbeta":
+            return "Fuck off erik."
+
+        if not re.match("^[A-Za-z]+$", self.values[0]):
+            return "%s no want to think about that." % botnick
+
+        if self.values[0].lower() == "gross":
+            return "Get Rid Of Slimey girlS"
 
         output = self.acronymit(self.values[0])
         return output
@@ -495,8 +508,8 @@ class Broca(Dendrite):
     @help('WORD [WHICH_DEFINITION] <look up etymology of word>')
     def ety(self):
         if not self.values:
-            self.chat("Enter a word")
-            return
+            return "Enter a word"
+            
 
         word = self.values[0]
         params = {'allowed_in_frame': '0', 'searchmode': 'term', 'search': word}
@@ -511,8 +524,7 @@ class Broca(Dendrite):
         defs = cont.findAll("dd")
 
         if not len(defs):
-            self.chat("Couldn't find anything")
-            return
+            return "Couldn't find anything"
 
         try:
             ord = int(self.values[1])
@@ -540,8 +552,8 @@ class Broca(Dendrite):
     @help('WORD_OR_PHRASE <look up anagram>')
     def anagram(self):
         if not self.values:
-            self.chat("Enter a word or phrase")
-            return
+            return "Enter a word or phrase"
+            
 
         word = ''.join(self.values)
         url = 'http://www.anagramica.com/best/%s' % word
@@ -555,6 +567,7 @@ class Broca(Dendrite):
             return json['best']
         except Exception as e:
             self.chat("Couldn't parse.", str(e))
+            return 
 
     
     # This pair of gems was created because Elliott kept
@@ -569,5 +582,4 @@ class Broca(Dendrite):
     @axon
     def speakup(self):
         self.cx.bequiet = False
-        self.chat('Back.')
-        return
+        return 'Back.'

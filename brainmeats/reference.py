@@ -63,8 +63,7 @@ class Reference(Dendrite):
     @help('SEARCH_TERM <look something up in wolfram alpha>')
     def w(self):
         if not self.values:
-            self.chat("Enter a search")
-            return
+            return "Enter a search"
 
         result = self.wolf.query(' '.join(self.values))
 
@@ -83,8 +82,7 @@ class Reference(Dendrite):
     @alias('google')
     def g(self):
         if not self.values:
-            self.chat("Enter a search")
-            return
+            return "Enter a search"
 
         # If values was a string you don't need the join/etc
         params = {'v': '1.0', 'rsz': 'large', 'start': '0',
@@ -96,12 +94,10 @@ class Reference(Dendrite):
                 params=params)
             json = request.json()
         except:
-            self.chat("Something's buggered up")
-            return
+            return "Something's buggered up"
 
         if len(json["responseData"]["results"]) == 0:
-            self.chat("No results")
-            return
+            return "No results"
 
         result = json["responseData"]["results"][0]
         title = result["titleNoFormatting"]
@@ -138,19 +134,16 @@ class Reference(Dendrite):
         try:
             response = pageopen(url)
         except:
-            self.chat("Couldn't get weather.")
-            return
+            return "Couldn't get weather."
 
         if not response:
-            self.chat("Couldn't get weather.")
-            return
+            return "Couldn't get weather."
 
         try:
             json = response.json()
             json = json['current_observation']
         except:
-            self.chat("Couldn't parse weather.")
-            return
+            return "Couldn't parse weather."
 
         location = json['display_location']['full']
         condition = json['weather']
@@ -168,16 +161,14 @@ class Reference(Dendrite):
     @help("SEARCH_TERM <get urban dictionary entry>")
     def ud(self):
         if not self.values:
-            self.chat("Whatchu wanna know, bitch?")
-            return
+            return "Whatchu wanna know, bitch?"
 
         try:
             request = pageopen('http://www.urbandictionary.com/define.php',
                                params={'term': ' '.join(self.values)})
             soup = bs4(request.text)
         except:
-            self.chat("parse error")
-            return
+            return "parse error"
 
         elem = soup.find('div', {'class': 'meaning'})
 
@@ -186,8 +177,7 @@ class Reference(Dendrite):
             for string in elem.stripped_strings:
                 defn.append(string)
         except:
-            self.chat("couldn't find anything")
-
+            return "couldn't find anything"
 
         if defn:
             # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
@@ -197,7 +187,7 @@ class Reference(Dendrite):
                 for line in wrapped:
                     self.chat(unescape(line))
         else:
-            self.chat("couldn't find anything")
+            return "couldn't find anything"
 
 
     # This function used to be called calc, but was changed to hack in
@@ -239,7 +229,8 @@ class Reference(Dendrite):
 
     @axon
     def ns(self):
-        if not self.values: return 'Lookup what?'
+        if not self.values:
+            return 'Lookup what?'
 
         lookup = self.values[0]
 
@@ -249,8 +240,7 @@ class Reference(Dendrite):
             else:
                 resolved = socket.gethostbyname_ex(lookup.strip())[2][0]
         except:
-            self.chat("Couldn't find anything.")
-            return
+            return "Couldn't find anything."
 
         return resolved
 
@@ -307,8 +297,7 @@ class Reference(Dendrite):
     @alias('regex', 'rx', 'extract')
     def regexsearch(self):
         if not self.values or len(self.values) < 2:
-            self.chat('Please enter REGEX LINE')
-            return
+            return 'Please enter REGEX LINE'
 
         regex = self.values.pop(0)
         line = ' '.join(self.values)
@@ -366,14 +355,11 @@ class Reference(Dendrite):
     def isitfriday(self):
         today = time.localtime().tm_wday
         if today == 4:
-            self.chat('Fuck YEAH it is!')
-            return
+            return 'Fuck YEAH it is!'
 
         if today < 4:
-            self.chat('No. Fuck. %s more day%s.' % ((4 - today),('s' if today != 3 else '')))
-            return
+            return 'No. Fuck. %s more day%s.' % ((4 - today),('s' if today != 3 else ''))
 
-        self.chat('Get entirely the fuck out of here with that weekday shit')
-        return
+        return 'Get entirely the fuck out of here with that weekday shit'
 
 

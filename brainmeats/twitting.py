@@ -29,8 +29,7 @@ class Twitting(Dendrite):
     def retweet(self):
         id = self.lasttweet
         if not self.values and not id:
-            self.chat('Provide an id or link a tweet first')
-            return
+            return 'Provide an id or link a tweet first'
 
         if self.values:
             id = self.values[0]
@@ -47,8 +46,7 @@ class Twitting(Dendrite):
     @help('MESSAGE <post to %s\'s twitter feed>' % metacortex.botnick)
     def tweet(self, _message=False):
         if not self.values and not _message:
-            self.chat('Tweet what?')
-            return
+            return 'Tweet what?'
 
         if not _message:
             message = ' '.join(self.values)
@@ -90,7 +88,7 @@ class Twitting(Dendrite):
             try:
                 self.chat(self.get_tweet(twitter_id.pop()))
             except:
-                self.chat('Could not get the tweet.')
+                return 'Could not get the tweet.'
 
         return
 
