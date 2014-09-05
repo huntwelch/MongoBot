@@ -209,6 +209,7 @@ class Broca(Dendrite):
     # Americans have some seriously fucked up problems with
     # their opinions on the nature and value of intelligence.
     @axon
+    @public
     @alias('waxrhapsodic')
     @help('<Make %s speak markov chain>' % botnick)
     def babble(self, what=False):
@@ -427,6 +428,7 @@ class Broca(Dendrite):
 
     
     @axon
+    @public
     @alias('scrabble')
     @help('LETTERS <cheat at Scrabble>')
     def scrabblecheat(self):

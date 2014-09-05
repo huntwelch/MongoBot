@@ -308,7 +308,7 @@ class Peeps(Dendrite):
         if hour not in self.checks:
             return
 
-        period, day = MEETUP_DAY.split()
+        period, day = self.secrets.meetup.day.split()
         check = dateutil.parser.parse(day)
 
         if self.checked == check.month:
@@ -330,12 +330,12 @@ class Peeps(Dendrite):
             return
 
         self.all()
-        self.announce('Meetup tonight! %s' % MEETUP_LOCATION)
+        self.announce('Meetup tonight! %s' % self.secrets.meetup.location)
 
 
     @axon
     def okdrink(self):
-        whenwhere = 'Every %s, %s' % (MEETUP_DAY, MEETUP_LOCATION)
+        whenwhere = 'Every %s, %s' % (self.secrets.meetup.day, self.secrets.meetup.location)
         return whenwhere
 
 

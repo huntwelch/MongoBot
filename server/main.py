@@ -43,7 +43,11 @@ def api_chat():
     if request.args.get('offset'):
         offset = request.args.get('offset')
 
-    chats = fetch_chats(request, offset)
+    try:
+        chats = fetch_chats(request, offset)
+    except Exception as e:
+        return str(e)
+
     return json.dumps(chats)
 
 

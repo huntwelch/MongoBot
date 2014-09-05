@@ -19,6 +19,7 @@ class {1}(Dendrite):
     def __init__(self, cortex):
         super({1}, self).__init__(cortex)
 
+
     # Example command function
     # The axon decorator adds it to the available chatroom commands,
     # based on the name of the function. The @help adds an entry to
@@ -27,6 +28,7 @@ class {1}(Dendrite):
     @help("<I am an example>")
     def function_name(self):
         return
+
 
     # Example receptor method
     # The receptor decorator makes the defined method get autocalled

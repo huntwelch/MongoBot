@@ -4,6 +4,7 @@ import re
 import wolframalpha
 import sys
 import pythonwhois
+import time
 
 from math import *
 from autonomic import axon, alias, help, Dendrite

@@ -23,6 +23,7 @@ irc:
   port: 6697
   ssl: True
   chanserv: False
+  scan: '^:\w+\.freenode\.net'
   nickserv:
     nick: 'NickServ'
     password: 'test'

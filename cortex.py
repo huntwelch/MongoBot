@@ -24,6 +24,7 @@ from thalamus import Thalamus
 from pprint import pprint
 import sys
 
+# Fix this
 CHANNEL = '#okdrink'
 
 # TODO:
@@ -112,6 +113,7 @@ class Cortex:
         for username in self.realuserdata:
             self.REALUSERS.append(username)
 
+
     # Loads up all the files in brainmeats and runs them
     # through the hookup process.
     def loadbrains(self, electroshock=False):
@@ -178,6 +180,7 @@ class Cortex:
     def addlive(self, func, alt=False):
         name = alt or func.__name__
         self.live[name] = func
+
 
     def droplive(self, name):
         del self.live[name]
@@ -385,6 +388,7 @@ class Cortex:
     def announce(self, message):
         self.chat(message, target=self.secrets.primary_channel)
 
+
     # Since chat is mongo's only means of communicating with
     # a room, the ratelimiting here should prevent any overflow
     # violations.
@@ -432,6 +436,7 @@ class Cortex:
             except:
                 pass
 
+
     def act(self, message, public=False, target=False):
         message = '\001ACTION %s\001' % message
         if public:
@@ -440,6 +445,7 @@ class Cortex:
             self.chat(message, target)
         else:
             self.chat(message)
+
 
     # When all else fails.
     def default(self):

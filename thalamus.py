@@ -199,6 +199,7 @@ class Thalamus(object):
             self.name = None
             self.introduce()
 
+
     # Handle name already being in use
     def _cmd_433(self, source, args):
 
