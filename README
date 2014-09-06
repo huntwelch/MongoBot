@@ -98,6 +98,7 @@ To Do
 
     + acro.py 
         ACROSCORE in needs to be sorted out
+        -Borked
     + broca.py 
         -the global botnick thing isn't working
         -read indicates lastsender is a little borked
@@ -106,7 +107,7 @@ To Do
     + chess.py
         -resetchess is broken because I'm missing something obvious about copying variables, but who gives a shit
     + holdem.py     *PROBABLY OK*
-        should run a test
+        -Borked
     + reference.py
         I forget how regexsearch takes input
         -weather works with a zipcode, otherwise throws error
