@@ -106,15 +106,14 @@ To Do
         I have no idea what's up with this now that we have thalamus
     + chess.py
         -resetchess is broken because I'm missing something obvious about copying variables, but who gives a shit
-    + holdem.py     *PROBABLY OK*
+    + holdem.py
         -Borked
     + reference.py
         I forget how regexsearch takes input
         -weather works with a zipcode, otherwise throws error
-    + system.py
-        -dis/enanble has odd behavior
     + turing.py
-        dunno. looks like it should be okay. function names need to be better, this is fucking mandarin
+        -function names need to be better, this is fucking mandarin
+        -borked
 
 
     OTHER
