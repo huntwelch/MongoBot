@@ -3,6 +3,7 @@ import email
 import smtplib
 
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse, Receptor
+from email.mime.text import MIMEText
 
 @Cerebellum
 class Mail(Dendrite):
@@ -17,33 +18,98 @@ class Mail(Dendrite):
         self.imap = imaplib.IMAP4_SSL(self.config.imap)
         self.imap.login(self.secrets.user, self.secrets.password)
 
-
-    # Example command function
-    # The axon decorator adds it to the available chatroom commands,
-    # based on the name of the function. The @help adds an entry to
-    # the appropriate category.
-    @axon
-    @help("<I am an example>")
-    def function_name(self):
-        return
+        self.smtp = smtplib.SMTP(self.config.smtp)
+        self.smtp.starttls()
+        self.smtp.login(self.secrets.user, self.secrets.password)
 
 
     @axon
+    @help('Check for new mail')
     def fetch(self):
-        self.imap.select('inbox')
-        result, data = self.imap.uid('search', None, "UnSeen") # search and return uids instead
-        print data
-        new = 0
+        unread = self.getnew()
+        if not unread:
+            return 'Fail.'
+
+        return 'You have %s unread emails' % len(unread)
+
+
+    def getnew(self):
+        try:
+            self.imap.select('inbox')
+            result, data = self.imap.uid('search', None, "UnSeen") # search and return uids instead
+        except:
+            return False
+
+        new = []
         for mail in data[0].split():
             uid = mail.split()[-1]
 
             if uid in self.logged: continue
 
             self.logged.append(uid)
-            new += 1    
+            new.append(uid)
             
-        if not new: return
+        if not new: return False
 
-        self.chat('You have %s unread emails' % new)
+        return new
+
+
+    def rollup(self, sender, subjects):
+
+        name, address = sender
+        subs = subjects.split()
+
+        stuff = []
+
+        # This construction is just to ensure babble
+        # outputs, as it occasionally returns nothing
+        babble = False
+        while not babble:
+            babble = self.cx.commands.get('babble', self.cx.default)()
+        babble = 'Inspiration: %s' % babble
+        stuff.append(babble)
+
+        if len(subs) == 2:
+            self.cx.values = [subs[1]]
+            weather = self.cx.commands.get('weather', self.cx.default)() 
+            stuff.append(weather)
+
+        msg = MIMEText('\n\n'.join(stuff))
+        msg['Subject'] = 'Stuff fetched'
+
+        try:
+            self.smtp.sendmail(self.secrets.email, sender, msg.as_string())
+        except Exception as e:
+            print str(e)
+
+        return
+
+
+    @Receptor('twitch')
+    def responder(self):
+        
+        incoming = self.getnew() 
+
+        if not incoming: return
+
+        for mailid in incoming:
+            try:
+                result, data = self.imap.uid('fetch', mailid, '(RFC822)')
+            except:
+                continue
+
+            raw = data[0][1]
+            message = email.message_from_string(raw)
+            
+            if 'rollup' not in message['Subject']: continue
+
+            try:
+                self.imap.uid('store', mailid, '+FLAGS', r'(\Deleted)') 
+                self.imap.expunge()
+            except Exception as e:
+                print str(e)
+
+            sender = email.utils.parseaddr(message['From'])
+            self.rollup(sender, message['Subject'])
 
         return

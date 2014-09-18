@@ -1,1 +1,2 @@
 imap: 'imap.gmail.com'
+smtp: 'smtp.gmail.com:587'
