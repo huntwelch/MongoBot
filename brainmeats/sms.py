@@ -152,7 +152,7 @@ class Sms(Dendrite):
                 params['body'] = msg
 
             message = self.client.messages.create(**params)
-            self.chat('Message sent: ' + message.sid)
+            self.chat('Message sent: %s (%s)' % (msg, message.sid))
         except Exception as e:
             self.chat(str(e))
 
