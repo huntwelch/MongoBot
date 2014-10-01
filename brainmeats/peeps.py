@@ -343,7 +343,7 @@ class Peeps(Dendrite):
     @Receptor('IRC_PRIVMSG')
     def peep_incdec(self, target, source, args):
         input = args[-1]
-        matches = re.match('^([a-zA-Z0-9_\\\[\]\{\}\^`\|]+)([\+\+|\-\-]).*', input)
+        matches = re.match('^([a-zA-Z0-9_\\\[\]\{\}\^`\|]+)([\+|\-]{2}(?![\+|\-])).*', input)
 
         if not matches:
             return
