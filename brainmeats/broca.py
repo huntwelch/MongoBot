@@ -275,6 +275,7 @@ class Broca(Dendrite):
         return words
 
     
+    # TODO: clean up relationship between whatmean/wordnik/seekdef
     @axon
     @alias('d')
     @help('WORD <get definition of word>')
@@ -316,6 +317,10 @@ class Broca(Dendrite):
         results = wapi.getDefinitions(word.strip())
 
         count = 0
+
+        if not results:
+            self.chat('I got nothin.')
+            return 
 
         for item in results:
 

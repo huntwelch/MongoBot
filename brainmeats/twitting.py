@@ -20,7 +20,7 @@ class Twitting(Dendrite):
 
     @axon
     @help('<show link to %s\'s twitter feed>' % metacortex.botnick)
-    def totw(self):
+    def twitter(self):
         return self.config.page
 
 

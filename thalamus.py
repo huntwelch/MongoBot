@@ -134,6 +134,8 @@ class Thalamus(object):
             if line[0] == ':':
                 source, line = line[1:].split(' ', 1)
 
+            #self.cx.logit(line)
+
             if line.find(' :') != -1:
                 line, trailing = line.split(' :', 1)
                 args = line.split()

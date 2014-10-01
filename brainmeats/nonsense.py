@@ -28,6 +28,11 @@ class Nonsense(Dendrite):
 
 
     @axon
+    def raincheck(self):
+        return "Lemme just stick a pin in that and I'll have my girl call your girl to pencil in a lunch some time."
+
+
+    @axon
     @public
     @help("<get cat fact>")
     def catfact(self):

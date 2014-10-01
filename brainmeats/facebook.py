@@ -12,6 +12,6 @@ class Facebook(Dendrite):
 
     @axon
     @help('<show link to %s\'s community page>' % metacortex.botnick)
-    def fblink(self):
+    def facebook(self):
         return self.secrets.page
 

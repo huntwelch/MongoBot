@@ -11,6 +11,7 @@ from autonomic import axon, alias, help, Dendrite
 from bs4 import BeautifulSoup as bs4
 from util import unescape, pageopen
 from howdoi import howdoi as hownow
+from staff import Browser
 
 
 # There's some semantic overlap between this and some functions
@@ -180,16 +181,19 @@ class Reference(Dendrite):
         except:
             return "couldn't find anything"
 
-        if defn:
-            # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
-            # entities like &#x27; so use the parser for any stray entities.
-            for paragraph in defn:
-                wrapped = textwrap.wrap(paragraph, 200)
-                for line in wrapped:
-                    self.chat(unescape(line))
-        else:
+        if not defn:
             return "couldn't find anything"
 
+        # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
+        # entities like &#x27; so use the parser for any stray entities.
+
+        response = []
+        for paragraph in defn:
+            wrapped = textwrap.wrap(paragraph, 200)
+            _response = unescape(' '.join(wrapped))
+            response.append(_response)
+
+        return ' '.join(response)
 
     # This function used to be called calc, but was changed to hack in
     # honor of Ken's incredibly sick exploitation of the eval function,
@@ -346,7 +350,7 @@ class Reference(Dendrite):
         url = base + params
 
         # Needs to be vastly improved for other sets
-        site = Browse(url)
+        site = Browser(url)
         result = site.read().split(':')[2].strip()[:-6]
 
         return result

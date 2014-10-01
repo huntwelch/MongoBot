@@ -31,9 +31,12 @@ class Hangman(Dendrite):
     # the appropriate category.
     @axon
     @help("<Start a game of hangman>")
-    def hang(self):
+    @alias('hang')
+    def lizard(self):
         
         if self.active: return 'Game already in progress'
+
+        self.chat('Guess the word before the monster eats you.')
 
         self.active = True
         self.word = []
@@ -69,6 +72,7 @@ class Hangman(Dendrite):
         if self.values[0].upper() == ''.join(self.word):
             self.chat('"%s"' % ''.join(self.word))
             self.win()
+            return
         elif len(self.values[0]) > 1:
             self.addhang()
             return
