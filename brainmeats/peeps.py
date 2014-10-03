@@ -258,7 +258,7 @@ class Peeps(Dendrite):
         self.chat('Hi %s, your temporary password is %s. Please set up your user '
         'by identifying yourself to me via private message (.identify %s) and '
         'then changing your password (.passwd <newpass>).' % (new_user.nick,
-        tmp_pass, tmp_pass), target=new_user.name)
+        tmp_pass, tmp_pass), target=new_user.nick)
 
 
     @axon
