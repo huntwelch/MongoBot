@@ -359,6 +359,11 @@ class Peeps(Dendrite):
         if not source.name or not source.is_authenticated:
             return
 
+        if source.name == entity:
+            self.chat("Do you kick puppies too?")
+            incrementEntity(entity, -1000000)
+            return
+
         mod = 1
         if method == '--':
             mod = -1
