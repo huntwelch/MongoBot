@@ -15,6 +15,8 @@ from pprint import pprint
 # a reload won't change it. Same goes for changes to thalamus.py
 class Medulla:
 
+    sock = False
+
     def __init__(self):
 
         print '* Becoming self-aware'
@@ -29,7 +31,8 @@ class Medulla:
             self.logger.warn('Drain bamaged... Stroking... out...')
             sys.exit()
 
-        self.thalamus = thalamus.Thalamus(self.brain)
+        self.thalamus = thalamus.Thalamus(self, self.brain)
+        self.thalamus.connect()
         self.brain.thalamus = self.thalamus
         self.brain.logger = self.logger
 
@@ -46,6 +49,10 @@ class Medulla:
 
         while True:
             sleep(0.1)
+
+            # Slight race condition on reloads
+            if not self.brain.thalamus: continue 
+
             self.brain.monitor()
             if mktime(localtime()) - self.lastpulse > 10:
                 self.setpulse()
@@ -61,7 +68,7 @@ class Medulla:
         else:
             self.brain.act('strokes out.', False, self.secrets.owner)
 
-        # TODO also broken. Reloading is SO BROKEN
+        # TODO broken.
         #for channel in self.secrets.channels:
         #    name, attr = channel.popitem()
         #    if attr.primary:
@@ -78,15 +85,18 @@ class Medulla:
         import staff
         import autonomic
         import cortex
+        import thalamus
 
         reload(datastore)
         reload(autonomic)
         reload(util)
         reload(staff)
         reload(cortex)
+        reload(thalamus)
 
         self.brain = cortex.Cortex(self, True)
-        self.thalamus.cx = self.brain
+        self.thalamus = thalamus.Thalamus(self, self.brain)
+
         self.brain.thalamus = self.thalamus
         self.active = True
 

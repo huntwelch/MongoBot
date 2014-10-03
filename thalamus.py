@@ -35,14 +35,17 @@ class Thalamus(object):
 
 
     # Initialize and auto-connect
-    def __init__(self, cortex):
+    def __init__(self, master, cortex):
 
         self.cx = cortex
+        self.master = master
 
         self.settings = load_config('config/settings.yaml')
         self.secrets = load_config('config/secrets.yaml')
 
-        self.connect()
+        if master.sock: self.sock = master.sock
+
+        # self.connect()
 
 
     # Make those connections, you will feel so much more human.
@@ -58,6 +61,8 @@ class Thalamus(object):
         else:
             self.sock = sock
 
+        self.master.sock = self.sock
+        
         self.sock.setblocking(0)
 
         if hasattr(self.settings.irc, 'password') and self.settings.irc.password:

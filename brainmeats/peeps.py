@@ -345,19 +345,16 @@ class Peeps(Dendrite):
         input = args[-1]
         matches = re.match('^([a-zA-Z0-9_\\\[\]\{\}\^`\|]+)([\+|\-]{2}(?![\+|\-])).*', input)
 
-        if not matches:
-            return
-
+        if not matches: return
+ 
         entity = matches.group(1)
         method = matches.group(2)
 
-        if not entity:
-            return
+        if not entity: return
 
         source = Id(source)
 
-        if not source.name or not source.is_authenticated:
-            return
+        if not source.name or not source.is_authenticated: return
 
         if source.name == entity:
             self.chat("Do you kick puppies too?")
