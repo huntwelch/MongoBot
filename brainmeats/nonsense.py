@@ -5,7 +5,7 @@ import simplejson
 from autonomic import axon, help, Dendrite, public
 from util import colorize, pageopen, shorten, zalgo
 from staff import Browser
-from random import choice
+from random import choice, randint
 from datastore import Drinker
 from xml.dom import minidom as dom
 
@@ -307,3 +307,49 @@ class Nonsense(Dendrite):
     def pressreturn(self):
         self.cx.autobabble = True
         return "94142243431512659321054872390486828512913474876027671959234602385829583047250165232525929692572765536436346272718401201264304554632945012784226484107566234789626728592858295347502772262646456217613984829519475412398501"
+
+    @axon
+    def stardev(self):
+
+        # Can't go in config due to config.py issue with string formatting.
+        sentences = [
+            'Try routing the {} though the {}.',
+            'Maybe if we decouple the {} we can get power to the {}.',
+            'The {} appears to be functioning normally. Try recalibrating the {}.',
+            'Run a level {diagnostic} diagnostic on the {}.',
+            'If we reverse the polarity on {}, then we can use the {} to bring it into phase.',
+            'If we disable the {}, we can increase the effeciency of the {} by {percent} percent.',
+        ]
+
+        sentence = choice(sentences)
+
+        percent = randint(1,100)
+        diagnostic = randint(1,4)
+
+        first = [
+            choice(self.config.starwords.first),
+            choice(self.config.starwords.second),
+            choice(self.config.starwords.third),
+        ]
+
+        second = [
+            choice(self.config.starwords.first),
+            choice(self.config.starwords.second),
+            choice(self.config.starwords.third),
+        ]
+
+        # Already generated em, might as well use em
+        if diagnostic < 3:
+            first.pop(0)
+
+        if percent < 51:
+            second.pop(0)
+
+        line = sentence.format(
+            ''.join(first),
+            ''.join(second),
+            diagnostic=diagnostic,
+            percent=percent,
+        )
+        
+        return line

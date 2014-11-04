@@ -358,7 +358,7 @@ class Broca(Dendrite):
         nick = whom.nick
 
         if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
-            open("%s/mom.log" % self.cx.settings.logdir, 'a').write(sentence + '\n')
+            open("%s/mom.log" % self.cx.settings.directory.logdir, 'a').write(sentence + '\n')
 
         if re.search("^%s" % botnick, sentence):
             backatcha = sentence[len(botnick):]

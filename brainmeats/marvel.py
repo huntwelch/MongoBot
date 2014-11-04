@@ -1,9 +1,11 @@
 import time 
 import urllib 
+import simplejson
 
 from hashlib import md5
 
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse
+from staff import Browser
 
 # TODO: recall ids after searches, so -events will 
 # fetch characters etc. See api
@@ -36,10 +38,12 @@ class Marvel(Dendrite):
 
 
     @axon
-    def mtest(self):
+    def character(self):
         link = self._call({
             'category': 'characters',
-            'name': 'Iron Man',
+            'name': ' '.join(self.values),
         })
+        
+        data = simplejson.loads(Browser(link).read())
 
-        return link
+        return data['results'][0]['description']

@@ -1,3 +1,5 @@
+import string
+
 from random import choice
 
 from autonomic import axon, alias, help, Dendrite
@@ -25,10 +27,6 @@ class Hangman(Dendrite):
         super(Hangman, self).__init__(cortex)
 
 
-    # Example command function
-    # The axon decorator adds it to the available chatroom commands,
-    # based on the name of the function. The @help adds an entry to 
-    # the appropriate category.
     @axon
     @help("<Start a game of hangman>")
     @alias('hang')
@@ -40,8 +38,8 @@ class Hangman(Dendrite):
 
         self.active = True
         self.word = []
-        self.correct = []
         self.wrong = ''
+        self.correct = ''
 
         wordbank = []
 
@@ -62,6 +60,7 @@ class Hangman(Dendrite):
 
 
     @axon
+    @help("<ONE_LETTER|WHOLEWORD in an active hangman game>")
     def guess(self):
         if not self.active:
             return 'No game in progress'
@@ -69,32 +68,37 @@ class Hangman(Dendrite):
         if not self.values:
             return 'Enter "-guess one_letter|whole_word"'
         
-        if self.values[0].upper() == ''.join(self.word):
+        if len(self.values[0]) == 1 and self.values[0] not in string.letters:
+            return "That's not a letter"
+
+        letter = self.values[0].upper()
+
+        if letter in self.correct or letter in self.wrong:
+            return 'You already guessed that'
+
+        if letter == ''.join(self.word):
             self.chat('"%s"' % ''.join(self.word))
             self.win()
             return
-        elif len(self.values[0]) > 1:
+        elif len(letter) > 1:
             self.addhang()
             return
-        
-        _g = self.values[0].upper()
 
-        if _g in self.word:
-            correct = [ i for i,l in enumerate(self.word) if l == _g ]
-            self.correct += correct
+        if letter in self.word:
+            self.correct += letter
             self.showword()
             return
 
-        self.wrong += _g
+        self.wrong += letter
         self.addhang()
 
+
     def showword(self):
-        
         display = []
-        for i in range(0, len(self.word)):
+        for i in self.word:
             char = '_'
             if i in self.correct:
-                char = self.word[i]
+                char = i
             display.append(char)
 
         self.chat('"%s"' % ''.join(display))
