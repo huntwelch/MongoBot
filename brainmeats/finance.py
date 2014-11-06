@@ -1,11 +1,10 @@
 import locale
 
 from autonomic import axon, help, Dendrite
-from util import pageopen
-from staff import Broker
-import simplejson
+from staff import Broker, Browser
 
 
+# Stock stuff.
 class Finance(Dendrite):
 
     def __init__(self, cortex):
@@ -37,12 +36,12 @@ class Finance(Dendrite):
     def btc(self):
         url = 'https://btc-e.com/api/2/btc_usd/ticker'
 
-        response = pageopen(url)
-        if not response:
+        request = Browser(url)
+        if not request:
             return "Couldn't retrieve BTC data."
 
         try:
-            json = response.json()
+            json = request.json()
         except:
             return "Couldn't parse BTC data."
 
@@ -67,12 +66,12 @@ class Finance(Dendrite):
     def ltc(self):
         url = 'https://btc-e.com/api/2/ltc_usd/ticker'
 
-        response = pageopen(url)
-        if not response:
+        request = Browser(url)
+        if not request:
             return "Couldn't retrieve LTC data."
 
         try:
-            json = response.json()
+            json = request.json()
         except:
             return "Couldn't parse LTC data."
 
@@ -97,12 +96,12 @@ class Finance(Dendrite):
     def doge(self):
         url = 'http://dogecoinaverage.com/USD.json'
 
-        response = pageopen(url)
-        if not response:
+        request = Browser(url)
+        if not request:
             return "Couldn't retrieve DOGE data."
 
         try:
-            json = simplejson.loads(response.text)
+            json = request.json()
         except:
             return "Couldn't parse DOGE data."
 

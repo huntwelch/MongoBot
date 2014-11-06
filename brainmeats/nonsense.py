@@ -3,11 +3,10 @@ import time
 import simplejson
 
 from autonomic import axon, help, Dendrite, public
-from util import colorize, pageopen, shorten, zalgo
+from util import colorize, shorten, zalgo
 from staff import Browser
 from random import choice, randint
 from datastore import Drinker
-from xml.dom import minidom as dom
 
 
 # Every drunk conversation that produces the idea for
@@ -39,7 +38,7 @@ class Nonsense(Dendrite):
         url = 'http://catfacts-api.appspot.com/api/facts'
 
         try:
-            json = pageopen(url).json()
+            json = Browser(url).json()
         except:
             return 'No meow facts.'
 
@@ -76,7 +75,7 @@ class Nonsense(Dendrite):
         url = 'http://api.adviceslip.com/advice'
 
         try:
-            json = pageopen(url).json()
+            json = Browser(url).json()
         except:
             return 'Use a rubber if you sleep with dcross2\'s mother.'
 
@@ -90,26 +89,23 @@ class Nonsense(Dendrite):
         url = 'http://api.fmylife.com'
         params = {'language': 'en', 'key': self.secrets.fml_api}
 
-        if self.values and self.values[0]:
+        if self.values:
             url += '/view/search'
             params['search'] = "+".join(self.values)
         else:
             url += '/view/random'
 
         try:
-            response = pageopen(url, params)
-            raw = dom.parseString(response.text)
-            if self.values and self.values[0]:
-                fml = choice(raw.getElementsByTagName("text")).firstChild.nodeValue
+            request = Browser(url, params)
+            soup = request.soup()
+
+            if self.values:
+                fml = choice(soup.find_all("text")).get_text()
             else:
-                fml = raw.getElementsByTagName("text")[0].firstChild.nodeValue
+                fml = soup.find_all("text")[0].get_text()
             return fml
         except Exception as e:
-            if self.values and self.values[0]:
-                self.chat("No results. Or done broken.")
-            else:
-                self.chat("Done broke")
-                self.chat("Exception: " + str(e))
+            self.chat("Done broke: " + str(e))
             return
 
 
@@ -117,14 +113,14 @@ class Nonsense(Dendrite):
     @help("<generate start-up elevator pitch>")
     def startup(self):
         url = 'http://itsthisforthat.com/api.php?json'
-        site = Browser(url)
+        request = Browser(url)
 
-        if site.error:
-            return 'Total fail: %s' % site.error
+        if request.error:
+            return 'Total fail: %s' % request.error
             sys.exit()
 
         try:
-            json = simplejson.loads(site.read())
+            json = request.json()
             return 'It\'s a %s for %s' % (json['this'].lower().capitalize(),
                     json['that'].lower().capitalize())
         except Exception as e:
@@ -217,8 +213,7 @@ class Nonsense(Dendrite):
     def aleksey(self):
         url = 'https://spreadsheets.google.com/feeds/list/0Auy4L1ZnQpdYdERZOGV1bHZrMEFYQkhKVHc4eEE3U0E/od6/public/basic?alt=json'
         try:
-            response = pageopen(url)
-            json = response.json()
+            json = Browser(url).json()
         except:
             return 'Somethin dun goobied.'
 

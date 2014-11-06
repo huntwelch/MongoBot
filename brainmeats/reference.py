@@ -8,8 +8,7 @@ import time
 
 from math import *
 from autonomic import axon, alias, help, Dendrite
-from bs4 import BeautifulSoup as bs4
-from util import unescape, pageopen
+from util import unescape
 from howdoi import howdoi as hownow
 from staff import Browser
 
@@ -108,7 +107,7 @@ class Reference(Dendrite):
                   'q': "+".join(self.values)}
 
         try:
-            request = pageopen(
+            request = Browser(
                 'http://ajax.googleapis.com/ajax/services/search/web',
                 params=params)
             json = request.json()
@@ -151,15 +150,15 @@ class Reference(Dendrite):
         url = base + params
 
         try:
-            response = pageopen(url)
+            request = Browser(url)
         except:
             return "Couldn't get weather."
 
-        if not response:
+        if not request:
             return "Couldn't get weather."
 
         try:
-            json = response.json()
+            json = request.json()
             json = json['current_observation']
         except:
             return "Couldn't parse weather."
@@ -183,9 +182,9 @@ class Reference(Dendrite):
             return "Whatchu wanna know, bitch?"
 
         try:
-            request = pageopen('http://www.urbandictionary.com/define.php',
+            request = Browser('http://www.urbandictionary.com/define.php',
                                params={'term': ' '.join(self.values)})
-            soup = bs4(request.text)
+            soup = request.soup()
         except:
             return "parse error"
 

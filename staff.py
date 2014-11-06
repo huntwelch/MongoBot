@@ -3,9 +3,11 @@ import urllib
 import threading
 import re
 import time
+import json
 
+from bs4 import BeautifulSoup as bs4
 from collections import OrderedDict
-from util import colorize, shorten, pageopen
+from util import colorize, shorten
 
 
 # TODO?: interface with addlive
@@ -83,6 +85,12 @@ class Browser(object):
         except Exception as e:
             self.error = str(e)
 
+    def soup(self):
+        return bs4(self.response.read())
+
+    def json(self):
+        return json.loads(self.response.read())
+
     def read(self):
         return self.response.read()
 
@@ -132,8 +140,7 @@ class Broker(object):
         params = {'f': ''.join(fields.values()), 's': symbol}
 
         try:
-            # TODO: replace pageopen w/ browse
-            raw_string = pageopen(url, params).text
+            raw_string = Browser(url, params).read()
             raw_list = raw_string.strip().replace('"', '').split(',')
             data = {key: raw_list.pop(0) for (key) in fields.keys()}
         except Exception as e:

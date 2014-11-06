@@ -12,9 +12,8 @@ from autonomic import axon, alias, help, Dendrite, public, Receptor, Cerebellum
 
 from datastore import Words, Learned, Structure
 from random import choice, randint
-from util import savefromweb, pageopen
+from util import savefromweb
 from staff import Browser
-from bs4 import BeautifulSoup as bs4
 from wordnik import swagger, WordApi
 from cybernetics import metacortex
 from id import Id
@@ -521,11 +520,11 @@ class Broca(Dendrite):
         word = self.values[0]
         params = {'allowed_in_frame': '0', 'searchmode': 'term', 'search': word}
 
-        site = pageopen("http://www.etymonline.com/index.php", params)
-        if not site:
+        request = Browser("http://www.etymonline.com/index.php", params)
+        if not request:
             return 'Error'
 
-        cont = bs4(site.text)
+        cont = request.soup()
 
         heads = cont.findAll("dt")
         defs = cont.findAll("dd")
@@ -565,12 +564,12 @@ class Broca(Dendrite):
         word = ''.join(self.values)
         url = 'http://www.anagramica.com/best/%s' % word
 
-        site = pageopen(url)
+        request = Browser(url)
         if not site:
             return 'Error'
 
         try:
-            json = site.json()
+            json = request.json()
             return json['best']
         except Exception as e:
             self.chat("Couldn't parse.", str(e))

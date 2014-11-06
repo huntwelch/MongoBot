@@ -8,6 +8,7 @@ import string
 
 from PIL import Image
 from config import load_config
+from staff import Browser
 
 secrets = load_config('config/secrets.yaml')
 
@@ -63,23 +64,11 @@ def colorize(text, color):
 
 HEADERS = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36' }
 
-def pageopen(url, params={}):
-    try:
-        urlbase = requests.get(url, headers=HEADERS, params=params, timeout=5)
-    except requests.exceptions.RequestException as e:
-        print e
-        return False
-    except:
-        return False
-
-    return urlbase
-
-
 def shorten(url):
-    short_url = pageopen(secrets.shortner.url, params={'roast': url})
+    short_url = Browser(secrets.shortner.url, params={'roast': url})
 
     if short_url:
-        return short_url.text
+        return short_url.read()
 
     return url
 
