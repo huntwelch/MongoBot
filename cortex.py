@@ -258,7 +258,7 @@ class Cortex:
 
             print self.flags
 
-        self.logit('%s sent command: %s\n' % (sender, what))
+        self.logroom('%s sent command: %s\n' % (sender, what))
         self.lastsender = sender
         self.lastcommand = what
 
@@ -364,8 +364,8 @@ class Cortex:
         self.announce('Chirp chirp. Chirp Chirp.')
 
 
-    # Simple chat/command log.
-    def logit(self, what):
+    # Simple log for room activity.
+    def logroom(self, what):
         with open(self.settings.directory.log, 'a') as f:
             f.write('TS:%s;%s' % (time(), what))
 
@@ -394,6 +394,8 @@ class Cortex:
     @ratelimited(2)
     def chat(self, message, target=False, error=False):
 
+        print self.context
+
         if self.context in self.channels \
         and not target \
         and not self.channels[self.context].speak: return
@@ -417,7 +419,7 @@ class Cortex:
 
         try:
             message = message.encode('utf-8')
-            self.logit('___%s: %s\n' % (self.personality.nick, str(message)))
+            self.logroom('___%s: %s\n' % (self.personality.nick, str(message)))
             m = str(message)
             if randint(1, 170) == 23:
                 i = m.split()

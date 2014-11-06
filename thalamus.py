@@ -50,7 +50,6 @@ class Thalamus(object):
 
     # Make those connections, you will feel so much more human.
     def connect(self):
-
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         print '[IRC] Connecting to %s:%s' % (self.settings.irc.host, self.settings.irc.port)
@@ -73,7 +72,6 @@ class Thalamus(object):
 
     # Introduce yourself to the IRC server; it's only polite.
     def introduce(self):
-
         if not self.name:
             self.name = self.settings.bot.nick
 
@@ -88,10 +86,9 @@ class Thalamus(object):
 
     # Read data in from the socket
     def read(self):
-
         try:
             data = self.sock.recv(256)
-            self.cx.logit(data)
+            self.cx.logroom(data)
             print data
         except Exception as e:
             return
@@ -210,47 +207,40 @@ class Thalamus(object):
 
     # Handle name already being in use
     def _cmd_433(self, source, args):
-
         self.name += '_'
         self.introduce()
 
 
     # Respond to server PING request for keep-alive
     def _cmd_PING(self, source, args):
-
         self.send('PONG %s' % args[-1])
 
 
     # Re-get all the names in the channel when a user leaves
     def _cmd_PART(self, source, args):
-
         channel = args.pop(0)
-
         self.send('NAMES %s' % channel)
 
 
     # Handle when a new user joins the room
     def _cmd_JOIN(self, source, args):
-
         channel = args.pop(0)
-
         self.send('NAMES %s' % channel)
 
 
     # Handle when a user quits
     def _cmd_QUIT(self, source, args):
-
         channel = args.pop(0)
-
         self.send('NAMES %s' % channel)
 
 
     # Handle all incoming messages
     @Synapse('IRC_PRIVMSG')
     def _cmd_PRIVMSG(self, source, args):
-
         user = Id(source)
         target = args[0] if args[0] != self.name else user.nick
+
+        self.cx.context = target
 
         # Parse the incoming message for a command with the selected command prefix
         match = re.search('^[\{0}|\{1}](\w*)[ ]?(.+)?'.format(
@@ -289,7 +279,6 @@ class Thalamus(object):
         else:
             self.cx.values = False
 
-        self.cx.context = target
         self.cx.butler.do(self.cx.command, (source, args[-1]))
 
         return (target, source, args)
