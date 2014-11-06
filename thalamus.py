@@ -91,7 +91,9 @@ class Thalamus(object):
 
         try:
             data = self.sock.recv(256)
-        except:
+            self.cx.logit(data)
+            print data
+        except Exception as e:
             return
 
         if data == b'':
@@ -156,7 +158,6 @@ class Thalamus(object):
                 if method is not None:
                     method(source, args)
             except Exception as e:
-                print "DA FUQ?"
                 print "%s" % e
                 print traceback.format_exc()
                 continue

@@ -36,7 +36,7 @@ CHANNEL = '#okdrink'
 # Also connects to mongodb.
 class Cortex:
 
-    context = CHANNEL
+    context = False
 
     master = False
     thalamus = False
@@ -80,6 +80,7 @@ class Cortex:
         self.settings = master.settings
         self.secrets = master.secrets
         self.channels = self.secrets.channels
+        self.context = self.secrets.primary_channel
         self.personality = self.settings.bot
 
         self.enabled = self.settings.plugins.values().pop(0)
@@ -355,18 +356,15 @@ class Cortex:
 
         self.multis = 0
 
+
     # Careful with this one.
     def bored(self):
         if not self.members: return
 
         self.announce('Chirp chirp. Chirp Chirp.')
 
-        # The behavior below is known to be highly obnoxious
-        # self.act("is bored.")
-        # self.act(choice(BOREDOM) + " " + choice(self.members))
 
-    # Simple logging.
-    # TODO: chenge to normal python logging
+    # Simple chat/command log.
     def logit(self, what):
         with open(self.settings.directory.log, 'a') as f:
             f.write('TS:%s;%s' % (time(), what))
@@ -416,6 +414,7 @@ class Cortex:
             message = zalgo(message)
 
         filter(lambda x: x in string.printable, message)
+
         try:
             message = message.encode('utf-8')
             self.logit('___%s: %s\n' % (self.personality.nick, str(message)))
