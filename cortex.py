@@ -394,8 +394,6 @@ class Cortex:
     @ratelimited(2)
     def chat(self, message, target=False, error=False):
 
-        print self.context
-
         if self.context in self.channels \
         and not target \
         and not self.channels[self.context].speak: return
