@@ -242,6 +242,11 @@ class Thalamus(object):
 
         self.cx.context = target
 
+        if target in self.cx.channels \
+        and 'spy' in self.cx.channels[target]['mods']:
+            self.cx.chat('%s: %s' % (target, args[-1]), self.cx.secrets.primary_channel)
+            return
+
         # Parse the incoming message for a command with the selected command prefix
         match = re.search('^[\{0}|\{1}](\w*)[ ]?(.+)?'.format(
             self.settings.bot.command_prefix,

@@ -15,6 +15,7 @@ from pprint import pprint
 # a reload won't change it. Same goes for changes to thalamus.py
 class Medulla:
 
+    # Used by thalamus
     sock = False
 
     def __init__(self):

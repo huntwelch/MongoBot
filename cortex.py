@@ -2,7 +2,6 @@ import re
 import os
 import shutil
 import pkgutil
-import socket
 import string
 import traceback
 
@@ -14,7 +13,7 @@ from config import load_config
 from getpass import getpass
 
 from datastore import Drinker, connectdb
-from util import unescape, shorten, ratelimited, postdelicious, savefromweb, zalgo
+from util import unescape, shorten, ratelimited, savefromweb, zalgo
 from staff import Browser, Butler
 from autonomic import serotonin, Neurons, Synapse
 from cybernetics import metacortex
@@ -24,12 +23,6 @@ from thalamus import Thalamus
 from pprint import pprint
 import sys
 
-# Fix this
-CHANNEL = '#okdrink'
-
-# TODO:
-# remove names check, use other means
-# do logging and tracebacks
 
 # Basically all the interesting interaction with
 # irc and command / content parsing happens here.
@@ -40,7 +33,6 @@ class Cortex:
 
     master = False
     thalamus = False
-    sock = False
     values = False
     lastpublic = False
     lastprivate = False
@@ -194,10 +186,6 @@ class Cortex:
     # decides whether to send new information to the parser.
     @Synapse('twitch')
     def monitor(self):
-
-        #currenttime = int(mktime(localtime()))
-        #self.parietal(currenttime)
-
         self.thalamus.process()
 
 
@@ -208,7 +196,7 @@ class Cortex:
     def command(self, sender, cmd, piped=False, silent=False):
 
         if self.context in self.channels \
-        and 'command' not in self.channels[self.context]: return
+        and 'command' not in self.channels[self.context]['mods']: return
 
         chain = cmd.split('|', 1)
         pipe = False
@@ -326,8 +314,6 @@ class Cortex:
             try:
                 result = self.commands.get(what, self.default)()
             except Exception as e:
-                # proper logging here
-
                 self.chat(str(e))
                 print traceback.format_exc()
 
@@ -396,7 +382,7 @@ class Cortex:
 
         if self.context in self.channels \
         and not target \
-        and not self.channels[self.context].speak: return
+        and 'speak' not in self.channels[self.context]['mods']: return
 
         if self.bequiet: return
 

@@ -8,7 +8,6 @@ import string
 
 from PIL import Image
 from config import load_config
-from staff import Browser
 
 secrets = load_config('config/secrets.yaml')
 
@@ -62,33 +61,15 @@ def colorize(text, color):
 
     return "\x03%s %s\x03\x0f" % (str(color), text)
 
-HEADERS = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36' }
 
 def shorten(url):
-    short_url = Browser(secrets.shortner.url, params={'roast': url})
+    short_url = requests.get(secrets.shortner.url, params={'roast': url})
 
     if short_url:
-        return short_url.read()
+        return short_url.text
 
     return url
 
-
-def postdelicious(url, title, sender):
-    # TODO Just commenting this all out since we don't want to make this use config; should be a brainmeat
-    #deli = "https://api.del.icio.us/v1/posts/add"
-    #params = {
-    #    "url": url,
-    #    "description": title,
-    #    "tags": "%s,%s" % (CHANNEL, sender),
-    #}
-
-    #if DELICIOUS_USER:
-    #    auth = requests.auth.HTTPBasicAuth(DELICIOUS_USER, DELICIOUS_PASS)
-    #    try:
-    #        send = requests.get(deli, params=params, auth=auth)
-    #    except:
-    #        pass
-    pass
 
 def savevideo(url, path):
     args = [
@@ -116,11 +97,11 @@ def savevideo(url, path):
 
 
 # Use of 'thumber' var is crappy, but probably
-# moving this to a Browse method, so not worrying
+# moving this to a Browser, so not worrying
 # about it right now.
 def savefromweb(url, path, thumber=False):
     # TODO could be a receptor that can also get called with a specific url attached to it
-    # TODO deprecate function in favor of Browse. Note dependencies
+    # TODO deprecate function in favor of Browser. Note dependencies
     r = requests.get(url, stream=True, verify=False)
 
 

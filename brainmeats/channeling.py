@@ -47,7 +47,7 @@ class Channeling(Dendrite):
             return 'Not in that channel'
 
         del self.cx.channels[channel]
-        self.cx.sock.send('PART %s\n' % channel)
+        self.cx.master.sock.send('PART %s\n' % channel)
 
         return 'Left %s' % channel
 
@@ -63,12 +63,12 @@ class Channeling(Dendrite):
         if not channel:
             channel = self.massage(self.values.pop(0))
 
-        self.cx.sock.send('JOIN %s\n' % channel)
+        self.cx.master.sock.send('JOIN %s\n' % channel)
 
         if channel in self.cx.channels:
             return 'Already in that channel'
 
-        self.cx.channels[channel] = []
+        self.cx.channels[channel] = {'mods':[]}
 
         if self.values:
             self.modchan(channel, self.values)
@@ -102,7 +102,7 @@ class Channeling(Dendrite):
             else:
                 mod = mod[1:]
 
-            if mod == 'spy' and self.cx.channels[chan].primary:
+            if mod == 'spy' and 'primary' in self.cx.channels[chan]:
                 #self.chat('Well not much point in that now, is there?')
                 return
 
@@ -111,10 +111,10 @@ class Channeling(Dendrite):
                 continue
 
             if action == '+' and mod not in self.cx.channels[chan]:
-                self.cx.channels[chan].append(mod)
+                self.cx.channels[chan]['mods'].append(mod)
 
             if action == '-' and mod in self.cx.channels[chan]:
-                self.cx.channels[chan].remove(mod)
+                self.cx.channels[chan]['mods'].remove(mod)
 
         return 'Mods applied to %s' % chan
 
