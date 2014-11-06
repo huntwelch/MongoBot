@@ -92,6 +92,9 @@ class Channeling(Dendrite):
         if not chan:
             chan = self.massage(self.values.pop(0))
 
+        if 'primary' in self.cx.channels[chan]:
+            return 'You cannot modify the main channel with this command.' 
+
         if not what:
             what = self.values
 
@@ -102,12 +105,9 @@ class Channeling(Dendrite):
             else:
                 mod = mod[1:]
 
-            if mod == 'spy' and 'primary' in self.cx.channels[chan]:
-                #self.chat('Well not much point in that now, is there?')
-                return
 
             if mod not in self.mods:
-                #self.chat('%s is not a mod. Available mods: %s' % (mod, ', '.join(self.mods)))
+                self.chat('%s is not a mod. Available mods: %s' % (mod, ', '.join(self.mods)))
                 continue
 
             if action == '+' and mod not in self.cx.channels[chan]:

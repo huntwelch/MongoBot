@@ -320,7 +320,7 @@ class Cortex:
         if not result: return
 
         if pipe:
-            # Piped output must be string!
+            # Piped output must be string
             if type(result) is list:
                 result = ' '.join(result)
             self.command(sender, pipe, result)
