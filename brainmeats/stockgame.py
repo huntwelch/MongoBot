@@ -236,7 +236,7 @@ class Stockgame(Dendrite):
             whom = self.values[0]
 
         drinker = Id(whom)
-        if not drinker.is_authenticated:
+        if not drinker.is_recognized:
             self.chat("%s doesn't exist" % whom)
             return
 
