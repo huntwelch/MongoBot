@@ -121,7 +121,7 @@ class Broca(Dendrite):
         self.draft = False
         return 'Work complete: %s' % link
 
-    
+
     @axon
     def mark(self, line):
         words = line.split()
@@ -140,18 +140,18 @@ class Broca(Dendrite):
                 follow = ','.join(follows)
                 self.markov.set(prefix, follow)
 
-    
+
     @axon
     @help('URL_OF_TEXT_FILE <Make %s read something>' % botnick)
     def read(self):
         if not self.values:
             return "Read what?"
-            
+
 
         book = self.values[0]
         if book[-4:] != '.txt':
             return "Plain text file only. %s purist." % botnick
-            
+
 
         name = "%s_%s.txt" % ( int(time.mktime(time.localtime())), self.lastsender )
         path = '%s/%s' % (self.cx.settings.media.books, name)
@@ -271,9 +271,22 @@ class Broca(Dendrite):
 
         words = ' '.join(words)
 
+        # Tweet this
+        # First make sure it's short enough
+        # only tweet 20% of babble
+        if len(words) <= 140 and random.randrange(1,5) == 1:
+            tweet_data = []
+            for word in words.split(' '):
+                if len(word) >= 4 and random.randrange(1, 4) == 1:
+                    if random.randrange(1, 3) == 1:
+                        word = '#' + word
+                    else:
+                        word = '@' + word
+                tweet_data.append(word)
+            self.cx.commands.get('tweet')(" ".join(tweet_data))
+
         return words
 
-    
     # TODO: clean up relationship between whatmean/wordnik/seekdef
     @axon
     @alias('d')
@@ -319,7 +332,7 @@ class Broca(Dendrite):
 
         if not results:
             self.chat('I got nothin.')
-            return 
+            return
 
         for item in results:
 
@@ -343,7 +356,7 @@ class Broca(Dendrite):
             self.chat("Definition 1:" + tempdef)
         else:
             return "I got nothin."
-    
+
 
     # This is where all the conversational tics and
     # automatic reactions are set up. Also, for some
@@ -425,7 +438,7 @@ class Broca(Dendrite):
             self.chat("LEAVE ERIK ALONE!", target=target)
             return
 
-    
+
     @axon
     @help('WORD <teach %s a word>' % botnick)
     def learn(self):
@@ -435,7 +448,7 @@ class Broca(Dendrite):
         open("%s/natwords" % self.cx.settings.directory.storage, 'a').write(self.values[0].strip() + '\n')
         self.chat("%s learn new word!" % botnick, self.lastsender)
 
-    
+
     @axon
     @public
     @alias('scrabble')
@@ -459,7 +472,7 @@ class Broca(Dendrite):
             if matchlen and len(letters) != len(word): continue
 
             # TODO: account for wild cards :( may need regex
-            
+
             test = ''.join(sorted(word))
             if test in letters:
                 words.append(word)
@@ -476,7 +489,7 @@ class Broca(Dendrite):
 
         return ', '.join(words)
 
-    
+
     @axon
     @help('ACRONYM <have %s decide the words for an acronym>' % botnick)
     def acronym(self):
@@ -514,13 +527,13 @@ class Broca(Dendrite):
 
         return " ".join(output)
 
-    
+
     @axon
     @help('WORD [WHICH_DEFINITION] <look up etymology of word>')
     def ety(self):
         if not self.values:
             return "Enter a word"
-            
+
 
         word = self.values[0]
         params = {'allowed_in_frame': '0', 'searchmode': 'term', 'search': word}
@@ -558,13 +571,13 @@ class Broca(Dendrite):
 
         return "Etymology %s of %s for %s: %s" % (str(ord + 1), str(len(defs)), _word, _def)
 
-    
+
     @axon
     @help('WORD_OR_PHRASE <look up anagram>')
     def anagram(self):
         if not self.values:
             return "Enter a word or phrase"
-            
+
 
         word = ''.join(self.values)
         url = 'http://www.anagramica.com/best/%s' % word
@@ -578,9 +591,9 @@ class Broca(Dendrite):
             return json['best']
         except Exception as e:
             self.chat("Couldn't parse.", str(e))
-            return 
+            return
 
-    
+
     # This pair of gems was created because Elliott kept
     # piping -all to various * commands.
     @axon
@@ -589,7 +602,7 @@ class Broca(Dendrite):
         self.cx.bequiet = True
         return
 
-    
+
     @axon
     def speakup(self):
         self.cx.bequiet = False
