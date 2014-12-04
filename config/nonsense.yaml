@@ -1,5 +1,5 @@
 patience: 7000
-lib: '/usr/share/dict/words'
+lib: 'hippocampus/commonwords'
 
 
 starwords:

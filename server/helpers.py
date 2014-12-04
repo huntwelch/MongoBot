@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 from flask import Flask, request, session, make_response, render_template
 from config import load_config
+from datastore import connectdb, Quote
 import pyotp
 import base64
 
@@ -16,6 +17,11 @@ def render_xml(path):
     response.headers['Content-Type'] = 'application/xml'
     return response
 
+
+def fetch_quotes():
+    connectdb()
+    return [q.text for q in Quote.objects]
+    
 
 def fetch_chats(request, offset):
 

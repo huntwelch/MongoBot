@@ -396,6 +396,11 @@ class Broca(Dendrite):
 
         if sentence.lower().strip() in self.config.frustration or sentence.lower().find('stupid') == 0:
             self.chat(self.cx.commands.get('table')(), target=target)
+            return
+
+        if sentence.strip() in ['ls', 'jjk', ':wq', 'ifconfig']:
+            self.chat('Wrong window.')
+            return
 
         inquiries = [sentence.lower().find(t) != -1 for t in self.config.questions]
 

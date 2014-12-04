@@ -45,8 +45,6 @@ class Thalamus(object):
 
         if master.sock: self.sock = master.sock
 
-        # self.connect()
-
 
     # Make those connections, you will feel so much more human.
     def connect(self):

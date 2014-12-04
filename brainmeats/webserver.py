@@ -26,6 +26,14 @@ class Webserver(Dendrite):
 
 
     @axon
+    @help("<Get one-time link to quote list>")
+    def quotelink(self):
+        num = self._setaccess()
+        link = "%s/quotes?onetime=%s" % (self.config.url, str(num))
+        self.chat(link)
+
+
+    @axon
     @help("<Get one-time link to error log>")
     def errorlink(self):
         num = self._setaccess()
