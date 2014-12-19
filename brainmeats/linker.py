@@ -6,6 +6,10 @@ from util import shorten, unescape
 from staff import Browser
 from random import randint
 
+# This isn't really a brainmeant like the others,
+# but it got moved here during brain surgery to
+# clear out cortex.py and start working with the
+# receptor stuff.
 @Cerebellum
 class Linker(Dendrite):
 

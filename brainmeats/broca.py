@@ -35,6 +35,10 @@ class Broca(Dendrite):
         self.markov = redis.StrictRedis(unix_socket_path=self.cx.settings.sys.redissock)
 
 
+    # This can get stuck sometimes. Seems to be working
+    # better these days, but a .reload should handle it.
+    # All these compose functions could use a little 
+    # cleaning up.
     @axon
     @help('TITLE <have %s compose poetry>' % botnick)
     def compose(self):
@@ -91,7 +95,7 @@ class Broca(Dendrite):
     @alias('write', 'explicit')
     def addtext(self, what=False):
 
-        # TODO: calling with -explicit will disable random line breaks
+        # TODO: calling with .explicit will disable random line breaks
 
         if not self.draft:
             return 'No poems open now.'
@@ -264,7 +268,7 @@ class Broca(Dendrite):
         words = words.split()
 
         # Mostly, security in babble is your
-        # problem, but botbass shows up in the
+        # problem, but botpass shows up in the
         # channel a lot.
         while self.cx.secrets.system.botpass in words:
             words.remove(self.cx.secrets.system.botpass)
@@ -372,11 +376,6 @@ class Broca(Dendrite):
         if "mom" in sentence.translate(string.maketrans("", ""), string.punctuation).split():
             open("%s/mom.log" % self.cx.settings.directory.logdir, 'a').write(sentence + '\n')
 
-        if re.search("^%s" % botnick, sentence):
-            backatcha = sentence[len(botnick):]
-            self.chat(nick + "'s MOM" + backatcha, target=target)
-            return
-
         # This could be more like a dict
         if sentence.lower().find("oh snap") != -1:
             self.chat("yeah WHAT?? Oh yes he DID", target=target)
@@ -449,6 +448,14 @@ class Broca(Dendrite):
         self.chat("%s learn new word!" % botnick, self.lastsender)
 
 
+    # I have this friend who kicks my ass in Scrabble
+    # a lot. Being fairly obsessive, this is mostly
+    # just to stop me from staring at the Scrabble app
+    # over two or three days trying to find a bingo.
+    # It's definitely still cheating, but it lets me
+    # stop looking, and at the end of the day, keeping
+    # my stress level down is more important than my
+    # sense of honor.
     @axon
     @public
     @alias('scrabble')
@@ -528,12 +535,13 @@ class Broca(Dendrite):
         return " ".join(output)
 
 
+    # I don't remember why this got added, but
+    # it's unfailingly awesome.
     @axon
     @help('WORD [WHICH_DEFINITION] <look up etymology of word>')
     def ety(self):
         if not self.values:
             return "Enter a word"
-
 
         word = self.values[0]
         params = {'allowed_in_frame': '0', 'searchmode': 'term', 'search': word}
@@ -583,7 +591,7 @@ class Broca(Dendrite):
         url = 'http://www.anagramica.com/best/%s' % word
 
         request = Browser(url)
-        if not site:
+        if not request:
             return 'Error'
 
         try:

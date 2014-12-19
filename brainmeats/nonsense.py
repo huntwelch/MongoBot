@@ -2,7 +2,7 @@ import os
 import time
 import simplejson
 
-from autonomic import axon, help, Dendrite, public
+from autonomic import axon, help, Dendrite, public, Receptor, Cerebellum
 from util import colorize, shorten, zalgo
 from staff import Browser
 from random import choice, randint
@@ -12,6 +12,7 @@ from datastore import Drinker
 # Every drunk conversation that produces the idea for
 # a command that just seems funny at the time ends up
 # here.
+@Cerebellum
 class Nonsense(Dendrite):
 
     anoid = []
@@ -26,11 +27,27 @@ class Nonsense(Dendrite):
         return zalgo(' '.join(self.values))
 
 
+    # This used to be 'my girl call your girl' which
+    # was probably funnier, but lost on the current 
+    # generation, and the irony of this obscure casual
+    # sexism from the past would be missed, leaving it 
+    # to just be another minor degredation of women.
+    # Is it such a small thing everyone should probably
+    # suck it up? Probably, yeah. But it's easier to 
+    # tell everyone to suck it up when you've never had
+    # to, and especially in the programming world, we
+    # shouldn't do it in the first place, because it's
+    # trivial not to, and anybody who can't make 
+    # miniscule changes to the dialogue in the name of
+    # others' comfort is an asshole.
     @axon
     def raincheck(self):
-        return "Lemme just stick a pin in that and I'll have my girl call your girl to pencil in a lunch some time."
+        return "Lemme just stick a pin in that and I'll have my people call your people to pencil in a lunch some time."
 
 
+    # This is almost exclusively used to troll people
+    # in conjunction with the sms command. Should hook
+    # that shit up.
     @axon
     @public
     @help("<get cat fact>")
@@ -45,7 +62,9 @@ class Nonsense(Dendrite):
         return json['facts'][0]
 
 
+    # Excellent antidote for a long meeting.
     @axon
+    @public
     @help("<generate bullshit>")
     def buzz(self):
         bsv = []
@@ -181,6 +200,7 @@ class Nonsense(Dendrite):
         return 'Activating.'
 
 
+    # This doesn't have a help entry because of rule 3.
     @axon
     def rules(self):
         return [
@@ -221,6 +241,8 @@ class Nonsense(Dendrite):
         return entry['title']['$t']
 
 
+    # This can get... awkward, let's say. Review
+    # the mom logs occasionally.
     @axon
     @help("<pull up a mom quote from logs>")
     def mom(self):
@@ -235,6 +257,9 @@ class Nonsense(Dendrite):
         return choice(momlines)
 
 
+    # All pull requests attempting to remove this vital
+    # function will be denied. It refers to the acro game.
+    # And Vinay.
     @axon
     def whatvinaylost(self):
         self.chat("Yep. Vinay used to have 655 points at 16 points per round. Now they're all gone, due to technical issues. Poor, poor baby.")
@@ -242,7 +267,9 @@ class Nonsense(Dendrite):
         self.chat("The humanity!")
 
 
-    # these two functions used to be restricted to the owner. maybe use an alias now
+    # These two functions used to be restricted to the owner.
+    # Was going to reenable that restriction, but really, 
+    # more fun this way.
     @axon
     def say(self):
         self.announce(" ".join(self.values))
@@ -272,29 +299,32 @@ class Nonsense(Dendrite):
 
 
     @axon
+    @help('USER_NICK <got a troll? make your bot a 5-year-old child!>')
     def annoy(self):
         if not self.values:
             return 'Annoy whom?'
 
         self.anoid.append(self.values[0])
-        self.cx.addlive(self.repeater)
         return 'You betcha'
 
 
     @axon
+    @help('<stop annoying people>')
     def stahp(self):
-        self.cx.droplive('repeater')
         self.anoid = []
         return 'K'
 
+    @Receptor('twitch')
     def repeater(self):
-        if self.lastsender in self.anoid:
-            if self.lastchat == self.cx.lastchat:
-                return
 
-            self.lastchat = self.cx.lastchat
-            self.chat(self.lastchat)
-            return
+        if not self.anoid: return
+        if self.lastsender not in self.anoid: return
+        if self.lastchat == self.cx.lastchat: return
+
+        self.lastchat = self.cx.lastchat
+        self.chat(self.lastchat)
+
+        return
 
 
     # Show Mongo the mind of God
@@ -304,6 +334,7 @@ class Nonsense(Dendrite):
         return "94142243431512659321054872390486828512913474876027671959234602385829583047250165232525929692572765536436346272718401201264304554632945012784226484107566234789626728592858295347502772262646456217613984829519475412398501"
 
     @axon
+    @help('<get Troy and Abed on the case>')
     def stardev(self):
 
         # Can't go in config due to config.py issue with string formatting.

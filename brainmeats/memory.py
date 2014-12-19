@@ -1,6 +1,9 @@
 from autonomic import axon, help, Dendrite
 
-
+# Fairly self-explanatory. It searches logs.
+# One thing todo is to make it capable of 
+# searching archived logs, since the current
+# system rolls the logs over each month.
 class Memory(Dendrite):
 
     def __init__(self, cortex):

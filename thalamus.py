@@ -238,12 +238,15 @@ class Thalamus(object):
         user = Id(source)
         target = args[0] if args[0] != self.name else user.nick
 
+        self.cx.lastsender = user.nick
         self.cx.context = target
 
         if target in self.cx.channels \
         and 'spy' in self.cx.channels[target]['mods']:
             self.cx.chat('%s: %s' % (target, args[-1]), self.cx.secrets.primary_channel)
             return
+
+        self.cx.lastchat = args[-1]
 
         # Parse the incoming message for a command with the selected command prefix
         match = re.search('^[\{0}|\{1}](\w*)[ ]?(.+)?'.format(

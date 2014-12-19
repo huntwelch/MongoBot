@@ -7,6 +7,10 @@ from autonomic import axon, help, Dendrite
 from datastore import Drinker
 
 
+# Broken after some major refactoring, despite
+# Ken's hard work. Probably not too far off; the
+# nitty gritty work is still solid. Needs a 
+# sitin/sitout functionality of some kind.
 class Player(object):
 
     name = ''

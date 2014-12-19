@@ -36,6 +36,7 @@ class Cortex:
     values = False
     lastpublic = False
     lastprivate = False
+    lastchat = False
     lastsender = False
     lastrealsender = False
     gettingnames = True
@@ -376,7 +377,7 @@ class Cortex:
     # Since chat is mongo's only means of communicating with
     # a room, the ratelimiting here should prevent any overflow
     # violations.
-    # NOTE: 'and not target' may be a sketchy override; test it
+    # NOTE: 'and not target' may be a sketchy override.
     @ratelimited(2)
     def chat(self, message, target=False, error=False):
 

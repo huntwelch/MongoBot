@@ -52,8 +52,17 @@ class Peeps(Dendrite):
         return 'I know where you work... watch your back.'
 
 
+    # Increment and decrement (also mapped to nick++/--)
+    # were kind of a joke to give people points and stuff.
+    # But, being a radical egalitarian against all forms
+    # of punitive and arbitrary ranking methods, I made it
+    # a random number. There's still some meaning, but
+    # it's pretty much just are you in the red or the
+    # black. Fun fact: you can increment or decrement any
+    # random thing. php is in the negative millions in our
+    # chat room.
     @axon
-    @help("DRINKER <give somebody a point>")
+    @help("DRINKER <give somebody points>")
     def increment(self):
         if not self.values:
             self.chat("you need to give someone your love")
@@ -69,7 +78,7 @@ class Peeps(Dendrite):
 
 
     @axon
-    @help("DRINKER <take a point away>")
+    @help("DRINKER <take points away>")
     def decrement(self):
         if not self.values:
             self.chat("you need to give someone your hate")

@@ -5,7 +5,23 @@ from random import choice
 from autonomic import axon, alias, help, Dendrite
 
 
-# Because why not
+# Because why not. This evolved into starting 
+# a game, then running :guess r l s t e a o or
+# whatever the most common letters are in your
+# word source. Initially, we used words from 
+# the chat log, but they included contractions
+# and shit, plus who's going to reliably guess
+# dev_appserver.py, so we changed it to 
+# /usr/share/dict/words, but that led to the
+# issue of who's going to get wokowi on their
+# best day, so eventually I found a list of 
+# most commonly used words, which I think, but
+# won't promise, is in the repository. Also,
+# a full ascii hangman ended up being pretty
+# spammy, so now it's a monster eating a person,
+# which is probably more traumatic for children,
+# even though hanging someone really should be.
+# Seriously, why is this game okay?
 class Hangman(Dendrite):
 
     word = []

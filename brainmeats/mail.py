@@ -5,6 +5,8 @@ import smtplib
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse, Receptor
 from email.mime.text import MIMEText
 
+# Lot of potential here. Currently just making
+# it a kind of daily wrap up thingy.
 @Cerebellum
 class Mail(Dendrite):
 
