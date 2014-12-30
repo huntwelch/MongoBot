@@ -10,7 +10,14 @@ from collections import OrderedDict
 from util import colorize, shorten
 
 
-# TODO?: interface with addlive
+# Because where would Batman be without Alfred? Without tea,
+# that's fucking where. These are handy helper objects for
+# dealing with commands and some more complex shit that 
+# shouldn't be as complex as it ends up being in brainmeats.
+# In particular, the Browser object gets around a lot of 
+# annoyances in http calls.
+
+# This is how we pseudo-thread all the commands.
 class Butler(object):
     maxtasks = 8
     cx = False
@@ -38,7 +45,7 @@ class Butler(object):
         thread.start()
 
 
-# Better browser through technology
+# Better browsing through technology
 class Browser(object):
 
     url = False

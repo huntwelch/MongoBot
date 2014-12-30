@@ -4,6 +4,7 @@ from logging import config, Handler
 
 settings = load_config('config/settings.yaml')
 
+# Logging, but with more syllables
 class Hyperthymesia(object):
     names = {
         'debug': logging.DEBUG,

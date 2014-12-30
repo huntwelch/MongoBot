@@ -1,4 +1,5 @@
 import re
+import traceback
 
 from autonomic import axon, help, Dendrite, Cerebellum, Receptor
 from time import mktime, localtime
@@ -6,7 +7,6 @@ from twilio.rest import TwilioRestClient
 from datastore import Drinker
 from config import load_config
 from id import Id
-import traceback
 
 # This shit be awesome. It requires a twilio account, but
 # there's no better way to hive-mind-fuck with someone.
@@ -27,7 +27,7 @@ class Sms(Dendrite):
 
     # smsticker is a receptor that responds to twitch 
     # broadcasts - which happen on every iteration of
-    # monitor. to prevent hitting twilio too hard, 
+    # monitor. To prevent hitting twilio too hard, 
     # this gets self limited to every 10 seconds.
     @Receptor('twitch')
     def smsticker(self):
@@ -71,8 +71,7 @@ class Sms(Dendrite):
             else:
                 from_ = item.from_
 
-            # TODO: Make this determine the default channel!!
-            self.cx.context = '#okdrink'
+            self.cx.context = self.secrets.primary_channel
 
             message = 'SMS from %s: %s' % (from_, item.body)
             self.announce(message)
@@ -133,7 +132,7 @@ class Sms(Dendrite):
         if not re.search('^[+0-9]+$', to):
             user = Id(to)
             if not user or not user.phone:
-                self.chat('Don\'t know who that is :(')
+                self.chat("Don't know who that is :(")
                 return
             else:
                 to = user.phone

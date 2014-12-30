@@ -32,7 +32,7 @@ class Peeps(Dendrite):
     def history(self):
 
         try:
-            intro = self.cx.channels[self.cx.context].intro
+            hist = self.cx.channels[self.cx.context].history
             return [s.strip() for s in intro.splitlines()]
         except:
             return 'Nothing to introduce!'

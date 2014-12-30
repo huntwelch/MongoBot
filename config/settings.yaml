@@ -23,17 +23,11 @@ irc:
   port: 6697
   ssl: True
   chanserv: False
+  # Removes protocol static from the chatlog
   scan: '^:\w+\.freenode\.net'
-  nickserv:
-    nick: 'NickServ'
-    password: 'test'
-  password: False
 
 bot:
   nick: 'MongoBot'
-  ident: 'macrotic'
-  realname: 'macrotic'
-  password: Null # The password to the IRC server
   command_prefix: '.'
   multi_command_prefix: ':'
   flag_prefix: '-'

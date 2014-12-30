@@ -45,6 +45,12 @@ class Nonsense(Dendrite):
         return "Lemme just stick a pin in that and I'll have my people call your people to pencil in a lunch some time."
 
 
+    # Because Busta Motherfuckin Rhymes 
+    @axon
+    def bounce(self):
+        return 'https://www.youtube.com/watch?v=LLZJeVDJMs4'
+
+
     # This is almost exclusively used to troll people
     # in conjunction with the sms command. Should hook
     # that shit up.

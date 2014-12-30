@@ -16,7 +16,8 @@ from pprint import pprint
 # body, or in this case IRC. It is responsible for relaying
 # input and out to the IRC server in a sane (well... yeah...
 # whatever) manner; and triggering the necessary brainmeats
-# in the cortex when commands are recognized.
+# in the cortex when commands are recognized. Changes to 
+# Thalamus require a reboot.
 class Thalamus(object):
 
     cx = False
@@ -62,8 +63,8 @@ class Thalamus(object):
         
         self.sock.setblocking(0)
 
-        if hasattr(self.settings.irc, 'password') and self.settings.irc.password:
-            self.send('PASS %s' % self.settings.irc.password)
+        if hasattr(self.secrets.irc, 'password') and self.secrets.irc.password:
+            self.send('PASS %s' % self.secrets.irc.password)
 
         self.introduce()
 
@@ -74,10 +75,10 @@ class Thalamus(object):
             self.name = self.settings.bot.nick
 
         self.send('USER %s %s %s : %s' % (
-            self.settings.bot.ident,
-            self.settings.bot.ident,
-            self.settings.bot.ident,
-            self.settings.bot.realname
+            self.secrets.bot.ident,
+            self.secrets.bot.ident,
+            self.secrets.bot.ident,
+            self.secrets.bot.realname
         ))
         self.send('NICK %s' % self.name)
 

@@ -18,7 +18,6 @@ from wordnik import swagger, WordApi
 from cybernetics import metacortex
 from id import Id
 
-botnick = metacortex.botnick
 
 # The miscellaneous language functions
 # usually work, and of course the markov
@@ -40,7 +39,7 @@ class Broca(Dendrite):
     # All these compose functions could use a little 
     # cleaning up.
     @axon
-    @help('TITLE <have %s compose poetry>' % botnick)
+    @help('TITLE <compose poetry>')
     def compose(self):
         if not self.startpoem(): return
 
@@ -48,7 +47,7 @@ class Broca(Dendrite):
         seed = self.babble()
 
         if not seed:
-            return 'Muse not with %s today' % botnick
+            return 'Muse not with %s today' % self.ego.nick
 
         seed = seed.split()
         for word in seed:
@@ -87,7 +86,7 @@ class Broca(Dendrite):
 
         self.draft = filename
 
-        self.chat('%s think "%s" may be masterpiece' % (botnick, title))
+        self.chat('%s think "%s" may be masterpiece' % (self.ego.nick, title))
         return True
 
 
@@ -146,7 +145,7 @@ class Broca(Dendrite):
 
 
     @axon
-    @help('URL_OF_TEXT_FILE <Make %s read something>' % botnick)
+    @help('URL_OF_TEXT_FILE <Read something>')
     def read(self):
         if not self.values:
             return "Read what?"
@@ -154,7 +153,7 @@ class Broca(Dendrite):
 
         book = self.values[0]
         if book[-4:] != '.txt':
-            return "Plain text file only. %s purist." % botnick
+            return "Plain text file only. %s purist." % self.ego.nick
 
 
         name = "%s_%s.txt" % ( int(time.mktime(time.localtime())), self.lastsender )
@@ -214,7 +213,7 @@ class Broca(Dendrite):
     @axon
     @public
     @alias('waxrhapsodic')
-    @help('<Make %s speak markov chain>' % botnick)
+    @help('<Speak markov chain>')
     def babble(self, what=False):
 
         suppress = False
@@ -439,13 +438,13 @@ class Broca(Dendrite):
 
 
     @axon
-    @help('WORD <teach %s a word>' % botnick)
+    @help('WORD <Learn a word>'
     def learn(self):
-        if not self.values: return "%s ponders the emptiness of meaning." % botnick
-        if not re.match("^[A-Za-z]+$", self.values[0].strip()): return "%s doesn't think that's a word." % botnick
+        if not self.values: return "%s ponders the emptiness of meaning." % self.ego.nick
+        if not re.match("^[A-Za-z]+$", self.values[0].strip()): return "%s doesn't think that's a word." % self.ego.nick
 
         open("%s/natwords" % self.cx.settings.directory.storage, 'a').write(self.values[0].strip() + '\n')
-        self.chat("%s learn new word!" % botnick, self.lastsender)
+        self.chat("%s learn new word!" % self.ego.nick, self.lastsender)
 
 
     # I have this friend who kicks my ass in Scrabble
@@ -498,7 +497,7 @@ class Broca(Dendrite):
 
 
     @axon
-    @help('ACRONYM <have %s decide the words for an acronym>' % botnick)
+    @help('ACRONYM <decide the words for an acronym>')
     def acronym(self):
         if not self.values:
             return "About what?"
@@ -508,13 +507,14 @@ class Broca(Dendrite):
             return "Fuck off erik."
 
         if not re.match("^[A-Za-z]+$", self.values[0]):
-            return "%s no want to think about that." % botnick
+            return "%s no want to think about that." % self.ego.nick
 
         if self.values[0].lower() == "gross":
             return "Get Rid Of Slimey girlS"
 
         output = self.acronymit(self.values[0])
         return output
+
 
     def acronymit(self, base):
         acronym = list(base.upper())
@@ -603,7 +603,7 @@ class Broca(Dendrite):
 
 
     # This pair of gems was created because Elliott kept
-    # piping -all to various * commands.
+    # piping .all to various * commands.
     @axon
     def shutup(self):
         self.chat('Shutting up now.')
