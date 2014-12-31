@@ -6,7 +6,7 @@ This is a map of the codebase, sort of: http://mongobot.com/static/img/mongomap2
 
 
 Getting Started
-===============
+---------------
 
     There's kind of a bootstrap.sh file that might work if you're on a Mac. No
     guarantees.
