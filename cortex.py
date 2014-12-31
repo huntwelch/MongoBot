@@ -1,5 +1,6 @@
 import re
 import os
+import sys
 import shutil
 import pkgutil
 import string
@@ -11,6 +12,7 @@ from time import time, mktime, localtime, sleep
 from random import randint
 from config import load_config
 from getpass import getpass
+from pprint import pprint
 
 from datastore import Drinker, connectdb
 from util import unescape, shorten, ratelimited, savefromweb, zalgo
@@ -19,9 +21,6 @@ from autonomic import serotonin, Neurons, Synapse
 from cybernetics import metacortex
 from id import Id
 from thalamus import Thalamus
-
-from pprint import pprint
-import sys
 
 
 # Basically all the interesting interaction with

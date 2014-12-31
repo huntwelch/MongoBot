@@ -64,6 +64,9 @@ New features
     a class Category_name. Loading of this class will be automated, no
     other files need to be altered.
 
+    IMPORTANT: new brainmeats won't be enabled for use until they're
+    added to config/plugins.yaml.
+
 
 Using ze bot
 ============
@@ -87,6 +90,9 @@ Using ze bot
     ... will tweet whatever babble spits out.
 
     Why would anyone add piping to a chat bot? I dunno. Things got out of hand.
+
+    IMPORTANT: whoever is running the bot instance will have to use
+    .adduser to add other users. After that they can authorize themselves.
 
 
 Philosophies
@@ -122,30 +128,10 @@ Philosophies
 To Do
 =====
 
-    BUGS
-
-    + acro.py 
-        -Totally borked
-    + broca.py 
-        -the global botnick thing isn't working
-        -read indicates lastsender is a little borked
-    + channelling.py
-        I have no idea what's up with this now that we have thalamus
-    + chess.py
-        -resetchess is broken because I'm missing something obvious about copying variables, but who gives a shit
-    + holdem.py
-        -Borked
-    + reference.py
-        I forget how regexsearch takes input
-        -weather works with a zipcode, otherwise throws error
-    + turing.py
-        -function names need to be better, this is fucking mandarin
-        -borked
-
-
-    OTHER
-
     + Probably make this readme better
+    + acro game is broken
+    + turing.py function names need to be better, this is fucking mandarin
+    + some odd bugs in channeling
     + remove image after thumbnailing, clear all out on boot
     + remove video downloads on reboot
     + create bootstrap install
@@ -155,6 +141,7 @@ To Do
     + Clean up broca
     + link holdem to db, make persistant, open up sit/in/out functionality
     + finish holdem, needs testing and split pots probably don't work
+    + also, holdem is just totally broken right now
     + stock game: account for splits and reverse splits
     + add @requires decorator, check for server, redis, mongo, etc.
     + just take out image relink, make it a thumblink

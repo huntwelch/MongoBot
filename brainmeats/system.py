@@ -65,6 +65,7 @@ class System(Dendrite):
         return self.cx.helpmenu[which]
 
 
+    # This doesn't work. Go figure.
     @axon
     def threads(self):
         return threading.activeCount()

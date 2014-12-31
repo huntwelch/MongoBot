@@ -22,11 +22,6 @@ class Nonsense(Dendrite):
         super(Nonsense, self).__init__(cortex)
 
 
-    @axon
-    def zal(self):
-        return zalgo(' '.join(self.values))
-
-
     # This used to be 'my girl call your girl' which
     # was probably funnier, but lost on the current 
     # generation, and the irony of this obscure casual
@@ -102,7 +97,7 @@ class Nonsense(Dendrite):
         try:
             json = Browser(url).json()
         except:
-            return 'Use a rubber if you sleep with dcross2\'s mother.'
+            return 'Use a rubber if you sleep with dcross\'s mother.'
 
         return json['slip']['advice'] + ".. in bed."
 
@@ -320,6 +315,7 @@ class Nonsense(Dendrite):
         self.anoid = []
         return 'K'
 
+
     @Receptor('twitch')
     def repeater(self):
 
@@ -385,3 +381,8 @@ class Nonsense(Dendrite):
         )
         
         return line
+
+
+    @axon
+    def zal(self):
+        return zalgo(' '.join(self.values))

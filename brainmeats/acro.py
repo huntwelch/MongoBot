@@ -1,11 +1,10 @@
 import os
 
-from autonomic import axon, help, Dendrite
+from autonomic import axon, help, Dendrite, Receptor, Cerebellum
 from cybernetics import metacortex
 from random import choice, randint, shuffle
 from time import mktime, localtime, strftime
 
-ACROSCORE = False
 
 # This is probably the first official brainmeat, as we
 # realized it was just to big to stuff into the cortex.
@@ -13,6 +12,7 @@ ACROSCORE = False
 # even after it was rewritten in the Great Brainmat
 # Transition. There's at least one bug, but I haven't gotten
 # to it, as it's not a deal breaker, it's just exploitable.
+@Cerebellum
 class Acro(Dendrite):
 
     active = False
@@ -20,19 +20,23 @@ class Acro(Dendrite):
     def __init__(self, cortex):
         super(Acro, self).__init__(cortex)
 
+
     @axon
-    @help("[pause|resume|end] <start/pause/resume/end acro game>")
-    def acro(self):
-        if not self.active:
-            self.run()
-            return
+    @help("start|pause|resume|end acro game>")
+    def acrogame(self):
 
         if not self.values:
-            self.chat("Already a game in progress")
+            self.chat("start, pause, resume, or end?")
             return
 
         action = self.values[0]
-        if action == "pause":
+
+        if action == "start":
+            if self.active:
+                return "Game already in progress"
+            self.run()
+
+        elif action == "pause":
             if self.stage == "waiting":
                 self.paused = True
                 self.announce("Game paused")
@@ -47,13 +51,14 @@ class Acro(Dendrite):
         else:
             self.chat("Not a valid action")
 
+
     @axon
     @help("<show cumulative acro game scores>")
     def boards(self):
         scores = {}
 
         # This is obviously a nonsense thing to do in the long term.
-        for path, dirs, files in os.walk(os.path.abspath(ACROSCORE)):
+        for path, dirs, files in os.walk(os.path.abspath(self.config.records)):
             for file in files:
                 for line in open(path + "/" + file):
                     if line.find(":") == -1:
@@ -73,6 +78,7 @@ class Acro(Dendrite):
 
             self.chat(player + ": " + str(score) + " (" + str(average) + " per round)")
 
+
     @axon
     @help("<print the rules for the acro game>")
     def acrorules(self):
@@ -83,6 +89,7 @@ class Acro(Dendrite):
         self.chat("5 of 6 play till the rounds are up.")
         self.chat("6 of 6 %s plays by default." % (metacortex.botnick))
 
+
     def gimper(self, check, action, penalty):
         gimps = []
         for player in self.players:
@@ -91,28 +98,30 @@ class Acro(Dendrite):
 
         use = self.config.insult 
 
-        if gimps:
-            trail = 0
-            target = ""
-            for gimp in gimps:
-                post = ""
-                if trail == 1:
-                    use = self.config.insults
-                    post = " and "
-                elif trail > 1:
-                    post = ", "
+        if not gimps: return
 
-                if gimp in self.gimps:
-                    self.gimps[gimp] += penalty
-                else:
-                    self.gimps[gimp] = penalty
+        trail = 0
+        target = ""
+        for gimp in gimps:
+            post = ""
+            if trail == 1:
+                use = self.config.insults
+                post = " and "
+            elif trail > 1:
+                post = ", "
 
-                target = gimp + post + target
-                trail += 1
+            if gimp in self.gimps:
+                self.gimps[gimp] += penalty
+            else:
+                self.gimps[gimp] = penalty
 
-            self.announce(target + " " + choice(use) +
-                          " and will be docked " + str(penalty) +
-                          " points for not " + action + ".")
+            target = gimp + post + target
+            trail += 1
+
+        self.announce(target + " " + choice(use) +
+                      " and will be docked " + str(penalty) +
+                      " points for not " + action + ".")
+
 
     def endgame(self):
         self.contenders = []
@@ -121,7 +130,7 @@ class Acro(Dendrite):
         self.announce("Game over.")
         self.killgame = False
         self.paused = False
-        self.cx.droplive("ticker")
+
 
     def input(self, selfsub=False):
         message = self.cx.lastprivate
@@ -216,8 +225,9 @@ class Acro(Dendrite):
             except:
                 return
 
+
     def setup(self):
-        self.record = ACROSCORE + strftime('%Y-%m-%d-%H%M') + '.game'
+        self.record = '%s/%s.game' % (self.config.records, strftime('%Y-%m-%d-%H%M'))
         open(self.record, "w")
 
         self.active = True
@@ -242,19 +252,22 @@ class Acro(Dendrite):
         self.paused = False
         self.killgame = False
 
+
     def run(self):
         self.setup()
-        self.announce("New game commencing in " + str(self.config.rest) + " seconds")
-        self.cx.addlive(self.ticker)
+        self.announce("New game commencing in %s seconds" % str(self.config.rest))
 
+
+    @Receptor('twitch')
     def ticker(self):
+
+        if not self.active: return
 
         if self.killgame:
             self.endgame()
             return
 
-        if self.paused:
-            return
+        if self.paused: return
 
         self.input()
 
@@ -265,6 +278,7 @@ class Acro(Dendrite):
             "submit": self.submit,
             "voting": self.voting,
         }.get(self.stage)()
+
 
     def waiting(self):
         if self.current <= self.mark + self.config.rest:
@@ -287,6 +301,7 @@ class Acro(Dendrite):
                       " commencing! Acronym is " + acronym)
 
         self.stage = "submit"
+
 
     def submit(self):
         if self.current > self.mark + self.config.roundtime - self.config.warning and not self.warned:
@@ -334,7 +349,7 @@ class Acro(Dendrite):
 
         if not self.contenders:
             self.announce("Don't waste my friggin time")
-            # sys.exit()
+            self.killgame = True
 
         if self.round != 1:
             self.gimper(submitters, "submitting", self.config.noacropenalty)
@@ -342,6 +357,7 @@ class Acro(Dendrite):
         self.announce("You have " + str(self.config.votetime) + " seconds to vote.")
         self.mark = mktime(localtime())
         self.stage = "voting"
+
 
     def voting(self):
         if self.current <= self.mark + self.config.votetime and not self.bypass:

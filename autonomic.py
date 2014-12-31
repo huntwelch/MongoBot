@@ -1,8 +1,9 @@
 import inspect
+import sys
+
 from config import load_config
 from id import Id
 from pprint import pprint
-import sys
 
 # The core of the library methodology used
 # by MongoBot. All brainmeats are Dendrites,
@@ -122,11 +123,14 @@ def serotonin(cortex, meatname, electroshock):
             for item in method.aliases:
                 cortex.commands[item] = method
 
+    cortex.helpmenu[meatname] = ['No help entries for this meat.']
+
     if len(helps):
         if meatname in cortex.helpmenu and not electroshock:
             print "Warning: overwriting category %s in help menu" % meatname
 
         cortex.helpmenu[meatname] = sorted(helps)
+
 
 
 # Neurons hold some vesicles. Vesicles are cool.

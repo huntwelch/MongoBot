@@ -10,7 +10,6 @@ from id import Id
 #    4.) List other drinker aliases other than our own.
 
 
-
 class Turing(Dendrite):
 
     def __init__(self, cortex):

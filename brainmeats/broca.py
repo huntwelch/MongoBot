@@ -438,7 +438,7 @@ class Broca(Dendrite):
 
 
     @axon
-    @help('WORD <Learn a word>'
+    @help('WORD <Learn a word>')
     def learn(self):
         if not self.values: return "%s ponders the emptiness of meaning." % self.ego.nick
         if not re.match("^[A-Za-z]+$", self.values[0].strip()): return "%s doesn't think that's a word." % self.ego.nick

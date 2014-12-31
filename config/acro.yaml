@@ -1,25 +1,28 @@
-lib: '/usr/share/dict/words'
+lib: 'hippocampus/commonwords'
+records: 'hippocampus/acro'
 minlen: 5
 maxlen: 7
 rounds: 5
+
 roundtime: 120
 warning: 30
 votetime: 30
-minplayers: 3
+rest: 15
+
+minplayers: 2
 timefactor: 2
 noacropenalty: 2
 novotepenalty: 5
-rest: 15
 botplay: True
 
 insults:
-  - 'are little bitches',
-  - 'are chumps',
-  - 'are cunt knockers',
-  - 'are lazy bastards',
+  - 'are little bitches'
+  - 'are chumps'
+  - 'are cunt knockers'
+  - 'are lazy bastards'
 
 insult:
-  - 'is a little bitch',
-  - 'is a chump',
-  - 'is a cunt knocker',
-  - 'is a lazy bastard',
+  - 'is a little bitch'
+  - 'is a chump'
+  - 'is a cunt knocker'
+  - 'is a lazy bastard'
