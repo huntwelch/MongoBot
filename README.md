@@ -8,18 +8,18 @@ This is a map of the codebase, sort of: http://mongobot.com/static/img/mongomap2
 Getting Started
 ---------------
 
-    There's kind of a bootstrap.sh file that might work if you're on a Mac. No
-    guarantees.
+There's kind of a bootstrap.sh file that might work if you're on a Mac. No
+guarantees.
 
-    mkvirtualenv MongoBot
-    pip install -r requirements.txt
-    
-    To run bot: python medulla.py
-    To run bot persistently so it will recover from crashes: python doctor.py
+mkvirtualenv MongoBot
+pip install -r requirements.txt
 
-    You'll need to install MongoDB to use most of the features relating to people
+To run bot: python medulla.py
+To run bot persistently so it will recover from crashes: python doctor.py
 
-    The master development branch is the skynet branch. There is a reason for this.
+You'll need to install MongoDB to use most of the features relating to people
+
+The master development branch is the skynet branch. There is a reason for this.
 
 
 Dafuq is going on?
