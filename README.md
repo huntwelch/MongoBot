@@ -12,16 +12,14 @@ Getting Started
 There's kind of a bootstrap.sh file that might work if you're on a Mac. No
 guarantees.
 
-    mkvirtualenv MongoBot
-    pip install -r requirements.txt
+```
+mkvirtualenv MongoBot
+pip install -r requirements.txt
+```
 
-To run bot: 
+To run bot: `python medulla.py`
 
-    python medulla.py
-
-To run bot persistently so it will recover from crashes: 
-
-    python doctor.py
+To run bot persistently so it will recover from crashes: `python doctor.py`
 
 You'll need to install MongoDB to use most of the features relating to people. I apologize for this.
 
@@ -98,7 +96,7 @@ When using in the chat room, you can pipe commands, i.e.:
 Why would anyone add piping to a chat bot? I dunno. Things got out of hand.
 
 IMPORTANT: whoever is running the bot instance will have to use
-.adduser to add other users. After that they can authorize themselves.
+```.adduser``` to add other users. After that they can authorize themselves.
 
 
 Philosophies
@@ -108,16 +106,20 @@ Don't nest logic when you can short circuit.
 
 BAD:
 
-    if blah:
-        for x in stuff:
-            do stuff
+```python
+if blah:
+    for x in stuff:
+        do stuff
+```
 
 GOOD:
 
-    if not blah: return
-    
-    for x in stuff:
-        do stuff
+```python
+if not blah: return
+
+for x in stuff:
+    do stuff
+```
 
 Try to stick to single quotes wherever possible.
 
@@ -134,26 +136,25 @@ otherwise the pull request will be refused.
 To Do
 -----
 
-+ Probably make this readme better
-+ acro game is broken
-+ turing.py function names need to be better, this is fucking mandarin
-+ some odd bugs in channeling
-+ remove image after thumbnailing, clear all out on boot
-+ remove video downloads on reboot
-+ create bootstrap install
-+ Add autostart for server, if components in place
-+ add tweet at in twitting
-+ reddit command breaks without specified subreddit
-+ Clean up broca
-+ link holdem to db, make persistant, open up sit/in/out functionality
-+ finish holdem, needs testing and split pots probably don't work
-+ also, holdem is just totally broken right now
-+ stock game: account for splits and reverse splits
-+ add @requires decorator, check for server, redis, mongo, etc.
-+ just take out image relink, make it a thumblink
-+ mud-style game
-+ interbot com
-+ streamline web stuff
-+ multi-platform
-+ futher abstract thalamus to load an interface depending on connection type
-
+* Probably make this readme better
+* acro game is broken
+* turing.py function names need to be better, this is fucking mandarin
+* some odd bugs in channeling
+* remove image after thumbnailing, clear all out on boot
+* remove video downloads on reboot
+* create bootstrap install
+* Add autostart for server, if components in place
+* add tweet at in twitting
+* reddit command breaks without specified subreddit
+* Clean up broca
+* link holdem to db, make persistant, open up sit/in/out functionality
+* finish holdem, needs testing and split pots probably don't work
+* also, holdem is just totally broken right now
+* stock game: account for splits and reverse splits
+* add @requires decorator, check for server, redis, mongo, etc.
+* just take out image relink, make it a thumblink
+* mud-style game
+* interbot com
+* streamline web stuff
+* multi-platform
+* futher abstract thalamus to load an interface depending on connection type
