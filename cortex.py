@@ -153,33 +153,7 @@ class Cortex:
         return self.personality
 
 
-    # I'll be frank, I don't have that great a grasp on
-    # threading, and despite working with people who do,
-    # there were a number of live processes that thread
-    # solutions weren't solving.
-    #
-    # The solution was to have everything that needs to
-    # run live run on one ticker. If you need something
-    # to run continuously, add this to the __init__ of
-    # your brainmeat:
-    #
-    # self.cx.addlive(self.ticker)
-    #
-    # ticker being the function in the class that runs.
-    # see brainmeats/sms.y for a good example of this.
-    #
-    # Update: may be obsolete now that @Cerebellum is
-    # working n stuff.
-    def addlive(self, func, alt=False):
-        name = alt or func.__name__
-        self.live[name] = func
-
-
-    def droplive(self, name):
-        del self.live[name]
-
-
-    # And this is basic function that runs all the time.
+    # And this is the basic function that runs all the time.
     # The razor qualia edge of consciousness, if you will
     # (though you shouldn't). It susses out the important
     # info, logs the chat, sends PONG, finds commands, and
@@ -235,6 +209,7 @@ class Cortex:
 
             self.values = components
 
+        # An awesome feature that's not used at all. Should be.
         if flags:
             for flag in flags:
                 self.values.remove(flag)
@@ -287,7 +262,7 @@ class Cortex:
 
             # All this multi checking had to be put in
             # after Eli decided to enter this:
-            # -babble fork | *babble | *babble | *babble
+            # .babble fork | :babble | :babble | :babble
             # ... which of course spiked the redis server
             # to 100% CPU and eventually flooded the chat
             # room with n^4 chats until the bot had to be
@@ -343,10 +318,8 @@ class Cortex:
         self.multis = 0
 
 
-    # Careful with this one.
     def bored(self):
         if not self.members: return
-
         self.announce('Chirp chirp. Chirp Chirp.')
 
 
