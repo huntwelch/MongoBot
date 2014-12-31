@@ -11,11 +11,16 @@ Getting Started
 There's kind of a bootstrap.sh file that might work if you're on a Mac. No
 guarantees.
 
-mkvirtualenv MongoBot
-pip install -r requirements.txt
+    mkvirtualenv MongoBot
+    pip install -r requirements.txt
 
-To run bot: python medulla.py
-To run bot persistently so it will recover from crashes: python doctor.py
+To run bot: 
+
+    python medulla.py
+
+To run bot persistently so it will recover from crashes: 
+
+    python doctor.py
 
 You'll need to install MongoDB to use most of the features relating to people. I apologize for this.
 
@@ -58,7 +63,7 @@ for the function, add @help("Help message.")
 
 To create a new command category, run this from the root directory: 
 
-python newbrains.py category_name
+    python newbrains.py category_name
 
 This will create a file called category_name.py in brainmeats, with
 a class Category_name. Loading of this class will be automated, no
@@ -75,17 +80,17 @@ If you actually manage to get this guy up and running, the default
 command characters are '.' for a command, and ':' for running multiple
 inputs to a command, so
 
-.q AAPL
+    .q AAPL
 
 ... gets you a stock quote for Apple, and 
 
-:q AAPL NFLX TWTR
+    :q AAPL NFLX TWTR
 
 ... gets you quotes for Apple, Netflix, and Twitter.
 
 When using in the chat room, you can pipe commands, i.e.:
 
-.babble Zaphod | .tweet
+    .babble Zaphod | .tweet
 
 ... will tweet whatever babble spits out.
 
@@ -102,16 +107,16 @@ Don't nest logic when you can short circuit.
 
 BAD:
 
-if blah:
-    for x in stuff:
-        do stuff
+    if blah:
+        for x in stuff:
+            do stuff
 
 GOOD:
 
-if not blah: return
-
-for x in stuff:
-    do stuff
+    if not blah: return
+    
+    for x in stuff:
+        do stuff
 
 Try to stick to single quotes wherever possible.
 
