@@ -1,6 +1,7 @@
-![Issa bot](http://mongobot.com/static/img/mongobot.png)
+<img src="http://mongobot.com/static/img/mongobot.png" width="150" height="150" />
 
-<h3>An IRC bot for people who like to muck with IRC bots.</h3>
+IRC bot for people who like to muck with IRC bots
+-------------------------------------------------
 
 This is a map of the codebase, sort of: http://mongobot.com/static/img/mongomap2.pdf
 
