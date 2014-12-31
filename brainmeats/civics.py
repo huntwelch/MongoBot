@@ -1,5 +1,6 @@
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse, Receptor
 
+
 @Cerebellum
 class Civics(Dendrite):
 
@@ -10,9 +11,7 @@ class Civics(Dendrite):
     def __init__(self, cortex):
         super(Civics, self).__init__(cortex)
 
-
     @axon
     @help("<I am an example>")
     def function_name(self):
         return
-

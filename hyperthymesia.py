@@ -4,6 +4,7 @@ from logging import config, Handler
 
 settings = load_config('config/settings.yaml')
 
+
 # Logging, but with more syllables
 class Hyperthymesia(object):
     names = {
@@ -44,10 +45,11 @@ class Hyperthymesia(object):
         self.__set_log_level('warn')
         self.logger.warn(message, exc_info=True)
 
-class ChatHandler(logging.Handler):
-	def __init__(self, cx):
-		logging.Handler.__init__(self)
-		self.cortex = cx
 
-	def emit(self, record):
-		self.brain.thalamus.send(record)
+class ChatHandler(logging.Handler):
+        def __init__(self, cx):
+                logging.Handler.__init__(self)
+                self.cortex = cx
+
+        def emit(self, record):
+                self.brain.thalamus.send(record)

@@ -36,7 +36,7 @@ class Broca(Dendrite):
 
     # This can get stuck sometimes. Seems to be working
     # better these days, but a .reload should handle it.
-    # All these compose functions could use a little 
+    # All these compose functions could use a little
     # cleaning up.
     @axon
     @help('TITLE <compose poetry>')

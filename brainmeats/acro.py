@@ -96,7 +96,7 @@ class Acro(Dendrite):
             if player not in check:
                 gimps.append(player)
 
-        use = self.config.insult 
+        use = self.config.insult
 
         if not gimps: return
 

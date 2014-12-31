@@ -8,7 +8,7 @@ from staff import Broker, Browser
 # and well maintained part of the bot because
 # everyone in my chatroom except yours truly
 # has stocks and likes keeping track of them
-# and discussing market movements and ... 
+# and discussing market movements and ...
 # shorts and ... zzzzzzzzzzSNORK what? Where
 # am ... oh right. Yeah. Here's stock stuff.
 class Finance(Dendrite):

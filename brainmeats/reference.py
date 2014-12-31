@@ -62,17 +62,17 @@ class Reference(Dendrite):
     def isitdown(self):
         if not self.values:
             return "Is what down?"
-        
+
         url = 'http://www.isitdownrightnow.com/check.php?domain=%s' % self.values[0]
 
         result = Browser(url)
         found = result.read().find('UP')
-        
+
         if found > 0:
             status = '%s is up' % self.values[0]
         else:
             status = '%s is down' % self.values[0]
-    
+
         return status
 
 

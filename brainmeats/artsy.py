@@ -97,7 +97,7 @@ class Artsy(Dendrite):
             return 'Video file not found'
 
         filename = '%s%s.gif' % (time.time(), target)
-        gifpath = 'server%s%s' % (self.cx.settings.media.gifs, filename) 
+        gifpath = 'server%s%s' % (self.cx.settings.media.gifs, filename)
 
         try:
             VideoFileClip(vidpath).subclip(start,finis).resize(0.5).to_gif(gifpath)

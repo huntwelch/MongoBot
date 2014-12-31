@@ -5,6 +5,7 @@ from config import load_config
 from id import Id
 from pprint import pprint
 
+
 # The core of the library methodology used
 # by MongoBot. All brainmeats are Dendrites,
 # inheriting the state of the cortex as the
@@ -22,7 +23,7 @@ class Dendrite(object):
         # Load in brainmeats specific secrets and only make those available as first
         # class secrets to the brainmeats
         if name in self.cx.secrets:
-            self.secrets = self.cx.secrets[name];
+            self.secrets = self.cx.secrets[name]
 
         # Load in config file by the same name as the brainmeats, if available
         try:
@@ -87,8 +88,8 @@ class Dendrite(object):
     def ego(self):
         return self.cx.personality
 
-    #@property
-    #def mysender(self):
+    # @property
+    # def mysender(self):
     #    return Id(self.cx.lastsender)
 
 
@@ -132,7 +133,6 @@ def serotonin(cortex, meatname, electroshock):
         cortex.helpmenu[meatname] = sorted(helps)
 
 
-
 # Neurons hold some vesicles. Vesicles are cool.
 class Neurons(object):
 
@@ -140,12 +140,12 @@ class Neurons(object):
     vesicles = {}
 
 
-# Cerebellum is needed on any class that has 
+# Cerebellum is needed on any class that has
 # methods that will be used as receptors - this is
-# due to pythons way of handling decorators and 
+# due to pythons way of handling decorators and
 # not binding them until the class is defined,
 # which is not how receptors should be utilized.
-# 
+#
 # aka, this be a hack
 def Cerebellum(object):
 
@@ -153,18 +153,18 @@ def Cerebellum(object):
         if hasattr(method, 'is_receptor'):
 
             receptors = Neurons.vesicles.get(method.name, [])
-            receptors.append({ object.__name__.lower(): method.neuron })
-            Neurons.vesicles.update({ method.name: receptors })
+            receptors.append({object.__name__.lower(): method.neuron})
+            Neurons.vesicles.update({method.name: receptors})
 
     return object
 
 
-# Synapse is an event emitting decorator that will 
+# Synapse is an event emitting decorator that will
 # fire off a neuron to all receptors that are
 # listening for the passed keyword.
-# 
+#
 # Usage:
-# 
+#
 #     @Synapse('my_keyword')
 #     def some_method():
 #         ...
@@ -193,9 +193,9 @@ class Synapse(Neurons):
 
 # Receptor is an observer decorator that will auto trigger when a neuron is fired using
 # a keyword the receptor is listening for.
-# 
+#
 # Usage:
-# 
+#
 #     @Receptor('my_keyword')
 #     def do_something():
 #         ....
@@ -228,11 +228,13 @@ def axon(fn):
     fn.create_command = True
     return fn
 
+
 # Makes the function available
 # to non-registered users.
 def public(fn):
     fn.public_command = True
     return fn
+
 
 # Tell people your function is
 # there and how to use it.
@@ -241,6 +243,7 @@ def help(text):
         fn.help = text
         return fn
     return add
+
 
 # Don't want to type out findfreechildpornwithukmirrors?
 # @alias(['perv', 'seriouslydude', 'gethelp'])

@@ -69,6 +69,7 @@ class Alias(mongoengine.EmbeddedDocument):
     name = StringField(required=True)
     definition = StringField(required=True)
 
+
 class Position(EmbeddedDocument):
 
     symbol = StringField(required=True)
@@ -76,6 +77,7 @@ class Position(EmbeddedDocument):
     price = FloatField(min_value=0)
     quantity = IntField(min_value=0)
     type = StringField()
+
 
 class Drinker(mongoengine.Document):
     name = StringField(required=True)
@@ -90,11 +92,13 @@ class Drinker(mongoengine.Document):
     aliases = ListField(EmbeddedDocumentField(Alias))
     data = DictField()
 
+
 class Words(mongoengine.Document):
     word = StringField(required=True)
     partofspeech = StringField(required=True)
     definition = StringField(required=True)
     source = StringField(required=True)
+
 
 class Learned(mongoengine.Document):
     word = StringField(required=True)

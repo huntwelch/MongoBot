@@ -46,7 +46,7 @@ class Chess(Dendrite):
     def resetchess(self):
         self.chessgrid = copy.copy(self.basegrid)
 
-    
+
     @axon
     @help("<show chessboard>")
     def chess(self):

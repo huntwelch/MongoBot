@@ -25,9 +25,9 @@ class Sms(Dendrite):
         self.client = TwilioRestClient(self.secrets.sid, self.secrets.token)
 
 
-    # smsticker is a receptor that responds to twitch 
+    # smsticker is a receptor that responds to twitch
     # broadcasts - which happen on every iteration of
-    # monitor. To prevent hitting twilio too hard, 
+    # monitor. To prevent hitting twilio too hard,
     # this gets self limited to every 10 seconds.
     @Receptor('twitch')
     def smsticker(self):
@@ -55,14 +55,14 @@ class Sms(Dendrite):
 
             self.incoming.append(sid)
 
-            # Don't parse previously received messages until the 
+            # Don't parse previously received messages until the
             # incoming list has been fully parsed
             if not self.loaded:
                 continue
 
             clipped = item.from_[2:]
             drinker = Id(phone=clipped)
-            
+
             # Note that this trusts the phone number, on the grounds
             # there must have been access to the system to get the
             # number in there. Normal ident auths can't be applied.

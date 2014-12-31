@@ -11,12 +11,13 @@ from id import Id
 
 from pprint import pprint
 
+
 # Welcome to the thalamus - the switchboard of the brain.
 # It connects the cortex and brainmeats to the rest of the
 # body, or in this case IRC. It is responsible for relaying
 # input and out to the IRC server in a sane (well... yeah...
 # whatever) manner; and triggering the necessary brainmeats
-# in the cortex when commands are recognized. Changes to 
+# in the cortex when commands are recognized. Changes to
 # Thalamus require a reboot.
 class Thalamus(object):
 
@@ -34,7 +35,6 @@ class Thalamus(object):
     channels = {}
     regain_nick = False
 
-
     # Initialize and auto-connect
     def __init__(self, master, cortex):
 
@@ -44,8 +44,8 @@ class Thalamus(object):
         self.settings = load_config('config/settings.yaml')
         self.secrets = load_config('config/secrets.yaml')
 
-        if master.sock: self.sock = master.sock
-
+        if master.sock:
+            self.sock = master.sock
 
     # Make those connections, you will feel so much more human.
     def connect(self):
@@ -60,14 +60,13 @@ class Thalamus(object):
             self.sock = sock
 
         self.master.sock = self.sock
-        
+
         self.sock.setblocking(0)
 
         if hasattr(self.secrets.irc, 'password') and self.secrets.irc.password:
             self.send('PASS %s' % self.secrets.irc.password)
 
         self.introduce()
-
 
     # Introduce yourself to the IRC server; it's only polite.
     def introduce(self):
@@ -81,7 +80,6 @@ class Thalamus(object):
             self.secrets.bot.realname
         ))
         self.send('NICK %s' % self.name)
-
 
     # Read data in from the socket
     def read(self):
@@ -98,7 +96,6 @@ class Thalamus(object):
             sys.exit()
         return data
 
-
     # Send data out to the bound socket
     def send(self, data):
 
@@ -106,7 +103,6 @@ class Thalamus(object):
         data = data.rstrip('\r\n')
 
         self.sock.send('%s%s%s' % (data, chr(015), chr(012)))
-
 
     # Process incoming data
     def process(self):
@@ -137,7 +133,7 @@ class Thalamus(object):
             if line[0] == ':':
                 source, line = line[1:].split(' ', 1)
 
-            #self.cx.logit(line)
+            # self.cx.logit(line)
 
             if line.find(' :') != -1:
                 line, trailing = line.split(' :', 1)
@@ -158,7 +154,6 @@ class Thalamus(object):
                 print traceback.format_exc()
                 continue
 
-
     # Handle the welcome to the server message
     # by joining channels at this point
     def _cmd_001(self, source, args):
@@ -170,7 +165,6 @@ class Thalamus(object):
             print '[IRC] Joining %s' % (channel)
             self.send('JOIN %s' % channel)
 
-
     # Handle incoming server information
     def _cmd_004(self, source, args):
 
@@ -178,7 +172,6 @@ class Thalamus(object):
         self.server = args.pop(0)
 
         self.regain_nick = time()
-
 
     # Handle joining a room
     def _cmd_353(self, source, args):
@@ -194,7 +187,6 @@ class Thalamus(object):
             'modes': self.secrets.channels.get(channel, {}),
         }
 
-
     # No such username - expected response when WHOIS fails
     # Attempt to regain nick
     def _cmd_401(self, source, args):
@@ -203,35 +195,29 @@ class Thalamus(object):
             self.name = None
             self.introduce()
 
-
     # Handle name already being in use
     def _cmd_433(self, source, args):
         self.name += '_'
         self.introduce()
 
-
     # Respond to server PING request for keep-alive
     def _cmd_PING(self, source, args):
         self.send('PONG %s' % args[-1])
-
 
     # Re-get all the names in the channel when a user leaves
     def _cmd_PART(self, source, args):
         channel = args.pop(0)
         self.send('NAMES %s' % channel)
 
-
     # Handle when a new user joins the room
     def _cmd_JOIN(self, source, args):
         channel = args.pop(0)
         self.send('NAMES %s' % channel)
 
-
     # Handle when a user quits
     def _cmd_QUIT(self, source, args):
         channel = args.pop(0)
         self.send('NAMES %s' % channel)
-
 
     # Handle all incoming messages
     @Synapse('IRC_PRIVMSG')
@@ -289,4 +275,3 @@ class Thalamus(object):
         self.cx.butler.do(self.cx.command, (source, args[-1]))
 
         return (target, source, args)
-
