@@ -23,14 +23,14 @@ Getting Started
 
 
 Dafuq is going on?
-==================
+------------------
 
     For best results in answering this question, read through medulla.py and cortex.py. 
     The comments are... lengthy. Also, learn python. 
 
 
 Advanced Usage
-==============
+--------------
 
     MongoBot is capable of running a number of web services and apis. For best
     results, run an nginx server and uwsgi server/deploy.ini. And by best results,
@@ -42,7 +42,7 @@ Advanced Usage
 
 
 Secret settings
-===============
+---------------
 
     You will need to create a file in the config folder called secrets.yaml.
     sample.secrets.yaml has descriptions of each setting, just copy it to
@@ -50,7 +50,7 @@ Secret settings
 
 
 New features
-============
+------------
 
     To create a new command in an existing brainmeat category, add the
     function to the class and add the decorator @axon. To add a help entry
@@ -69,7 +69,7 @@ New features
 
 
 Using ze bot
-============
+------------
 
     If you actually manage to get this guy up and running, the default
     command characters are '.' for a command, and ':' for running multiple
@@ -96,7 +96,7 @@ Using ze bot
 
 
 Philosophies
-============
+------------
 
     Don't nest logic when you can short circuit.
 
@@ -126,7 +126,7 @@ Philosophies
 
 
 To Do
-=====
+-----
 
     + Probably make this readme better
     + acro game is broken
