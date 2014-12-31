@@ -174,7 +174,8 @@ class Cortex:
     def droplive(self, name):
         del self.live[name]
 
-    # And this is basic function that runs all the time.
+
+    # And this is the basic function that runs all the time.
     # The razor qualia edge of consciousness, if you will
     # (though you shouldn't). It susses out the important
     # info, logs the chat, sends PONG, finds commands, and
@@ -233,6 +234,7 @@ class Cortex:
 
             self.values = components
 
+        # An awesome feature that's not used at all. Should be.
         if flags:
             for flag in flags:
                 self.values.remove(flag)
@@ -285,7 +287,7 @@ class Cortex:
 
             # All this multi checking had to be put in
             # after Eli decided to enter this:
-            # -babble fork | *babble | *babble | *babble
+            # .babble fork | :babble | :babble | :babble
             # ... which of course spiked the redis server
             # to 100% CPU and eventually flooded the chat
             # room with n^4 chats until the bot had to be
