@@ -96,7 +96,7 @@ When using in the chat room, you can pipe commands, i.e.:
 Why would anyone add piping to a chat bot? I dunno. Things got out of hand.
 
 IMPORTANT: whoever is running the bot instance will have to use
-```.adduser``` to add other users. After that they can authorize themselves.
+`.adduser` to add other users. After that they can authorize themselves.
 
 
 Philosophies
