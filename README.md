@@ -25,7 +25,7 @@ To run bot persistently so it will recover from crashes:
 
 You'll need to install MongoDB to use most of the features relating to people. I apologize for this.
 
-The master development branch is the skynet branch. There is a reason for this.
+The master development branch is the skynet branch. There is a reason.
 
 
 Dafuq is going on?
