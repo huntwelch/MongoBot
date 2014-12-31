@@ -23,16 +23,16 @@ class Nonsense(Dendrite):
 
 
     # This used to be 'my girl call your girl' which
-    # was probably funnier, but lost on the current 
+    # was probably funnier, but lost on the current
     # generation, and the irony of this obscure casual
-    # sexism from the past would be missed, leaving it 
+    # sexism from the past would be missed, leaving it
     # to just be another minor degredation of women.
     # Is it such a small thing everyone should probably
-    # suck it up? Probably, yeah. But it's easier to 
+    # suck it up? Probably, yeah. But it's easier to
     # tell everyone to suck it up when you've never had
     # to, and especially in the programming world, we
     # shouldn't do it in the first place, because it's
-    # trivial not to, and anybody who can't make 
+    # trivial not to, and anybody who can't make
     # miniscule changes to the dialogue in the name of
     # others' comfort is an asshole.
     @axon
@@ -40,7 +40,7 @@ class Nonsense(Dendrite):
         return "Lemme just stick a pin in that and I'll have my people call your people to pencil in a lunch some time."
 
 
-    # Because Busta Motherfuckin Rhymes 
+    # Because Busta Motherfuckin Rhymes
     @axon
     def bounce(self):
         return 'https://www.youtube.com/watch?v=LLZJeVDJMs4'
@@ -269,7 +269,7 @@ class Nonsense(Dendrite):
 
 
     # These two functions used to be restricted to the owner.
-    # Was going to reenable that restriction, but really, 
+    # Was going to reenable that restriction, but really,
     # more fun this way.
     @axon
     def say(self):
@@ -379,7 +379,7 @@ class Nonsense(Dendrite):
             diagnostic=diagnostic,
             percent=percent,
         )
-        
+
         return line
 
 

@@ -12,9 +12,9 @@ from util import colorize, shorten
 
 # Because where would Batman be without Alfred? Without tea,
 # that's fucking where. These are handy helper objects for
-# dealing with commands and some more complex shit that 
+# dealing with commands and some more complex shit that
 # shouldn't be as complex as it ends up being in brainmeats.
-# In particular, the Browser object gets around a lot of 
+# In particular, the Browser object gets around a lot of
 # annoyances in http calls.
 
 # This is how we pseudo-thread all the commands.
@@ -199,11 +199,11 @@ class Broker(object):
         ]
 
         # TODO: Don't do this for not in channel, ensure it's a privmsg only. Currently not compatible with channeling
-        #if context != CHANNEL:
-        #    for item in otherinfo:
-        #        pretty, id = item
-        #        addon = pretty + ": " + getattr(self, id, 'N/A')
-        #        message.append(addon)
+        # if context != CHANNEL:
+        #     for item in otherinfo:
+        #         pretty, id = item
+        #         addon = pretty + ": " + getattr(self, id, 'N/A')
+        #         message.append(addon)
 
         link = 'http://finance.yahoo.com/q?s=' + self.symbol
         roasted = shorten(link)
@@ -212,5 +212,3 @@ class Broker(object):
         output = ', '.join(message)
 
         return output
-
-

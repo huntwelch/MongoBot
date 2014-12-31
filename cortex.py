@@ -57,7 +57,7 @@ class Cortex:
     enabled = []
     REALUSERS = []
 
-    flags = {} 
+    flags = {}
     commands = {}
     live = {}
     helpmenu = {}
@@ -106,7 +106,6 @@ class Cortex:
         for username in self.realuserdata:
             self.REALUSERS.append(username)
 
-
     # Loads up all the files in brainmeats and runs them
     # through the hookup process.
     def loadbrains(self, electroshock=False):
@@ -144,14 +143,12 @@ class Cortex:
         for brainmeat in self.brainmeats:
             serotonin(self, brainmeat, electroshock)
 
-
     # When you get amnesia, it's probably a good time to really
     # think and try to remember who you are.
     def amnesia(self):
 
         # This is an easy way out for now...
         return self.personality
-
 
     # I'll be frank, I don't have that great a grasp on
     # threading, and despite working with people who do,
@@ -174,10 +171,8 @@ class Cortex:
         name = alt or func.__name__
         self.live[name] = func
 
-
     def droplive(self, name):
         del self.live[name]
-
 
     # And this is basic function that runs all the time.
     # The razor qualia edge of consciousness, if you will
@@ -188,15 +183,16 @@ class Cortex:
     def monitor(self):
         self.thalamus.process()
 
-
     # If it is indeed a command, the cortex stores who sent it,
     # and any words after the command are split in a values array,
     # accessible by the brainmeats as self.values.
     multis = 0
+
     def command(self, sender, cmd, piped=False, silent=False):
 
         if self.context in self.channels \
-        and 'command' not in self.channels[self.context]['mods']: return
+            and 'command' not in self.channels[self.context]['mods']:
+                return
 
         chain = cmd.split('|', 1)
         pipe = False
@@ -218,11 +214,13 @@ class Cortex:
         is_nums = re.search("^[0-9]+", what)
         is_breaky = re.search("^" + re.escape(self.personality.command_prefix) + "|[^\w]+", what)
 
-        if is_nums or is_breaky: return
+        if is_nums or is_breaky:
+            return
 
         if not what:
-           if not self.lastcommand: return
-           what = self.lastcommand
+            if not self.lastcommand:
+                return
+            what = self.lastcommand
 
         self.values = False
         self.flags = {}
@@ -230,7 +228,7 @@ class Cortex:
 
         if components:
             for component in components:
-                if component[:1] == self.personality.flag_prefix:    
+                if component[:1] == self.personality.flag_prefix:
                     flags.append(component)
 
             self.values = components
@@ -317,7 +315,8 @@ class Cortex:
                 self.chat(str(e))
                 print traceback.format_exc()
 
-        if not result: return
+        if not result:
+            return
 
         if pipe:
             # Piped output must be string
@@ -342,13 +341,12 @@ class Cortex:
 
         self.multis = 0
 
-
     # Careful with this one.
     def bored(self):
-        if not self.members: return
+        if not self.members:
+            return
 
         self.announce('Chirp chirp. Chirp Chirp.')
-
 
     # Simple log for room activity.
     def logroom(self, what):
@@ -356,22 +354,22 @@ class Cortex:
             f.write('TS:%s;%s' % (time(), what))
 
         now = date.today()
-        if now.day != 1: return
+        if now.day != 1:
+            return
 
         prev = date.today() - timedelta(days=1)
         backlog = '%s/%s-mongo.log' % (self.settings.directory.logdir, prev.strftime('%Y%m'))
 
-        if os.path.isfile(backlog): return
+        if os.path.isfile(backlog):
+            return
 
         shutil.move(self.settings.directory.log, backlog)
-
 
     # Announce means the chat is always sent to the channel,
     # never back as a private response.
     @ratelimited(2)
     def announce(self, message):
         self.chat(message, target=self.secrets.primary_channel)
-
 
     # Since chat is mongo's only means of communicating with
     # a room, the ratelimiting here should prevent any overflow
@@ -381,12 +379,15 @@ class Cortex:
     def chat(self, message, target=False, error=False):
 
         if self.context in self.channels \
-        and not target \
-        and 'speak' not in self.channels[self.context]['mods']: return
+            and not target \
+            and 'speak' not in self.channels[self.context]['mods']:
+                return
 
-        if self.bequiet: return
+        if self.bequiet:
+            return
 
-        if not message: return
+        if not message:
+            return
 
         if target:
             whom = target
@@ -414,13 +415,12 @@ class Cortex:
             if error:
                 m += ' %s' % str(error)
 
-            self.thalamus.send('PRIVMSG %s :%s' % (whom,m))
+            self.thalamus.send('PRIVMSG %s :%s' % (whom, m))
         except Exception as e:
             try:
                 self.thalamus.send('PRIVMSG %s :ERROR: ' % (whom, str(e)))
             except:
                 pass
-
 
     def act(self, message, public=False, target=False):
         message = '\001ACTION %s\001' % message
@@ -430,7 +430,6 @@ class Cortex:
             self.chat(message, target)
         else:
             self.chat(message)
-
 
     # When all else fails.
     def default(self):

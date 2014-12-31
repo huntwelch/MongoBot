@@ -32,7 +32,7 @@ class System(Dendrite):
     @axon
     def echo(self):
         return ' '.join(self.values)
-    
+
 
     # Help menu. It used to just show every command, but there
     # are so goddamn many at this point, they had to be split

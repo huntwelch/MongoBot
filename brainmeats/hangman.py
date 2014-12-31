@@ -5,16 +5,16 @@ from random import choice
 from autonomic import axon, alias, help, Dendrite
 
 
-# Because why not. This evolved into starting 
+# Because why not. This evolved into starting
 # a game, then running :guess r l s t e a o or
 # whatever the most common letters are in your
-# word source. Initially, we used words from 
+# word source. Initially, we used words from
 # the chat log, but they included contractions
 # and shit, plus who's going to reliably guess
-# dev_appserver.py, so we changed it to 
+# dev_appserver.py, so we changed it to
 # /usr/share/dict/words, but that led to the
 # issue of who's going to get wokowi on their
-# best day, so eventually I found a list of 
+# best day, so eventually I found a list of
 # most commonly used words, which I think, but
 # won't promise, is in the repository. Also,
 # a full ascii hangman ended up being pretty
@@ -47,7 +47,7 @@ class Hangman(Dendrite):
     @help("<Start a game of hangman>")
     @alias('hang')
     def lizard(self):
-        
+
         if self.active: return 'Game already in progress'
 
         self.chat('Guess the word before the monster eats you.')
@@ -83,7 +83,7 @@ class Hangman(Dendrite):
 
         if not self.values:
             return 'Enter "-guess one_letter|whole_word"'
-        
+
         if len(self.values[0]) == 1 and self.values[0] not in string.letters:
             return "That's not a letter"
 
@@ -141,7 +141,7 @@ class Hangman(Dendrite):
 
     def addhang(self):
         self.display = self.display[1:]
-        
+
         wrongness = u'%s  %s%s' % (self.wrong, self.monster, self.display)
 
         if len(self.display):

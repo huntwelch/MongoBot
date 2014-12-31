@@ -61,7 +61,6 @@ class Id(object):
         if self.nick == secrets.owner and self.is_authenticated:
             self.is_owner = True
 
-
     # Dynamicaly retrieve data from the datastore connection that are linked to the current
     # authenticated user.
     def __getattr__(self, key):
@@ -79,7 +78,6 @@ class Id(object):
             return self.prop[key]
 
         return False
-
 
     # Update an attribute in the datastore when a linked variable is accessed
     def __setattr__(self, key, value):
@@ -108,11 +106,10 @@ class Id(object):
 
         return True
 
-
     # Migrate data to new data format as we go
     def migrate(self, key):
 
-        protected = [ 'name', 'password' ]
+        protected = ['name', 'password']
 
         if key in protected:
             # Protected variable that should not get migrated

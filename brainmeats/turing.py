@@ -42,7 +42,7 @@ class Turing(Dendrite):
         # drinker.save()
         self.chat(name + " saved.")
 
-    
+
     @axon
     def ralias(self):
         name = self.values[0]

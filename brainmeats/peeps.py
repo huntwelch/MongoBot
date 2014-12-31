@@ -355,7 +355,7 @@ class Peeps(Dendrite):
         matches = re.match('^([a-zA-Z0-9_\\\[\]\{\}\^`\|]+)([\+|\-]{2}(?![\+|\-])).*', input)
 
         if not matches: return
- 
+
         entity = matches.group(1)
         method = matches.group(2)
 

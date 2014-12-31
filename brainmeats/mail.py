@@ -50,7 +50,7 @@ class Mail(Dendrite):
 
             self.logged.append(uid)
             new.append(uid)
-            
+
         if not new: return False
 
         return new
@@ -73,7 +73,7 @@ class Mail(Dendrite):
 
         if len(subs) == 2:
             self.cx.values = [subs[1]]
-            weather = self.cx.commands.get('weather', self.cx.default)() 
+            weather = self.cx.commands.get('weather', self.cx.default)()
             stuff.append(weather)
 
         msg = MIMEText('\n\n'.join(stuff))
@@ -89,8 +89,8 @@ class Mail(Dendrite):
 
     @Receptor('twitch')
     def responder(self):
-        
-        incoming = self.getnew() 
+
+        incoming = self.getnew()
 
         if not incoming: return
 
@@ -102,11 +102,11 @@ class Mail(Dendrite):
 
             raw = data[0][1]
             message = email.message_from_string(raw)
-            
+
             if 'rollup' not in message['Subject']: continue
 
             try:
-                self.imap.uid('store', mailid, '+FLAGS', r'(\Deleted)') 
+                self.imap.uid('store', mailid, '+FLAGS', r'(\Deleted)')
                 self.imap.expunge()
             except Exception as e:
                 print str(e)

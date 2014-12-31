@@ -11,6 +11,7 @@ from config import load_config
 
 secrets = load_config('config/secrets.yaml')
 
+
 # Utility functions
 
 # http://stackoverflow.com/questions/667508/whats-a-good-rate-limiting-algorithm
@@ -104,7 +105,6 @@ def savefromweb(url, path, thumber=False):
     # TODO deprecate function in favor of Browser. Note dependencies
     r = requests.get(url, stream=True, verify=False)
 
-
     if r.status_code != 200:
         return
 
@@ -114,12 +114,12 @@ def savefromweb(url, path, thumber=False):
         f.close()
 
     # TODO this qualifies as either its own method or an artsy method
-    #if thumber:
-    #    fname = "%s_%s.jpeg" % ( thumber, int(time.mktime(time.localtime())) )
-    #    img = Image.open(path)
-    #    img.thumbnail((THUMB_SIZE, THUMB_SIZE), Image.ANTIALIAS)
-    #    img.save('server%s%s' % (THUMBS, fname))
-    #    return '%s%s%s' % (WEBSITE, THUMBS, fname)
+    # if thumber:
+    #     fname = "%s_%s.jpeg" % ( thumber, int(time.mktime(time.localtime())) )
+    #     img = Image.open(path)
+    #     img.thumbnail((THUMB_SIZE, THUMB_SIZE), Image.ANTIALIAS)
+    #     img.save('server%s%s' % (THUMBS, fname))
+    #     return '%s%s%s' % (WEBSITE, THUMBS, fname)
     pass
 
 
@@ -180,12 +180,13 @@ fears = [
     'a room with a moose',
 ]
 
+
 # HE COMES
 def zalgo(_string):
     if len(_string) < 10:
         return _string
 
-    amount = random.randint(10,len(_string))
+    amount = random.randint(10, len(_string))
     base = _string[:amount]
     zalgoit = list(_string[amount:])
     zalgoed = u''
@@ -203,7 +204,7 @@ def zalgo(_string):
             continue
 
         direction = random.choice(zalgochars)
-        for x in range(0,4):
+        for x in range(0, 4):
             tic = random.choice(direction)
             zalgoed = u'%s%s' % (zalgoed, tic)
 
