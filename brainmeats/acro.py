@@ -7,9 +7,9 @@ from time import mktime, localtime, strftime
 
 
 # This is probably the first official brainmeat, as we
-# realized it was just to big to stuff into the cortex.
+# realized it was just too big to stuff into the cortex.
 # It's also some of the oldest and least attended code,
-# even after it was rewritten in the Great Brainmat
+# even after it was rewritten in the Great Brainmeat
 # Transition. There's at least one bug, but I haven't gotten
 # to it, as it's not a deal breaker, it's just exploitable.
 @Cerebellum
@@ -82,12 +82,14 @@ class Acro(Dendrite):
     @axon
     @help("<print the rules for the acro game>")
     def acrorules(self):
-        self.chat("1 of 6 start game with %sacrogame start." % self.botconf.command_prefix)
-        self.chat("2 of 6 when the acronym comes up, type /msg %s your version of what the acronym stands for." % self.ego.bot)
-        self.chat("3 of 6 each word of your submission is automatically uppercased unless you preface it with '-', so 'do -it up' will show as 'Do it Up'.")
-        self.chat("4 of 6 when the voting comes up, msg %s with the number of your vote." % self.ego.bot)
-        self.chat("5 of 6 play till the rounds are up.")
-        self.chat("6 of 6 %s plays by default." % (self.ego.nick))
+        return [
+            "1 of 6 start game with %sacrogame start" % self.botconf.command_prefix,
+            "2 of 6 when the acronym comes up, type /msg %s your version of what the acronym stands for" % self.ego.bot,
+            "3 of 6 each word of your submission is automatically uppercased unless you preface it with '-', so 'do -it up' will show as 'Do it Up'",
+            "4 of 6 when the voting comes up, /msg %s with the number of your vote" % self.ego.bot,
+            "5 of 6 play till the rounds are up",
+            "6 of 6 %s plays by default" % self.ego.nick,
+        ]
 
 
     def gimper(self, check, action, penalty):

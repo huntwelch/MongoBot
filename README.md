@@ -26,11 +26,12 @@ You'll need to install MongoDB to use most of the features relating to people. I
 The master development branch is the skynet branch. There is a reason.
 
 
-Dafuq is going on?
+What's going on?
 ------------------
 
 For best results in answering this question, read through medulla.py and cortex.py. 
-The comments are... lengthy. Also, learn python. 
+The comments are... lengthy. The brainmeat interface is mostly in autonomic.py.
+Thalamus is what gets it on IRC and handles input. Also, learn python. 
 
 
 Advanced Usage
@@ -65,11 +66,8 @@ To create a new command category, run this from the root directory:
     python newbrains.py category_name
 
 This will create a file called category_name.py in brainmeats, with
-a class Category_name. Loading of this class will be automated, no
-other files need to be altered.
-
-IMPORTANT: new brainmeats won't be enabled for use until they're
-added to config/plugins.yaml.
+a class Category_name. Initialization of this class will be automated once 
+category_name is added to config/plugins.yaml.
 
 
 Using ze bot
@@ -137,7 +135,6 @@ To Do
 -----
 
 * Probably make this readme better
-* acro game is broken
 * turing.py function names need to be better, this is fucking mandarin
 * some odd bugs in channeling
 * remove image after thumbnailing, clear all out on boot

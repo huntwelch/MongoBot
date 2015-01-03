@@ -70,12 +70,14 @@ class Linker(Dendrite):
 
         return
 
+
     @axon
     def shorten(self):
         if not self.values:
             return 'Shorten what?'
 
         return shorten(self.values[0])
+
 
     @Receptor('url')
     def random_tweet(self, url):

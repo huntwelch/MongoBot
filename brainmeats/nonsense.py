@@ -386,3 +386,9 @@ class Nonsense(Dendrite):
     @axon
     def zal(self):
         return zalgo(' '.join(self.values))
+
+
+    @axon
+    @help('Link to best website ever.')
+    def bestwebsiteever(self):
+        return 'http://stilldrinking.org'

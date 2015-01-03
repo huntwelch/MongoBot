@@ -143,36 +143,13 @@ class Cortex:
         for brainmeat in self.brainmeats:
             serotonin(self, brainmeat, electroshock)
 
+
     # When you get amnesia, it's probably a good time to really
     # think and try to remember who you are.
     def amnesia(self):
 
         # This is an easy way out for now...
         return self.personality
-
-    # I'll be frank, I don't have that great a grasp on
-    # threading, and despite working with people who do,
-    # there were a number of live processes that thread
-    # solutions weren't solving.
-    #
-    # The solution was to have everything that needs to
-    # run live run on one ticker. If you need something
-    # to run continuously, add this to the __init__ of
-    # your brainmeat:
-    #
-    # self.cx.addlive(self.ticker)
-    #
-    # ticker being the function in the class that runs.
-    # see brainmeats/sms.y for a good example of this.
-    #
-    # Update: may be obsolete now that @Cerebellum is
-    # working n stuff.
-    def addlive(self, func, alt=False):
-        name = alt or func.__name__
-        self.live[name] = func
-
-    def droplive(self, name):
-        del self.live[name]
 
 
     # And this is the basic function that runs all the time.
@@ -183,6 +160,7 @@ class Cortex:
     @Synapse('twitch')
     def monitor(self):
         self.thalamus.process()
+
 
     # If it is indeed a command, the cortex stores who sent it,
     # and any words after the command are split in a values array,
@@ -285,7 +263,7 @@ class Cortex:
         # I probably won't worry about act and announce.
         if means == self.personality.multi_command_prefix:
 
-            # All this multi checking had to be put in
+            # The multi checking had to be put in
             # after Eli decided to enter this:
             # .babble fork | :babble | :babble | :babble
             # ... which of course spiked the redis server
