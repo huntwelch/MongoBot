@@ -1,3 +1,4 @@
+import os
 import sys
 import cortex
 import thalamus
@@ -52,11 +53,12 @@ class Medulla:
             sleep(0.1)
 
             # Slight race condition on reloads
-            if not self.brain.thalamus: continue 
+            if not self.brain.thalamus: continue
 
             self.brain.monitor()
             if mktime(localtime()) - self.lastpulse > 10:
                 self.setpulse()
+
 
     # Reload has to be run from here to update the
     # cortex.
@@ -106,15 +108,17 @@ class Medulla:
         else:
             self.brain.act('comes to.', False, self.secrets.owner)
 
+
     def setpulse(self):
         self.lastpulse = mktime(localtime())
         pulse = open(self.settings.sys.pulse, 'w')
         pulse.write(str(self.lastpulse))
         pulse.close()
 
+
     def die(self, msg=None):
         if msg is not None:
             print msg
-        sys.exit()
+        os._exit(1)
 
 connect = Medulla()
