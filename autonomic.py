@@ -127,9 +127,6 @@ def serotonin(cortex, meatname, electroshock):
     cortex.helpmenu[meatname] = ['No help entries for this meat.']
 
     if len(helps):
-        if meatname in cortex.helpmenu and not electroshock:
-            print "Warning: overwriting category %s in help menu" % meatname
-
         cortex.helpmenu[meatname] = sorted(helps)
 
 

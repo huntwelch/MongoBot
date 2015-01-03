@@ -133,22 +133,24 @@ class Acro(Dendrite):
 
 
     def input(self, selfsub=False):
-        message = self.cx.lastprivate
-        if message == self.matchlast:
-            return
-
-        self.matchlast = message
 
         if self.paused:
             self.chat("Game is paused.")
             return
 
-        if not selfsub:
+        if selfsub:
+            sender = self.ego.nick
+            entry = self.cx.brainmeats["broca"].acronymit(self.currentacronym)
+        else:
+            message = self.cx.lastprivate
+
+            if message == self.matchlast:
+                return
+
+            self.matchlast = message
+
             sender = self.cx.lastsender
             entry = message
-        else:
-            sender = self.ego.nick
-            entry = self.cx.brainmeants["broca"].acronymit(self.currentacronym)
 
         if sender not in self.players and self.round != 1:
             return
@@ -213,11 +215,11 @@ class Acro(Dendrite):
             except:
                 return
 
-            if sender == self.contenders[vote - 1]["player"]:
-                self.announce(sender + " tried to vote for himself. What a bitch.")
-                return
-
             try:
+                if sender == self.contenders[vote - 1]["player"]:
+                    self.announce(sender + " tried to vote for himself. What a bitch.")
+                    return
+
                 self.contenders[vote - 1]["votes"] += 1
                 self.voters.append(sender)
                 if len(self.voters) == len(self.players):
