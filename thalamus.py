@@ -233,6 +233,11 @@ class Thalamus(object):
             self.cx.chat('%s: %s' % (target, args[-1]), self.cx.secrets.primary_channel)
             return
 
+        if target not in self.cx.channels:
+            self.cx.lastprivate = args[-1]
+        else:
+            self.cx.lastpublic = args[-1]
+
         self.cx.lastchat = args[-1]
 
         # Parse the incoming message for a command with the selected command prefix

@@ -521,7 +521,7 @@ class Broca(Dendrite):
         output = []
 
         wordbank = []
-        for line in open("%s/%s" % (self.cx.settings.directory.storage, self.config.acronymlib)):
+        for line in open("%s" % self.config.acronymlib):
             wordbank.append(line.strip())
 
         for letter in acronym:

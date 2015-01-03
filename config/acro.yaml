@@ -1,15 +1,15 @@
 lib: 'hippocampus/commonwords'
 records: 'hippocampus/acro'
-minlen: 5
-maxlen: 7
-rounds: 5
+minlen: 4
+maxlen: 5
+rounds: 2
 
-roundtime: 120
+roundtime: 30
 warning: 30
 votetime: 30
-rest: 15
+rest: 5
 
-minplayers: 2
+minplayers: 1
 timefactor: 2
 noacropenalty: 2
 novotepenalty: 5

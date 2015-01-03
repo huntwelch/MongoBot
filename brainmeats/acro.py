@@ -82,12 +82,12 @@ class Acro(Dendrite):
     @axon
     @help("<print the rules for the acro game>")
     def acrorules(self):
-        self.chat("1 of 6 start game with %sacro." % self.botconf.command_prefix)
-        self.chat("2 of 6 when the acronym comes up, type /msg %s your version of what the acronym stands for." % metacortex.botnick)
+        self.chat("1 of 6 start game with %sacrogame start." % self.botconf.command_prefix)
+        self.chat("2 of 6 when the acronym comes up, type /msg %s your version of what the acronym stands for." % self.ego.bot)
         self.chat("3 of 6 each word of your submission is automatically uppercased unless you preface it with '-', so 'do -it up' will show as 'Do it Up'.")
-        self.chat("4 of 6 when the voting comes up, msg %s with the number of your vote." % metacortex.botnick)
+        self.chat("4 of 6 when the voting comes up, msg %s with the number of your vote." % self.ego.bot)
         self.chat("5 of 6 play till the rounds are up.")
-        self.chat("6 of 6 %s plays by default." % (metacortex.botnick))
+        self.chat("6 of 6 %s plays by default." % (self.ego.nick))
 
 
     def gimper(self, check, action, penalty):
@@ -127,9 +127,9 @@ class Acro(Dendrite):
         self.contenders = []
         self.voters = []
         self.active = False
-        self.announce("Game over.")
         self.killgame = False
         self.paused = False
+        self.announce("Game over.")
 
 
     def input(self, selfsub=False):
@@ -144,10 +144,10 @@ class Acro(Dendrite):
             return
 
         if not selfsub:
-            sender = message[0][1:].split('!')[0]
-            entry = message[3][1:]
+            sender = self.cx.lastsender
+            entry = message
         else:
-            sender = metacortex.botnick
+            sender = self.ego.nick
             entry = self.cx.brainmeants["broca"].acronymit(self.currentacronym)
 
         if sender not in self.players and self.round != 1:
@@ -184,7 +184,7 @@ class Acro(Dendrite):
 
             entry = ' '.join(temp)
 
-            er = str(self.round) + ":" + sender + ":" + str(_time) + ":" + entry + "\n"
+            er = "%s:%s:%s:%s\n" % (self.round, sender, _time, entry)
             open(self.record, 'a').write(er)
             numplayers = len(self.players)
             received = entries + 1
@@ -194,7 +194,7 @@ class Acro(Dendrite):
                 addition = str(numplayers - received) + " more to go."
 
             if not selfsub:
-                self.announce("Entry recieved at " + str(_time) + " seconds. " + addition)
+                self.announce("Entry recieved at %s seconds. %s" % (_time, addition))
 
             if received == numplayers and self.round != 1:
                 self.bypass = True
@@ -202,8 +202,8 @@ class Acro(Dendrite):
                 self.players.append(sender)
 
         elif self.stage == "voting":
-            if self.config.botplay and metacortex.botnick not in self.voters:
-                self.voters.append(metacortex.botnick)
+            if self.config.botplay and self.ego.nick not in self.voters:
+                self.voters.append(self.ego.nick)
 
             if len(self.players) < self.config.minplayers:
                 self.announce("Need at least" + str(self.config.minplayers) + " players. Sorry.")
@@ -292,13 +292,12 @@ class Acro(Dendrite):
 
         acronym = ""
         length = randint(self.config.minlen, self.config.maxlen)
-        for i in range(1, length):
+        for i in range(length):
             acronym = acronym + choice(letters).upper()
 
         self.currentacronym = acronym
         self.mark = mktime(localtime())
-        self.announce("Round " + str(self.round) +
-                      " commencing! Acronym is " + acronym)
+        self.announce("Round %s commencing! Acronym is %s" % (str(self.round), acronym))
 
         self.stage = "submit"
 

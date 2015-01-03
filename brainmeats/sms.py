@@ -71,7 +71,7 @@ class Sms(Dendrite):
             else:
                 from_ = item.from_
 
-            self.cx.context = self.secrets.primary_channel
+            self.cx.context = self.cx.secrets.primary_channel
 
             message = 'SMS from %s: %s' % (from_, item.body)
             self.announce(message)
