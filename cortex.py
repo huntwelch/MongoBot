@@ -55,7 +55,6 @@ class Cortex:
     broken = []
     realuserdata = []
     enabled = []
-    REALUSERS = []
 
     flags = {}
     commands = {}
@@ -101,10 +100,6 @@ class Cortex:
         print '* Waking butler'
         self.butler = Butler(self)
 
-        print '* Loading users'
-        self.realuserdata = load_config(self.settings.directory.authfile)
-        for username in self.realuserdata:
-            self.REALUSERS.append(username)
 
     # Loads up all the files in brainmeats and runs them
     # through the hookup process.

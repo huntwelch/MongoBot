@@ -48,7 +48,6 @@ directory:
   errorlog: "{directory.logdir}/error.log"
   log: "{directory.logdir}/chat.log"
   distaste: "{directory.storage}/distaste"
-  authfile: "{directory.storage}/users.yaml"
 
 # Media
 media:
@@ -70,7 +69,7 @@ general:
 misc:
   thumbsize: 40
   website: 'http://www.mongobot.com' # Dupped by webserver
-  
+
 # Web stuff
 website: !include webserver.yaml
 
