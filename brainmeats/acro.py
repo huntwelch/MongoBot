@@ -1,7 +1,6 @@
 import os
 
 from autonomic import axon, help, Dendrite, Receptor, Cerebellum
-from cybernetics import metacortex
 from random import choice, randint, shuffle
 from time import mktime, localtime, strftime
 

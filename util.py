@@ -1,10 +1,8 @@
 import time
 import HTMLParser
 import requests
-import urllib
 import random
 import subprocess
-import string
 
 from PIL import Image
 from config import load_config

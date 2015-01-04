@@ -1,13 +1,10 @@
-import mongoengine
 import re
 import string
 import random
 import redis
 import time
 import os
-import simplejson
 
-from threading import Thread
 from autonomic import axon, alias, help, Dendrite, public, Receptor, Cerebellum
 
 from datastore import Words, Learned, Structure
@@ -15,7 +12,6 @@ from random import choice, randint
 from util import savefromweb
 from staff import Browser
 from wordnik import swagger, WordApi
-from cybernetics import metacortex
 from id import Id
 
 

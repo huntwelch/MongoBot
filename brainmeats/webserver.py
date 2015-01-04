@@ -1,4 +1,3 @@
-import random
 import os
 
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Receptor
