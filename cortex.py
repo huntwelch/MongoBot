@@ -217,8 +217,6 @@ class Cortex:
                 flag = flag[1:]
                 self.flags[flag] = value
 
-            print self.flags
-
         self.logroom('%s sent command: %s\n' % (sender, what))
         self.lastsender = sender
         self.lastcommand = what

@@ -22,64 +22,6 @@ class Acro(Dendrite):
 
 
     @axon
-    @help("start|pause|resume|end acro game>")
-    def acrogame(self):
-
-        if not self.values:
-            self.chat("start, pause, resume, or end?")
-            return
-
-        action = self.values[0]
-
-        if action == "start":
-            if self.active:
-                return "Game already in progress"
-            self.run()
-
-        elif action == "pause":
-            if self.stage == "waiting":
-                self.paused = True
-                self.announce("Game paused")
-            else:
-                self.chat("You can only pause between rounds.")
-
-        elif action == "resume":
-            self.paused = False
-            self.announce("Game on")
-        elif action == "end":
-            self.killgame = True
-        else:
-            self.chat("Not a valid action")
-
-
-    @axon
-    @help("<show cumulative acro game scores>")
-    def boards(self):
-        scores = {}
-
-        # This is obviously a nonsense thing to do in the long term.
-        for path, dirs, files in os.walk(os.path.abspath(self.config.records)):
-            for file in files:
-                for line in open(path + "/" + file):
-                    if line.find(":") == -1:
-                        try:
-                            player, score, toss = line.split()
-                            if player in scores:
-                                scores[player]['score'] += int(score)
-                                scores[player]['rounds'] += 1
-                            else:
-                                scores[player] = {'score': int(score), 'rounds': 1}
-                        except:
-                            continue
-
-        for player in scores:
-            score = scores[player]['score']
-            average = score / scores[player]['rounds']
-
-            self.chat(player + ": " + str(score) + " (" + str(average) + " per round)")
-
-
-    @axon
     @help("<print the rules for the acro game>")
     def acrorules(self):
         return [
@@ -90,6 +32,66 @@ class Acro(Dendrite):
             "5 of 6 play till the rounds are up",
             "6 of 6 %s plays by default" % self.ego.nick,
         ]
+
+
+    @axon
+    @help("start|pause|resume|end acro game>")
+    def acro(self):
+
+        if not self.values:
+            return "start, pause, resume, or end?"
+
+        action = self.values[0]
+
+        # I know this is an odd construct
+        # but I think it's pretty.
+        {
+            'start': self._start,
+            'pause': self._pause,
+            'resume': self._resume,
+            'end': self.endgame,
+        }.get(action,lambda: self.chat('Invalid action'))()
+
+
+    def _start(self):
+        if self.active:
+            self.chat("Game already in progress.")
+            return
+        self.begin()
+
+
+    def _pause(self):
+        if self.stage != "waiting":
+            self.chat("You can only pause between rounds.")
+            return
+
+        self.paused = True
+        self.announce("Game paused")
+
+
+    def _resume(self):
+        if not self.paused:
+            self.chat("It's not paused.")
+            return
+
+        self.paused = False
+        self.announce("Game on")
+
+
+    @Receptor('twitch')
+    def ticker(self):
+
+        if not self.active or self.paused: return
+
+        self.input()
+
+        self.current = mktime(localtime())
+
+        {
+            "waiting": self.waiting,
+            "submit": self.submit,
+            "voting": self.voting,
+        }.get(self.stage)()
 
 
     def gimper(self, check, action, penalty):
@@ -120,18 +122,7 @@ class Acro(Dendrite):
             target = gimp + post + target
             trail += 1
 
-        self.announce(target + " " + choice(use) +
-                      " and will be docked " + str(penalty) +
-                      " points for not " + action + ".")
-
-
-    def endgame(self):
-        self.contenders = []
-        self.voters = []
-        self.active = False
-        self.killgame = False
-        self.paused = False
-        self.announce("Game over.")
+        self.announce("%s %s and will be docked %s points for not %s." % (target, choice(use), penalty, action))
 
 
     def input(self, selfsub=False):
@@ -157,131 +148,110 @@ class Acro(Dendrite):
         if sender not in self.players and self.round != 1:
             return
 
-        if self.stage == "submit":
+        {
+            'submit': self.process_submit,
+            'voting': self.process_vote,
+        }.get(self.stage)(sender, entry, selfsub)
 
-            entries = 0
 
-            for line in open(self.record):
-                try:
-                    current, subber, timed, what = line.split(":", 3)
-                except:
-                    continue
+    def process_submit(self, sender, entry, selfsub):
 
-                if int(current) == self.round:
-                    entries += 1
-                if int(current) == self.round and sender == subber:
-                    return
+        entries = 0
 
-            if not selfsub:
-                _time = int(mktime(localtime()) - self.mark)
+        for line in open(self.record):
+            try:
+                current, subber, timed, what = line.split(":", 3)
+            except:
+                continue
+
+            if int(current) == self.round:
+                entries += 1
+            if int(current) == self.round and sender == subber:
+                return
+
+        if not selfsub:
+            _time = int(mktime(localtime()) - self.mark)
+        else:
+            _time = int(self.config.roundtime / 2)
+
+        words = entry.split()
+        temp = []
+        for word in words:
+            if word[:1] == "-":
+                temp.append(word[1:])
             else:
-                _time = int(self.config.roundtime / 2)
+                temp.append(word.capitalize())
+                open(self.cx.settings.directory.storage + "/natwords", 'a').write(word.capitalize() + "\n")
 
-            words = entry.split()
-            temp = []
-            for word in words:
-                if word[:1] == "-":
-                    temp.append(word[1:])
-                else:
-                    temp.append(word.capitalize())
-                    open(self.cx.settings.directory.storage + "/natwords", 'a').write(word.capitalize() + "\n")
+        entry = ' '.join(temp)
 
-            entry = ' '.join(temp)
+        er = "%s:%s:%s:%s\n" % (self.round, sender, _time, entry)
+        open(self.record, 'a').write(er)
+        numplayers = len(self.players)
+        received = entries + 1
 
-            er = "%s:%s:%s:%s\n" % (self.round, sender, _time, entry)
-            open(self.record, 'a').write(er)
-            numplayers = len(self.players)
-            received = entries + 1
+        addition = ""
+        if self.round != 1:
+            addition = str(numplayers - received) + " more to go."
 
-            addition = ""
-            if self.round != 1:
-                addition = str(numplayers - received) + " more to go."
+        if not selfsub:
+            self.announce("Entry recieved at %s seconds. %s" % (_time, addition))
 
-            if not selfsub:
-                self.announce("Entry recieved at %s seconds. %s" % (_time, addition))
+        if received == numplayers and self.round != 1:
+            self.bypass = True
+        elif self.round == 1:
+            self.players.append(sender)
 
-            if received == numplayers and self.round != 1:
+
+    def process_vote(self, sender, entry, selfsub):
+        if self.config.botplay and self.ego.nick not in self.voters:
+            self.voters.append(self.ego.nick)
+
+        if len(self.players) < self.config.minplayers:
+            self.announce("Need at least" + str(self.config.minplayers) + " players. Sorry.")
+
+        try:
+            vote = int(entry)
+        except:
+            return
+
+        try:
+            if sender == self.contenders[vote - 1]["player"]:
+                self.announce(sender + " tried to vote for himself. What a bitch.")
+                return
+
+            self.contenders[vote - 1]["votes"] += 1
+            self.voters.append(sender)
+            if len(self.voters) == len(self.players):
                 self.bypass = True
-            elif self.round == 1:
-                self.players.append(sender)
-
-        elif self.stage == "voting":
-            if self.config.botplay and self.ego.nick not in self.voters:
-                self.voters.append(self.ego.nick)
-
-            if len(self.players) < self.config.minplayers:
-                self.announce("Need at least" + str(self.config.minplayers) + " players. Sorry.")
-
-            try:
-                vote = int(entry)
-            except:
-                return
-
-            try:
-                if sender == self.contenders[vote - 1]["player"]:
-                    self.announce(sender + " tried to vote for himself. What a bitch.")
-                    return
-
-                self.contenders[vote - 1]["votes"] += 1
-                self.voters.append(sender)
-                if len(self.voters) == len(self.players):
-                    self.bypass = True
-            except:
-                return
+        except:
+            return
 
 
-    def setup(self):
+    def begin(self):
         self.record = '%s/%s.game' % (self.config.records, strftime('%Y-%m-%d-%H%M'))
         open(self.record, "w")
 
         self.active = True
-
-        self.cumulative = {}
-        self.start = mktime(localtime())
-        self.mark = mktime(localtime())
+        self.stage = "waiting"
         self.round = 1
 
-        self.stage = "waiting"
+        self.start = mktime(localtime())
+        self.mark = mktime(localtime())
 
         self.matchlast = False
-        self.killgame = False
         self.warned = False
         self.bypass = False
         self.displayed = False
+        self.selfsubbed = False
+        self.paused = False
 
         self.voters = []
         self.players = []
+        self.cumulative = {}
         self.gimps = {}
-        self.selfsubbed = False
-        self.paused = False
-        self.killgame = False
 
-
-    def run(self):
-        self.setup()
         self.announce("New game commencing in %s seconds" % str(self.config.rest))
-
-
-    @Receptor('twitch')
-    def ticker(self):
-
-        if not self.active: return
-
-        if self.killgame:
-            self.endgame()
-            return
-
-        if self.paused: return
-
-        self.input()
-
-        self.current = mktime(localtime())
-
-        {
-            "waiting": self.waiting,
-            "submit": self.submit,
-            "voting": self.voting,
-        }.get(self.stage)()
 
 
     def waiting(self):
@@ -352,7 +322,7 @@ class Acro(Dendrite):
 
         if not self.contenders:
             self.announce("Don't waste my friggin time")
-            self.killgame = True
+            self.endgame()
 
         if self.round != 1:
             self.gimper(submitters, "submitting", self.config.noacropenalty)
@@ -421,10 +391,8 @@ class Acro(Dendrite):
 
         open(self.record, 'a').write("\n" + tally + "\n")
 
-        # Record in game tally
-
         if self.round == self.config.rounds:
-            self.killgame = True
+            self.endgame()
             return
 
         self.selfsubbed = False
@@ -432,6 +400,46 @@ class Acro(Dendrite):
         self.contenders = []
         self.gimps = {}
         self.mark = mktime(localtime())
-        self.announce("Next round in " + str(self.config.rest) + " seconds.")
         self.round += 1
         self.stage = "waiting"
+        self.announce("Next round in " + str(self.config.rest) + " seconds.")
+
+
+    def endgame(self):
+        self.contenders = []
+        self.voters = []
+        self.active = False
+        self.paused = False
+        self.announce("Game over.")
+
+
+    @axon
+    @help("<show cumulative acro game scores>")
+    def boards(self):
+        scores = {}
+
+        # I know this is kind of ridculous, but didn't
+        # have a database in the beginning and didn't
+        # want to redo everything when we got one.
+        for path, dirs, files in os.walk(os.path.abspath(self.config.records)):
+            for file in files:
+                for line in open(path + "/" + file):
+                    if line.find(":") != -1: continue
+
+                    try:
+                        player, score, toss = line.split()
+                        if player in scores:
+                            scores[player]['score'] += int(score)
+                            scores[player]['rounds'] += 1
+                        else:
+                            scores[player] = {'score': int(score), 'rounds': 1}
+                    except:
+                        continue
+
+        for player in scores:
+            score = scores[player]['score']
+            average = score / scores[player]['rounds']
+
+            self.chat(player + ": " + str(score) + " (" + str(average) + " per round)")
+
+
