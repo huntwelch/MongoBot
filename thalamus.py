@@ -15,8 +15,7 @@ from id import Id
 # body, or in this case IRC. It is responsible for relaying
 # input and out to the IRC server in a sane (well... yeah...
 # whatever) manner; and triggering the necessary brainmeats
-# in the cortex when commands are recognized. Changes to
-# Thalamus require a reboot.
+# in the cortex when commands are recognized.
 class Thalamus(object):
 
     cx = False

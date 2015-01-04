@@ -17,7 +17,6 @@ from staff import Butler
 from autonomic import serotonin, Neurons, Synapse
 from cybernetics import metacortex
 from id import Id
-from thalamus import Thalamus
 
 
 # Basically all the interesting interaction with
