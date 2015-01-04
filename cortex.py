@@ -1,22 +1,19 @@
 import re
 import os
-import sys
 import shutil
 import pkgutil
 import string
 import traceback
 
-from datetime import date, timedelta, datetime
-from pytz import timezone
-from time import time, mktime, localtime, sleep
+from datetime import date, timedelta
+from time import time, mktime, localtime
 from random import randint
 from config import load_config
 from getpass import getpass
-from pprint import pprint
 
-from datastore import Drinker, connectdb
-from util import unescape, shorten, ratelimited, savefromweb, zalgo
-from staff import Browser, Butler
+from datastore import connectdb
+from util import ratelimited, zalgo
+from staff import Butler
 from autonomic import serotonin, Neurons, Synapse
 from cybernetics import metacortex
 from id import Id
@@ -164,10 +161,15 @@ class Cortex:
 
     def command(self, sender, cmd, piped=False, silent=False):
 
+        # Limit commands to allowed channels.
         if self.context in self.channels \
             and 'command' not in self.channels[self.context]['mods']:
                 return
 
+        # This handles piping. Piping just breaks
+        # off the first command, gathers its output
+        # and runs command again on the next part
+        # of the chain until it's done.
         chain = cmd.split('|', 1)
         pipe = False
 
@@ -185,12 +187,15 @@ class Cortex:
         what = _what[1:]
         means = _what[:1]
 
+        # These are specific command malformations
+        # that cropped up.
         is_nums = re.search("^[0-9]+", what)
         is_breaky = re.search("^" + re.escape(self.personality.command_prefix) + "|[^\w]+", what)
 
         if is_nums or is_breaky:
             return
 
+        # Small convenience feature.
         if not what:
             if not self.lastcommand:
                 return

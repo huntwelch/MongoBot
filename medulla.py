@@ -1,5 +1,6 @@
 import os
 import sys
+
 import cortex
 import thalamus
 
@@ -7,7 +8,6 @@ from config import load_config
 from time import sleep, mktime, localtime
 from hyperthymesia import Hyperthymesia
 
-from pprint import pprint
 
 # Welcome to the beginning of a very strained brain metaphor!
 # This is the shell for running the cortex. Ideally, this will never

@@ -6,10 +6,8 @@ import traceback
 
 from autonomic import Synapse
 from config import load_config
-from time import sleep, time
+from time import time
 from id import Id
-
-from pprint import pprint
 
 
 # Welcome to the thalamus - the switchboard of the brain.
