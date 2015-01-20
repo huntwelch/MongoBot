@@ -277,7 +277,6 @@ class Cortex:
             result = []
 
             if not components:
-                self.chat("No args to iter. Bitch.")
                 self.multis = 0
                 return
 
