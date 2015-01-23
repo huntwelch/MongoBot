@@ -380,7 +380,7 @@ class Broca(Dendrite):
             self.chat("chillin", target=target)
             return
 
-        if sentence.lower().find("murican") != -1:
+        if sentence.lower().find("murica") != -1:
             self.chat("fuck yeah", target=target)
             return
 

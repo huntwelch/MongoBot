@@ -28,7 +28,7 @@ class Channeling(Dendrite):
     def chanstat(self):
         message = ['Connected to %s channels.' % len(self.cx.channels)]
         for channel in self.cx.channels:
-            message.append('%s (%s)' % (channel, ', '.join(self.cx.channels[channel])))
+            message.append('%s (%s)' % (channel, ', '.join(self.cx.channels[channel].mods)))
 
         return message
 
@@ -88,7 +88,7 @@ class Channeling(Dendrite):
             return 'Mod how?'
 
         if not what and not chan and len(self.values) < 2:
-            return 'Usage: -modchan #channel +mod1 -mod2'
+            return 'Usage: .modchan #channel +mod1 -mod2'
 
         if not chan:
             chan = self.massage(self.values.pop(0))

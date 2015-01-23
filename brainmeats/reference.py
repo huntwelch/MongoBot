@@ -384,3 +384,20 @@ class Reference(Dendrite):
         return 'Get entirely the fuck out of here with that weekday shit'
 
 
+    @axon
+    def mta(self):
+        if not self.values:
+            return 'Which line?'
+
+        q = self.values[0]
+        info = Browser('http://web.mta.info/status/serviceStatus.txt').soup()
+
+        lines = info.find_all('line')
+        for line in lines:
+            if q.lower() in line.find('name').string.lower():
+                message = '%s: %s' % (line.find('name').string, line.find('status').string)
+                if line.find('status').string != 'GOOD SERVICE':
+                    message = '%s %s%s' % (message, 'http://www.mta.info/status/subway/', line.find('name').string)
+                return message
+
+        return 'Not found'
