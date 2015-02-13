@@ -274,6 +274,6 @@ class Thalamus(object):
         else:
             self.cx.values = False
 
-        self.cx.butler.do(self.cx.command, (source, args[-1]))
+        self.cx.butler.do(self.cx.command, (user.name, args[-1]))
 
         return (target, source, args)

@@ -70,6 +70,11 @@ class Alias(mongoengine.EmbeddedDocument):
     definition = StringField(required=True)
 
 
+class Defaults(mongoengine.Document):
+    command = StringField(required=True)
+    response = StringField(required=True)
+
+
 class Position(EmbeddedDocument):
 
     symbol = StringField(required=True)

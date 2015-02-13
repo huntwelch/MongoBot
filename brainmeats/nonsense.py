@@ -2,11 +2,11 @@ import os
 import time
 import simplejson
 
-from autonomic import axon, help, Dendrite, public, Receptor, Cerebellum
+from autonomic import axon, help, Dendrite, public, Receptor, Cerebellum, alias
 from util import colorize, shorten, zalgo
 from staff import Browser
 from random import choice, randint
-from datastore import Drinker
+from datastore import Drinker, Defaults
 
 
 # Every drunk conversation that produces the idea for
@@ -99,7 +99,7 @@ class Nonsense(Dendrite):
         except:
             return 'Use a rubber if you sleep with dcross\'s mother.'
 
-        return json['slip']['advice'] + ".. in bed."
+        return json['slip']['advice'] + ".. except in bed."
 
 
     @axon
@@ -392,3 +392,22 @@ class Nonsense(Dendrite):
     @help('Link to best website ever.')
     def bestwebsiteever(self):
         return 'http://stilldrinking.org'
+
+
+    @axon
+    @alias('set')
+    @help('Set a default response.')
+    def setdefault(self):
+        if not self.values or len(self.values) < 2:
+            return 'set COMMAND RESPONSE'
+
+        com = Defaults.objects(command=self.values[0])
+        if com:
+            com = com[0]
+            com.response = ' '.join(self.values[1:])
+        else:
+            com = Defaults(command=self.values[0], response=' '.join(self.values[1:]))
+
+        com.save()
+
+        return 'Response set'

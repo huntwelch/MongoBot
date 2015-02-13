@@ -11,7 +11,7 @@ from random import randint
 from config import load_config
 from getpass import getpass
 
-from datastore import connectdb
+from datastore import connectdb, Defaults
 from util import ratelimited, zalgo
 from staff import Butler
 from autonomic import serotonin, Neurons, Synapse
@@ -409,4 +409,8 @@ class Cortex:
 
     # When all else fails.
     def default(self):
+        backup = Defaults.objects(command=self.lastcommand)
+        if backup:
+            return backup[0].response
+
         self.act(" cannot do this thing :'(")

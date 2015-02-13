@@ -376,6 +376,12 @@ class Broca(Dendrite):
             self.chat("yeah WHAT?? Oh yes he DID", target=target)
             return
 
+        if sentence.lower() == 'boom':
+            self.chat(u'(\u2022_\u2022)', target=target)
+            self.chat(u'( \u2022_\u2022)>\u2310 \u25A1-\u25A1', target=target)
+            self.chat(u'(\u2310 \u25A1_\u25A1)', target=target)
+            return
+
         if sentence.lower() == "sup":
             self.chat("chillin", target=target)
             return
