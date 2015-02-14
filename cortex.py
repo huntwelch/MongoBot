@@ -7,7 +7,7 @@ import traceback
 
 from datetime import date, timedelta
 from time import time, mktime, localtime
-from random import randint
+from random import randint, choice
 from config import load_config
 from getpass import getpass
 
@@ -411,6 +411,6 @@ class Cortex:
     def default(self):
         backup = Defaults.objects(command=self.lastcommand)
         if backup:
-            return backup[0].response
+            return choice(backup).response
 
         self.act(" cannot do this thing :'(")

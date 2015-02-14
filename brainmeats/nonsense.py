@@ -401,13 +401,17 @@ class Nonsense(Dendrite):
         if not self.values or len(self.values) < 2:
             return 'set COMMAND RESPONSE'
 
-        com = Defaults.objects(command=self.values[0])
-        if com:
-            com = com[0]
-            com.response = ' '.join(self.values[1:])
-        else:
-            com = Defaults(command=self.values[0], response=' '.join(self.values[1:]))
-
-        com.save()
+        Defaults(command=self.values[0], response=' '.join(self.values[1:])).save()
 
         return 'Response set'
+
+
+    @axon
+    def cleardefaults(self):
+        if not self.values:
+            return 'Clear what?'
+
+        Defaults.objects(command=self.values[0]).delete()
+
+        return 'Responses cleared'
+
