@@ -396,7 +396,7 @@ class Nonsense(Dendrite):
 
     @axon
     @alias('set')
-    @help('Set a default response.')
+    @help('COMMAND RESPONSE <set a default response>')
     def setdefault(self):
         if not self.values or len(self.values) < 2:
             return 'set COMMAND RESPONSE'
@@ -407,6 +407,8 @@ class Nonsense(Dendrite):
 
 
     @axon
+    @alias('clear')
+    @help('COMMAND <clear all defaults for a command>')
     def cleardefaults(self):
         if not self.values:
             return 'Clear what?'
