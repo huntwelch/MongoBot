@@ -237,6 +237,9 @@ class Reference(Dendrite):
 
         string = ' '.join(self.values)
 
+        if string.replace(' ','') == '6*9':
+            return '42'
+
         # This is to stop future Kens
         if "__" in string: return 'Rejected.'
 

@@ -62,6 +62,7 @@ class Linker(Dendrite):
         # Don't parse certain URLs - return false for these
         if (url.find('roa.st') != -1 or
             url.find('gist.github') != -1 or
+            url.find('drafts') != -1 or
             url.find('twitter.com') != -1):
             return False
 
@@ -81,6 +82,8 @@ class Linker(Dendrite):
 
     @Receptor('url')
     def random_tweet(self, url):
+
+        return
 
         if self.cleanse(url) == False:
             return

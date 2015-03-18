@@ -32,6 +32,7 @@ class Cortex:
     lastpublic = False
     lastprivate = False
     lastchat = False
+    lastid = False
     lastsender = False
     lastrealsender = False
     gettingnames = True

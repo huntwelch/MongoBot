@@ -89,6 +89,7 @@ class Medulla:
         import autonomic
         import cortex
         import thalamus
+        import id
 
         reload(datastore)
         reload(autonomic)
@@ -96,6 +97,7 @@ class Medulla:
         reload(staff)
         reload(cortex)
         reload(thalamus)
+        reload(id)
 
         self.brain = cortex.Cortex(self, True)
         self.thalamus = thalamus.Thalamus(self, self.brain)

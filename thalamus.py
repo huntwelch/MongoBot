@@ -222,6 +222,7 @@ class Thalamus(object):
         user = Id(source)
         target = args[0] if args[0] != self.name else user.nick
 
+        self.cx.lastid = user.fullid
         self.cx.lastsender = user.nick
         self.cx.context = target
 

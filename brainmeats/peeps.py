@@ -44,11 +44,19 @@ class Peeps(Dendrite):
         if not self.values:
             return 'If you\'re unemployed, that\'s cool, just don\'t abuse the bot'
 
-        user = Id(self.lastsender)
+        user = Id(self.lastid)
         if not user.is_authenticated:
             return 'That\'s cool bro, but I don\'t know you!'
 
-        user.company = ' '.join(self.values)
+        drinker = Drinker.objects(name=user.name)
+        if drinker:
+            drinker = drinker[0]
+            drinker.company = ' '.join(self.values)
+        else:
+            drinker = Drinker(name=user.name, company=' '.join(self.values))
+
+        drinker.save()
+
         return 'I know where you work... watch your back.'
 
 
@@ -208,7 +216,7 @@ class Peeps(Dendrite):
     @axon
     @help("PASSWD <set admin password>")
     def passwd(self):
-        whom = Id(self.lastsender)
+        whom = Id(self.lastid)
 
         if not whom.is_authenticated:
             self.chat('STRANGER DANGER!')
@@ -238,7 +246,7 @@ class Peeps(Dendrite):
             self.chat('Not in the channel, you twit.')
             return
 
-        whom = Id(self.lastsender)
+        whom = Id(self.lastid)
 
         if not whom.identify(' '.join(self.values)):
             self.chat("I don't know you... go away...")
@@ -254,7 +262,7 @@ class Peeps(Dendrite):
             self.chat("Who are you trying to add?")
             return
 
-        whom = Id(self.lastsender)
+        whom = Id(self.lastid)
 
         if not whom.is_authenticated:
             self.chat("I'm sorry, Dave, I'm afraid I can't do that")
@@ -283,7 +291,7 @@ class Peeps(Dendrite):
             self.chat("Just one good ol'merican ten-digit number, thank ya kindly.")
             return
 
-        whom = Id(self.lastsender)
+        whom = Id(self.lastid)
         whom.phone = phone
         self.chat("Number updated.")
 

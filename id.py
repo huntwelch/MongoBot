@@ -12,6 +12,7 @@ class Id(object):
     ident = False
     host = False
     ip = False
+    fullid = False
 
     is_authenticated = False
     is_recognized = False
@@ -32,6 +33,8 @@ class Id(object):
         else:
             user = arguments[0]
 
+            self.fullid = user
+
             try:
                 self.nick, self.ident = user.split('!')
                 self.host = self.ident.split('@', 1)[1]
@@ -45,6 +48,8 @@ class Id(object):
 
         if not self.nick:
             return
+
+        # ident not getting set for some reason?
 
         self.is_recognized = True
 
@@ -143,10 +148,10 @@ class Id(object):
 
         obj = hashlib.sha256(password)
         if obj.hexdigest() != self.prop['password']:
-            return False
+            return "Hex check failed."
 
         self.is_authenticated = True
-        self.prop['idents'].append(self.ident)
+        self.prop.idents.append(self.ident)
 
         self.prop.save()
 

@@ -46,7 +46,7 @@ class Stockgame(Dendrite):
             self.chat("No penny stocks")
             return
 
-        drinker = Id(whom)
+        drinker = Id(self.lastid)
 
         if not drinker.cash:
             drinker.cash = self.config.startupcash
@@ -98,7 +98,7 @@ class Stockgame(Dendrite):
             self.chat("Stock not found")
             return
 
-        drinker = Id(whom)
+        drinker = Id(self.lastid)
         if not drinker.is_authenticated:
             self.chat("You don't have a portfolio")
             return
@@ -222,7 +222,7 @@ class Stockgame(Dendrite):
 
         whom = self.lastsender
 
-        drinker = Id(whom)
+        drinker = Id(self.lastid)
 
         self.chat("You gots $%.02f" % drinker.cash)
 

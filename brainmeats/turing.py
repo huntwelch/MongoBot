@@ -23,7 +23,7 @@ class Turing(Dendrite):
         evil = ['salias', 'ralias', 'lalias', 'dalias']
         definition = ' '.join(self.values[1:])
 
-        drinker = Id(whom)
+        drinker = Id(self.lastid)
         # drinker = Drinker.objects(name=whom).first()
 
         if not drinker.is_authenticated:
@@ -96,7 +96,7 @@ class Turing(Dendrite):
             self.chat(name + " deleted.")
 
     def _get_drinker(self):
-        drinker = Id(self.lastsender)
+        drinker = Id(self.lastid)
 
         if not drinker.is_authenticated:
             self.chat('Be gone peasant.')

@@ -133,9 +133,9 @@ class Broker(object):
         # See http://www.gummy-stuff.org/Yahoo-data.htm for more
         fields = OrderedDict([
             ('symbol', 's'),
-            ('price', 'k1'),
-            ('perc_change', 'k2'),
-            ('change', 'c6'),
+            ('price', 'l1'),
+            ('perc_change', 'p2'),
+            ('change', 'c1'),
             ('exchange', 'x'),
             ('company', 'n'),
             ('volume', 'v'),
@@ -143,8 +143,8 @@ class Broker(object):
         ])
 
         # yahoo specific
-        url = 'http://finance.yahoo.com/d/quotes.csv'
-        params = {'f': ''.join(fields.values()), 's': symbol}
+        url = 'http://download.finance.yahoo.com/d/quotes.csv'
+        params = {'f': ''.join(fields.values()), 's': symbol, 'e': '.csv'}
 
         try:
             raw_string = Browser(url, params).read()
@@ -174,10 +174,11 @@ class Broker(object):
         return self.stock is not None
 
     def showquote(self, context):
+
         if not self.stock:
             return False
 
-        name = "%s (%s)" % (self.company, self.symbol)
+        name = "%s (%s)" % (self.company, self.symbol.upper())
         changestring = str(self.change) + " (" + ("%.2f" % self.perc_change) + "%)"
 
         if self.change < 0:

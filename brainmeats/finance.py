@@ -29,6 +29,7 @@ class Finance(Dendrite):
             stock = Broker(symbol)
             showit = stock.showquote(self.context)
         except Exception as e:
+            return str(e)
             pass
 
         if not showit:
