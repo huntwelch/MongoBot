@@ -76,6 +76,9 @@ class Reference(Dendrite):
         return status
 
 
+    # This single api call ends up replacing a
+    # lot of other functionality. I do not remember
+    # why the result variable is called prozac.
     @axon
     @alias('wolfram')
     @help('SEARCH_TERM <look something up in wolfram alpha>')
@@ -316,6 +319,8 @@ class Reference(Dendrite):
             return 'Dunno bro'
 
 
+    # This is useful when piping output to other
+    # functions, if you can remember it.
     @axon
     @help('REGEX LINE <extract re.search(REGEX, LINE).group(1)>')
     @alias('regex', 'rx', 'extract')
@@ -375,6 +380,7 @@ class Reference(Dendrite):
         return result
 
 
+    # It's shocking how much use this command gets.
     @axon
     def isitfriday(self):
         today = time.localtime().tm_wday
@@ -387,6 +393,9 @@ class Reference(Dendrite):
         return 'Get entirely the fuck out of here with that weekday shit'
 
 
+    # Really only useful if you live in NYC,
+    # but gets a good laugh whenever it reports
+    # L TRAIN: GOOD SERVICE
     @axon
     def mta(self):
         if not self.values:

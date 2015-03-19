@@ -102,6 +102,9 @@ class Nonsense(Dendrite):
         return json['slip']['advice'] + ".. except in bed."
 
 
+    # An endless avalanche of whiny first world teenagers
+    # comlaining about their worthless entitled lives.
+    # I don't know why it's cathartic, but it is.
     @axon
     @help("SEARCHTERM <grab random fml entry>")
     def fml(self):
@@ -394,6 +397,12 @@ class Nonsense(Dendrite):
         return 'http://stilldrinking.org'
 
 
+    # So. There's a habit in the chatroom of taking
+    # whatever somebody just said and running some
+    # variation of it as a bot command. Instead of
+    # writing a new axon for various snarky responses,
+    # I figured people can just set there own at
+    # will. Makes for a good easter egg now and then.
     @axon
     @alias('set')
     @help('COMMAND RESPONSE <set a default response>')
