@@ -2,6 +2,7 @@ import os
 import re
 import pkgutil
 import threading
+import subprocess
 
 from autonomic import axon, help, Dendrite, public, alias
 from cybernetics import metacortex
@@ -109,6 +110,12 @@ class System(Dendrite):
         self.cx.master.reload(True)
         self.chat("I know kung-fu.")
 
+    # Find out what revision we are on
+    @axon
+    @help("<show git hash>")
+    def gitversion(self):
+        sha_hash = subprocess.check_output("git rev-parse HEAD", shell=True)
+        self.chat("I'm running revision %s" % sha_hash)
 
     # Turn libs on.
     @axon
