@@ -23,7 +23,7 @@ class Stockgame(Dendrite):
 
         try:
             quantity = int(self.values[0])
-            symbol = self.values[1]
+            symbol = self.values[1].upper()
         except:
             self.chat("That's not right")
             return
@@ -83,7 +83,7 @@ class Stockgame(Dendrite):
 
         try:
             quantity = int(self.values[0])
-            symbol = self.values[1]
+            symbol = self.values[1].upper()
         except:
             self.chat("That's not right")
             return
@@ -106,7 +106,7 @@ class Stockgame(Dendrite):
         check = []
         keep = []
         for p in drinker.positions:
-            if p.symbol == stock.symbol and p.type == ptype:
+            if p.symbol.upper() == stock.symbol and p.type == ptype:
                 check.append(p)
             else:
                 keep.append(p)
