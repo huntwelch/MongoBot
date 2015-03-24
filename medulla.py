@@ -7,6 +7,7 @@ import thalamus
 from config import load_config
 from time import sleep, mktime, localtime
 from hyperthymesia import Hyperthymesia
+from cybernetics import metacortex
 
 
 # Welcome to the beginning of a very strained brain metaphor!
@@ -37,6 +38,8 @@ class Medulla:
         self.thalamus.connect()
         self.brain.thalamus = self.thalamus
         self.brain.logger = self.logger
+
+        metacortex.cx = self.brain
 
         # The pulse file is set as a measure of how
         # long the bot has been spinning its gears
@@ -104,6 +107,8 @@ class Medulla:
 
         self.brain.thalamus = self.thalamus
         self.active = True
+
+        metacortex.cx = self.brain
 
         if not quiet:
             self.brain.act('comes to.')

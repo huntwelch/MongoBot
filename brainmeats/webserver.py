@@ -23,6 +23,22 @@ class Webserver(Dendrite):
         link = "%s/chatlogs?onetime=%s" % (self.config.url, str(num))
         self.chat(link)
 
+    @Receptor('twitch')
+    def getuploads(self):
+        file = '/tmp/uploads.msgs'
+        if not os.path.isfile(file): return
+        if os.stat(file).st_size == 0: return
+
+        with open(file) as f:
+            msgs = f.readlines()
+
+        f.close()
+
+        if msgs:
+            os.remove(file)
+
+        self.chat(msgs, target=self.cx.secrets.primary_channel)
+
 
     @axon
     @help("<Get one-time link to quote list>")
