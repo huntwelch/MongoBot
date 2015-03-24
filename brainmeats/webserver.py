@@ -37,6 +37,9 @@ class Webserver(Dendrite):
         if msgs:
             os.remove(file)
 
+        msgs = [x.strip() for x in msgs]
+        msgs = ', '.join(msgs)
+
         self.chat(msgs, target=self.cx.secrets.primary_channel)
 
 

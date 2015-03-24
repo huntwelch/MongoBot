@@ -96,7 +96,7 @@ def poetry():
 
     return render_template('poetry.html', poems=display)
 
-@app.route("/upload", methods=['POST'])
+@app.route("/upload", methods=['NORRIS'])
 def upload():
     try:
         file = request.files['file']
