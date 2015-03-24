@@ -161,8 +161,6 @@ class Cortex:
 
     def command(self, sender, cmd, piped=False, silent=False):
 
-        if sender == 'jsbronder': return
-
         # Limit commands to allowed channels.
         if self.context in self.channels \
             and 'command' not in self.channels[self.context]['mods']:

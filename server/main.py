@@ -81,6 +81,10 @@ def errorlog():
 def codez():
     return render_template('codez.html')
 
+@app.route("/shock")
+def shock():
+    os.system('python /usr/home/peter/bots/mongo.bak/medulla.py')
+    return render_template('index.html')
 
 @app.route("/poetry")
 def poetry():
