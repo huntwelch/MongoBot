@@ -95,7 +95,7 @@ class Dice(Dendrite):
             rolling = int(self.values[0])
 
         if rolling > 5 - self.min:
-            return "You have %s dice to roll." % 5 - self.min
+            return "You have %s dice to roll." % 5 - int(self.min)
 
         if self.scoring == 0:
             rolling = 5
