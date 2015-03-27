@@ -2,6 +2,7 @@ import collections
 import random
 
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse, Receptor
+from util import colorize
 
 # Today, 3/24/2015 is Danny O'Shea's birthday.
 # In honor of it, today is the day I implement
@@ -73,9 +74,56 @@ class Dice(Dendrite):
     @axon
     @help('<show current scores>')
     def dicescore(self):
+        if not self.players:
+            return 'Nobody playing'
         for player in self.players:
             self.chat('%s: %s' % (player, self.players[player]['score']))
 
+
+    @axon
+    @help('<join or return to dice game>')
+    @alias('joindice')
+    def joinup(self, _name=None):
+        name = _name or self.lastsender
+
+        if not _name and self.broke:
+            return "No new players after the limit's broken"
+
+        if name in self.playerorder and not _name:
+            return 'You already in bro'
+
+        if name in self.playerorder: return
+
+        self.playerorder.append(name)
+
+        if name in self.players and not _name:
+            return 'You back'
+
+        self.players[name] = {
+            'score': 0,
+            'broke': False,
+        }
+
+        if not _name:
+            return 'You in'
+
+
+    @axon
+    @help('<leave the dice game>')
+    def quitdice(self):
+        if not self.playerorder:
+            return "Nobody playing"
+
+        if self.turn > self.playerorder.index(self.lastsender):
+            self.turn -= 1
+
+        self.playerorder.remove(self.lastsender)
+        return "Yer out"
+
+
+    @axon
+    def activedice(self):
+        return ', '.join(self.playerorder) or "Nobody playing"
 
     @axon
     @help("[HOW_MANY] <roll dem dice>")
@@ -94,8 +142,8 @@ class Dice(Dendrite):
         if self.values:
             rolling = int(self.values[0])
 
-        if rolling > 5 - self.min:
-            return "You have %s dice to roll." % 5 - self.min
+        if rolling > (5 - self.min):
+            return "You have %s dice to roll." % (5 - self.min)
 
         if self.scoring == 0:
             rolling = 5
@@ -116,14 +164,22 @@ class Dice(Dendrite):
 
         busted = False
         message = 'and rolling'
+        color = None
         if scoring == 0:
             self.turn = (self.turn + 1) % len(self.playerorder)
-            message = 'and bust. %s to roll.' % self.playerorder[self.turn]
+            message = 'and bust.'
+
+            if not self.players[self.playerorder[self.turn]]['broke']:
+                message += ' %s to roll.' % self.playerorder[self.turn]
+
             self.score = 0
             busted = True
+            color = 'red'
         if scoring == rolling:
             message = 'and clear!'
             self.score += score
+            color = 'lightcyan'
+
 
         # Common resets
         if scoring in [0, rolling]:
@@ -141,17 +197,28 @@ class Dice(Dendrite):
         self.scoring += scoring
         self.min += min
 
-        self.chat('%s for %s %s' % (' '.join(str(s) for s in result), score + self.score, message))
+        if not color:
+            display = [colorize(str(x), 'lightgreen') if x in [1,5, triple] else str(x) for x in result]
+            message = '%s for %s %s' % (' '.join(display), score + self.score, message)
+        else:
+            message = '%s for %s %s' % (' '.join(str(s) for s in result), score + self.score, message)
+            message = colorize(message, color)
+
+        self.chat(message)
         if busted:
             self.checkwin()
 
 
     @axon
     @help("<Take your score>")
+    @alias('keepit')
     def takeit(self):
 
         if not self.scoredice:
             return "You can't take it right now."
+
+        if not self.playerorder:
+            return "Nobody playing"
 
         if self.playerorder[self.turn] != self.lastsender:
             return "Not your turn"
@@ -163,7 +230,7 @@ class Dice(Dendrite):
 
         player = self.players[self.playerorder[self.turn]]
         player['score'] += self.score
-        if player['score'] >= self.limit:
+        if player['score'] >= self.limit and not self.broke:
             player['broke'] = True
             message += ' %s has been broken! Last chance, people. ' % self.limit
             self.broke = True
@@ -252,18 +319,6 @@ class Dice(Dendrite):
             score = 500
 
         return (score, scoredice, scoring, min, triple)
-
-
-    def joinup(self, name):
-        if name in self.players: return
-
-        self.players[name] = {
-            'score': 0,
-            'broke': False,
-        }
-
-        self.playerorder.append(name)
-
 
     def checkwin(self):
         breaker = self.players[self.playerorder[self.turn]]

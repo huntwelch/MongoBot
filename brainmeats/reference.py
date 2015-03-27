@@ -353,6 +353,9 @@ class Reference(Dendrite):
         if not values:
             values = self.values
 
+        if not values:
+            return "No values. You probably meant .toss"
+
         if values and values[0][:1] == 'd':
             default[0] = 1
             default[1] = values[0][1:]
