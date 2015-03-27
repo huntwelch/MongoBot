@@ -1,28 +1,294 @@
+import collections
+import random
+
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse, Receptor
 
+# Today, 3/24/2015 is Danny O'Shea's birthday.
+# In honor of it, today is the day I implement
+# the gambling dice game he taught me at the
+# the very bar I'm sitting at, where a white
+# Polish dude is telling a racist joke to the
+# black bartender, who has no patience for it.
 @Cerebellum
 class Dice(Dendrite):
-
+    limit = 1000
+    turn = 0
+    min = 0
+    scoring = 0
+    score = 0
+    broke = False
     players = {}
+    scoredice = []
+    playerorder = []
+
+    # Would be nice, but the dice are pathetically
+    # small and hard to see.
+    prettydice = [
+        u'\u2680',
+        u'\u2681',
+        u'\u2682',
+        u'\u2683',
+        u'\u2684',
+        u'\u2685',
+    ]
+
 
     def __init__(self, cortex):
         super(Dice, self).__init__(cortex)
 
 
-    # Example command function
-    # The axon decorator adds it to the available chatroom commands,
-    # based on the name of the function. The @help adds an entry to
-    # the appropriate category.
     @axon
-    @help("<I am an example>")
-    def function_name(self):
-        return
+    @help('<show rules for dice game>')
+    def dicerules(self):
+        rules = [
+            '.toss to roll',
+            '1s are 100, 5s are 50, 3 of a kind is die value * 100, except 3 ones, which is 1000',
+            'You can keep rolling as long as you keep one scoring die or triplet',
+            '.toss automatically roles your non-scoring dice. If you want to roll more, specify with .toss 3',
+            'If you roll without scoring, you lose all points and your turn is over',
+            'If all your dice are scoring, you clear and must roll again, keeping your points so far',
+            'Otherwise you can stop whenever you want with .takeit',
+            'Once somebody breaks the limit, everybody else gets one more chance to top their score',
+            'Highest score wins',
+        ]
+
+        return rules
 
 
-    # Example receptor method
-    # The receptor decorator makes the defined method get autocalled
-    # for any corresponding synapse. To see a list of available synapses
-    # run tools/synapse.py or ask the bot for -synapse when running.
-    @Receptor('heartbeat')
-    def auto(self):
-        return
+    @axon
+    @help('LIMIT <set the the score ceiling>')
+    def setlimit(self):
+        if self.players:
+            return "Can't change limit mid game"
+        if not self.values:
+            return "Specify limit"
+        try:
+            self.limit = int(self.values[0])
+        except:
+            return "Something wasn't right there"
+
+        return "Limit set to %s" % self.limit
+
+
+    @axon
+    @help('<show current scores>')
+    def dicescore(self):
+        for player in self.players:
+            self.chat('%s: %s' % (player, self.players[player]['score']))
+
+
+    @axon
+    @help("[HOW_MANY] <roll dem dice>")
+    def toss(self):
+
+        if self.lastsender not in self.players and self.broke:
+            return "No new players after the limit's broken"
+
+        self.joinup(self.lastsender)
+        if self.playerorder[self.turn] != self.lastsender:
+            return "Not your turn"
+
+
+        rolling = 5 - self.scoring
+
+        if self.values:
+            rolling = int(self.values[0])
+
+        if rolling > 5 - self.min:
+            return "You have %s dice to roll." % 5 - self.min
+
+        if self.scoring == 0:
+            rolling = 5
+
+        # Apply last roll score after determining how many
+        # dice got picked back up. Maybe better done with a
+        # pendingscore variable but this works.
+        if self.scoredice:
+            self.scoring = len(self.scoredice[:-rolling])
+            self.scoredice = self.scoredice[:-rolling]
+            score, scoredice, scoring, min, triple = self.getscore(self.scoredice)
+            self.score += score
+
+        result = self.roll(rolling)
+
+        score, scoredice, scoring, min, triple = self.getscore(result)
+        self.scoredice.extend(scoredice)
+
+        busted = False
+        message = 'and rolling'
+        if scoring == 0:
+            self.turn = (self.turn + 1) % len(self.playerorder)
+            message = 'and bust. %s to roll.' % self.playerorder[self.turn]
+            self.score = 0
+            busted = True
+        if scoring == rolling:
+            message = 'and clear!'
+            self.score += score
+
+        # Common resets
+        if scoring in [0, rolling]:
+            scoring = 0
+            score = 0
+            self.scoring = 0
+            self.scoredice = []
+            self.min = 0
+            min = 0
+
+        if self.scoredice:
+            self.scoredice = sorted(scoredice)
+            self.scoredice.extend([None] * (5 - len(self.scoredice)))
+
+        self.scoring += scoring
+        self.min += min
+
+        self.chat('%s for %s %s' % (' '.join(str(s) for s in result), score + self.score, message))
+        if busted:
+            self.checkwin()
+
+
+    @axon
+    @help("<Take your score>")
+    def takeit(self):
+
+        if not self.scoredice:
+            return "You can't take it right now."
+
+        if self.playerorder[self.turn] != self.lastsender:
+            return "Not your turn"
+
+        score, scoredice, scoring, min, triple = self.getscore(self.scoredice)
+        self.score += score
+
+        message = "%s takes it at %s. " % (self.playerorder[self.turn], self.score)
+
+        player = self.players[self.playerorder[self.turn]]
+        player['score'] += self.score
+        if player['score'] >= self.limit:
+            player['broke'] = True
+            message += ' %s has been broken! Last chance, people. ' % self.limit
+            self.broke = True
+
+        self.turn = (self.turn + 1) % len(self.playerorder)
+
+        if not self.players[self.playerorder[self.turn]]['broke']:
+            message += '%s to roll.' % self.playerorder[self.turn]
+
+        self.score = 0
+        self.scoring = 0
+        self.scoredice = []
+        self.min = 0
+
+        self.chat(message)
+        self.checkwin()
+
+
+    def roll(self, count):
+        result = []
+        while count:
+            count -= 1
+            result.append(random.randint(1,6))
+
+        # superfluous here, but handy if you switch
+        # to quantum results
+        result = [int(x) for x in result]
+
+        return result
+        # Weirdly these numbers didn't seem super random. Hit 12345
+        # like 1 out of 10.
+        #return self.cx.commands.get('random')(['%sd6' % count], True)
+
+
+    def pretty(self, dice):
+        display = u''
+        for die in dice:
+            display += '%s%s ' % (self.prettydice[int(die)-1], die)
+
+        return display
+
+
+    def getscore(self, dice):
+        counter = collections.Counter(dice)
+        trip = counter.most_common(1)[0]
+        triple = 0
+        score = 0
+        scoring = 0
+        scoredice = []
+        min = 0
+        if trip[1] > 2 and trip[0] is not None:
+            triple = trip[0]
+            scoring += 3
+            min = 3
+            scoredice = [triple,triple,triple]
+            if triple == 1:
+                score = 1000
+            else:
+                score = 100*triple
+            if trip[1] > 3:
+                scoredice.append(triple)
+                scoring += 1
+                score *= 2
+            if trip[1] > 4:
+                scoredice.append(triple)
+                scoring += 1
+                score *= 2
+
+        for die in counter:
+            if die == triple: continue
+            num = counter[die]
+            if die == 5:
+                scoredice.extend([5] * num)
+                min = 1
+                scoring += num
+                score += num*50
+            if die == 1:
+                scoredice.extend([1] * num)
+                min = 1
+                scoring += num
+                score += num*100
+
+        # override everything
+        if sorted(dice) == [1,2,3,4,5]:
+            scoring = 5
+            score = 500
+
+        return (score, scoredice, scoring, min, triple)
+
+
+    def joinup(self, name):
+        if name in self.players: return
+
+        self.players[name] = {
+            'score': 0,
+            'broke': False,
+        }
+
+        self.playerorder.append(name)
+
+
+    def checkwin(self):
+        breaker = self.players[self.playerorder[self.turn]]
+        if not breaker['broke']: return
+
+        winner = self.playerorder[self.turn]
+        top = breaker['score']
+        for player in self.players:
+            if self.players[player]['score'] <= top: continue
+
+            winner = player
+            top = self.players[player]['score']
+
+        self.chat('%s wins it with %s.' % (winner, top))
+
+        self.reset()
+
+
+    def reset(self):
+        self.turn = 0
+        self.min = 0
+        self.scoring = 0
+        self.score = 0
+        self.broke = False
+        self.players = {}
+        self.scoredice = []
+        self.playerorder = []
+

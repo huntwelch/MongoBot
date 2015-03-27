@@ -347,21 +347,24 @@ class Reference(Dendrite):
 
     @axon
     @alias('d', 'roll')
-    def random(self):
+    def random(self, values=False, array=False):
         default = [0, 9999, 1, 1]
 
-        if self.values and self.values[0][:1] == 'd':
+        if not values:
+            values = self.values
+
+        if values and values[0][:1] == 'd':
             default[0] = 1
-            default[1] = self.values[0][1:]
+            default[1] = values[0][1:]
             send = default
-        elif 'd' in self.values[0]:
+        elif 'd' in values[0]:
             default[0] = 1
-            num, high = self.values[0].split('d')
+            num, high = values[0].split('d')
             default[1] = high
             default[3] = num
             send = default
-        elif self.values:
-            splice = len(self.values)
+        elif values:
+            splice = len(values)
             send = self.values + default[splice:]
         else:
             send = default
@@ -376,6 +379,9 @@ class Reference(Dendrite):
         # Needs to be vastly improved for other sets
         site = Browser(url)
         result = site.read().split(':')[2].strip()[:-6]
+
+        if array:
+            result = result.split(', ')
 
         return result
 

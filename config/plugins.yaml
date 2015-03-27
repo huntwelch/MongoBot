@@ -5,6 +5,7 @@ plugins:
   - broca
   - channeling
   - chess
+  - dice
   - facebook
   - finance
   - hangman

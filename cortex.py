@@ -289,7 +289,8 @@ class Cortex:
             try:
                 result = self.commands.get(what, self.default)()
             except Exception as e:
-                self.chat(str(e))
+                # self.chat(str(e))
+                self.chat(traceback.format_exc().replace('\n', ' '))
                 print traceback.format_exc()
 
         if not result:
