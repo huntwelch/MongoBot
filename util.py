@@ -58,7 +58,7 @@ def colorize(text, color):
     if isinstance(color, str):
         color = colors[color]
 
-    return "\x03%s %s\x03\x0f" % (str(color), text)
+    return "\x03%s\x02%s\x02\x03\x0f" % (str(color), text)
 
 
 def shorten(url):

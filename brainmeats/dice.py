@@ -1,7 +1,7 @@
 import collections
 import random
 
-from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse, Receptor
+from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse, Receptor, autocommand
 from util import colorize
 
 # Today, 3/24/2015 is Danny O'Shea's birthday.

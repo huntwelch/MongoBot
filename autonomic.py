@@ -11,6 +11,23 @@ from pprint import pprint
 # inheriting the state of the cortex as the
 # cortex monitors the chatroom. It also adds
 # some shortcuts to cortex functions.
+
+# future experiment
+
+def router(self):
+    destination = self.values.pop(0)
+    if not self[destination].create_command: return
+    return self[destination]()
+
+def autocommand(fn_name):
+    def add(object):
+        object.routed = True
+        object[fn_name] = router
+        return object
+
+    return add
+
+
 class Dendrite(object):
 
     config = None
@@ -107,6 +124,11 @@ def serotonin(cortex, meatname, electroshock):
 
     helps = []
 
+    if hasattr(brainmeat, 'routed'):
+        cortex.commands[meatname] = brainmeat[meatname]
+        return 
+
+
     for name, method in methods:
         if not hasattr(method, 'create_command'):
             continue
@@ -192,7 +214,8 @@ class Synapse(Neurons):
         return glutamate
 
 
-# Receptor is an observer decorator that will auto trigger when a neuron is fired using
+# Receptor is an observer decorator that will 
+# auto trigger when a neuron is fired using
 # a keyword the receptor is listening for.
 #
 # Usage:
@@ -253,3 +276,5 @@ def alias(*args):
         fn.aliases = args
         return fn
     return add
+
+

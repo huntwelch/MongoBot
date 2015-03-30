@@ -390,6 +390,10 @@ class Broca(Dendrite):
             self.chat("fuck yeah", target=target)
             return
 
+        if sentence.lower().find("hail satan") != -1:
+            self.chat(u"\u26E7\u26E7\u26E7\u26E7\u26E7", target=target)
+            return
+
         if sentence.lower().find("rimshot") != -1:
             self.chat("*ting*", target=target)
             return
