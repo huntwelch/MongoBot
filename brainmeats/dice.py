@@ -15,7 +15,6 @@ class Dice(Dendrite):
     limit = 1000
     turn = 0
     min = 0
-    scoring = 0
     score = 0
     broke = False
     players = {}
@@ -137,7 +136,7 @@ class Dice(Dendrite):
             return "Not your turn"
 
 
-        rolling = 5 - self.scoring
+        rolling = 5 - len(self.scoredice)
 
         if self.values:
             rolling = int(self.values[0])
@@ -145,27 +144,28 @@ class Dice(Dendrite):
         if rolling > (5 - self.min):
             return "You have %s dice to roll." % (5 - self.min)
 
-        if self.scoring == 0:
+        if not self.scoredice:
             rolling = 5
 
         # Apply last roll score after determining how many
         # dice got picked back up. Maybe better done with a
         # pendingscore variable but this works.
         if self.scoredice:
-            self.scoring = len(self.scoredice[:-rolling])
-            self.scoredice = self.scoredice[:-rolling]
-            score, scoredice, scoring, min, triple = self.getscore(self.scoredice)
+            diff = 5 - len(self.scoredice)
+            if rolling > diff:
+                self.scoredice = self.scoredice[:-(rolling - diff)]
+            score, scoredice, min, triple = self.getscore(self.scoredice)
             self.score += score
 
         result = self.roll(rolling)
 
-        score, scoredice, scoring, min, triple = self.getscore(result)
+        score, scoredice, min, triple = self.getscore(result)
         self.scoredice.extend(scoredice)
 
         busted = False
         message = 'and rolling'
         color = None
-        if scoring == 0:
+        if not scoredice:
             self.turn = (self.turn + 1) % len(self.playerorder)
             message = 'and bust.'
 
@@ -175,26 +175,22 @@ class Dice(Dendrite):
             self.score = 0
             busted = True
             color = 'red'
-        if scoring == rolling:
+        if len(scoredice) == rolling:
             message = 'and clear!'
             self.score += score
             color = 'lightcyan'
 
 
         # Common resets
-        if scoring in [0, rolling]:
-            scoring = 0
+        if len(scoredice) in [0, rolling]:
             score = 0
-            self.scoring = 0
             self.scoredice = []
             self.min = 0
             min = 0
 
         if self.scoredice:
-            self.scoredice = sorted(scoredice)
-            self.scoredice.extend([None] * (5 - len(self.scoredice)))
+            self.scoredice = sorted(self.scoredice)
 
-        self.scoring += scoring
         self.min += min
 
         if not color:
@@ -223,7 +219,7 @@ class Dice(Dendrite):
         if self.playerorder[self.turn] != self.lastsender:
             return "Not your turn"
 
-        score, scoredice, scoring, min, triple = self.getscore(self.scoredice)
+        score, scoredice, min, triple = self.getscore(self.scoredice)
         self.score += score
 
         message = "%s takes it at %s. " % (self.playerorder[self.turn], self.score)
@@ -241,7 +237,6 @@ class Dice(Dendrite):
             message += '%s to roll.' % self.playerorder[self.turn]
 
         self.score = 0
-        self.scoring = 0
         self.scoredice = []
         self.min = 0
 
@@ -278,12 +273,10 @@ class Dice(Dendrite):
         trip = counter.most_common(1)[0]
         triple = 0
         score = 0
-        scoring = 0
         scoredice = []
         min = 0
         if trip[1] > 2 and trip[0] is not None:
             triple = trip[0]
-            scoring += 3
             min = 3
             scoredice = [triple,triple,triple]
             if triple == 1:
@@ -292,11 +285,9 @@ class Dice(Dendrite):
                 score = 100*triple
             if trip[1] > 3:
                 scoredice.append(triple)
-                scoring += 1
                 score *= 2
             if trip[1] > 4:
                 scoredice.append(triple)
-                scoring += 1
                 score *= 2
 
         for die in counter:
@@ -305,20 +296,18 @@ class Dice(Dendrite):
             if die == 5:
                 scoredice.extend([5] * num)
                 min = 1
-                scoring += num
                 score += num*50
             if die == 1:
                 scoredice.extend([1] * num)
                 min = 1
-                scoring += num
                 score += num*100
 
         # override everything
         if sorted(dice) == [1,2,3,4,5]:
-            scoring = 5
+            self.scoredice = dice
             score = 500
 
-        return (score, scoredice, scoring, min, triple)
+        return (score, scoredice, min, triple)
 
     def checkwin(self):
         breaker = self.players[self.playerorder[self.turn]]
@@ -340,7 +329,6 @@ class Dice(Dendrite):
     def reset(self):
         self.turn = 0
         self.min = 0
-        self.scoring = 0
         self.score = 0
         self.broke = False
         self.players = {}
