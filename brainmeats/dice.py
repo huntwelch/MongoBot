@@ -22,6 +22,9 @@ class Dice(Dendrite):
     scoredice = []
     playerorder = []
 
+    top = 0
+    winner = None
+
     # Would be nice, but the dice are pathetically
     # small and hard to see.
     prettydice = [
@@ -78,6 +81,7 @@ class Dice(Dendrite):
             return 'Nobody playing'
         for player in self.players:
             self.chat('%s: %s' % (player, self.players[player]['score']))
+        self.chat('Ceiling is %s' % self.limit)
 
 
     @axon
@@ -204,6 +208,14 @@ class Dice(Dendrite):
             message = '%s for %s %s' % (' '.join(str(s) for s in result), score + self.score, message)
             message = colorize(message, color)
 
+        if not busted and self.broke:
+            self.gethigh()
+            total_now = self.players[self.playerorder[self.turn]]['score'] + score + self.score
+            if total_now <= self.top:
+                message += ' %s to go for the win.' % (self.top - total_now + 50)
+            else:
+                message += ' Winning with %s' % total_now
+
         self.chat(message)
         if busted:
             self.checkwin()
@@ -232,7 +244,7 @@ class Dice(Dendrite):
         player['score'] += self.score
         if player['score'] >= self.limit and not self.broke:
             player['broke'] = True
-            message += ' %s has been broken! Last chance, people. ' % self.limit
+            message += ' %s has been broken with %s! Last chance, people. ' % (self.limit, player['score'])
             self.broke = True
 
         self.turn = (self.turn + 1) % len(self.playerorder)
@@ -320,20 +332,21 @@ class Dice(Dendrite):
 
         return (score, scoredice, scoring, min, triple)
 
+
+    def gethigh(self):
+        for player in self.players:
+            if self.players[player]['score'] <= self.top: continue
+            self.winner = player
+            self.top = self.players[player]['score']
+
+
     def checkwin(self):
         breaker = self.players[self.playerorder[self.turn]]
+
         if not breaker['broke']: return
 
-        winner = self.playerorder[self.turn]
-        top = breaker['score']
-        for player in self.players:
-            if self.players[player]['score'] <= top: continue
-
-            winner = player
-            top = self.players[player]['score']
-
-        self.chat('%s wins it with %s.' % (winner, top))
-
+        self.gethigh()
+        self.chat('%s wins it with %s.' % (self.winner, self.top))
         self.reset()
 
 
