@@ -253,7 +253,8 @@ class Dice(Dendrite):
         result = []
         while count:
             count -= 1
-            result.append(random())
+            random = SystemRandom()
+            result.append(random.randint(1,6))
 
         # superfluous here, but handy if you switch
         # to quantum results
@@ -346,7 +347,3 @@ class Dice(Dendrite):
         self.players = {}
         self.scoredice = []
         self.playerorder = []
-
-    def random():
-        return int((SystemRandom().random() * 10) % 6)
-
