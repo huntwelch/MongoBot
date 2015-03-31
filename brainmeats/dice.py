@@ -1,5 +1,5 @@
 import collections
-import random
+from random import SystemRandom
 
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse, Receptor, autocommand
 from util import colorize
@@ -253,7 +253,7 @@ class Dice(Dendrite):
         result = []
         while count:
             count -= 1
-            result.append(random.randint(1,6))
+            result.append(random())
 
         # superfluous here, but handy if you switch
         # to quantum results
@@ -346,4 +346,7 @@ class Dice(Dendrite):
         self.players = {}
         self.scoredice = []
         self.playerorder = []
+
+    def random():
+        return int((SystemRandom().random() * 10) % 6)
 
