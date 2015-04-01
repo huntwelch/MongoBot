@@ -212,9 +212,9 @@ class Dice(Dendrite):
             self.gethigh()
             total_now = self.players[self.playerorder[self.turn]]['score'] + score + self.score
             if total_now <= self.top:
-                message += ' %s to go for the win.' % (self.top - total_now + 50)
+                message += '. %s to go for the win.' % (self.top - total_now + 50)
             else:
-                message += ' Winning with %s' % total_now
+                message += '. Winning with %s.' % total_now
 
         self.chat(message)
         if busted:
