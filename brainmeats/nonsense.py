@@ -438,3 +438,14 @@ class Nonsense(Dendrite):
 
         return 'Responses cleared'
 
+    @axon
+    @help('generate an excuse for why the code is broken/incomplete/failing/holding the president for ransom')
+    def excuse(self):
+        try:
+            html = Browser('http://developerexcuses.com')
+        except:
+            return 'You\'re on your own this time bud'
+
+        parsed = html.soup()
+        return parsed.a.text
+
