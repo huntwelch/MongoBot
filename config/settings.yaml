@@ -69,6 +69,7 @@ general:
 misc:
   thumbsize: 40
   website: 'http://www.mongobot.com' # Dupped by webserver
+  color: True
 
 # Web stuff
 website: !include webserver.yaml

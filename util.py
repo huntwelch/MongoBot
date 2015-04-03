@@ -8,6 +8,7 @@ from PIL import Image
 from config import load_config
 
 secrets = load_config('config/secrets.yaml')
+settings = load_config('config/settings.yaml')
 
 
 # Utility functions
@@ -36,7 +37,10 @@ def unescape(text):
     return parser.unescape(text)
 
 
-def colorize(text, color):
+def colorize(text, color, colorize=True):
+    if not settings.misc.color or not colorize:
+        return text
+
     colors = {
         "white": 0,
         "black": 1,

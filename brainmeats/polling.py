@@ -3,8 +3,9 @@ from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse, Receptor
 @Cerebellum
 class Polling(Dendrite):
 
-    active = {}
+    active = []
     polled = {}
+
 
     def __init__(self, cortex):
         super(Polling, self).__init__(cortex)
@@ -16,8 +17,7 @@ class Polling(Dendrite):
         if not self.values or len(self.values) < 2:
             return 'That doesn\'t seem like a very exciting poll'
 
-        for item in self.values:
-            self.active[item] = 0
+        self.active = self.values
 
         return 'Poll started'
 
@@ -32,19 +32,14 @@ class Polling(Dendrite):
             return 'No write-ins'
 
         self.polled[self.lastsender] = v
-        self.tally()
         return 'Voted'
 
 
     @axon
     def exitpoll(self):
+        tally = self.polled.values()
         for item in self.active:
-            self.chat('%s: %s' % (item, self.active[item]))
-
-
-    def tally(self):
-        for voter in self.polled:
-            self.active[self.polled[voter]] += 1
+            self.chat('%s: %s' % (item, tally.count(item)))
 
 
 

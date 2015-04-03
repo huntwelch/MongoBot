@@ -144,7 +144,10 @@ class Dice(Dendrite):
         rolling = 5 - self.scoring
 
         if self.values:
-            rolling = int(self.values[0])
+            try:
+                rolling = int(self.values[0])
+            except:
+                return "Don't roll like that"
 
         if rolling > (5 - self.min):
             return "You have %s dice to roll." % (5 - self.min)
@@ -238,10 +241,11 @@ class Dice(Dendrite):
         score, scoredice, scoring, min, triple = self.getscore(self.scoredice)
         self.score += score
 
-        message = "%s takes it at %s. " % (self.playerorder[self.turn], self.score)
-
         player = self.players[self.playerorder[self.turn]]
         player['score'] += self.score
+
+        message = "%s takes it at %s for %s. " % (self.playerorder[self.turn], self.score, player['score'])
+
         if player['score'] >= self.limit and not self.broke:
             player['broke'] = True
             message += ' %s has been broken with %s! Last chance, people. ' % (self.limit, player['score'])
@@ -356,7 +360,9 @@ class Dice(Dendrite):
         self.min = 0
         self.scoring = 0
         self.score = 0
-        self.broke = False
+        self.top = 0
         self.players = {}
         self.scoredice = []
         self.playerorder = []
+        self.broke = False
+        self.winner = None
