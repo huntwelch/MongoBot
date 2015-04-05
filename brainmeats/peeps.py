@@ -39,6 +39,16 @@ class Peeps(Dendrite):
 
 
     @axon
+    @help('<show latest news>')
+    def news(self):
+        try:
+            text = open('news').read().replace('\n', ' ')
+            return [s.strip() for s in text.split('---')]
+        except:
+            return "No bot news, but there's probably something fucked up happening in the middle east."
+
+
+    @axon
     @help("COMPANY <save your current copmany>")
     def workat(self):
         if not self.values:
@@ -73,15 +83,17 @@ class Peeps(Dendrite):
     @help("DRINKER <give somebody points>")
     def increment(self):
         if not self.values:
-            self.chat("you need to give someone your love")
+            self.chat("You need to give someone your love")
             return
         entity = " ".join(self.values)
-        if entity == 'jcb':
+        if entity == self.lastsender:
+            self.chat("You need to give someone who isn't you your love")
             return
 
-        if not incrementEntity(entity, random.randint(1, 100000)):
-            self.chat("mongodb seems borked")
+        if not simpleupdate(entity, 'cash', random.randint(1, 10000), True):
+            self.chat("bot borked")
             return
+
         return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
 
 
@@ -89,13 +101,14 @@ class Peeps(Dendrite):
     @help("DRINKER <take points away>")
     def decrement(self):
         if not self.values:
-            self.chat("you need to give someone your hate")
+            self.chat("You need to give someone your hate")
             return
         entity = " ".join(self.values)
-        if entity == 'jcb':
+        if entity == self.lastsender:
+            self.chat("You need to give someone else your hate")
             return
 
-        if not incrementEntity(entity, random.randint(1, 100000) * -1):
+        if not simpleupdate(entity, 'cash', random.randint(1, 10000) * -1, True):
             self.chat("mongodb seems borked")
             return
         return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
@@ -375,14 +388,14 @@ class Peeps(Dendrite):
 
         if source.name == entity:
             self.chat("Do you kick puppies too?")
-            incrementEntity(entity, -1000000)
+            simpleupdate(entity, 'cash', -100000, True)
             return
 
         mod = 1
         if method == '--':
             mod = -1
 
-        if not incrementEntity(entity, random.randint(1, 100000) * mod):
+        if not simpleupdate(entity, 'cash', random.randint(1, 10000) * mod, True):
             self.chat("mongodb seems borked", target=target)
             return
 

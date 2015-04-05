@@ -10,16 +10,21 @@ def connectdb():
     mongoengine.connect('bot', host='localhost')
 
 
-def simpleupdate(whom, key, val):
+def simpleupdate(whom, key, val, crement=False):
     try:
         drinker = Drinker.objects(name=whom)
         if drinker:
             drinker = drinker[0]
+            # Incoming epic cheat
+            if crement:
+                drinker['data']['cash'] = drinker['data']['cash'] + val
+                # *sigh*
+            else:
+                drinker[key] = val
+            drinker.save()
         else:
-            drinker = Drinker(name=whom)
+            incrementEntity(whom, val)
 
-        drinker[key] = val
-        drinker.save()
     except:
         return False
 
@@ -46,14 +51,17 @@ def incrementEntity(whom, amount):
 
 def entityScore(whom):
     try:
-        entity = Entity.objects(name=whom)
-        if entity:
-            entity = entity[0]
+        drinker = Drinker.objects(name=whom)
+        if drinker:
+            drinker = drinker[0]
+            value = drinker['data']['cash']
         else:
-            entity = Entity(name=whom)
+            enitity = Entity.objects(name=whom)
+            entity = entity[0]
+            value = entity.value
     except:
         return 0
-    return entity.value
+    return value
 
 
 def topScores(limit):

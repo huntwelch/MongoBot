@@ -1,8 +1,10 @@
 import collections
+
 from random import SystemRandom
 
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse, Receptor, autocommand
 from util import colorize
+from datastore import simpleupdate
 
 # Today, 3/24/2015 is Danny O'Shea's birthday.
 # In honor of it, today is the day I implement
@@ -352,6 +354,14 @@ class Dice(Dendrite):
 
         self.gethigh()
         self.chat('%s wins it with %s.' % (self.winner, self.top))
+
+        # apply to cash
+        for player in self.players:
+            if player == self.winner:
+                simpleupdate(player, 'cash', self.players[player]['score'], True)
+            else:
+                simpleupdate(player, 'cash', self.players[player]['score'] * -1, True)
+
         self.reset()
 
 
