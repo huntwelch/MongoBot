@@ -13,7 +13,7 @@ from datastore import simpleupdate
 # Polish dude is telling a racist joke to the
 # black bartender, who has no patience for it.
 @Cerebellum
-class Dice(Dendrite):
+class Farkle(Dendrite):
     limit = 1000
     turn = 0
     min = 0
@@ -40,7 +40,7 @@ class Dice(Dendrite):
 
 
     def __init__(self, cortex):
-        super(Dice, self).__init__(cortex)
+        super(Farkle, self).__init__(cortex)
 
 
     @axon
