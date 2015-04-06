@@ -5,8 +5,8 @@ plugins:
   - broca
   - channeling
   - chess
-  - dice
   - facebook
+  - farkle
   - finance
   - hangman
   - holdem
@@ -15,6 +15,7 @@ plugins:
   - memory
   - nonsense
   - peeps
+  - polling
   - quotes
   - reference
   - sms
