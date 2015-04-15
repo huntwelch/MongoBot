@@ -49,7 +49,7 @@ class Farkle(Dendrite):
         rules = [
             '.toss to roll',
             '1s are 100, 5s are 50, 3 of a kind is die value * 100, except 3 ones, which is 1000',
-            'An initial roll consisting of (1 2 3 4 5) in any order is 500'
+            'An initial roll consisting of (1 2 3 4 5) in any order is 500',
             'You can keep rolling as long as you keep one scoring die or triplet',
             '.toss automatically roles your non-scoring dice. If you want to roll more, specify with .toss 3',
             'If you roll without scoring, you lose all points and your turn is over',
