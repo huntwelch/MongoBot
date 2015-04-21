@@ -93,6 +93,9 @@ class Reference(Dendrite):
         for pod in result.pods:
             prozac.append(pod.text)
 
+        if not prozac:
+            return 'No results'
+
         prozac.pop(0)
 
         return prozac

@@ -44,6 +44,11 @@ class Farkle(Dendrite):
 
 
     @axon
+    def showscoring(self):
+        return str(self.scoredice)
+
+
+    @axon
     @help('<show rules for dice game>')
     def dicerules(self):
         rules = [
@@ -170,6 +175,8 @@ class Farkle(Dendrite):
         result = self.roll(rolling)
 
         score, scoredice, scoring, min, triple = self.getscore(result)
+
+        self.scoredice = [x for x in self.scoredice if x is not None]
         self.scoredice.extend(scoredice)
 
         busted = False
@@ -201,7 +208,7 @@ class Farkle(Dendrite):
             min = 0
 
         if self.scoredice:
-            self.scoredice = sorted(scoredice)
+            self.scoredice = sorted(self.scoredice)
             self.scoredice.extend([None] * (5 - len(self.scoredice)))
 
         self.scoring += scoring
