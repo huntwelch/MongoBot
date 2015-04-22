@@ -43,6 +43,7 @@ class Cortex:
     operator = False
     bequiet = False
     lastip = False
+    debugging = False
 
     butler = False
 
@@ -342,6 +343,10 @@ class Cortex:
             return
 
         shutil.move(self.settings.directory.log, backlog)
+
+    def debug(self, message, target=False):
+        if not self.debugging: return
+        self.chat(message, target)
 
     # Announce means the chat is always sent to the channel,
     # never back as a private response.

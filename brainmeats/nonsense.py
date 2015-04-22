@@ -438,6 +438,7 @@ class Nonsense(Dendrite):
 
         return 'Responses cleared'
 
+
     @axon
     @help('generate an excuse for why the code is broken/incomplete/failing/holding the president for ransom')
     def excuse(self):
@@ -448,4 +449,20 @@ class Nonsense(Dendrite):
 
         parsed = html.soup()
         return parsed.a.text
+
+
+    @axon
+    def giphy(self):
+
+        if not self.values:
+            return 'Giphy what?'
+
+        query = '+'.join(self.values)
+
+        try:
+            json = Browser('http://api.giphy.com/v1/gifs/search?q=%s&api_key=dc6zaTOxFJmzC&limit=1' % query)
+            parsed = json.json()
+            return parsed['data'][0]['bitly_url']
+        except:
+            return 'Unable to giphy'
 

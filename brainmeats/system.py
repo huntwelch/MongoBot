@@ -22,6 +22,16 @@ class System(Dendrite):
 
 
     @axon
+    @help('toggle whether debug statements are reported in chat')
+    def debug(self):
+        if self.cx.debugging:
+            self.cx.debugging = False
+            return 'Debugging off'
+        else:
+            self.cx.debugging = True
+            return 'Debugging on'
+
+    @axon
     @alias('raw')
     def rawsock(self):
         if not self.values:

@@ -52,6 +52,9 @@ class Dendrite(object):
     def chat(self, what, target=False, error=False):
         self.cx.chat(what, target, error)
 
+    def debug(self, what, target=False):
+        self.cx.debug(what, target)
+
     def announce(self, what):
         self.cx.announce(what)
 
@@ -126,7 +129,7 @@ def serotonin(cortex, meatname, electroshock):
 
     if hasattr(brainmeat, 'routed'):
         cortex.commands[meatname] = brainmeat[meatname]
-        return 
+        return
 
 
     for name, method in methods:
@@ -214,7 +217,7 @@ class Synapse(Neurons):
         return glutamate
 
 
-# Receptor is an observer decorator that will 
+# Receptor is an observer decorator that will
 # auto trigger when a neuron is fired using
 # a keyword the receptor is listening for.
 #

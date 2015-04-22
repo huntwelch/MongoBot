@@ -137,6 +137,7 @@ class Farkle(Dendrite):
     def activedice(self):
         return ', '.join(self.playerorder) or "Nobody playing"
 
+
     @axon
     @help("[HOW_MANY] <roll dem dice>")
     def toss(self):
@@ -166,18 +167,20 @@ class Farkle(Dendrite):
         # Apply last roll score after determining how many
         # dice got picked back up. Maybe better done with a
         # pendingscore variable but this works.
+        self.debug(str(self.scoredice))
         if self.scoredice:
-            self.scoring = len(self.scoredice[:-rolling])
+            self.scoring += len(self.scoredice[:-rolling])
             self.scoredice = self.scoredice[:-rolling]
+
+            self.debug(str(self.scoredice))
+
             score, scoredice, scoring, min, triple = self.getscore(self.scoredice)
             self.score += score
+            self.scoredice = []
 
         result = self.roll(rolling)
 
         score, scoredice, scoring, min, triple = self.getscore(result)
-
-        self.scoredice = [x for x in self.scoredice if x is not None]
-        self.scoredice.extend(scoredice)
 
         busted = False
         message = 'and rolling'
@@ -192,11 +195,13 @@ class Farkle(Dendrite):
             self.score = 0
             busted = True
             color = 'red'
+
+        clear = False
         if scoring == rolling:
             message = 'and clear!'
             self.score += score
             color = 'lightcyan'
-
+            clear = True
 
         # Common resets
         if scoring in [0, rolling]:
@@ -207,12 +212,17 @@ class Farkle(Dendrite):
             self.min = 0
             min = 0
 
-        if self.scoredice:
-            self.scoredice = sorted(self.scoredice)
-            self.scoredice.extend([None] * (5 - len(self.scoredice)))
+        if scoredice and not clear:
+            self.scoredice = sorted(scoredice)
+            self.scoredice.extend([None] * (rolling - len(self.scoredice)))
+
+            self.debug('end of roll' + str(self.scoredice))
 
         self.scoring += scoring
         self.min += min
+
+        self.debug('min: ' + str(self.min))
+        self.debug('scoring: ' + str(self.scoring))
 
         if not color:
             display = [colorize(str(x), 'lightgreen') if x in [1,5, triple] else str(x) for x in result]
