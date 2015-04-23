@@ -169,7 +169,7 @@ class Farkle(Dendrite):
         # pendingscore variable but this works.
         self.debug(str(self.scoredice))
         if self.scoredice:
-            self.scoring += len(self.scoredice[:-rolling])
+            self.scoring = 5 - len(self.scoredice) + len(self.scoredice[:-rolling])
             self.scoredice = self.scoredice[:-rolling]
 
             self.debug(str(self.scoredice))
