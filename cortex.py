@@ -24,17 +24,11 @@ from id import Id
 # Also connects to mongodb.
 class Cortex:
 
-    context = False
-
-    master = False
-    thalamus = False
     values = False
     lastpublic = False
     lastprivate = False
     lastchat = False
     lastid = False
-    lastsender = False
-    lastrealsender = False
     gettingnames = True
     memories = False
     autobabble = False
@@ -45,7 +39,8 @@ class Cortex:
     lastip = False
     debugging = False
 
-    butler = False
+    thalamus = False
+    master = False
 
     channels = []
     public_commands = []
@@ -95,8 +90,8 @@ class Cortex:
         print '* Loading brainmeats'
         self.loadbrains(electroshock)
 
-        print '* Waking butler'
-        self.butler = Butler(self)
+        # print '* Waking butler'
+        # self.butler = Butler(self)
 
 
     # Loads up all the files in brainmeats and runs them
@@ -227,6 +222,8 @@ class Cortex:
         self.lastsender = sender
         self.lastcommand = what
 
+        context = self.context
+
         result = None
 
         # So you'll notice that some commands return
@@ -272,7 +269,7 @@ class Cortex:
             # to give nice things to hackers.
             self.multis += 1
             if self.multis > 1:
-                self.chat('This look like fork bomb. You kick puppies too?')
+                self.chat('This look like fork bomb. You kick puppies too?', context)
                 self.multis = 0
                 return
 
@@ -308,7 +305,7 @@ class Cortex:
             if silent:
                 return result
 
-            self.chat(result)
+            self.chat(result, context)
 
         if type(result) is list:
             if len(result) > self.personality.throttle:
@@ -316,7 +313,7 @@ class Cortex:
                 result.append("Such result. So self throttle. Much erotic. Wow.")
 
             for line in result:
-                self.chat(line)
+                self.chat(line, context)
 
         self.multis = 0
 
@@ -383,7 +380,8 @@ class Cortex:
         if randint(1, 170) == 13:
             message = zalgo(message)
 
-        filter(lambda x: x in string.printable, message)
+        # test later
+        # message = filter(lambda x: x in string.printable, message)
 
         try:
             message = message.encode('utf-8')

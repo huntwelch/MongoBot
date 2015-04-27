@@ -49,7 +49,7 @@ class Peeps(Dendrite):
 
 
     @axon
-    @help("COMPANY <save your current copmany>")
+    @help("COMPANY <save your current company>")
     def workat(self):
         if not self.values:
             return 'If you\'re unemployed, that\'s cool, just don\'t abuse the bot'

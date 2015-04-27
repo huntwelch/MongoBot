@@ -20,7 +20,6 @@ from util import colorize, shorten
 # This is how we pseudo-thread all the commands.
 class Butler(object):
     maxtasks = 8
-    cx = False
     semaphore = False
 
     def __init__(self, cortex):

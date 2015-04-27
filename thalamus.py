@@ -9,6 +9,8 @@ from config import load_config
 from time import time
 from id import Id
 
+from staff import Butler
+
 
 # Welcome to the thalamus - the switchboard of the brain.
 # It connects the cortex and brainmeats to the rest of the
@@ -18,7 +20,6 @@ from id import Id
 # in the cortex when commands are recognized.
 class Thalamus(object):
 
-    cx = False
     lastcommand = False
 
     buffer = ''
@@ -275,6 +276,9 @@ class Thalamus(object):
         else:
             self.cx.values = False
 
-        self.cx.butler.do(self.cx.command, (user.name, args[-1]))
+        butler = Butler(self.cx)
+        butler.do(self.cx.command, (user.name, args[-1]))
+
+        #self.cx.butler.do(self.cx.command, (user.name, args[-1]))
 
         return (target, source, args)

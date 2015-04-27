@@ -167,12 +167,10 @@ class Farkle(Dendrite):
         # Apply last roll score after determining how many
         # dice got picked back up. Maybe better done with a
         # pendingscore variable but this works.
-        self.debug(str(self.scoredice))
         if self.scoredice:
             self.scoring = 5 - len(self.scoredice) + len(self.scoredice[:-rolling])
             self.scoredice = self.scoredice[:-rolling]
 
-            self.debug(str(self.scoredice))
 
             score, scoredice, scoring, min, triple = self.getscore(self.scoredice)
             self.score += score
@@ -213,7 +211,8 @@ class Farkle(Dendrite):
             min = 0
 
         if scoredice and not clear:
-            self.scoredice = sorted(scoredice)
+            o = [1,5,2,3,4,6]
+            self.scoredice = sorted(scoredice, cmp=lambda x,y: o.index(x) - o.index(y))
             self.scoredice.extend([None] * (rolling - len(self.scoredice)))
 
             self.debug('end of roll' + str(self.scoredice))
@@ -221,8 +220,6 @@ class Farkle(Dendrite):
         self.scoring += scoring
         self.min += min
 
-        self.debug('min: ' + str(self.min))
-        self.debug('scoring: ' + str(self.scoring))
 
         if not color:
             display = [colorize(str(x), 'lightgreen') if x in [1,5, triple] else str(x) for x in result]
