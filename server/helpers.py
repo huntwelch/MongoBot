@@ -21,9 +21,11 @@ def render_xml(path):
 def fetch_quotes():
     connectdb()
     return [q.text for q in Quote.objects]
-    
+
 
 def fetch_chats(request, offset):
+
+    filenames = os.listdir()
 
     log = open(config.directory.log, 'r')
     chats = []
@@ -44,7 +46,6 @@ def fetch_chats(request, offset):
 
             clip += 1
             line = line[clip:]
-
 
 
         if line.find(config.bot.nick) is 1:

@@ -56,7 +56,8 @@ class Turing(Dendrite):
             if alias.name == name:
                 definition = [elem.strip() for elem in alias.definition.split(';') if len(elem.strip()) > 0]
                 for line in definition:
-                    self.cx.command(drinker.name, line)
+                    # this needs to not rely on cx.context
+                    self.cx.command(drinker.name, self.cx.context, line)
                 return
 
 

@@ -155,7 +155,7 @@ class Cortex:
     # accessible by the brainmeats as self.values.
     multis = 0
 
-    def command(self, sender, cmd, piped=False, silent=False):
+    def command(self, sender, context, cmd, piped=False, silent=False):
 
         # Limit commands to allowed channels.
         if self.context in self.channels \
@@ -221,8 +221,6 @@ class Cortex:
         self.logroom('%s sent command: %s\n' % (sender, what))
         self.lastsender = sender
         self.lastcommand = what
-
-        context = self.context
 
         result = None
 
@@ -298,7 +296,7 @@ class Cortex:
             # Piped output must be string
             if type(result) is list:
                 result = ' '.join(result)
-            self.command(sender, pipe, result)
+            self.command(sender, context, pipe, result)
             return
 
         if type(result) in [str, unicode]:

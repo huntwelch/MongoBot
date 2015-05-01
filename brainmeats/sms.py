@@ -93,7 +93,7 @@ class Sms(Dendrite):
                 arguments = match.group(2)
 
                 try:
-                    resp = self.cx.command(name, item.body, silent=True)
+                    resp = self.cx.command(name, self.cx.secrets.primary_channel, item.body, silent=True)
 
                     message = self.client.messages.create(
                         body=resp,

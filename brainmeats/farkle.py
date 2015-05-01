@@ -14,7 +14,7 @@ from datastore import simpleupdate
 # black bartender, who has no patience for it.
 @Cerebellum
 class Farkle(Dendrite):
-    limit = 1000
+    limit = 5000
     turn = 0
     min = 0
     scoring = 0
@@ -87,9 +87,12 @@ class Farkle(Dendrite):
     def dicescore(self):
         if not self.players:
             return 'Nobody playing'
+
+        message = []
         for player in self.players:
-            self.chat('%s: %s' % (player, self.players[player]['score']))
-        self.chat('Ceiling is %s' % self.limit)
+            message.append('%s: %s' % (player, self.players[player]['score']))
+        message.append('Ceiling is %s' % self.limit)
+        return message
 
 
     @axon
@@ -220,7 +223,6 @@ class Farkle(Dendrite):
         self.scoring += scoring
         self.min += min
 
-
         if not color:
             display = [colorize(str(x), 'lightgreen') if x in [1,5, triple] else str(x) for x in result]
             message = '%s for %s %s' % (' '.join(display), score + self.score, message)
@@ -236,10 +238,13 @@ class Farkle(Dendrite):
             else:
                 message += '. Winning with %s.' % total_now
 
-        self.chat(message)
         if busted:
-            self.checkwin()
+            winner = self.checkwin()
+            if winner:
+                message = [message, winner]
+                self.reset()
 
+        return message
 
     @axon
     @help("<Take your score>")
@@ -278,8 +283,13 @@ class Farkle(Dendrite):
         self.scoredice = []
         self.min = 0
 
-        self.chat(message)
-        self.checkwin()
+        winner = self.checkwin()
+
+        if winner:
+            message = [message, winner]
+            self.reset()
+
+        return message
 
 
     def roll(self, count):
@@ -365,10 +375,9 @@ class Farkle(Dendrite):
     def checkwin(self):
         breaker = self.players[self.playerorder[self.turn]]
 
-        if not breaker['broke']: return
+        if not breaker['broke']: return False
 
         self.gethigh()
-        self.chat('%s wins it with %s.' % (self.winner, self.top))
 
         # apply to cash
         for player in self.players:
@@ -377,7 +386,7 @@ class Farkle(Dendrite):
             else:
                 simpleupdate(player, 'cash', self.players[player]['score'] * -1, True)
 
-        self.reset()
+        return '%s wins it with %s.' % (self.winner, self.top)
 
 
     def reset(self):
