@@ -607,6 +607,26 @@ class Broca(Dendrite):
             self.chat("Couldn't parse.", str(e))
             return
 
+    # http://emalmi.kapsi.fi/battlebot/battlebot.fcgi?l=en&q=tame%20it%20before%20you%20lose%20it
+    @axon
+    @help('LINE <get phat rhymes>')
+    def rhyme(self):
+        if not self.values:
+            return "Enter a line"
+
+        url = "http://emalmi.kapsi.fi/battlebot/battlebot.fcgi"
+        params = "l=en&q=" + '+'.join(self.values)
+
+        request = Browser('%s?%s' % (url, params))
+
+        try:
+            json = request.json()
+            rhyme = choice(json["rhymes"])
+            return rhyme['line']
+        except Exception as e:
+            self.chat('...')
+            self._act("drops mic in shame.")
+            return
 
     # This pair of gems was created because Elliott kept
     # piping .all to various * commands.

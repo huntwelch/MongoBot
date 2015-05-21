@@ -460,9 +460,9 @@ class Nonsense(Dendrite):
         query = '+'.join(self.values)
 
         try:
-            json = Browser('http://api.giphy.com/v1/gifs/search?q=%s&api_key=dc6zaTOxFJmzC&limit=1' % query)
+            json = Browser('http://api.giphy.com/v1/gifs/random?tag=%s&api_key=dc6zaTOxFJmzC' % query)
             parsed = json.json()
-            return parsed['data'][0]['bitly_url']
+            return parsed['data']['image_original_url']
         except:
             return 'Unable to giphy'
 

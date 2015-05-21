@@ -39,17 +39,7 @@ class Peeps(Dendrite):
 
 
     @axon
-    @help('<show latest news>')
-    def news(self):
-        try:
-            text = open('news').read().replace('\n', ' ')
-            return [s.strip() for s in text.split('---')]
-        except:
-            return "No bot news, but there's probably something fucked up happening in the middle east."
-
-
-    @axon
-    @help("COMPANY <save your current company>")
+    @help("COMPANY <save your current copmany>")
     def workat(self):
         if not self.values:
             return 'If you\'re unemployed, that\'s cool, just don\'t abuse the bot'
@@ -83,17 +73,15 @@ class Peeps(Dendrite):
     @help("DRINKER <give somebody points>")
     def increment(self):
         if not self.values:
-            self.chat("You need to give someone your love")
+            self.chat("you need to give someone your love")
             return
         entity = " ".join(self.values)
-        if entity == self.lastsender:
-            self.chat("You need to give someone who isn't you your love")
+        if entity == 'jcb':
             return
 
-        if not simpleupdate(entity, 'cash', random.randint(1, 10000), True):
-            self.chat("bot borked")
+        if not simpleupdate(entity, False, random.randint(1, 100000), True):
+            self.chat("mongodb seems borked")
             return
-
         return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
 
 
@@ -101,14 +89,13 @@ class Peeps(Dendrite):
     @help("DRINKER <take points away>")
     def decrement(self):
         if not self.values:
-            self.chat("You need to give someone your hate")
+            self.chat("you need to give someone your hate")
             return
         entity = " ".join(self.values)
-        if entity == self.lastsender:
-            self.chat("You need to give someone else your hate")
+        if entity == 'jcb':
             return
 
-        if not simpleupdate(entity, 'cash', random.randint(1, 10000) * -1, True):
+        if not simpleupdate(entity, False, random.randint(1, 100000) * -1, True):
             self.chat("mongodb seems borked")
             return
         return self.lastsender + " brought " + entity + " to " + str(entityScore(entity))
@@ -292,6 +279,51 @@ class Peeps(Dendrite):
 
 
     @axon
+    @help("KEY VALUE <set a data item for a drinker>")
+    def setinfo(self):
+        if not self.values or not len(self.values) > 1:
+            return "Need a name and a value, champ"
+
+        key = self.values[0]
+        value = ' '.join(self.values[1:])
+        whom = Id(self.lastid)
+
+        whom[key] = value
+
+        return 'Updated %s for %s' % (key, whom.name)
+
+
+    @axon
+    @help("[NICK] KEY <get a data item for a drinker>")
+    def getinfo(self):
+        if not self.values:
+            return "Need at least a key name, brah"
+
+        if len(self.values) == 2:
+            search_for = self.values[0]
+            key = self.values[1]
+        else:
+            search_for = self.lastsender
+            key = self.values[0]
+
+        whom = Id(search_for)
+
+        if not whom:
+            return "Couldn't find %s" % search_for
+
+        if not whom[key]:
+            return "Couldn't find %s for %s" % (key, search_for)
+
+        return "%s's %s: %s" % (search_for, key, whom[key])
+
+
+    @axon
+    @help("NICK <see what data is set for a drinker>")
+    def whatinfo(self):
+        return 'Not done yet'
+
+
+    @axon
     @help("PHONE_NUMBER <add your phone number to your profile for sms access>")
     def addphone(self):
         if not self.values:
@@ -388,14 +420,14 @@ class Peeps(Dendrite):
 
         if source.name == entity:
             self.chat("Do you kick puppies too?")
-            simpleupdate(entity, 'cash', -100000, True)
+            incrementEntity(entity, -1000000)
             return
 
         mod = 1
         if method == '--':
             mod = -1
 
-        if not simpleupdate(entity, 'cash', random.randint(1, 10000) * mod, True):
+        if not incrementEntity(entity, random.randint(1, 100000) * mod):
             self.chat("mongodb seems borked", target=target)
             return
 

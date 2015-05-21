@@ -68,6 +68,12 @@ class Id(object):
 
     # Dynamicaly retrieve data from the datastore connection that are linked to the current
     # authenticated user.
+    def __getitem__(self, key):
+        return self.__getattr__(key)
+
+    def __setitem__(self, key, value):
+        return self.__setattr__(key, value)
+
     def __getattr__(self, key):
 
         if not self.is_recognized or not self.prop:

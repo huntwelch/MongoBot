@@ -77,6 +77,7 @@ class Browser(object):
             user, password = userpass.split(':')
             self.robot.add_password(url, user, password)
 
+        # TODO params are broken
         try:
             if params:
                 data = urllib.urlencode(params)
