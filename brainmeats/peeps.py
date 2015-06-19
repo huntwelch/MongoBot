@@ -32,7 +32,7 @@ class Peeps(Dendrite):
     def history(self):
 
         try:
-            hist = self.cx.channels[self.cx.context].history
+            intro = self.cx.channels[self.cx.context].history
             return [s.strip() for s in intro.splitlines()]
         except:
             return 'Nothing to introduce!'
@@ -127,9 +127,13 @@ class Peeps(Dendrite):
     @axon
     @help("<show where everyone works>")
     def companies(self):
+        comps = []
         for drinker in Drinker.objects:
-            if "_" not in drinker.name and drinker.company != None:
-                self.chat("%s: %s" % (drinker.name, drinker.company))
+            if drinker.name and "_" not in drinker.name and drinker.company != None:
+                comp = "%s: %s" % (drinker.name, drinker.company)
+                comps.append(comp)
+
+        return comps
 
 
     @axon
@@ -142,9 +146,9 @@ class Peeps(Dendrite):
 
         user = Drinker.objects(name=search_for).first()
         if not user or not user.company:
-            self.chat("Tell that deadbeat %s to get a damn job already..." % search_for)
+            return "Tell that deadbeat %s to get a damn job already..." % search_for
         else:
-            self.chat(user.name + ": " + user.company)
+            return user.name + ": " + user.company
 
 
     @axon

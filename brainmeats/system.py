@@ -42,7 +42,9 @@ class System(Dendrite):
 
     @axon
     def echo(self):
-        return ' '.join(self.values)
+        line = ' '.join(self.values)
+        self.chat(line)
+        return line
 
 
     # Help menu. It used to just show every command, but there
