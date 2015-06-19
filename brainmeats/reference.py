@@ -252,7 +252,7 @@ class Reference(Dendrite):
         try:
             result = "{:,}".format(eval(string, {"__builtins__": None}, self.safe_calc))
         except:
-            result = self.botname + " not smart enough to do that."
+            result = self.ego.nick + " not smart enough to do that."
 
         return str(result)
 
