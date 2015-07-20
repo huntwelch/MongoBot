@@ -8,7 +8,7 @@ import time
 
 from math import *
 from autonomic import axon, alias, help, Dendrite
-from util import unescape
+from util import unescape, shorten
 from howdoi import howdoi as hownow
 from staff import Browser
 
@@ -175,9 +175,11 @@ class Reference(Dendrite):
         humid = json['relative_humidity']
         wind = json['wind_string']
         feels = json['feelslike_string']
+        hourly = 'http://www.weather.com/weather/hourbyhour/l/%s' % self.values[0]
+        radar = shorten('http://www.weather.com/weather/map/interactive/l/%s' % self.values[0])
 
-        base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s"
-        return base % (location, condition, temp, humid, wind, feels)
+        base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s, Radar: %s"
+        return base % (location, condition, temp, humid, wind, feels, radar)
 
 
     @axon

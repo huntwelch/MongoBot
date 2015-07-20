@@ -394,6 +394,10 @@ class Broca(Dendrite):
             self.chat(u"\u26E7\u26E7\u26E7\u26E7\u26E7", target=target)
             return
 
+        if sentence.lower().find("race condition") != -1:
+            self.chat("It's never a race condition.", target=target)
+            return
+
         if sentence.lower().find("rimshot") != -1:
             self.chat("*ting*", target=target)
             return

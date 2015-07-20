@@ -379,12 +379,20 @@ class Farkle(Dendrite):
 
         self.gethigh()
 
-        # apply to cash
+        tally = 0
+
         for player in self.players:
-            if player == self.winner:
-                simpleupdate(player, 'cash', self.players[player]['score'], True)
-            else:
-                simpleupdate(player, 'cash', self.players[player]['score'] * -1, True)
+
+            if player == self.winner: continue
+
+            spread = self.top - self.players[player]['score']
+            tally += spread
+            simpleupdate(player, 'cash', spread * -1, True)
+
+        if not tally:
+            tally = self.top
+
+        simpleupdate(player, 'cash', tally, True)
 
         return '%s wins it with %s.' % (self.winner, self.top)
 

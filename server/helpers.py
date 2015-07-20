@@ -1,4 +1,5 @@
 import re
+import os
 
 from datetime import datetime
 from flask import Flask, request, session, make_response, render_template
@@ -24,8 +25,6 @@ def fetch_quotes():
 
 
 def fetch_chats(request, offset):
-
-    filenames = os.listdir()
 
     log = open(config.directory.log, 'r')
     chats = []

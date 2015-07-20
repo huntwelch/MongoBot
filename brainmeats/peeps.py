@@ -115,6 +115,7 @@ class Peeps(Dendrite):
 
     @axon
     @help("WHAT <show cumulative score for random thing>")
+    @alias('points')
     def score(self):
         if not self.values: return "For what?"
 
@@ -423,15 +424,15 @@ class Peeps(Dendrite):
         if not source.name or not source.is_authenticated: return
 
         if source.name == entity:
-            self.chat("Do you kick puppies too?")
-            incrementEntity(entity, -1000000)
+            self.chat("No self love.")
+            simpleupdate(entity, -1000000)
             return
 
         mod = 1
         if method == '--':
             mod = -1
 
-        if not incrementEntity(entity, random.randint(1, 100000) * mod):
+        if not simpleupdate(entity, False, random.randint(1, 100000) * mod, True):
             self.chat("mongodb seems borked", target=target)
             return
 

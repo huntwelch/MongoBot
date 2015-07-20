@@ -1,7 +1,7 @@
 from mongoengine import *
 
 from autonomic import axon, help, Dendrite, alias
-from datastore import Drinker, Position
+from datastore import Drinker, Position, entityScore
 from datetime import datetime
 from staff import Broker
 
@@ -208,18 +208,20 @@ class Stockgame(Dendrite):
             for s in scores:
                 self.chat("%15s %10.02f %10.02f %10.02f %10.02f" % s)
 
+
     @axon
     @help("<show cash money>")
-    @alias('cash', 'points')
+    @alias('cash')
     def cashmoney(self):
 
         whom = self.lastsender
         if self.values:
             whom = self.values[0]
 
-        drinker = Id(whom)
+        s = entityScore(whom)
 
-        self.chat("%s gots $%.02f" % (whom, drinker.cash))
+        self.chat("%s gots $%.02f" % (whom, s))
+
 
     @axon
     @help("[USERNAME] <show person's portfolio>")

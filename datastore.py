@@ -32,6 +32,7 @@ def simpleupdate(whom, key, val, crement=False):
 
 
 def incrementEntity(whom, amount):
+    amount = int(amount)
     try:
         entity = Entity.objects(name=whom)
         if entity:
@@ -56,7 +57,7 @@ def entityScore(whom):
             drinker = drinker[0]
             value = drinker['data']['cash']
         else:
-            enitity = Entity.objects(name=whom)
+            entity = Entity.objects(name=whom)
             entity = entity[0]
             value = entity.value
     except:
