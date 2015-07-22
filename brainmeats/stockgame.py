@@ -37,7 +37,7 @@ class Stockgame(Dendrite):
             self.chat("Stock not found")
             return
 
-        if stock.exchange.upper() not in self.config.exchanges:
+        if stock.exchange.upper() in self.config.blacklist:
             self.chat("Stock exchange %s DENIED!" % stock.exchange)
             return
 

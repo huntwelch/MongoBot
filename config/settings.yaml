@@ -19,7 +19,7 @@
 
 # IRC connection settings
 irc:
-  host: 'chat.freenode.net'
+  host: 'irc.freenode.net'
   port: 6697
   ssl: True
   chanserv: False

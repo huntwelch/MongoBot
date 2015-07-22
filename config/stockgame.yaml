@@ -8,4 +8,10 @@ exchanges:
   - 'NMS'
   - 'ASE'
 
+blacklist:
+  - 'OTCBB'
+  - 'OTCQX'
+  - 'OTCQB'
+  - 'OTC'
+
 startupcash: 100000
