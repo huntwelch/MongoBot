@@ -129,11 +129,15 @@ class Farkle(Dendrite):
         if not self.playerorder:
             return "Nobody playing"
 
-        if self.turn > self.playerorder.index(self.lastsender):
-            self.turn -= 1
-
+        index = self.playerorder.index(self.lastsender)
         self.playerorder.remove(self.lastsender)
-        return "Yer out"
+        message = '%s out' % (self.lastsender,)
+
+        if index == self.turn:
+            self.turn = (self.turn + 1) % len(self.playerorder)
+            message += ', %s to roll' % (self.playerorder[self.turn],)
+
+        return message + '.'
 
 
     @axon
