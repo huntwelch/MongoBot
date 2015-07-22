@@ -135,7 +135,7 @@ class Farkle(Dendrite):
 
         if index == self.turn:
             self.turn = (self.turn + 1) % len(self.playerorder)
-            message += ', %s to roll' % (self.lastsender, self.playerorder[self.turn])
+            message += ', %s to roll' % (self.playerorder[self.turn],)
 
         return message + '.'
 
