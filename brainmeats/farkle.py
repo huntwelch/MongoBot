@@ -136,6 +136,8 @@ class Farkle(Dendrite):
         if index == self.turn:
             self.turn = (self.turn + 1) % len(self.playerorder)
             message += ', %s to roll' % (self.playerorder[self.turn],)
+        elif index < self.turn:
+            self.turn -= 1
 
         return message + '.'
 
