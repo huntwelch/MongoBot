@@ -1,4 +1,5 @@
 import collections
+import time
 
 from random import SystemRandom
 
@@ -24,6 +25,9 @@ class Farkle(Dendrite):
     scoredice = []
     playerorder = []
 
+    ticker = 0
+    patience = 240
+
     top = 0
     winner = None
 
@@ -41,6 +45,20 @@ class Farkle(Dendrite):
 
     def __init__(self, cortex):
         super(Farkle, self).__init__(cortex)
+
+
+    @Receptor('twitch')
+    def checkwait(self):
+        if not self.ticker: return
+
+        now = int(time.time())
+        wait = now - self.ticker
+
+        if wait > self.patience:
+            self.quitdice(self.playerorder[self.turn])
+            self.ticker = now
+
+        return
 
 
     @axon
@@ -98,40 +116,42 @@ class Farkle(Dendrite):
     @axon
     @help('<join or return to dice game>')
     @alias('joindice')
-    def joinup(self, _name=None):
-        name = _name or self.lastsender
+    def joinup(self, _player=None):
+        player = _player or self.lastsender
 
-        if not _name and self.broke:
+        if not _player and self.broke:
             return "No new players after the limit's broken"
 
-        if name in self.playerorder and not _name:
+        if player in self.playerorder and not _player:
             return 'You already in bro'
 
-        if name in self.playerorder: return
+        if player in self.playerorder: return
 
-        self.playerorder.append(name)
+        self.playerorder.append(player)
 
-        if name in self.players and not _name:
+        if player in self.players and not _player:
             return 'You back'
 
-        self.players[name] = {
+        self.players[player] = {
             'score': 0,
             'broke': False,
         }
 
-        if not _name:
+        if not _player:
             return 'You in'
 
 
     @axon
     @help('<leave the dice game>')
-    def quitdice(self):
+    def quitdice(self, _player=None):
         if not self.playerorder:
             return "Nobody playing"
 
-        index = self.playerorder.index(self.lastsender)
-        self.playerorder.remove(self.lastsender)
-        message = '%s out' % (self.lastsender,)
+        player = _player or self.lastsender
+
+        index = self.playerorder.index(player)
+        self.playerorder.remove(player)
+        message = '%s out' % (player,)
 
         if index == self.turn:
             self.turn = (self.turn + 1) % len(self.playerorder)
@@ -151,13 +171,14 @@ class Farkle(Dendrite):
     @help("[HOW_MANY] <roll dem dice>")
     def toss(self):
 
+        self.ticker = int(time.time())
+
         if self.lastsender not in self.players and self.broke:
             return "No new players after the limit's broken"
 
         self.joinup(self.lastsender)
         if self.playerorder[self.turn] != self.lastsender:
             return "Not your turn"
-
 
         rolling = 5 - self.scoring
 
@@ -194,7 +215,11 @@ class Farkle(Dendrite):
         color = None
         if scoring == 0:
             self.turn = (self.turn + 1) % len(self.playerorder)
-            message = 'and bust.'
+
+            if scoredice == [4,2]:
+                message = 'and possession with intent to distribute.'
+            else:
+                message = 'and bust.'
 
             if not self.players[self.playerorder[self.turn]]['broke']:
                 message += ' %s to roll.' % self.playerorder[self.turn]
@@ -409,6 +434,7 @@ class Farkle(Dendrite):
         self.scoring = 0
         self.score = 0
         self.top = 0
+        self.ticker = 0
         self.players = {}
         self.scoredice = []
         self.playerorder = []
