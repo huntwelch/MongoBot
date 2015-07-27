@@ -216,7 +216,7 @@ class Farkle(Dendrite):
         if scoring == 0:
             self.turn = (self.turn + 1) % len(self.playerorder)
 
-            if scoredice == [4,2]:
+            if result == [4,2]:
                 message = 'and possession with intent to distribute.'
             else:
                 message = 'and bust.'
