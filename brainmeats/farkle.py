@@ -55,8 +55,11 @@ class Farkle(Dendrite):
         wait = now - self.ticker
 
         if wait > self.patience:
+            msg = 'Booting %s for wasting time, ' % (self.playerorder[self.turn],)
             self.quitdice(self.playerorder[self.turn])
             self.ticker = now
+            msg += '%s to roll' % (self.playerorder[self.turn],)
+            self.chat(msg)
 
         return
 
