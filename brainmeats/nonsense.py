@@ -128,8 +128,7 @@ class Nonsense(Dendrite):
                 fml = soup.find_all("text")[0].get_text()
             return fml
         except Exception as e:
-            self.chat("Done broke: " + str(e))
-            return
+            return "Nobody's life got fucked like that"
 
 
     @axon

@@ -16,7 +16,9 @@ from id import Id
 # Basically everything here depends on mongodb, and
 # many other functions of other libraries refer to peeps
 # stuff. If you install no other external stuff, I
-# recommend mongodb.
+# recommend mongodb. (Actually, strictly speaking, I
+# do not recommend this, but nobody's gotten around to
+# swapping out mongodb for sqlite3.)
 @Cerebellum
 class Peeps(Dendrite):
 
@@ -284,6 +286,7 @@ class Peeps(Dendrite):
 
 
     @axon
+    @alias('me')
     @help("KEY VALUE <set a data item for a drinker>")
     def setinfo(self):
         if not self.values or not len(self.values) > 1:
@@ -299,6 +302,7 @@ class Peeps(Dendrite):
 
 
     @axon
+    @alias('info')
     @help("[NICK] KEY <get a data item for a drinker>")
     def getinfo(self):
         if not self.values:
@@ -323,9 +327,19 @@ class Peeps(Dendrite):
 
 
     @axon
+    @alias('infos')
     @help("NICK <see what data is set for a drinker>")
     def whatinfo(self):
-        return 'Not done yet'
+        if not self.values:
+            whom = Id(self.lastsender)
+        else:
+            whom = Id(self.values[0])
+
+        types = [str,int,unicode,float]
+        data = [x for x in whom.prop.data if type(whom[x]) in types]
+
+        return ', '.join(data)
+
 
 
     @axon

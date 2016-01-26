@@ -156,6 +156,10 @@ class Farkle(Dendrite):
         self.playerorder.remove(player)
         message = '%s out' % (player,)
 
+        if not len(self.playerorder):
+            self.chat('Nobody playing.')
+            return
+
         if index == self.turn:
             self.turn = (self.turn + 1) % len(self.playerorder)
             message += ', %s to roll' % (self.playerorder[self.turn],)

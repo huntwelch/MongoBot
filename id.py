@@ -90,6 +90,7 @@ class Id(object):
 
         return False
 
+
     # Update an attribute in the datastore when a linked variable is accessed
     def __setattr__(self, key, value):
 
@@ -102,7 +103,6 @@ class Id(object):
 
         # This can eventually be removed; migrate the data as we go
         self.migrate(key)
-
         self.prop.data[key] = value
 
         # Even with a migration lets save the changes to the original as well,
@@ -117,24 +117,22 @@ class Id(object):
 
         return True
 
+
     # Migrate data to new data format as we go
     def migrate(self, key):
 
         protected = ['name', 'password']
 
-        if key in protected:
-            # Protected variable that should not get migrated
-            return
+        if key in protected: return
 
-        if key in self.prop.data:
-            # Already migrated
-            return
+        if key in self.prop.data: return
 
         if key in self.prop:
             self.prop.data[key] = self.prop[key]
             self.prop.save()
 
         return
+
 
     # Set the users password
     def setpassword(self, password, skip_auth_check=False):

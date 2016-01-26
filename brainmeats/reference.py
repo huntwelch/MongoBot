@@ -5,6 +5,7 @@ import wolframalpha
 import sys
 import pythonwhois
 import time
+import hashlib
 
 from math import *
 from autonomic import axon, alias, help, Dendrite
@@ -133,7 +134,12 @@ class Reference(Dendrite):
     @axon
     @help("<display link to bot's github repository>")
     def source(self):
-        return self.config.repo
+
+        link = self.config.repo
+        if self.values:
+            link = '%ssearch?q=%s' % (link, '+'.join(self.values))
+
+        return link
 
 
     @axon
@@ -189,9 +195,15 @@ class Reference(Dendrite):
         if not self.values:
             return "Whatchu wanna know, bitch?"
 
+        term = ' '.join(self.values)
+        term = term.strip()
+
+        if term == 'truffle butter':
+            return "You all know what it is, and I don't want to have to read this shit again."
+
         try:
             request = Browser('http://www.urbandictionary.com/define.php',
-                               params={'term': ' '.join(self.values)})
+                               params={'term': term})
             soup = request.soup()
         except:
             return "parse error"
@@ -427,3 +439,17 @@ class Reference(Dendrite):
                 return message
 
         return 'Not found'
+
+
+    @axon
+    def crypt(self):
+        algs = hashlib.algorithms
+        if not self.values or self.values[0] not in algs or len(self.values) < 2:
+            return '%s STRING_TO_ENCRYPT' % '|'.join(algs)
+
+        alg = self.values.pop(0)
+        h = hashlib.new(alg)
+
+        h.update(' '.join(self.values))
+
+        return h.hexdigest()
