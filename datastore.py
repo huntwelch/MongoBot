@@ -1,7 +1,7 @@
 import mongoengine
 
 from mongoengine import *
-
+import sys, traceback
 
 # All mongodb stuff. I've been told this would be
 # better done with sqlite. Some day.
@@ -26,6 +26,7 @@ def simpleupdate(whom, key, val, crement=False):
             incrementEntity(whom, val)
 
     except:
+        traceback.print_exc(file=sys.stderr)
         return False
 
     return True
