@@ -287,7 +287,7 @@ class Nonsense(Dendrite):
     @help("URL <pull from distaste entries or add url to distate options>")
     def distaste(self):
         if self.values:
-            roasted = shorten(url)
+            roasted = shorten(self.values[0])
 
             if roasted:
                 open(self.settings.directory.distaste, 'a').write(roasted + '\n')
