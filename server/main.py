@@ -168,6 +168,12 @@ def showpoem(title):
     return render_template('poem.html', title=title, poem=poem)
 
 
+@app.route("/history")
+@requires_auth
+def showhistory():
+    return render_template('history.html')
+
+
 @app.route("/voice.xml", methods=['GET', 'POST'])
 def twilio_voice():
     return render_xml('voice.xml')

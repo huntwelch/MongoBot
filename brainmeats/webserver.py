@@ -17,11 +17,20 @@ class Webserver(Dendrite):
 
 
     @axon
+    @help("<Get one-time link history page>")
+    def history(self):
+        num = self._setaccess()
+        link = "The history of okdrink: %s/history?onetime=%s" % (self.config.url, str(num))
+        self.chat(link)
+
+
+    @axon
     @help("<Get one-time link to chat log>")
     def chatlink(self):
         num = self._setaccess()
         link = "%s/chatlogs?onetime=%s" % (self.config.url, str(num))
         self.chat(link)
+
 
     @Receptor('twitch')
     def getuploads(self):

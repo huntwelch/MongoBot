@@ -80,7 +80,7 @@ class Id(object):
             return False
 
         # This can eventually be removed; migrate the data as we go
-        self.migrate(key)
+        # self.migrate(key)
 
         if key in self.prop.data:
             return self.prop.data[key]

@@ -29,15 +29,17 @@ class Peeps(Dendrite):
         super(Peeps, self).__init__(cortex)
 
 
-    @axon
-    @help('<show history of the current channel>')
-    def history(self):
+    # This got moved to a static web page because
+    # Erik kept fucking setting it off by accident.
+    # @axon
+    # @help('<show history of the current channel>')
+    # def history(self):
 
-        try:
-            intro = self.cx.channels[self.cx.context].history
-            return [s.strip() for s in intro.splitlines()]
-        except:
-            return 'Nothing to introduce!'
+    #     try:
+    #         intro = self.cx.channels[self.cx.context].history
+    #         return [s.strip() for s in intro.splitlines()]
+    #     except:
+    #         return 'Nothing to introduce!'
 
 
     @axon

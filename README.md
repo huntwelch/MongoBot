@@ -97,8 +97,10 @@ IMPORTANT: whoever is running the bot instance will have to use
 `.adduser` to add other users. After that they can authorize themselves.
 
 
-Philosophies
-------------
+A Handful of Philosophies and Notes Chosen at Random
+----------------------------------------------------
+
+The brain puns SHALL be adhered to, to the very limits of linguistic feasibility.
 
 Don't nest logic when you can short circuit.
 
@@ -150,7 +152,7 @@ To Do
 * stock game: account for splits and reverse splits
 * add @requires decorator, check for server, redis, mongo, etc.
 * just take out image relink, make it a thumblink
-* mud-style game
+* mud-style game, playable and modifiable from chat
 * interbot com
 * streamline web stuff
 * multi-platform
