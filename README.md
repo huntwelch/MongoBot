@@ -100,6 +100,8 @@ IMPORTANT: whoever is running the bot instance will have to use
 A Handful of Philosophies and Notes Chosen at Random
 ----------------------------------------------------
 
+Long, rambling comments are encouraged.
+
 The brain puns SHALL be adhered to, to the very limits of linguistic feasibility.
 
 Don't nest logic when you can short circuit.
