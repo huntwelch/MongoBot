@@ -10,7 +10,7 @@ import hashlib
 from math import *
 from autonomic import axon, alias, help, Dendrite
 from util import unescape, shorten
-from howdoi import howdoi as hownow
+#from howdoi import howdoi as hownow
 from staff import Browser
 
 
@@ -109,24 +109,33 @@ class Reference(Dendrite):
         if not self.values:
             return "Enter a search"
 
-        # If values was a string you don't need the join/etc
-        params = {'v': '1.0', 'rsz': 'large', 'start': '0',
-                  'q': "+".join(self.values)}
+        key = self.config.google_search_key
+        gid = self.config.google_search_id
+
+        params = {'key': key, 'cx': gid, 'fields': 'items(title,link)', 'q': "+".join(self.values)}
 
         try:
             request = Browser(
-                'http://ajax.googleapis.com/ajax/services/search/web',
+                'https://www.googleapis.com/customsearch/v1',
                 params=params)
+
+            if request.error:
+                return request.error
+
             json = request.json()
+
+        except Exception as e:
+            return "Something's buggered up: %s" % str(e)
+
+        try:
+            if len(json["items"]) == 0:
+                return "No results"
         except:
-            return "Something's buggered up"
+            return "Non-standard response: https://www.google.com/#q=%s" % '+'.join(self.values)
 
-        if len(json["responseData"]["results"]) == 0:
-            return "No results"
-
-        result = json["responseData"]["results"][0]
-        title = result["titleNoFormatting"]
-        link = result["unescapedUrl"]
+        result = json["items"][0]
+        title = result["title"]
+        link = result["link"]
 
         return "%s @ %s" % (title, link)
 
@@ -323,17 +332,17 @@ class Reference(Dendrite):
             return 'No results, or parsing failure.'
 
 
-    @axon
-    @help('QUERY <get a howdoi answer>')
-    def howdoi(self):
-        if not self.values: return 'Howdoi what now?'
+    #@axon
+    #@help('QUERY <get a howdoi answer>')
+    #def howdoi(self):
+    #    if not self.values: return 'Howdoi what now?'
 
-        try:
-            parser = hownow.get_parser()
-            args = vars(parser.parse_args(self.values))
-            return hownow.howdoi(args)
-        except:
-            return 'Dunno bro'
+    #    try:
+    #        parser = hownow.get_parser()
+    #        args = vars(parser.parse_args(self.values))
+    #        return hownow.howdoi(args)
+    #    except:
+    #        return 'Dunno bro'
 
 
     # This is useful when piping output to other
@@ -453,3 +462,13 @@ class Reference(Dendrite):
         h.update(' '.join(self.values))
 
         return h.hexdigest()
+
+    @axon
+    def track(self):
+        if not self.values:
+            return 'Enter a UPS tracking number'
+
+        num = self.values[0]
+
+        link = 'https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums=%s' % num
+        return shorten(link)

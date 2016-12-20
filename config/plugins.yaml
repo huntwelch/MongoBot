@@ -11,6 +11,7 @@ plugins:
   - hangman
   - holdem
   - linker
+  - mail
   - marvel
   - memory
   - nonsense

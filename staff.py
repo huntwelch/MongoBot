@@ -81,7 +81,6 @@ class Browser(object):
         try:
             if params:
                 data = urllib.urlencode(params)
-
             if params and method == 'GET':
                 self.response = self.robot.open(url + '?%s' % data)
             elif params and method == 'POST':

@@ -17,6 +17,8 @@ def simpleupdate(whom, key, val, crement=False):
             drinker = drinker[0]
             # Incoming epic cheat
             if crement:
+                if 'cash' not in drinker['data']:
+                    drinker['data']['cash'] = 0
                 drinker['data']['cash'] = drinker['data']['cash'] + val
                 # *sigh*
             else:
@@ -25,7 +27,7 @@ def simpleupdate(whom, key, val, crement=False):
         else:
             incrementEntity(whom, val)
 
-    except:
+    except Exception as e:
         traceback.print_exc(file=sys.stderr)
         return False
 

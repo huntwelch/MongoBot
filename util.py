@@ -4,7 +4,6 @@ import requests
 import random
 import subprocess
 
-from PIL import Image
 from config import load_config
 
 secrets = load_config('config/secrets.yaml')

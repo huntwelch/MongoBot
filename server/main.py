@@ -21,6 +21,7 @@ from autonomic import Dendrite
 from config import load_config
 from util import shorten
 from cybernetics import metacortex
+from server.spooner import Spoon
 
 # Commented out until broca is fixed
 # from brainmeats.broca import Broca
@@ -61,6 +62,7 @@ def quotes():
     quotes = fetch_quotes()
     onetime = request.args.get('onetime')
     return render_template('quotes.html', quotes=quotes, onetime=onetime)
+
 
 @app.route("/chatlogs")
 @requires_auth
@@ -166,6 +168,16 @@ def showpoem(title):
         poem.append(line)
 
     return render_template('poem.html', title=title, poem=poem)
+
+
+@app.route("/spoon/<word>")
+def spoonerize(word):
+
+    spooned = Spoon(word)
+    spoons = spooned.show()
+    title = 'spooning %s' % word
+
+    return render_template('spoon.html', title=title, spoons=spoons)
 
 
 @app.route("/history")

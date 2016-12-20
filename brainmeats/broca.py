@@ -645,3 +645,11 @@ class Broca(Dendrite):
     def speakup(self):
         self.cx.bequiet = False
         return 'Back.'
+
+
+    @axon
+    def spoonerize(self):
+        if not self.values:
+            return 'Spoonerize what?'
+        return 'http://mongobot.com/spoon/%s' % self.values[0]
+

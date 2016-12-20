@@ -1,9 +1,11 @@
 import imaplib
 import email
 import smtplib
+import re
 
 from autonomic import axon, alias, help, Dendrite, Cerebellum, Synapse, Receptor
 from email.mime.text import MIMEText
+from id import Id
 
 # Lot of potential here. Currently just making
 # it a kind of daily wrap up thingy.
@@ -85,6 +87,33 @@ class Mail(Dendrite):
             print str(e)
 
         return
+
+
+    @axon
+    @alias('mail')
+    def sendemail(self):
+        if not self.values:
+            return 'mail whom what?'
+
+        to = self.values[0]
+
+        if not re.search('@', to):
+            user = Id(to)
+            if not user or not user.email:
+                self.chat("Don't know who that is :(")
+                return
+            else:
+                to = user.email
+
+        msg = MIMEText(' '.join(self.values[1:]))
+        msg['Subject'] = 'Heyo'
+
+        try:
+            self.smtp.sendmail(self.secrets.email, to, msg.as_string())
+        except Exception as e:
+            return str(e)
+
+        return 'Message sent'
 
 
     @Receptor('twitch')
