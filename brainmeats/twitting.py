@@ -41,6 +41,23 @@ class Twitting(Dendrite):
 
         return 'Retwitted'
 
+    @axon
+    @help('[ID] <retweet by id, or just the last tweet>')
+    def liz(self):
+        id = self.lasttweet
+        if not self.values and not id:
+            return 'Provide an id or link a Trump tweet first'
+
+        status = self.api.get_status(id)
+        message = "Liz Lemon, %s #TracyTrump @realDonaldTrump" % status.text
+
+        try:
+            status = self.api.update_status(message)
+            self.chat("Tweeted: %s" % message)
+        except Exception as e:
+            return 'Twitter error: %s' % str(e)
+
+
 
     @axon
     @help('MESSAGE <post to %s\'s twitter feed>' % metacortex.botnick)

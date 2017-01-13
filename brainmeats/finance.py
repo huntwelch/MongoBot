@@ -57,6 +57,14 @@ class Finance(Dendrite):
         low = locale.currency(json['ticker']['low'])
         high = locale.currency(json['ticker']['high'])
 
+        gdax = '(No result)'
+        gdax_url = 'https://api.gdax.com/products/BTC-USD/ticker'
+        g_request = Browser(gdax_url)
+        try:
+            gdax = '%.2f' % float(g_request.json()['price'])
+        except:
+            pass
+
         if self.values:
             try:
                 value = locale.currency(float(json['ticker']['last']) * float(self.values[0]))
@@ -65,7 +73,7 @@ class Finance(Dendrite):
 
             return 'Value of %s BTC is %s' % (self.values[0], value)
         else:
-            return 'Bitcoin, Last: %s, Low: %s, High: %s' % (last, low, high)
+            return 'Bitcoin, Last: %s, Low: %s, High: %s, GDAX: %s' % (last, low, high, gdax)
 
 
     @axon
