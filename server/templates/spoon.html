@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+        body {
+            padding: 20px;
+        }
+        p {
+            color: #444;
+            margin: 0;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+        span {
+            color: black;
+        }        
+        poem {
+            display: block;
+            width: 600px;
+            position: relative;
+            margin: 0 auto;
+        }
+        img {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    {% for line in spoons %}
+        <p>{{ line }}</p>
+    {% endfor %}
+    <br/>
+    <br/>
+    <p>
+        <img src='{{ url_for('static', filename='img/mongobot.png') }}' />
+    </p>
+{% endblock %}
