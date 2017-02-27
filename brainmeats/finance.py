@@ -61,7 +61,7 @@ class Finance(Dendrite):
         gdax_url = 'https://api.gdax.com/products/BTC-USD/ticker'
         g_request = Browser(gdax_url)
         try:
-            gdax = '%.2f' % float(g_request.json()['price'])
+            gdax = '$%.2f' % float(g_request.json()['price'])
         except:
             pass
 

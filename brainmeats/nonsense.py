@@ -1,6 +1,7 @@
 import os
 import time
 import simplejson
+import re
 
 from autonomic import axon, help, Dendrite, public, Receptor, Cerebellum, alias
 from util import colorize, shorten, zalgo
@@ -109,23 +110,19 @@ class Nonsense(Dendrite):
     @help("SEARCHTERM <grab random fml entry>")
     def fml(self):
 
-        url = 'http://api.fmylife.com'
-        params = {'language': 'en', 'key': self.secrets.fml_api}
+        #return "The FML api is discontinued and I don't feel like making a site scraper. RIP, whiny teens."
+
+        url = 'http://www.fmylife.com'
 
         if self.values:
-            url += '/view/search'
-            params['search'] = "+".join(self.values)
+            url += '/search/' + '%20'.join(self.values)
         else:
-            url += '/view/random'
+            url += '/random'
 
         try:
-            request = Browser(url, params)
+            request = Browser(url)
             soup = request.soup()
-
-            if self.values:
-                fml = choice(soup.find_all("text")).get_text()
-            else:
-                fml = soup.find_all("text")[0].get_text()
+            fml = choice(soup.find_all(string=re.compile('Today'))).strip()
             return fml
         except Exception as e:
             return "Nobody's life got fucked like that"
