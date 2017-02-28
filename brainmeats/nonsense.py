@@ -122,7 +122,7 @@ class Nonsense(Dendrite):
         try:
             request = Browser(url)
             soup = request.soup()
-            fml = choice(soup.find_all(string=re.compile('Today'))).strip()
+            fml = choice(soup.find('div', {'class': 'infinite-scroll'}).find_all(string=re.compile('Today'))).strip()
             return fml
         except Exception as e:
             return "Nobody's life got fucked like that"
