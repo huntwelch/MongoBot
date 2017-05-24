@@ -37,6 +37,36 @@ class Finance(Dendrite):
 
         return showit
 
+    
+    @axon
+    @help("<get current Ethereum trading information>")
+    def eth(self):
+        url = 'https://ethereumprice.org/wp-content/themes/theme/inc/exchanges/price-data.php?coin=eth&cur=ethusd&ex=waex&dec=2'
+        
+        request = Browser(url)
+        if not request:
+            return "Couldn't retrieve ETH data."
+        
+        try:
+            json = request.json()
+        except:
+            return "Couldn't parse ETH data."
+        
+        locale.setlocate(locale.LC_ALL, 'en_US.UTF-8')
+        last = locale.currency(json['current_price'])
+        low = locale.currency(json['today_low'])
+        high = locale.currency(json['today_high'])
+        
+        if self.values:
+            try:
+                value = locale.currency(float(last) * float(self.values[0]))
+            except:
+                return "Couldn't compute ETH value."
+
+            return 'Value of %s ETH is %s' % (self.values[0], value)
+        else:
+            return 'Ethereum, Last: %s, Low: %s, High: %s' % (last, low, high)
+
 
     @axon
     @help("<get current Bitcoin trading information>")
