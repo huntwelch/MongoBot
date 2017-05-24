@@ -93,7 +93,7 @@ class Finance(Dendrite):
             g_json = g_request.json()
             gdax = '$%.2f' % float(g_json['price'])
             if self.values:
-                gdax = locale.currency(float(g_json['price']) * float(self.values[0])
+                gdax = locale.currency(float(g_json['price']) * float(self.values[0]))
         except:
             pass
 
