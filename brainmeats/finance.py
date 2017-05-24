@@ -2,7 +2,7 @@ import locale
 
 from autonomic import axon, help, Dendrite
 from staff import Broker, Browser
-
+from decimal import Decimal
 
 # Stock stuff. This is a shockingly complex
 # and well maintained part of the bot because
@@ -53,9 +53,9 @@ class Finance(Dendrite):
             return "Couldn't parse ETH data."
         
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-        last = locale.currency(json['current_price'])
-        low = locale.currency(json['today_low'])
-        high = locale.currency(json['today_high'])
+        last = locale.currency(Decimal(json['current_price']))
+        low = locale.currency(Decimal(json['today_low']))
+        high = locale.currency(Decimal(json['today_high']))
         
         if self.values:
             try:
