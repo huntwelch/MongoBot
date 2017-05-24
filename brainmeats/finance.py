@@ -52,7 +52,7 @@ class Finance(Dendrite):
         except:
             return "Couldn't parse ETH data."
         
-        locale.setlocate(locale.LC_ALL, 'en_US.UTF-8')
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
         last = locale.currency(json['current_price'])
         low = locale.currency(json['today_low'])
         high = locale.currency(json['today_high'])
