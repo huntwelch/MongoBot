@@ -6,13 +6,17 @@ plugins:
   - channeling
   - chess
   - facebook
+  - farkle
   - finance
+  - hangman
   - holdem
   - linker
+  - mail
   - marvel
   - memory
   - nonsense
   - peeps
+  - polling
   - quotes
   - reference
   - sms

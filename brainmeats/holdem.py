@@ -7,6 +7,10 @@ from autonomic import axon, help, Dendrite
 from datastore import Drinker
 
 
+# Broken after some major refactoring, despite
+# Ken's hard work. Probably not too far off; the
+# nitty gritty work is still solid. Needs a
+# sitin/sitout functionality of some kind.
 class Player(object):
 
     name = ''
@@ -19,9 +23,11 @@ class Player(object):
 
     hand = []
 
+
     def __init__(self, name, money):
         self.name = name
         self.money = money
+
 
     def __repr__(self):
         r = "Player(name=%r, money=%r, round_money=%r, hand_money=%r, "\
@@ -30,10 +36,12 @@ class Player(object):
              self.status, self.hand, self.winlimit, self.besthand)
         return r
 
+
     def bet(self, money):
         self.money -= money
         self.round_money += money
         self.hand_money += money
+
 
     def reset(self):
         self.winlimit = None
@@ -186,6 +194,7 @@ class Holdem(Dendrite):
         self.bet = amount
         self.turn(prepend=message)
 
+
     @axon
     @help("<match the current bet>")
     def callit(self):
@@ -214,10 +223,12 @@ class Holdem(Dendrite):
 
         self.turn(prepend=message)
 
+
     @axon
     @help("<show how much money you have>")
     def mymoney(self):
         self.chat(str(self.players[self.lastsender].money))
+
 
     @axon
     @help("<show how much money everybody has>")
@@ -225,6 +236,7 @@ class Holdem(Dendrite):
         for player, p in self.players.iteritems():
             self.chat("%s: %d, %s" % (player, p.money, p.status))
             print p
+
 
     @axon
     @help("<pass>")
@@ -257,6 +269,7 @@ class Holdem(Dendrite):
         message = player + " passes. "
         self.turn(prepend=message)
 
+
     @axon
     @help("<you can probably figure this one out>")
     def fold(self):
@@ -279,6 +292,7 @@ class Holdem(Dendrite):
             self.distribute(lastman)
         else:
             self.turn(prepend=message)
+
 
     @axon
     @help("<go all in>")
@@ -307,15 +321,18 @@ class Holdem(Dendrite):
 
         self.turn(prepend=message)
 
+
     @axon
     @help("<show the current bet amount>")
     def thebet(self):
         self.chat("Bet is " + str(self.bet))
 
+
     @axon
     @help("<show the amount in the pot>")
     def thepot(self):
         self.chat("Pot is " + str(self.pot))
+
 
     def turn(self, jump=1, prepend=""):
         start = self.playerpointer
@@ -385,6 +402,7 @@ class Holdem(Dendrite):
             player = self.order[self.playerpointer]
             self.announce(prepend + player + "'s turn.")
 
+
     def deal(self):
 
         self.bet = 0
@@ -431,6 +449,7 @@ class Holdem(Dendrite):
 
         return
 
+
     def nextbet(self, type=""):
         self.announce(type + ": " + " ".join(self.hand))
         self.bet = 0
@@ -440,9 +459,11 @@ class Holdem(Dendrite):
         self.stage += 1
         self.turn()
 
+
     def burn(self):
         self.burncards.append(self.cards[self.cardpointer])
         self.cardpointer += 1
+
 
     def flop(self):
         self.burn()
@@ -451,17 +472,20 @@ class Holdem(Dendrite):
             self.cardpointer += 1
         self.nextbet("Flop")
 
+
     def turncard(self):
         self.burn()
         self.hand.append(self.cards[self.cardpointer])
         self.cardpointer += 1
         self.nextbet("Turn")
 
+
     def river(self):
         self.burn()
         self.hand.append(self.cards[self.cardpointer])
         self.cardpointer += 1
         self.nextbet("River")
+
 
     def translator(self, handstring):
         "Translate the hand string to a list of Card objects."
@@ -481,6 +505,7 @@ class Holdem(Dendrite):
             handobjects.append(hand.Card(suit, ordinal))
 
         return handobjects
+
 
     def distribute(self, lastman=None, side=False):
 

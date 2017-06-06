@@ -23,18 +23,15 @@ irc:
   port: 6697
   ssl: True
   chanserv: False
-  nickserv:
-    nick: 'NickServ'
-    password: 'test'
-  password: False
+  # Removes protocol static from the chatlog
+  scan: '^:\w+\.freenode\.net'
 
 bot:
   nick: 'MongoBot'
-  ident: 'macrotic'
-  realname: 'macrotic'
-  password: Null # The password to the IRC server
   command_prefix: '.'
   multi_command_prefix: ':'
+  flag_prefix: '-'
+  throttle: 25
 
 sys:
   pulse: '/tmp/bot.pulse'
@@ -51,7 +48,6 @@ directory:
   errorlog: "{directory.logdir}/error.log"
   log: "{directory.logdir}/chat.log"
   distaste: "{directory.storage}/distaste"
-  authfile: "{directory.storage}/users.yaml"
 
 # Media
 media:
@@ -73,7 +69,8 @@ general:
 misc:
   thumbsize: 40
   website: 'http://www.mongobot.com' # Dupped by webserver
-  
+  color: True
+
 # Web stuff
 website: !include webserver.yaml
 

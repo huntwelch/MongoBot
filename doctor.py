@@ -16,7 +16,7 @@ while True:
     lastpulse = pulse.readline()
 
     try:
-        if mktime(localtime()) - float(lastpulse) > PULSE_RATE:
+        if mktime(localtime()) - float(lastpulse) > settings.sys.pulserate:
             print "He's dead, Jim"
             os.system("ps ax | grep 'medulla.py' | grep -v grep | awk '{print $1}' | xargs kill")
             os.system("python medulla.py >> hippocampus/log/sys.log 2>>hippocampus/log/error.log &")

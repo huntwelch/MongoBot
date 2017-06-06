@@ -1,7 +1,7 @@
 import mongoengine
 
 from mongoengine import *
-
+import sys, traceback
 
 # All mongodb stuff. I've been told this would be
 # better done with sqlite. Some day.
@@ -10,23 +10,32 @@ def connectdb():
     mongoengine.connect('bot', host='localhost')
 
 
-def simpleupdate(whom, key, val):
+def simpleupdate(whom, key, val, crement=False):
     try:
         drinker = Drinker.objects(name=whom)
         if drinker:
             drinker = drinker[0]
+            # Incoming epic cheat
+            if crement:
+                if 'cash' not in drinker['data']:
+                    drinker['data']['cash'] = 0
+                drinker['data']['cash'] = drinker['data']['cash'] + val
+                # *sigh*
+            else:
+                drinker[key] = val
+            drinker.save()
         else:
-            drinker = Drinker(name=whom)
+            incrementEntity(whom, val)
 
-        drinker[key] = val
-        drinker.save()
-    except:
+    except Exception as e:
+        traceback.print_exc(file=sys.stderr)
         return False
 
     return True
 
 
 def incrementEntity(whom, amount):
+    amount = int(amount)
     try:
         entity = Entity.objects(name=whom)
         if entity:
@@ -46,14 +55,17 @@ def incrementEntity(whom, amount):
 
 def entityScore(whom):
     try:
-        entity = Entity.objects(name=whom)
-        if entity:
-            entity = entity[0]
+        drinker = Drinker.objects(name=whom)
+        if drinker:
+            drinker = drinker[0]
+            value = drinker['data']['cash']
         else:
-            entity = Entity(name=whom)
+            entity = Entity.objects(name=whom)
+            entity = entity[0]
+            value = entity.value
     except:
         return 0
-    return entity.value
+    return value
 
 
 def topScores(limit):
@@ -69,6 +81,12 @@ class Alias(mongoengine.EmbeddedDocument):
     name = StringField(required=True)
     definition = StringField(required=True)
 
+
+class Defaults(mongoengine.Document):
+    command = StringField(required=True)
+    response = StringField(required=True)
+
+
 class Position(EmbeddedDocument):
 
     symbol = StringField(required=True)
@@ -76,6 +94,7 @@ class Position(EmbeddedDocument):
     price = FloatField(min_value=0)
     quantity = IntField(min_value=0)
     type = StringField()
+
 
 class Drinker(mongoengine.Document):
     name = StringField(required=True)
@@ -90,11 +109,13 @@ class Drinker(mongoengine.Document):
     aliases = ListField(EmbeddedDocumentField(Alias))
     data = DictField()
 
+
 class Words(mongoengine.Document):
     word = StringField(required=True)
     partofspeech = StringField(required=True)
     definition = StringField(required=True)
     source = StringField(required=True)
+
 
 class Learned(mongoengine.Document):
     word = StringField(required=True)

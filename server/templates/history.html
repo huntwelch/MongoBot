@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+        body {
+            padding: 20px;
+        }
+        p {
+            color: #444;
+            margin: 0 0 20px;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+        span {
+            color: black;
+        }        
+        history {
+            display: block;
+            width: 600px;
+            position: relative;
+            margin: 0 auto;
+        }
+        img {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <history>
+    <h2>The History of OkDrink</h2>
+    <p>Long, long ago, erikbeta went on vacation from OkCupid, and melanarchy messaged chiyou to say: "Fuck. Who am I going to bitch to all day?" to which chiyou replied "inorite?" and much bitching was done. Upon erikbeta's return, #jailbait was created, as a place to continue the bitching and trade pictures of obviously underage users.</p>
+    <p>After the great OkExodus of 2010, our numbers did swell with Euj1, kenfree, realvinay, dcross2, digx, and woxidu, all dissaffected and enraged, except for woxidu, who was weirdly content at OkCupid, so we kind of slinked away into #okdrink to continue our 18 month recovery process of spewing vitriol and libel at the founders of OkCupid.</p>
+    <p>Once this wound down and erikbeta quit, woxidu was brought back to the fold and there was much rejoicing. jsbronder came too. He does fancy linux shit. So chiyou moved on to AdCloud, which became AdCirrus when George ruined the company's brand by bilking a client for 8k and the client wrote about it (http://www.inspiredstartup.com/adcloudmedia/).</p>
+    <p>jcb bailed early from the debacle, and once George stopped paying chiyou, chiyou sued him and we took to calling the company AdVapor, since they didn't appear to produce anything useful. They did have a really hot chick there, and entertaining names in the sales department, including Brittany Tingle and Guy Baretta. At some point, digx brought Viza on board.</p>
+    <p>chiyou's ad serving career ended shortly thereafter at the managerial apocalypse known as Mojiva, or Mocean, depending on who you asked. The mocean of the otion was at such a level of mindless fuckery that castr0 and loxo33 bailed shortly after arriving, and they too were brought among the saved, amen.</p>
+    <p>chiyou around this time became huntwelch as he slowly learned IRC commands, a skill that seemed oddly difficult for him considering he programmed a custom IRC protocol interpreter for this bot, and the Brothers Garfield joined us, though I'm a little hazy on the timeline there because I didn't notice for a while that jgarf and bgarf were there and then it took me a bit to realize they were two different people.</p>
+    <p>The ranks swelled again with sublimnl, xitrium, and arach_, as lot18 shifted its business strategy from slow burn to nose dive, but then lot18 gave arach_ enormous amounts of money and he towed the company line and alas would not bitch with us, though the invitation stands.</p>
+    <p>The lo, did technical females join us and fulfill our diversity quota, and we had to grow up a bit and take down the "No girls allowed" bit that used to conclude this history. (ibid. 35). pythonchelle joined us as she was wrapping up her years of not having a job because why not, though we haven't seen much of her since she went back to work.</p>
+    <p>Here began The Time of the Troll, as evil genius iforgothernick spammed many a site with her bot army until The Day of Aleksey (also referred to "A Troll Too Far") whereupon our safe haven was breached by the Russians and sublimnl banned istillcantremeberitsbeenawhilegimmeabreak.</p>
+    <p>Now as erikbeta finishes his purgatorial stint at ThoseRocksWerentOnTheMap and recovers the lease on his soul, we have aquired jbz and jberger, making tab completion of j names fairly difficult, praise the Lord, and we journey on through the undiscovered country, though when you think about it, Star Trek VI came out well after Next Generation was running, so the country wasn't really undiscovered at all.</p>
+    <br/>
+    <br/>
+    <p>
+        <img src='{{ url_for('static', filename='img/mongobot.png') }}' />
+    </p>
+    </history>
+{% endblock %}

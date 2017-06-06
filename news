@@ -1,0 +1,22 @@
+EXTRA! EXTRA!
+---
+Now type .news to get bot updates like this one.
+---
+Points accessed through increment/decrement/++/-- are
+now synonymous with stockgame monies.
+---
+In addtion, the dice game affects points: the winner
+gets their final score added to their points/cash, all
+losers get their final score likewise deducted. This
+is untested, so expect breakage.
+---
+To usher in this new dystopian economy, some changes:
+++/-- now select between 1 and 10,000, instead of a
+100,000. Incrementing yourself is an instant -100,000. jcb
+is no longer banned. This is all pretty insecure, so script
+away if you must.
+---
+I also reset everybody's cash to $100,000. If you really
+want your previous gains back, make a formal request. Please
+request an amount of money smaller than worldwide GDP, grains
+of sand on the beach, number of atoms in the universe, etc.

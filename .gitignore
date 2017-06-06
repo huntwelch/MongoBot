@@ -12,9 +12,6 @@ wordbank
 introductions
 allowed
 python.core
-secrets.py
 junk/*
 deprecated/*
-config/settings.yaml
 config/secrets.yaml
-

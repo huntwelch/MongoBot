@@ -2,6 +2,7 @@ import os
 import re
 import pkgutil
 import threading
+import subprocess
 
 from autonomic import axon, help, Dendrite, public, alias
 from cybernetics import metacortex
@@ -19,6 +20,17 @@ class System(Dendrite):
     def __init__(self, cortex):
         super(System, self).__init__(cortex)
 
+
+    @axon
+    @help('toggle whether debug statements are reported in chat')
+    def debug(self):
+        if self.cx.debugging:
+            self.cx.debugging = False
+            return 'Debugging off'
+        else:
+            self.cx.debugging = True
+            return 'Debugging on'
+
     @axon
     @alias('raw')
     def rawsock(self):
@@ -27,10 +39,14 @@ class System(Dendrite):
 
         self.cx.sock.send(' '.join(self.values))
 
+
     @axon
     def echo(self):
-        return ' '.join(self.values)
-    
+        line = ' '.join(self.values)
+        self.chat(line)
+        return line
+
+
     # Help menu. It used to just show every command, but there
     # are so goddamn many at this point, they had to be split
     # into categories.
@@ -39,7 +55,7 @@ class System(Dendrite):
     @alias('help')
     def showhelp(self):
 
-        enabled = self.cx.master.ENABLED
+        enabled = self.cx.enabled
         broken = self.cx.broken
 
         if not self.values or self.values[0] not in self.libs or self.values[0] not in self.cx.helpmenu:
@@ -61,9 +77,12 @@ class System(Dendrite):
 
         return self.cx.helpmenu[which]
 
+
+    # This doesn't work. Go figure.
     @axon
     def threads(self):
         return threading.activeCount()
+
 
     # Reloads the bot. Any changes make to cortex or brainmeats
     # and most settings will be reflected after a reload.
@@ -76,6 +95,7 @@ class System(Dendrite):
         #    meats['webserver'].reloadserver(True)
         self.cx.master.reload()
 
+
     # Actually kills the medulla process and waits for the
     # doctor to restart. Some settings and any changes to
     # medulla.py won't take effect until a reboot.
@@ -85,6 +105,7 @@ class System(Dendrite):
     def reboot(self):
         self.cx.master.die()
 
+
     # DANGER ZONE. You merge it, anyone can pull it. If you
     # have a catastrophic failure after this, it's probably
     # because of a conflict with local changes. But will it
@@ -92,7 +113,8 @@ class System(Dendrite):
     @axon
     @help("<update from git repo>")
     def gitpull(self):
-        if not self.values: return 'Which branch?'
+        if not self.values:
+            return 'Which branch?'
 
         branch = self.values[0]
 
@@ -100,13 +122,19 @@ class System(Dendrite):
         self.cx.master.reload(True)
         self.chat("I know kung-fu.")
 
+    # Find out what revision we are on
+    @axon
+    @help("<show git hash>")
+    def gitversion(self):
+        sha_hash = subprocess.check_output("git rev-parse HEAD", shell=True)
+        self.chat("I'm running revision %s" % sha_hash)
+
     # Turn libs on.
     @axon
     @help("LIB_1 [LIB_n] <activate libraries>")
     def enable(self):
         if not self.values:
-            self.chat("Enable what?")
-            return
+            return "Enable what?"
 
         if self.values[0] == '*':
             values = self.libs
@@ -118,7 +146,7 @@ class System(Dendrite):
         enabled = []
         broken = []
         for lib in values:
-            if lib in self.cx.master.ENABLED:
+            if lib in self.cx.enabled:
                 already.append(lib)
             elif lib not in self.libs:
                 nonextant.append(lib)
@@ -126,7 +154,7 @@ class System(Dendrite):
                 broken.append(lib)
             else:
                 enabled.append(lib)
-                self.cx.master.ENABLED.append(lib)
+                self.cx.enabled.append(lib)
 
         messages = []
         if len(already):
@@ -145,18 +173,17 @@ class System(Dendrite):
 
         self.chat(' '.join(messages))
 
+
     # Turn libs off. Why all this lib stuff? Helps when developing, so
     # you can just turn stuff off while you tinker and prevent crashes.
     @axon
     @help("LIB_1 [LIB_n] <deactivate libraries>")
     def disable(self):
         if not self.values:
-            self.chat("Disable what?")
-            return
+            return "Disable what?"
 
         if 'system' in self.values:
-            self.chat("You can't disable the system, jackass.")
-            return
+            return "You can't disable the system, jackass."
 
         already = []
         nonextant = []
@@ -164,11 +191,11 @@ class System(Dendrite):
         for lib in self.values:
             if lib not in self.libs:
                 nonextant.append(lib)
-            elif lib not in self.cx.master.ENABLED:
+            elif lib not in self.cx.enabled:
                 already.append(lib)
             else:
                 disabled.append(lib)
-                self.cx.master.ENABLED.remove(lib)
+                self.cx.enabled.remove(lib)
 
         messages = []
         if len(already):

@@ -3,15 +3,23 @@ import urllib
 import threading
 import re
 import time
+import json
 
+from bs4 import BeautifulSoup as bs4
 from collections import OrderedDict
-from util import colorize, shorten, pageopen
+from util import colorize, shorten
 
 
-# TODO?: interface with addlive
+# Because where would Batman be without Alfred? Without tea,
+# that's fucking where. These are handy helper objects for
+# dealing with commands and some more complex shit that
+# shouldn't be as complex as it ends up being in brainmeats.
+# In particular, the Browser object gets around a lot of
+# annoyances in http calls.
+
+# This is how we pseudo-thread all the commands.
 class Butler(object):
     maxtasks = 8
-    cx = False
     semaphore = False
 
     def __init__(self, cortex):
@@ -36,7 +44,7 @@ class Butler(object):
         thread.start()
 
 
-# Better browser through technology
+# Better browsing through technology
 class Browser(object):
 
     url = False
@@ -69,10 +77,10 @@ class Browser(object):
             user, password = userpass.split(':')
             self.robot.add_password(url, user, password)
 
+        # TODO params are broken
         try:
             if params:
                 data = urllib.urlencode(params)
-
             if params and method == 'GET':
                 self.response = self.robot.open(url + '?%s' % data)
             elif params and method == 'POST':
@@ -82,6 +90,12 @@ class Browser(object):
 
         except Exception as e:
             self.error = str(e)
+
+    def soup(self):
+        return bs4(self.response.read())
+
+    def json(self):
+        return json.loads(self.response.read())
 
     def read(self):
         return self.response.read()
@@ -112,15 +126,15 @@ class Broker(object):
 
         # Yahoo uses hyphens in the symbols; old portfolios might be saved
         # with dots from when we were using the Google API - look up with hyphen.
-        symbol.replace('.', '-')
+        symbol = symbol.replace('.', '-')
 
         # yahoo fields
         # See http://www.gummy-stuff.org/Yahoo-data.htm for more
         fields = OrderedDict([
             ('symbol', 's'),
-            ('price', 'k1'),
-            ('perc_change', 'k2'),
-            ('change', 'c6'),
+            ('price', 'l1'),
+            ('perc_change', 'p2'),
+            ('change', 'c1'),
             ('exchange', 'x'),
             ('company', 'n'),
             ('volume', 'v'),
@@ -128,12 +142,11 @@ class Broker(object):
         ])
 
         # yahoo specific
-        url = 'http://finance.yahoo.com/d/quotes.csv'
-        params = {'f': ''.join(fields.values()), 's': symbol}
+        url = 'http://download.finance.yahoo.com/d/quotes.csv'
+        params = {'f': ''.join(fields.values()), 's': symbol, 'e': '.csv'}
 
         try:
-            # TODO: replace pageopen w/ browse
-            raw_string = pageopen(url, params).text
+            raw_string = Browser(url, params).read()
             raw_list = raw_string.strip().replace('"', '').split(',')
             data = {key: raw_list.pop(0) for (key) in fields.keys()}
         except Exception as e:
@@ -160,10 +173,11 @@ class Broker(object):
         return self.stock is not None
 
     def showquote(self, context):
+
         if not self.stock:
             return False
 
-        name = "%s (%s)" % (self.company, self.symbol)
+        name = "%s (%s)" % (self.company, self.symbol.upper())
         changestring = str(self.change) + " (" + ("%.2f" % self.perc_change) + "%)"
 
         if self.change < 0:
@@ -185,11 +199,11 @@ class Broker(object):
         ]
 
         # TODO: Don't do this for not in channel, ensure it's a privmsg only. Currently not compatible with channeling
-        #if context != CHANNEL:
-        #    for item in otherinfo:
-        #        pretty, id = item
-        #        addon = pretty + ": " + getattr(self, id, 'N/A')
-        #        message.append(addon)
+        # if context != CHANNEL:
+        #     for item in otherinfo:
+        #         pretty, id = item
+        #         addon = pretty + ": " + getattr(self, id, 'N/A')
+        #         message.append(addon)
 
         link = 'http://finance.yahoo.com/q?s=' + self.symbol
         roasted = shorten(link)
@@ -198,5 +212,3 @@ class Broker(object):
         output = ', '.join(message)
 
         return output
-
-

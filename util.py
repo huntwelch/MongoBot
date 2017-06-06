@@ -1,15 +1,14 @@
 import time
 import HTMLParser
 import requests
-import urllib
 import random
 import subprocess
-import string
 
-from PIL import Image
 from config import load_config
 
 secrets = load_config('config/secrets.yaml')
+settings = load_config('config/settings.yaml')
+
 
 # Utility functions
 
@@ -37,7 +36,10 @@ def unescape(text):
     return parser.unescape(text)
 
 
-def colorize(text, color):
+def colorize(text, color, colorize=True):
+    if not settings.misc.color or not colorize:
+        return text
+
     colors = {
         "white": 0,
         "black": 1,
@@ -59,47 +61,17 @@ def colorize(text, color):
     if isinstance(color, str):
         color = colors[color]
 
-    return "\x03" + str(color) + text + "\x03\x0f"
-
-HEADERS = {'User-agent': '(Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.17 Safari/537.36' }
-
-def pageopen(url, params={}):
-    try:
-        urlbase = requests.get(url, headers=HEADERS, params=params, timeout=5)
-    except requests.exceptions.RequestException as e:
-        print e
-        return False
-    except:
-        return False
-
-    return urlbase
+    return "\x03%s\x02%s\x02\x03\x0f" % (str(color), text)
 
 
 def shorten(url):
-    short_url = pageopen(secrets.shortner.url, params={'roast': url})
+    short_url = requests.get(secrets.shortner.url, params={'roast': url})
 
     if short_url:
         return short_url.text
 
     return url
 
-
-def postdelicious(url, title, sender):
-    # TODO Just commenting this all out since we don't want to make this use config; should be a brainmeat
-    #deli = "https://api.del.icio.us/v1/posts/add"
-    #params = {
-    #    "url": url,
-    #    "description": title,
-    #    "tags": "%s,%s" % (CHANNEL, sender),
-    #}
-
-    #if DELICIOUS_USER:
-    #    auth = requests.auth.HTTPBasicAuth(DELICIOUS_USER, DELICIOUS_PASS)
-    #    try:
-    #        send = requests.get(deli, params=params, auth=auth)
-    #    except:
-    #        pass
-    pass
 
 def savevideo(url, path):
     args = [
@@ -127,13 +99,12 @@ def savevideo(url, path):
 
 
 # Use of 'thumber' var is crappy, but probably
-# moving this to a Browse method, so not worrying
+# moving this to a Browser, so not worrying
 # about it right now.
 def savefromweb(url, path, thumber=False):
     # TODO could be a receptor that can also get called with a specific url attached to it
-    # TODO deprecate function in favor of Browse. Note dependencies
+    # TODO deprecate function in favor of Browser. Note dependencies
     r = requests.get(url, stream=True, verify=False)
-
 
     if r.status_code != 200:
         return
@@ -144,12 +115,12 @@ def savefromweb(url, path, thumber=False):
         f.close()
 
     # TODO this qualifies as either its own method or an artsy method
-    #if thumber:
-    #    fname = "%s_%s.jpeg" % ( thumber, int(time.mktime(time.localtime())) )
-    #    img = Image.open(path)
-    #    img.thumbnail((THUMB_SIZE, THUMB_SIZE), Image.ANTIALIAS)
-    #    img.save('server%s%s' % (THUMBS, fname))
-    #    return '%s%s%s' % (WEBSITE, THUMBS, fname)
+    # if thumber:
+    #     fname = "%s_%s.jpeg" % ( thumber, int(time.mktime(time.localtime())) )
+    #     img = Image.open(path)
+    #     img.thumbnail((THUMB_SIZE, THUMB_SIZE), Image.ANTIALIAS)
+    #     img.save('server%s%s' % (THUMBS, fname))
+    #     return '%s%s%s' % (WEBSITE, THUMBS, fname)
     pass
 
 
@@ -168,10 +139,6 @@ zalgochars = [
         u'\u036a',       u'\u036b',       u'\u036c',       u'\u036d',
         u'\u036e',       u'\u036f',       u'\u033e',       u'\u035b',
         u'\u0346',       u'\u031a'
-    ],
-
-    [
-        u'\u0E47'
     ],
 
     [
@@ -214,12 +181,13 @@ fears = [
     'a room with a moose',
 ]
 
+
 # HE COMES
 def zalgo(_string):
     if len(_string) < 10:
         return _string
 
-    amount = random.randint(10,len(_string))
+    amount = random.randint(10, len(_string))
     base = _string[:amount]
     zalgoit = list(_string[amount:])
     zalgoed = u''
@@ -237,7 +205,7 @@ def zalgo(_string):
             continue
 
         direction = random.choice(zalgochars)
-        for x in range(0,4):
+        for x in range(0, 4):
             tic = random.choice(direction)
             zalgoed = u'%s%s' % (zalgoed, tic)
 

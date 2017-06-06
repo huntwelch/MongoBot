@@ -1,12 +1,14 @@
+import os
 import sys
+
 import cortex
+import thalamus
 
 from config import load_config
 from time import sleep, mktime, localtime
-from thalamus import Thalamus
 from hyperthymesia import Hyperthymesia
+from cybernetics import metacortex
 
-from pprint import pprint
 
 # Welcome to the beginning of a very strained brain metaphor!
 # This is the shell for running the cortex. Ideally, this will never
@@ -15,12 +17,14 @@ from pprint import pprint
 # a reload won't change it. Same goes for changes to thalamus.py
 class Medulla:
 
+    # Used by thalamus
+    sock = False
+
     def __init__(self):
 
         print '* Becoming self-aware'
         self.settings = load_config('config/settings.yaml')
         self.secrets = load_config('config/secrets.yaml')
-        self.ENABLED = self.settings.plugins.values().pop(0)
         self.active = True
         self.logger = Hyperthymesia()
 
@@ -30,9 +34,12 @@ class Medulla:
             self.logger.warn('Drain bamaged... Stroking... out...')
             sys.exit()
 
-        self.thalamus = Thalamus(self.brain)
+        self.thalamus = thalamus.Thalamus(self, self.brain)
+        self.thalamus.connect()
         self.brain.thalamus = self.thalamus
         self.brain.logger = self.logger
+
+        metacortex.cx = self.brain
 
         # The pulse file is set as a measure of how
         # long the bot has been spinning its gears
@@ -47,9 +54,14 @@ class Medulla:
 
         while True:
             sleep(0.1)
+
+            # Slight race condition on reloads
+            if not self.brain.thalamus: continue
+
             self.brain.monitor()
             if mktime(localtime()) - self.lastpulse > 10:
                 self.setpulse()
+
 
     # Reload has to be run from here to update the
     # cortex.
@@ -62,7 +74,7 @@ class Medulla:
         else:
             self.brain.act('strokes out.', False, self.secrets.owner)
 
-        # TODO also broken. Reloading is SO BROKEN
+        # TODO broken.
         #for channel in self.secrets.channels:
         #    name, attr = channel.popitem()
         #    if attr.primary:
@@ -76,20 +88,33 @@ class Medulla:
 
         import datastore
         import util
+        import staff
         import autonomic
         import cortex
+        import thalamus
+        import id
+
         reload(datastore)
         reload(autonomic)
         reload(util)
+        reload(staff)
         reload(cortex)
+        reload(thalamus)
+        reload(id)
+
         self.brain = cortex.Cortex(self, True)
+        self.thalamus = thalamus.Thalamus(self, self.brain)
+
         self.brain.thalamus = self.thalamus
         self.active = True
+
+        metacortex.cx = self.brain
 
         if not quiet:
             self.brain.act('comes to.')
         else:
             self.brain.act('comes to.', False, self.secrets.owner)
+
 
     def setpulse(self):
         self.lastpulse = mktime(localtime())
@@ -97,9 +122,10 @@ class Medulla:
         pulse.write(str(self.lastpulse))
         pulse.close()
 
+
     def die(self, msg=None):
         if msg is not None:
             print msg
-        sys.exit()
+        os._exit(1)
 
 connect = Medulla()

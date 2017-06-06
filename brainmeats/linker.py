@@ -6,23 +6,23 @@ from util import shorten, unescape
 from staff import Browser
 from random import randint
 
+# This isn't really a brainmeant like the others,
+# but it got moved here during brain surgery to
+# clear out cortex.py and start working with the
+# receptor stuff.
 @Cerebellum
 class Linker(Dendrite):
 
-    '''
-    Set up the brainmeat
-    '''
     def __init__(self, cortex):
         super(Linker, self).__init__(cortex)
 
 
-    '''
-    urlfinder locates urls in incoming irc messages
-    '''
+    # urlfinder locates urls in incoming irc messages
     @Receptor('IRC_PRIVMSG')
     def urlfinder(self, target, source, args):
         # Ignore urls in commands
-        if re.search('^%s' % self.cx.settings.bot.command_prefix, args[-1]):
+
+        if re.search('^\%s' % self.cx.settings.bot.command_prefix, args[-1]):
             return
 
         pattern = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
@@ -33,6 +33,7 @@ class Linker(Dendrite):
             self.urlparse(url)
 
         return
+
 
     @Synapse('url')
     def urlparse(self, url):
@@ -56,10 +57,12 @@ class Linker(Dendrite):
         self.chat('%s @ %s' % (unescape(site.title()), roasted))
         return [url]
 
+
     def cleanse(self, url):
         # Don't parse certain URLs - return false for these
         if (url.find('roa.st') != -1 or
             url.find('gist.github') != -1 or
+            url.find('drafts') != -1 or
             url.find('twitter.com') != -1):
             return False
 
@@ -68,8 +71,19 @@ class Linker(Dendrite):
 
         return
 
+
+    @axon
+    def shorten(self):
+        if not self.values:
+            return 'Shorten what?'
+
+        return shorten(self.values[0])
+
+
     @Receptor('url')
     def random_tweet(self, url):
+
+        return
 
         if self.cleanse(url) == False:
             return
@@ -79,5 +93,4 @@ class Linker(Dendrite):
                 self.cx.commands.get('tweet')(url)
             except:
                 pass
-
 

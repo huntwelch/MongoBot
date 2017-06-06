@@ -12,6 +12,7 @@ class Id(object):
     ident = False
     host = False
     ip = False
+    fullid = False
 
     is_authenticated = False
     is_recognized = False
@@ -32,6 +33,8 @@ class Id(object):
         else:
             user = arguments[0]
 
+            self.fullid = user
+
             try:
                 self.nick, self.ident = user.split('!')
                 self.host = self.ident.split('@', 1)[1]
@@ -45,6 +48,8 @@ class Id(object):
 
         if not self.nick:
             return
+
+        # ident not getting set for some reason?
 
         self.is_recognized = True
 
@@ -61,16 +66,21 @@ class Id(object):
         if self.nick == secrets.owner and self.is_authenticated:
             self.is_owner = True
 
-
     # Dynamicaly retrieve data from the datastore connection that are linked to the current
     # authenticated user.
+    def __getitem__(self, key):
+        return self.__getattr__(key)
+
+    def __setitem__(self, key, value):
+        return self.__setattr__(key, value)
+
     def __getattr__(self, key):
 
         if not self.is_recognized or not self.prop:
             return False
 
         # This can eventually be removed; migrate the data as we go
-        self.migrate(key)
+        # self.migrate(key)
 
         if key in self.prop.data:
             return self.prop.data[key]
@@ -93,7 +103,6 @@ class Id(object):
 
         # This can eventually be removed; migrate the data as we go
         self.migrate(key)
-
         self.prop.data[key] = value
 
         # Even with a migration lets save the changes to the original as well,
@@ -112,21 +121,18 @@ class Id(object):
     # Migrate data to new data format as we go
     def migrate(self, key):
 
-        protected = [ 'name', 'password' ]
+        protected = ['name', 'password']
 
-        if key in protected:
-            # Protected variable that should not get migrated
-            return
+        if key in protected: return
 
-        if key in self.prop.data:
-            # Already migrated
-            return
+        if key in self.prop.data: return
 
         if key in self.prop:
             self.prop.data[key] = self.prop[key]
             self.prop.save()
 
         return
+
 
     # Set the users password
     def setpassword(self, password, skip_auth_check=False):
@@ -146,10 +152,10 @@ class Id(object):
 
         obj = hashlib.sha256(password)
         if obj.hexdigest() != self.prop['password']:
-            return False
+            return "Hex check failed."
 
         self.is_authenticated = True
-        self.prop['idents'].append(self.ident)
+        self.prop.idents.append(self.ident)
 
         self.prop.save()
 

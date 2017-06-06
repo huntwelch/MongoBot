@@ -1,9 +1,14 @@
 from autonomic import axon, help, Dendrite
 
-
+# Fairly self-explanatory. It searches logs.
+# One thing todo is to make it capable of
+# searching archived logs, since the current
+# system rolls the logs over each month.
 class Memory(Dendrite):
+
     def __init__(self, cortex):
         super(Memory, self).__init__(cortex)
+
 
     @axon
     @help("<search logs for phrase and print the most recent>")
@@ -32,6 +37,7 @@ class Memory(Dendrite):
         self.mempoint = len(self.memories) - 1
         return self.remember()
 
+
     @axon
     @help("<after mem, get the next phrase memory>")
     def next(self):
@@ -42,6 +48,7 @@ class Memory(Dendrite):
             return
         self.mempoint += 1
         return self.remember()
+
 
     @axon
     @help("<after mem, get the previous phrase memory>")
@@ -54,6 +61,7 @@ class Memory(Dendrite):
         self.mempoint -= 1
         return self.remember()
 
+
     @axon
     @help("<after mem, get the latest phrase memory>")
     def oldest(self):
@@ -61,6 +69,7 @@ class Memory(Dendrite):
             return
         self.mempoint = 0
         return self.remember()
+
 
     @axon
     @help("<you see where this is going>")
@@ -70,11 +79,13 @@ class Memory(Dendrite):
         self.mempoint = len(self.memories) - 1
         return self.remember()
 
+
     def remember(self):
         try:
             return self.memories[self.mempoint]
         except:
             return "Don't recall anything about that."
+
 
     def nomem(self):
         if not self.memories:

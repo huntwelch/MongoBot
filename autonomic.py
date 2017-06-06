@@ -1,14 +1,33 @@
 import inspect
+import sys
+
 from config import load_config
 from id import Id
 from pprint import pprint
-import sys
+
 
 # The core of the library methodology used
 # by MongoBot. All brainmeats are Dendrites,
 # inheriting the state of the cortex as the
 # cortex monitors the chatroom. It also adds
 # some shortcuts to cortex functions.
+
+# future experiment
+
+def router(self):
+    destination = self.values.pop(0)
+    if not self[destination].create_command: return
+    return self[destination]()
+
+def autocommand(fn_name):
+    def add(object):
+        object.routed = True
+        object[fn_name] = router
+        return object
+
+    return add
+
+
 class Dendrite(object):
 
     config = None
@@ -21,7 +40,7 @@ class Dendrite(object):
         # Load in brainmeats specific secrets and only make those available as first
         # class secrets to the brainmeats
         if name in self.cx.secrets:
-            self.secrets = self.cx.secrets[name];
+            self.secrets = self.cx.secrets[name]
 
         # Load in config file by the same name as the brainmeats, if available
         try:
@@ -32,6 +51,9 @@ class Dendrite(object):
 
     def chat(self, what, target=False, error=False):
         self.cx.chat(what, target, error)
+
+    def debug(self, what, target=False):
+        self.cx.debug(what, target)
 
     def announce(self, what):
         self.cx.announce(what)
@@ -51,12 +73,20 @@ class Dendrite(object):
         return self.cx.values
 
     @property
+    def flags(self):
+        return self.cx.flags
+
+    @property
     def butler(self):
         return self.cx.butler
 
     @property
     def lastsender(self):
         return self.cx.lastsender
+
+    @property
+    def lastid(self):
+        return self.cx.lastid
 
     @property
     def lastip(self):
@@ -82,8 +112,8 @@ class Dendrite(object):
     def ego(self):
         return self.cx.personality
 
-    #@property
-    #def mysender(self):
+    # @property
+    # def mysender(self):
     #    return Id(self.cx.lastsender)
 
 
@@ -96,6 +126,11 @@ def serotonin(cortex, meatname, electroshock):
     methods = inspect.getmembers(brainmeat)
 
     helps = []
+
+    if hasattr(brainmeat, 'routed'):
+        cortex.commands[meatname] = brainmeat[meatname]
+        return
+
 
     for name, method in methods:
         if not hasattr(method, 'create_command'):
@@ -111,17 +146,16 @@ def serotonin(cortex, meatname, electroshock):
             cortex.public_commands.append(name)
 
         if name in cortex.commands and not electroshock:
-            print "Warning: overwriting " + name
+            print "Warning: overwriting %s command" % name
 
         cortex.commands[name] = method
         if hasattr(method, 'aliases') and method.aliases:
             for item in method.aliases:
                 cortex.commands[item] = method
 
-    if len(helps):
-        if meatname in cortex.helpmenu and not electroshock:
-            print "Warning: overwriting category %s in help menu" % meatname
+    cortex.helpmenu[meatname] = ['No help entries for this meat.']
 
+    if len(helps):
         cortex.helpmenu[meatname] = sorted(helps)
 
 
@@ -132,12 +166,12 @@ class Neurons(object):
     vesicles = {}
 
 
-# Cerebellum is needed on any class that has 
+# Cerebellum is needed on any class that has
 # methods that will be used as receptors - this is
-# due to pythons way of handling decorators and 
+# due to pythons way of handling decorators and
 # not binding them until the class is defined,
 # which is not how receptors should be utilized.
-# 
+#
 # aka, this be a hack
 def Cerebellum(object):
 
@@ -145,18 +179,18 @@ def Cerebellum(object):
         if hasattr(method, 'is_receptor'):
 
             receptors = Neurons.vesicles.get(method.name, [])
-            receptors.append({ object.__name__.lower(): method.neuron })
-            Neurons.vesicles.update({ method.name: receptors })
+            receptors.append({object.__name__.lower(): method.neuron})
+            Neurons.vesicles.update({method.name: receptors})
 
     return object
 
 
-# Synapse is an event emitting decorator that will 
+# Synapse is an event emitting decorator that will
 # fire off a neuron to all receptors that are
 # listening for the passed keyword.
-# 
+#
 # Usage:
-# 
+#
 #     @Synapse('my_keyword')
 #     def some_method():
 #         ...
@@ -183,11 +217,12 @@ class Synapse(Neurons):
         return glutamate
 
 
-# Receptor is an observer decorator that will auto trigger when a neuron is fired using
+# Receptor is an observer decorator that will
+# auto trigger when a neuron is fired using
 # a keyword the receptor is listening for.
-# 
+#
 # Usage:
-# 
+#
 #     @Receptor('my_keyword')
 #     def do_something():
 #         ....
@@ -212,10 +247,6 @@ def Receptor(name, *args, **kwargs):
 
 # Proposed:
 # @requires(vars, connections, installs)
-# @live() to run it in parietal. Iffy.
-# @pipe() can pipe output to another function.
-#         This is kind of just built in right
-#         now.
 
 # Makes the function available as
 # a chat command, using the function
@@ -224,11 +255,13 @@ def axon(fn):
     fn.create_command = True
     return fn
 
+
 # Makes the function available
 # to non-registered users.
 def public(fn):
     fn.public_command = True
     return fn
+
 
 # Tell people your function is
 # there and how to use it.
@@ -238,6 +271,7 @@ def help(text):
         return fn
     return add
 
+
 # Don't want to type out findfreechildpornwithukmirrors?
 # @alias(['perv', 'seriouslydude', 'gethelp'])
 def alias(*args):
@@ -245,3 +279,5 @@ def alias(*args):
         fn.aliases = args
         return fn
     return add
+
+

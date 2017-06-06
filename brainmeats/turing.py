@@ -10,10 +10,11 @@ from id import Id
 #    4.) List other drinker aliases other than our own.
 
 
-
 class Turing(Dendrite):
+
     def __init__(self, cortex):
         super(Turing, self).__init__(cortex)
+
 
     @axon
     def salias(self):
@@ -22,7 +23,7 @@ class Turing(Dendrite):
         evil = ['salias', 'ralias', 'lalias', 'dalias']
         definition = ' '.join(self.values[1:])
 
-        drinker = Id(whom)
+        drinker = Id(self.lastid)
         # drinker = Drinker.objects(name=whom).first()
 
         if not drinker.is_authenticated:
@@ -41,6 +42,7 @@ class Turing(Dendrite):
         # drinker.save()
         self.chat(name + " saved.")
 
+
     @axon
     def ralias(self):
         name = self.values[0]
@@ -54,8 +56,10 @@ class Turing(Dendrite):
             if alias.name == name:
                 definition = [elem.strip() for elem in alias.definition.split(';') if len(elem.strip()) > 0]
                 for line in definition:
-                    self.cx.command(drinker.name, line)
+                    # this needs to not rely on cx.context
+                    self.cx.command(drinker.name, self.cx.context, line)
                 return
+
 
     @axon
     def lalias(self):
@@ -68,6 +72,7 @@ class Turing(Dendrite):
 
         for alias in drinker.aliases:
             self.chat(alias.name + " " + alias.definition)
+
 
     @axon
     def dalias(self):
@@ -92,7 +97,7 @@ class Turing(Dendrite):
             self.chat(name + " deleted.")
 
     def _get_drinker(self):
-        drinker = Id(self.lastsender)
+        drinker = Id(self.lastid)
 
         if not drinker.is_authenticated:
             self.chat('Be gone peasant.')

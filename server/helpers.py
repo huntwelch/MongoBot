@@ -1,8 +1,10 @@
 import re
+import os
 
 from datetime import datetime
 from flask import Flask, request, session, make_response, render_template
 from config import load_config
+from datastore import connectdb, Quote
 import pyotp
 import base64
 
@@ -17,9 +19,12 @@ def render_xml(path):
     return response
 
 
-def fetch_chats(request, offset):
+def fetch_quotes():
+    connectdb()
+    return [q.text for q in Quote.objects]
 
-    global config
+
+def fetch_chats(request, offset):
 
     log = open(config.directory.log, 'r')
     chats = []
@@ -40,7 +45,6 @@ def fetch_chats(request, offset):
 
             clip += 1
             line = line[clip:]
-
 
 
         if line.find(config.bot.nick) is 1:

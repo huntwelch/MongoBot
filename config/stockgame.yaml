@@ -4,5 +4,14 @@ exchanges:
   - 'NYSEAMEX'
   - 'NASDAQ'
   - 'NASDAQNM'
+  - 'NYQ'
+  - 'NMS'
+  - 'ASE'
+
+blacklist:
+  - 'OTCBB'
+  - 'OTCQX'
+  - 'OTCQB'
+  - 'OTC'
 
 startupcash: 100000

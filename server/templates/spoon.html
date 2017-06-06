@@ -28,9 +28,7 @@
     </style>
 {% endblock %}
 {% block content %}
-    <poem>
-    <h2>{{ title }}</h2>
-    {% for line in poem %}
+    {% for line in spoons %}
         <p>{{ line }}</p>
     {% endfor %}
     <br/>
@@ -38,8 +36,4 @@
     <p>
         <img src='{{ url_for('static', filename='img/mongobot.png') }}' />
     </p>
-    <p>
-        <a href="/poetry">Back to poems</a>
-    </p>
-    </poem>
 {% endblock %}

@@ -14,6 +14,7 @@ class Alien(Dendrite):
     def __init__(self, cortex):
         super(Alien, self).__init__(cortex)
 
+
     @axon
     @help("<grab reddit stuff>")
     @alias('r')
@@ -41,7 +42,6 @@ class Alien(Dendrite):
             entry = random.choice(entries)
 
         except Exception as e:
-            self.chat('Reddit fail.', str(e))
-            return
+            return 'Reddit fail. %s' % str(e)
 
         return str(entry)

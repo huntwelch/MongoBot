@@ -4,12 +4,14 @@ import re
 import wolframalpha
 import sys
 import pythonwhois
+import time
+import hashlib
 
 from math import *
 from autonomic import axon, alias, help, Dendrite
-from bs4 import BeautifulSoup as bs4
-from util import unescape, pageopen
-from howdoi import howdoi as hownow
+from util import unescape, shorten
+#from howdoi import howdoi as hownow
+from staff import Browser
 
 
 # There's some semantic overlap between this and some functions
@@ -57,14 +59,33 @@ class Reference(Dendrite):
 
         self.wolf = wolframalpha.Client(self.secrets.wolfram_api)
 
+    @axon
+    def isitdown(self):
+        if not self.values:
+            return "Is what down?"
 
+        url = 'http://www.isitdownrightnow.com/check.php?domain=%s' % self.values[0]
+
+        result = Browser(url)
+        found = result.read().find('UP')
+
+        if found > 0:
+            status = '%s is up' % self.values[0]
+        else:
+            status = '%s is down' % self.values[0]
+
+        return status
+
+
+    # This single api call ends up replacing a
+    # lot of other functionality. I do not remember
+    # why the result variable is called prozac.
     @axon
     @alias('wolfram')
     @help('SEARCH_TERM <look something up in wolfram alpha>')
     def w(self):
         if not self.values:
-            self.chat("Enter a search")
-            return
+            return "Enter a search"
 
         result = self.wolf.query(' '.join(self.values))
 
@@ -73,49 +94,70 @@ class Reference(Dendrite):
         for pod in result.pods:
             prozac.append(pod.text)
 
+        if not prozac:
+            return 'No results'
+
         prozac.pop(0)
 
         return prozac
+
 
     @axon
     @help("SEARCH_TERM <look something up in google>")
     @alias('google')
     def g(self):
         if not self.values:
-            self.chat("Enter a search")
-            return
+            return "Enter a search"
 
-        # If values was a string you don't need the join/etc
-        params = {'v': '1.0', 'rsz': 'large', 'start': '0',
-                  'q': "+".join(self.values)}
+        key = self.config.google_search_key
+        gid = self.config.google_search_id
+
+        params = {'key': key, 'cx': gid, 'fields': 'items(title,link)', 'q': "+".join(self.values)}
 
         try:
-            request = pageopen(
-                'http://ajax.googleapis.com/ajax/services/search/web',
+            request = Browser(
+                'https://www.googleapis.com/customsearch/v1',
                 params=params)
+
+            if request.error:
+                return request.error
+
             json = request.json()
+
+        except Exception as e:
+            return "Something's buggered up: %s" % str(e)
+
+        try:
+            if len(json["items"]) == 0:
+                return "No results"
         except:
-            self.chat("Something's buggered up")
-            return
+            return "Non-standard response: https://www.google.com/#q=%s" % '+'.join(self.values)
 
-        if len(json["responseData"]["results"]) == 0:
-            self.chat("No results")
-            return
-
-        result = json["responseData"]["results"][0]
-        title = result["titleNoFormatting"]
-        link = result["unescapedUrl"]
+        result = json["items"][0]
+        title = result["title"]
+        link = result["link"]
 
         return "%s @ %s" % (title, link)
+
 
     @axon
     @help("<display link to bot's github repository>")
     def source(self):
-        return self.config.repo
+
+        link = self.config.repo
+        if self.values:
+            link = '%ssearch?q=%s' % (link, '+'.join(self.values))
+
+        return link
+
 
     @axon
     @help("[ZIP|LOCATION (ru/moscow)] <get weather, defaults to geo api>")
     def weather(self):
+
+        if not self.values:
+            return "Please enter a zip/location"
+
         if not self.secrets.weather_api:
             return "wunderground api key is not set"
 
@@ -129,21 +171,18 @@ class Reference(Dendrite):
         url = base + params
 
         try:
-            response = pageopen(url)
+            request = Browser(url)
         except:
-            self.chat("Couldn't get weather.")
-            return
+            return "Couldn't get weather."
 
-        if not response:
-            self.chat("Couldn't get weather.")
-            return
+        if not request:
+            return "Couldn't get weather."
 
         try:
-            json = response.json()
+            json = request.json()
             json = json['current_observation']
         except:
-            self.chat("Couldn't parse weather.")
-            return
+            return "Couldn't parse weather."
 
         location = json['display_location']['full']
         condition = json['weather']
@@ -151,25 +190,32 @@ class Reference(Dendrite):
         humid = json['relative_humidity']
         wind = json['wind_string']
         feels = json['feelslike_string']
+        hourly = 'http://www.weather.com/weather/hourbyhour/l/%s' % self.values[0]
+        radar = shorten('http://www.weather.com/weather/map/interactive/l/%s' % self.values[0])
 
-        base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s"
-        return base % (location, condition, temp, humid, wind, feels)
+        base = "%s, %s, %s, Humidity: %s, Wind: %s, Feels like: %s, Radar: %s"
+        return base % (location, condition, temp, humid, wind, feels, radar)
+
 
     @axon
     @alias('urban')
     @help("SEARCH_TERM <get urban dictionary entry>")
     def ud(self):
         if not self.values:
-            self.chat("Whatchu wanna know, bitch?")
-            return
+            return "Whatchu wanna know, bitch?"
+
+        term = ' '.join(self.values)
+        term = term.strip()
+
+        if term == 'truffle butter':
+            return "You all know what it is, and I don't want to have to read this shit again."
 
         try:
-            request = pageopen('http://www.urbandictionary.com/define.php',
-                               params={'term': ' '.join(self.values)})
-            soup = bs4(request.text)
+            request = Browser('http://www.urbandictionary.com/define.php',
+                               params={'term': term})
+            soup = request.soup()
         except:
-            self.chat("parse error")
-            return
+            return "parse error"
 
         elem = soup.find('div', {'class': 'meaning'})
 
@@ -178,18 +224,21 @@ class Reference(Dendrite):
             for string in elem.stripped_strings:
                 defn.append(string)
         except:
-            self.chat("couldn't find anything")
+            return "couldn't find anything"
 
+        if not defn:
+            return "couldn't find anything"
 
-        if defn:
-            # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
-            # entities like &#x27; so use the parser for any stray entities.
-            for paragraph in defn:
-                wrapped = textwrap.wrap(paragraph, 200)
-                for line in wrapped:
-                    self.chat(unescape(line))
-        else:
-            self.chat("couldn't find anything")
+        # Unfortunately, BeautifulSoup doesn't parse hexadecimal HTML
+        # entities like &#x27; so use the parser for any stray entities.
+
+        response = []
+        for paragraph in defn:
+            wrapped = textwrap.wrap(paragraph, 200)
+            _response = unescape(' '.join(wrapped))
+            response.append(_response)
+
+        return ' '.join(response)
 
     # This function used to be called calc, but was changed to hack in
     # honor of Ken's incredibly sick exploitation of the eval function,
@@ -217,19 +266,24 @@ class Reference(Dendrite):
 
         string = ' '.join(self.values)
 
+        if string.replace(' ','') == '6*9':
+            return '42'
+
         # This is to stop future Kens
         if "__" in string: return 'Rejected.'
 
         try:
             result = "{:,}".format(eval(string, {"__builtins__": None}, self.safe_calc))
         except:
-            result = self.botname + " not smart enough to do that."
+            result = self.ego.nick + " not smart enough to do that."
 
         return str(result)
 
+
     @axon
     def ns(self):
-        if not self.values: return 'Lookup what?'
+        if not self.values:
+            return 'Lookup what?'
 
         lookup = self.values[0]
 
@@ -239,15 +293,11 @@ class Reference(Dendrite):
             else:
                 resolved = socket.gethostbyname_ex(lookup.strip())[2][0]
         except:
-            self.chat("Couldn't find anything.")
-            return
+            return "Couldn't find anything."
 
         return resolved
 
-    # I wanted to do a good whois function, but whois parsing is
-    # a shitshow even stackoverflow balked at. If you know of or
-    # want to create a solid parser for it, go for it. I'll take
-    # that pull request like a crack whore.
+
     @axon
     @help('URL <get whois information>')
     def whois(self):
@@ -281,26 +331,28 @@ class Reference(Dendrite):
         except:
             return 'No results, or parsing failure.'
 
-    @axon
-    @help('QUERY <get a howdoi answer>')
-    def howdoi(self):
-        if not self.values: return 'Howdoi what now?'
 
-        try:
-            parser = hownow.get_parser()
-            args = vars(parser.parse_args(self.values))
-            return hownow.howdoi(args)
-        except:
-            return 'Dunno bro'
+    #@axon
+    #@help('QUERY <get a howdoi answer>')
+    #def howdoi(self):
+    #    if not self.values: return 'Howdoi what now?'
 
-    # TODO: save common regexs
+    #    try:
+    #        parser = hownow.get_parser()
+    #        args = vars(parser.parse_args(self.values))
+    #        return hownow.howdoi(args)
+    #    except:
+    #        return 'Dunno bro'
+
+
+    # This is useful when piping output to other
+    # functions, if you can remember it.
     @axon
     @help('REGEX LINE <extract re.search(REGEX, LINE).group(1)>')
     @alias('regex', 'rx', 'extract')
     def regexsearch(self):
         if not self.values or len(self.values) < 2:
-            self.chat('Please enter REGEX LINE')
-            return
+            return 'Please enter REGEX LINE'
 
         regex = self.values.pop(0)
         line = ' '.join(self.values)
@@ -318,23 +370,30 @@ class Reference(Dendrite):
 
         return m.group(1)
 
+
     @axon
     @alias('d', 'roll')
-    def random(self):
+    def random(self, values=False, array=False):
         default = [0, 9999, 1, 1]
 
-        if self.values and self.values[0][:1] == 'd':
+        if not values:
+            values = self.values
+
+        if not values:
+            return "No values. You probably meant .toss"
+
+        if values and values[0][:1] == 'd':
             default[0] = 1
-            default[1] = self.values[0][1:]
+            default[1] = values[0][1:]
             send = default
-        elif 'd' in self.values[0]:
+        elif 'd' in values[0]:
             default[0] = 1
-            num, high = self.values[0].split('d')
+            num, high = values[0].split('d')
             default[1] = high
             default[3] = num
             send = default
-        elif self.values:
-            splice = len(self.values)
+        elif values:
+            splice = len(values)
             send = self.values + default[splice:]
         else:
             send = default
@@ -347,9 +406,69 @@ class Reference(Dendrite):
         url = base + params
 
         # Needs to be vastly improved for other sets
-        site = Browse(url)
+        site = Browser(url)
         result = site.read().split(':')[2].strip()[:-6]
+
+        if array:
+            result = result.split(', ')
 
         return result
 
 
+    # It's shocking how much use this command gets.
+    @axon
+    def isitfriday(self):
+        today = time.localtime().tm_wday
+        if today == 4:
+            return 'Fuck YEAH it is!'
+
+        if today < 4:
+            return 'No. Fuck. %s more day%s.' % ((4 - today),('s' if today != 3 else ''))
+
+        return 'Get entirely the fuck out of here with that weekday shit'
+
+
+    # Really only useful if you live in NYC,
+    # but gets a good laugh whenever it reports
+    # L TRAIN: GOOD SERVICE
+    @axon
+    def mta(self):
+        if not self.values:
+            return 'Which line?'
+
+        q = self.values[0]
+        info = Browser('http://web.mta.info/status/serviceStatus.txt').soup()
+
+        lines = info.find_all('line')
+        for line in lines:
+            if q.lower() in line.find('name').string.lower():
+                message = '%s: %s' % (line.find('name').string, line.find('status').string)
+                if line.find('status').string != 'GOOD SERVICE':
+                    message = '%s %s%s' % (message, 'http://www.mta.info/status/subway/', line.find('name').string)
+                return message
+
+        return 'Not found'
+
+
+    @axon
+    def crypt(self):
+        algs = hashlib.algorithms
+        if not self.values or self.values[0] not in algs or len(self.values) < 2:
+            return '%s STRING_TO_ENCRYPT' % '|'.join(algs)
+
+        alg = self.values.pop(0)
+        h = hashlib.new(alg)
+
+        h.update(' '.join(self.values))
+
+        return h.hexdigest()
+
+    @axon
+    def track(self):
+        if not self.values:
+            return 'Enter a UPS tracking number'
+
+        num = self.values[0]
+
+        link = 'https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums=%s' % num
+        return shorten(link)

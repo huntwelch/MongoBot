@@ -1,6 +1,7 @@
 smartass: True
 babblelim: 100
-acronymlib: 'natwords'
+acronymlib: 'hippocampus/commonwords'
+scrabbledict: '/usr/share/dict/words'
 questions:
   - 'how do i'
   - 'how do you'

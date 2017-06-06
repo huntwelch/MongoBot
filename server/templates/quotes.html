@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Quotes from OkDrink{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+        body {
+            padding: 20px;
+        }
+        p {
+            font-weight: bold;
+            color: #999;
+            margin: 5px;
+        }
+        span {
+            color: black;
+        }        
+    </style>
+{% endblock %}
+{% block content %}
+    <h3>Quotes from OkDrink</h3>
+    {% for quote in quotes %}
+        <p>{{ quote }}</p>
+    {% endfor %}
+{% endblock %}

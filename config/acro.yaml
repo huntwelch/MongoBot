@@ -1,27 +1,28 @@
-lib: 'natwords'
-minlen: 5
-maxlen: 7
-rounds: 5
-roundtime: 120
+lib: 'hippocampus/commonwords'
+records: 'hippocampus/acro'
+minlen: 4
+maxlen: 5
+rounds: 2
+
+roundtime: 30
 warning: 30
 votetime: 30
-minplayers: 3
+rest: 5
+
+minplayers: 1
 timefactor: 2
 noacropenalty: 2
 novotepenalty: 5
-rest: 15
 botplay: True
 
 insults:
-  - 'are little bitches',
-  - 'are chumps',
-  - 'are cunt knockers',
-  - 'are lazy bastards',
-  - "are busy with dcross's mom",
+  - 'are little bitches'
+  - 'are chumps'
+  - 'are cunt knockers'
+  - 'are lazy bastards'
 
 insult:
-  - 'is a little bitch',
-  - 'is a chump',
-  - 'is a cunt knocker',
-  - 'is a lazy bastard',
-  - "is busy with dcross's mom",
+  - 'is a little bitch'
+  - 'is a chump'
+  - 'is a cunt knocker'
+  - 'is a lazy bastard'

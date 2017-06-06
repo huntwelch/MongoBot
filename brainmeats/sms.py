@@ -1,4 +1,5 @@
 import re
+import traceback
 
 from autonomic import axon, help, Dendrite, Cerebellum, Receptor
 from time import mktime, localtime
@@ -6,7 +7,6 @@ from twilio.rest import TwilioRestClient
 from datastore import Drinker
 from config import load_config
 from id import Id
-import traceback
 
 # This shit be awesome. It requires a twilio account, but
 # there's no better way to hive-mind-fuck with someone.
@@ -19,16 +19,15 @@ class Sms(Dendrite):
     current = mktime(localtime())
     next_ = current + 10
 
-    # Set up the SMS brainmeat and the Twilio client
     def __init__(self, cortex):
         super(Sms, self).__init__(cortex)
 
         self.client = TwilioRestClient(self.secrets.sid, self.secrets.token)
 
 
-    # smsticker is a receptor that responds to twitch 
+    # smsticker is a receptor that responds to twitch
     # broadcasts - which happen on every iteration of
-    # monitor. to prevent hitting twilio too hard, 
+    # monitor. To prevent hitting twilio too hard,
     # this gets self limited to every 10 seconds.
     @Receptor('twitch')
     def smsticker(self):
@@ -56,47 +55,64 @@ class Sms(Dendrite):
 
             self.incoming.append(sid)
 
-            # Don't parse previously received messages until the incoming list has been fully parsed
+            # Don't parse previously received messages until the
+            # incoming list has been fully parsed
             if not self.loaded:
                 continue
 
             clipped = item.from_[2:]
             drinker = Id(phone=clipped)
 
-            if drinker.is_authenticated:
+            # Note that this trusts the phone number, on the grounds
+            # there must have been access to the system to get the
+            # number in there. Normal ident auths can't be applied.
+            if drinker.name:
                 from_ = drinker.name
             else:
                 from_ = item.from_
 
-            # TODO: Make this determine the default channel!!
-            self.cx.context = '#okdrink'
+            self.cx.context = self.cx.secrets.primary_channel
 
             message = 'SMS from %s: %s' % (from_, item.body)
-
             self.announce(message)
 
+            name = drinker.name
+            numba = drinker.phone
+
+            bypass = False
+            if clipped in self.secrets.bypass:
+                bypass = True
+                name = clipped
+                numba = clipped
+
             # Check if the incoming message contained a command
-            match = re.search('^{0}(\w+)[ ]?(.+)?'.format(self.cx.settings.bot.command_prefix), item.body)
-            if match and drinker.is_authenticated:
+            match = re.search('^\{0}(\w+)[ ]?(.+)?'.format(self.cx.settings.bot.command_prefix), item.body)
+            if match and (drinker.name or bypass):
+
                 command = match.group(1)
                 arguments = match.group(2)
 
                 try:
-                    resp = self.cx.command(drinker.name, item.body, silent=True)
+                    resp = self.cx.command(name, self.cx.secrets.primary_channel, item.body, silent=True)
 
                     message = self.client.messages.create(
                         body=resp,
-                        to=drinker.phone,
+                        to=numba,
                         from_=self.secrets.number
                     )
 
                     self.chat('Message sent: ' + message.sid)
                 except Exception as e:
                     self.chat(str(e))
-                    print traceback.format_exc()
 
 
         self.loaded = True
+
+
+    @axon
+    def phonepass(self):
+        self.secrets.bypass.append(self.values[0])
+        return 'Added'
 
     @axon
     @help('NUMBER|USERNAME MESSAGE <send an sms message to unsuspecting victim>')
@@ -116,7 +132,7 @@ class Sms(Dendrite):
         if not re.search('^[+0-9]+$', to):
             user = Id(to)
             if not user or not user.phone:
-                self.chat('Don\'t know who that is :(')
+                self.chat("Don't know who that is :(")
                 return
             else:
                 to = user.phone
@@ -135,12 +151,12 @@ class Sms(Dendrite):
                 params['body'] = msg
 
             message = self.client.messages.create(**params)
-            self.chat('Message sent: ' + message.sid)
+            self.chat('Message sent: %s (%s)' % (msg, message.sid))
         except Exception as e:
             self.chat(str(e))
-            print traceback.format_exc()
 
         return
+
 
     @axon
     @help('[FROM NUMBER] <check for sms replies to messages previously sent to unsuspecting victims>')
