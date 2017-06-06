@@ -15,6 +15,7 @@ from time import mktime, localtime, strftime
 class Acro(Dendrite):
 
     active = False
+    channel = None
 
     def __init__(self, cortex):
         super(Acro, self).__init__(cortex)
@@ -36,7 +37,6 @@ class Acro(Dendrite):
     @axon
     @help("start|pause|resume|end acro game>")
     def acro(self):
-
         if not self.values:
             return "start, pause, resume, or end?"
 
@@ -53,6 +53,7 @@ class Acro(Dendrite):
 
 
     def _start(self):
+        self.channel = self.context
         if self.active:
             self.chat("Game already in progress.")
             return
@@ -65,7 +66,7 @@ class Acro(Dendrite):
             return
 
         self.paused = True
-        self.announce("Game paused")
+        self.announce("Game paused", self.channel)
 
 
     def _resume(self):
@@ -74,7 +75,7 @@ class Acro(Dendrite):
             return
 
         self.paused = False
-        self.announce("Game on")
+        self.announce("Game on", self.channel)
 
 
     @Receptor('twitch')
@@ -121,7 +122,7 @@ class Acro(Dendrite):
             target = gimp + post + target
             trail += 1
 
-        self.announce("%s %s and will be docked %s points for not %s." % (target, choice(use), penalty, action))
+        self.announce("%s %s and will be docked %s points for not %s." % (target, choice(use), penalty, action), self.channel)
 
 
     def input(self, selfsub=False):
@@ -147,10 +148,14 @@ class Acro(Dendrite):
         if sender not in self.players and self.round != 1:
             return
 
-        {
-            'submit': self.process_submit,
-            'voting': self.process_vote,
-        }.get(self.stage)(sender, entry, selfsub)
+        try:
+            {
+                'submit': self.process_submit,
+                'voting': self.process_vote,
+            }.get(self.stage)(sender, entry, selfsub)
+        except:
+            self.chat('Issue with processing, stage was: %s' % self.stage)
+            pass
 
 
     def process_submit(self, sender, entry, selfsub):
@@ -194,7 +199,7 @@ class Acro(Dendrite):
             addition = str(numplayers - received) + " more to go."
 
         if not selfsub:
-            self.announce("Entry recieved at %s seconds. %s" % (_time, addition))
+            self.announce("Entry recieved at %s seconds. %s" % (_time, addition), self.channel)
 
         if received == numplayers and self.round != 1:
             self.bypass = True
@@ -207,7 +212,7 @@ class Acro(Dendrite):
             self.voters.append(self.ego.nick)
 
         if len(self.players) < self.config.minplayers:
-            self.announce("Need at least" + str(self.config.minplayers) + " players. Sorry.")
+            self.announce("Need at least %s players. Sorry." % self.config.minplayers, self.channel)
 
         try:
             vote = int(entry)
@@ -216,7 +221,7 @@ class Acro(Dendrite):
 
         try:
             if sender == self.contenders[vote - 1]["player"]:
-                self.announce(sender + " tried to vote for himself. What a bitch.")
+                self.announce("%s tried to vote for himself. What a bitch." % sender, self.channel)
                 return
 
             self.contenders[vote - 1]["votes"] += 1
@@ -250,7 +255,7 @@ class Acro(Dendrite):
         self.cumulative = {}
         self.gimps = {}
 
-        self.announce("New game commencing in %s seconds" % str(self.config.rest))
+        self.announce("New game commencing in %s seconds" % str(self.config.rest), self.channel)
 
 
     def waiting(self):
@@ -270,7 +275,7 @@ class Acro(Dendrite):
 
         self.currentacronym = acronym
         self.mark = mktime(localtime())
-        self.announce("Round %s commencing! Acronym is %s" % (str(self.round), acronym))
+        self.announce("Round %s commencing! Acronym is %s" % (str(self.round), acronym), self.channel)
 
         self.stage = "submit"
 
@@ -278,7 +283,7 @@ class Acro(Dendrite):
     def submit(self):
         if self.current > self.mark + self.config.roundtime - self.config.warning and not self.warned:
             self.warned = True
-            self.announce(str(self.config.warning) + " seconds left...")
+            self.announce("%s seconds left..." % self.config.warning, self.channel)
             return
 
         if self.config.botplay and not self.selfsubbed:
@@ -294,7 +299,7 @@ class Acro(Dendrite):
 
         self.bypass = False
         self.warned = False
-        self.announce("Round over, sluts. Here are the contenders:")
+        self.announce("Round over, sluts. Here are the contenders:", self.channel)
 
         self.contenders = []
         submitters = []
@@ -316,17 +321,17 @@ class Acro(Dendrite):
         shuffle(self.contenders)
         item = 1
         for submission in self.contenders:
-            self.announce(str(item) + ": " + submission["entry"])
+            self.announce("%s : %s" % (item, submission['entry']), self.channel)
             item += 1
 
         if not self.contenders:
-            self.announce("Don't waste my friggin time")
+            self.announce("Don't waste my friggin time", self.channel)
             self.endgame()
 
         if self.round != 1:
             self.gimper(submitters, "submitting", self.config.noacropenalty)
 
-        self.announce("You have " + str(self.config.votetime) + " seconds to vote.")
+        self.announce("You have %s seconds to vote." % self.config.votetime, self.channel)
         self.mark = mktime(localtime())
         self.stage = "voting"
 
@@ -336,7 +341,7 @@ class Acro(Dendrite):
             return
 
         self.bypass = False
-        self.announce("Votes are in. The results:")
+        self.announce("Votes are in. The results:", self.channel)
 
         for r in self.contenders:
             if r['votes'] == 0:
@@ -346,7 +351,7 @@ class Acro(Dendrite):
             else:
                 note = str(r['votes']) + " votes."
 
-            self.announce(r['player'] + "'s \"" + r['entry'] + "\" got " + note)
+            self.announce("%s's \"%s\" got %s" % (r['player'], r['entry'], note), self.channel)
 
         self.gimper(self.voters, "voting", self.config.novotepenalty)
 
@@ -371,7 +376,7 @@ class Acro(Dendrite):
                 results[r['player']]['timebonus'] = timebonus
                 results[r['player']]['score'] += timebonus
 
-        tally = "Round:" + str(self.round) + "\n"
+        tally = "Round: %s\n" % self.round
 
         for result in results:
             sc = results[result]
@@ -382,13 +387,11 @@ class Acro(Dendrite):
             bonus = str(sc['timebonus'])
             total = str(self.cumulative[result])
 
-            self.announce(result + " came in with " + score +
-                          " with a time bonus of " + bonus +
-                          ", for a total of " + total)
+            self.announce('%s came in with %s with a bonus of %s for a total of %s' % (result, score, bonus, total), self.channel)
 
-            tally += result + " " + str(sc['score']) + " (" + str(sc['timebonus']) + ")\n"
+            tally += "%s %s (%s)\n" % (result, sc['score'], sc['timebonus'])
 
-        open(self.record, 'a').write("\n" + tally + "\n")
+        open(self.record, 'a').write("\n%s\n" % tally)
 
         if self.round == self.config.rounds:
             self.endgame()
@@ -401,15 +404,16 @@ class Acro(Dendrite):
         self.mark = mktime(localtime())
         self.round += 1
         self.stage = "waiting"
-        self.announce("Next round in " + str(self.config.rest) + " seconds.")
+        self.announce("Next round in %s seconds." % self.config.rest, self.channel)
 
 
     def endgame(self):
+        self.channel = None
         self.contenders = []
         self.voters = []
         self.active = False
         self.paused = False
-        self.announce("Game over.")
+        self.announce("Game over.", self.channel)
 
 
     @axon
@@ -439,6 +443,6 @@ class Acro(Dendrite):
             score = scores[player]['score']
             average = score / scores[player]['rounds']
 
-            self.chat(player + ": " + str(score) + " (" + str(average) + " per round)")
+            self.chat("%s: %s (%s per round)" % (player, score, average))
 
 

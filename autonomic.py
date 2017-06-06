@@ -55,8 +55,8 @@ class Dendrite(object):
     def debug(self, what, target=False):
         self.cx.debug(what, target)
 
-    def announce(self, what):
-        self.cx.announce(what)
+    def announce(self, what, channel=None):
+        self.cx.announce(what, channel)
 
     def _act(self, what, public=False, target=False):
         self.cx.act(what, public, target)
