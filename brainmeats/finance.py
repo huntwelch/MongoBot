@@ -68,6 +68,36 @@ class Finance(Dendrite):
 
 
     @axon
+    @help("<get current Ethereum Classic trading information>")
+    def etc(self):
+        url = 'https://www.cryptocompare.com/api/data/coinsnapshot/?fsym=ETC&tsym=USD'
+        
+        request = Browser(url)
+        if not request:
+            return "Couldn't retrieve ETC data."
+        
+        try:
+            json = request.json()
+        except:
+            return "Couldn't parse ETC data."
+        
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+        last = locale.currency(float(json['Data']['AggregatedData']['PRICE']))
+        low = locale.currency(float(json['Data']['AggregatedData']['LOW24HOUR']))
+        high = locale.currency(float(json['Data']['AggregatedData']['HIGH24HOUR']))
+        
+        if self.values:
+            try:
+                value = locale.currency(float(json['Data']['AggregatedData']['PRICE']) * float(self.values[0]))
+            except:
+                return "Couldn't compute ETC value."
+
+            return 'Value of %s ETC is %s' % (self.values[0], value)
+        else:
+            return 'Ethereum Classic, Last: %s, Low: %s, High: %s' % (last, low, high)
+
+
+    @axon
     @help("<get current Bitcoin trading information>")
     def btc(self):
         url = 'https://btc-e.com/api/2/btc_usd/ticker'
