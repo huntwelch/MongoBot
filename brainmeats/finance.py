@@ -42,6 +42,13 @@ class Finance(Dendrite):
         """
         Retrieve the aggregated last, low and high prices of a crypto currency.
         """
+        value_of = None
+        if self.values:
+            try:
+                value_of = int(self.values[0])
+            except:
+                pass
+        
         url = 'https://www.cryptocompare.com/api/data/coinsnapshot/?fsym=%s&tsym=%s'
 
         request = Browser(url % (source, dest))
@@ -59,18 +66,18 @@ class Finance(Dendrite):
         gdax = None
 
         if has_gdax:
-            gdax = self.get_gdax_price(source, dest)
+            gdax = self.get_gdax_price(source, dest, value_of)
 
-        if self.values:
+        if value_of:
             try:
-                value = float(json['PRICE']) * float(self.values[0])
+                value = float(json['PRICE']) * float(value_of)
             except:
                 return "Couldn't compute %s value." % source.upper()
 
             if gdax:
-                gdax = ", GDAX: %s" % gdax
+                gdax = ", GDAX: %s" % self.format_currency(gdax)
 
-            return 'Value of %s %s is %s%s' % (self.values[0], source.upper(), value, gdax)
+            return 'Value of %s %s is %s%s' % (value_of, source.upper(), self.format_currency(value), gdax if gdax else '')
         else:
             response = OrderedDict()
             response['Last'] = self.format_currency(last)
@@ -85,7 +92,7 @@ class Finance(Dendrite):
             return '%s, %s' % (name, prices)
 
 
-    def get_gdax_price(self, source, dest='USD'):
+    def get_gdax_price(self, source, dest='USD', value_of=None):
         """
         Retrieve the GDAX price of a specific currency.
         """
@@ -95,8 +102,8 @@ class Finance(Dendrite):
         try:
             g_json = g_request.json()
             gdax = self.format_currency(float(g_json['price']))
-            if self.values:
-                gdax = float(g_json['price']) * float(self.values[0])
+            if value_of:
+                gdax = float(g_json['price']) * float(value_of)
         except:
             pass
 
@@ -149,7 +156,6 @@ class Finance(Dendrite):
     def c(self):
         if self.values:
             currencies = self.values
-            self.values = None
 
             for currency in currencies:
                 if currency.lower() in vars(Finance):
