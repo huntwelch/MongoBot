@@ -1,6 +1,7 @@
 import locale
 
 from autonomic import axon, help, Dendrite
+from collections import OrderedDict
 from staff import Broker, Browser
 
 # Stock stuff. This is a shockingly complex
@@ -36,161 +37,108 @@ class Finance(Dendrite):
 
         return showit
 
-    
+
+    def get_currency_price(self, name, source, dest='USD', has_gdax=False):
+        """
+        Retrieve the aggregated last, low and high prices of a crypto currency.
+        """
+        url = 'https://www.cryptocompare.com/api/data/coinsnapshot/?fsym=%s&tsym=%s'
+
+        request = Browser(url % (source, dest))
+        if not request:
+            return "Couldn't retrieve %s data." % source.upper()
+
+        try:
+            json = request.json()['Data']['AggregatedData']
+        except:
+            return "Couldn't parse %s data." % source.upper()
+
+        last = float(json['PRICE'])
+        low = float(json['LOW24HOUR'])
+        high = float(json['HIGH24HOUR'])
+        gdax = None
+
+        if has_gdax:
+            gdax = self.get_gdax_price(source, dest)
+
+        if self.values:
+            try:
+                value = float(json['PRICE']) * float(self.values[0])
+            except:
+                return "Couldn't compute %s value." % source.upper()
+
+            if gdax:
+                gdax = ", GDAX: %s" % gdax
+
+            return 'Value of %s %s is %s%s' % (self.values[0], source.upper(), value, gdax)
+        else:
+            response = OrderedDict()
+            response['Last'] = self.format_currency(last)
+            response['Low'] = self.format_currency(low)
+            response['High'] = self.format_currency(high)
+
+            if gdax:
+                response['GDAX'] = gdax
+
+            prices = ", ".join([": ".join([key, str(val)]) for key, val in response.items()])
+
+            return '%s, %s' % (name, prices)
+
+
+    def get_gdax_price(self, source, dest='USD'):
+        """
+        Retrieve the GDAX price of a specific currency.
+        """
+        gdax = '(No result)'
+        gdax_url = 'https://api.gdax.com/products/%s-%s/ticker' % (source.upper(), dest.upper())
+        g_request = Browser(gdax_url)
+        try:
+            g_json = g_request.json()
+            gdax = self.format_currency(float(g_json['price']))
+            if self.values:
+                gdax = float(g_json['price']) * float(self.values[0])
+        except:
+            pass
+
+        return gdax
+
+
+    def format_currency(self, price):
+        """
+        Format a currency appropriately, with a check if the price is under $0.01 to allow sub-penny display.
+        """
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+        if price < 0.01:
+            return '$%s' % price
+
+        return locale.currency(price, grouping=True)
+
+
     @axon
     @help("<get current Ethereum trading information>")
     def eth(self):
-        url = 'https://ethereumprice.org/wp-content/themes/theme/inc/exchanges/price-data.php?coin=eth&cur=ethusd&ex=waex&dec=2'
-        
-        request = Browser(url)
-        if not request:
-            return "Couldn't retrieve ETH data."
-        
-        try:
-            json = request.json()
-        except:
-            return "Couldn't parse ETH data."
-        
-        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-        last = locale.currency(float(json['current_price']))
-        low = locale.currency(float(json['today_low']))
-        high = locale.currency(float(json['today_high']))
-        
-        if self.values:
-            try:
-                value = locale.currency(float(json['current_price']) * float(self.values[0]))
-            except:
-                return "Couldn't compute ETH value."
-
-            return 'Value of %s ETH is %s' % (self.values[0], value)
-        else:
-            return 'Ethereum, Last: %s, Low: %s, High: %s' % (last, low, high)
+        return self.get_currency_price('Ethereum', 'ETH', has_gdax=True)
 
 
     @axon
     @help("<get current Ethereum Classic trading information>")
     def etc(self):
-        url = 'https://www.cryptocompare.com/api/data/coinsnapshot/?fsym=ETC&tsym=USD'
-        
-        request = Browser(url)
-        if not request:
-            return "Couldn't retrieve ETC data."
-        
-        try:
-            json = request.json()
-        except:
-            return "Couldn't parse ETC data."
-        
-        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-        last = locale.currency(float(json['Data']['AggregatedData']['PRICE']))
-        low = locale.currency(float(json['Data']['AggregatedData']['LOW24HOUR']))
-        high = locale.currency(float(json['Data']['AggregatedData']['HIGH24HOUR']))
-        
-        if self.values:
-            try:
-                value = locale.currency(float(json['Data']['AggregatedData']['PRICE']) * float(self.values[0]))
-            except:
-                return "Couldn't compute ETC value."
-
-            return 'Value of %s ETC is %s' % (self.values[0], value)
-        else:
-            return 'Ethereum Classic, Last: %s, Low: %s, High: %s' % (last, low, high)
+        return self.get_currency_price('Ethereum Classic', 'ETC')
 
 
     @axon
     @help("<get current Bitcoin trading information>")
     def btc(self):
-        url = 'https://btc-e.com/api/2/btc_usd/ticker'
-
-        request = Browser(url)
-        if not request:
-            return "Couldn't retrieve BTC data."
-
-        try:
-            json = request.json()
-        except:
-            return "Couldn't parse BTC data."
-
-        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-        last = locale.currency(json['ticker']['last'])
-        low = locale.currency(json['ticker']['low'])
-        high = locale.currency(json['ticker']['high'])
-
-        gdax = '(No result)'
-        gdax_url = 'https://api.gdax.com/products/BTC-USD/ticker'
-        g_request = Browser(gdax_url)
-        try:
-            g_json = g_request.json()
-            gdax = '$%.2f' % float(g_json['price'])
-            if self.values:
-                gdax = locale.currency(float(g_json['price']) * float(self.values[0]))
-        except:
-            pass
-
-        if self.values:
-            try:
-                value = locale.currency(float(json['ticker']['last']) * float(self.values[0]))
-            except:
-                return "Couldn't compute BTC value."
-
-            return 'Value of %s BTC is %s, GDAX: %s' % (self.values[0], value, gdax)
-        else:
-            return 'Bitcoin, Last: %s, Low: %s, High: %s, GDAX: %s' % (last, low, high, gdax)
+        return self.get_currency_price('Bitcoin', 'BTC', has_gdax=True)
 
 
     @axon
     @help("<get current Litecoin trading information>")
     def ltc(self):
-        url = 'https://btc-e.com/api/2/ltc_usd/ticker'
-
-        request = Browser(url)
-        if not request:
-            return "Couldn't retrieve LTC data."
-
-        try:
-            json = request.json()
-        except:
-            return "Couldn't parse LTC data."
-
-        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-        last = locale.currency(json['ticker']['last'])
-        low = locale.currency(json['ticker']['low'])
-        high = locale.currency(json['ticker']['high'])
-
-        if self.values:
-            try:
-                value = locale.currency(float(json['ticker']['last']) * float(self.values[0]))
-            except:
-                return "Couldn't compute LTC value."
-
-            return 'Value of %s LTC is %s' % (self.values[0], value)
-        else:
-            return 'Litecoin, Last: %s, Low: %s, High: %s' % (last, low, high)
+        return self.get_currency_price('Litecoin', 'LTC', has_gdax=True)
 
 
     @axon
     @help("<get current Dogecoin trading information>")
     def doge(self):
-        url = 'http://dogecoinaverage.com/USD.json'
-
-        request = Browser(url)
-        if not request:
-            return "Couldn't retrieve DOGE data."
-
-        try:
-            json = request.json()
-        except:
-            return "Couldn't parse DOGE data."
-
-        weighted = float(json['vwap'])
-
-        if self.values:
-            try:
-                locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-                value = locale.currency(weighted * float(self.values[0]))
-            except:
-                return "Couldn't compute DOGE value."
-
-            return 'Value of %s DOGE is %s' % (self.values[0], value)
-        else:
-            return 'Dogecoin, Volume-Weighted Average Price: $%s' % (weighted)
+        return self.get_currency_price('Dogecoin', 'DOGE')
