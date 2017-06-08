@@ -339,22 +339,24 @@ class Cortex:
 
         shutil.move(self.settings.directory.log, backlog)
 
-    def debug(self, message, target=False):
+    def debug(self, message, target=None):
         if not self.debugging: return
         self.chat(message, target)
 
-    # Announce means the chat is always sent to the channel,
+    # Announce means the chat is always sent to a channel,
     # never back as a private response.
     @ratelimited(2)
-    def announce(self, message):
-        self.chat(message, target=self.secrets.primary_channel)
+    def announce(self, message, channel=None):
+        if not channel:
+            channel = self.context if self.context in self.channels else self.secrets.primary_channel
+        self.chat(message, target=channel)
 
     # Since chat is mongo's only means of communicating with
     # a room, the ratelimiting here should prevent any overflow
     # violations.
     # NOTE: 'and not target' may be a sketchy override.
     @ratelimited(2)
-    def chat(self, message, target=False, error=False):
+    def chat(self, message, target=None, error=False):
 
         if self.context in self.channels \
             and not target \
@@ -372,8 +374,11 @@ class Cortex:
         elif self.context in self.channels:
             whom = self.context
         else:
-            user = Id(self.lastsender)
-            whom = user.nick
+            try:
+                user = Id(self.lastsender)
+                whom = user.nick
+            except:
+                whom = self.secrets.primary_channel
 
         if randint(1, 170) == 13:
             message = zalgo(message)
