@@ -159,7 +159,7 @@ class Finance(Dendrite):
 
             for currency in currencies:
                 if currency.lower() in vars(Finance):
-                    self.chat(self[currency.lower()]())
+                    self.chat(getattr(self, currency.lower())())
             else:
                 return "I'm sorry Dave, I'm afraid I can't do that."
         else:
