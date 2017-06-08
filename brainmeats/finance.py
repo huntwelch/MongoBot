@@ -158,9 +158,10 @@ class Finance(Dendrite):
             currencies = self.values
 
             for currency in currencies:
-                if currency.lower() in vars(Finance):
+                try:
+                    if not getattr(self, currency.lower()).create_command: break
                     self.chat(getattr(self, currency.lower())())
-            else:
-                return "I'm sorry Dave, I'm afraid I can't do that."
+                except:
+                    pass
         else:
             return "Just what do you think you're doing, Dave?"
