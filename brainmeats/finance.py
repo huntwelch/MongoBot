@@ -142,3 +142,17 @@ class Finance(Dendrite):
     @help("<get current Dogecoin trading information>")
     def doge(self):
         return self.get_currency_price('Dogecoin', 'DOGE')
+
+
+    @axon
+    @help("<get trading info for a list of crypto currencies>")
+    def c(self):
+        if self.values:
+            currencies = self.values
+            self.values = None
+
+            for currency in currencies:
+                if currency.lower() in vars(Finance):
+                    self.chat(getattr(self, currency.lower())())
+        else:
+            return "I'm sorry Dave, I'm afraid I can't do that"
