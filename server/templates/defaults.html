@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Command Defaults{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+        body {
+            padding: 20px;
+        }
+        p {
+            font-weight: bold;
+            color: #999;
+            margin: 5px;
+        }
+        span {
+            color: black;
+        }        
+        table {
+            width: 100%
+        }
+        tr:nth-child(even) {
+            background: #f4f4f4;
+        }
+        td.command {
+            width: 150px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <h3>Command Defaults</h3>
+    <div>
+      <table>
+      <tbody>
+          {% for _default in defaults %}
+              <tr>
+                  <td class="command">{{ _default.command }}<td/>
+                  <td>
+                    {% for _response in _default.response %}
+                        {{ _response }}<br/>
+                    {% endfor %}
+                  <td/>
+              </tr>
+          {% endfor %}           
+      </tbody>
+      </table> 
+    </div>
+{% endblock %}

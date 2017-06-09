@@ -32,6 +32,14 @@ class Webserver(Dendrite):
         self.chat(link)
 
 
+    @axon
+    @help("<Get one-time link to defaults (.set commands)>")
+    def defaultslink(self):
+        num = self._setaccess()
+        link = "%s/defaults?onetime=%s" % (self.config.url, str(num))
+        self.chat(link)
+
+
     @Receptor('twitch')
     def getuploads(self):
         file = '/tmp/uploads.msgs'

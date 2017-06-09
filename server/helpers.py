@@ -1,10 +1,11 @@
 import re
 import os
+import collections
 
 from datetime import datetime
 from flask import Flask, request, session, make_response, render_template
 from config import load_config
-from datastore import connectdb, Quote
+from datastore import connectdb, Quote, Defaults
 import pyotp
 import base64
 
@@ -22,6 +23,22 @@ def render_xml(path):
 def fetch_quotes():
     connectdb()
     return [q.text for q in Quote.objects]
+
+
+def fetch_defaults():
+    connectdb()
+    cmds = {}
+    for d in Defaults.objects:
+        if d.command not in cmds:
+            cmds[d.command] = [d.response]
+        else:
+            cmds[d.command].append(d.response)
+
+    render = []
+    od = collections.OrderedDict(sorted(cmds.items()))
+    for k,v in od.iteritems():
+        render.append({'command': k, 'response': v})
+    return render
 
 
 def fetch_chats(request, offset):

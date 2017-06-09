@@ -412,18 +412,6 @@ class Nonsense(Dendrite):
 
 
     @axon
-    def showdefaults(self):
-        commands = Defaults.objects.all()
-        display = []
-        for command in commands:
-            display.append(command.command)
-
-        display = list(set(display))
-
-        return ', '.join(display)
-
-
-    @axon
     @alias('clear')
     @help('COMMAND <clear all defaults for a command>')
     def cleardefaults(self):

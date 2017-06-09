@@ -16,7 +16,7 @@ import simplejson as json
 from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash, _app_ctx_stack
 from server.decorators import requires_auth
-from server.helpers import fetch_chats, render_xml, fetch_quotes
+from server.helpers import fetch_chats, render_xml, fetch_quotes, fetch_defaults
 from autonomic import Dendrite
 from config import load_config
 from util import shorten
@@ -62,6 +62,14 @@ def quotes():
     quotes = fetch_quotes()
     onetime = request.args.get('onetime')
     return render_template('quotes.html', quotes=quotes, onetime=onetime)
+
+
+@app.route("/defaults")
+@requires_auth
+def defaults():
+    defaults = fetch_defaults()
+    onetime = request.args.get('onetime')
+    return render_template('defaults.html', defaults=defaults, onetime=onetime)
 
 
 @app.route("/chatlogs")

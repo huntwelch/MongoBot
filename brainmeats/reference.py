@@ -104,7 +104,7 @@ class Reference(Dendrite):
 
     @axon
     @help("SEARCH_TERM <look something up in google>")
-    @alias('google')
+    @alias('google', 'stalk')
     def g(self):
         if not self.values:
             return "Enter a search"
