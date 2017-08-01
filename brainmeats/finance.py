@@ -138,6 +138,12 @@ class Finance(Dendrite):
     def btc(self):
         return self.get_currency_price('Bitcoin', 'BTC', has_gdax=True)
 
+    
+    @axon
+    @help("<get current Bitcoin Cash trading information>")
+    def bcc(self):
+        return self.get_currency_price('Bitcoin Cash', 'BCC')
+
 
     @axon
     @help("<get current Litecoin trading information>")
