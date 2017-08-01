@@ -48,7 +48,7 @@ class Finance(Dendrite):
                 value_of = int(self.values[0])
             except:
                 pass
-        
+
         url = 'https://www.cryptocompare.com/api/data/coinsnapshot/?fsym=%s&tsym=%s'
 
         request = Browser(url % (source, dest))
@@ -154,14 +154,12 @@ class Finance(Dendrite):
     @axon
     @help("<get trading info for a list of crypto currencies>")
     def c(self):
-        if self.values:
-            currencies = self.values
-
-            for currency in currencies:
-                try:
-                    if not getattr(self, currency.lower()).create_command: break
-                    self.chat(getattr(self, currency.lower())())
-                except:
-                    pass
-        else:
+        if not self.values:
             return "Just what do you think you're doing, Dave?"
+
+        currency = self.values[0]
+
+        try:
+            return getattr(self, currency.lower())()
+        except:
+            return 'No such currency'

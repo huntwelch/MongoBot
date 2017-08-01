@@ -1,4 +1,5 @@
 import string
+import operator
 
 from random import choice
 
@@ -44,9 +45,49 @@ class Hangman(Dendrite):
 
 
     @axon
+    def freqlist(self):
+        try:
+            auto = int(self.values[0])
+            return self.frequency(auto)
+        except:
+            return 'Not a number'
+
+
+    def frequency(self, count=False):
+        letters = {}
+        for line in open(self.config.wordsource):
+            for _letter in line:
+                letter = _letter.lower()
+                if letter not in string.ascii_lowercase: continue
+                if letter not in letters:
+                    letters[letter] = 0
+                letters[letter] += 1
+
+        sort = sorted(letters.items(), key=operator.itemgetter(1))[::-1]
+
+        if count:
+            guesses = []
+            for l,n in sort:
+                guesses.append(l)
+                count -= 1
+                if not count:
+                    break
+            return ' '.join(guesses)
+
+        display = []
+        for l,n in sort:
+            display.append('%s (%s)' % (l, n))
+
+        return ', '.join(display)
+
+
+    @axon
     @help("<Start a game of hangman>")
     @alias('hang')
     def lizard(self):
+
+        if self.values and self.values[0] == 'frequency':
+            return self.frequency()
 
         if self.active: return 'Game already in progress'
 

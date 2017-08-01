@@ -208,7 +208,7 @@ class Broca(Dendrite):
     # their opinions on the nature and value of intelligence.
     @axon
     @public
-    @alias('waxrhapsodic')
+    @alias('waxrhapsodic', 'preach')
     @help('<Speak markov chain>')
     def babble(self, what=False):
 

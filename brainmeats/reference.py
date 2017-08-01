@@ -400,7 +400,7 @@ class Reference(Dendrite):
 
         low, high, sets, nums = send
 
-        base = 'http://qrng.anu.edu.au/form_handler.php?repeats=no&'
+        base = 'http://qrng.anu.edu.au/form_handler.php?repeats=yes&'
         params = "min_num=%s&max_num=%s&numofsets=%s&num_per_set=%s" % (low, high, sets, nums)
 
         url = base + params
