@@ -53,7 +53,7 @@ class Hangman(Dendrite):
             return 'Not a number'
 
 
-    def frequency(self, count=False):
+    def frequency(self, count=False, array=False):
         letters = {}
         for line in open(self.config.wordsource):
             for _letter in line:
@@ -72,6 +72,8 @@ class Hangman(Dendrite):
                 count -= 1
                 if not count:
                     break
+            if array:
+                return guesses
             return ' '.join(guesses)
 
         display = []
@@ -118,17 +120,28 @@ class Hangman(Dendrite):
 
     @axon
     @help("<ONE_LETTER|WHOLEWORD in an active hangman game>")
-    def guess(self):
+    def guess(self, internal=None):
         if not self.active:
             return 'No game in progress'
 
-        if not self.values:
+        if not self.values and not internal:
             return 'Enter "-guess one_letter|whole_word"'
 
-        if len(self.values[0]) == 1 and self.values[0] not in string.letters:
+        val = internal or self.values[0]
+
+        try:
+            auto = int(val)
+            guesses = self.frequency(auto, True)
+            for guess in guesses:
+                self.guess(guess)
+            return
+        except:
+            pass
+
+        if len(val) == 1 and val not in string.letters:
             return "That's not a letter"
 
-        letter = self.values[0].upper()
+        letter = val.upper()
 
         if letter in self.correct or letter in self.wrong:
             return 'You already guessed that'
