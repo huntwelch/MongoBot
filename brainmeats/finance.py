@@ -45,7 +45,7 @@ class Finance(Dendrite):
         value_of = None
         if self.values:
             try:
-                value_of = int(self.values[0])
+                value_of = float(self.values[0])
             except:
                 pass
 
@@ -138,7 +138,7 @@ class Finance(Dendrite):
     def btc(self):
         return self.get_currency_price('Bitcoin', 'BTC', has_gdax=True)
 
-    
+
     @axon
     @help("<get current Bitcoin Cash trading information>")
     def bcc(self):
