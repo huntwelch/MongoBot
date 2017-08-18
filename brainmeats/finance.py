@@ -142,7 +142,7 @@ class Finance(Dendrite):
     @axon
     @help("<get current Bitcoin Cash trading information>")
     def bcc(self):
-        return self.get_currency_price('Bitcoin Cash', 'BCC')
+        return self.get_currency_price('Bitcoin Cash', 'BCH')
 
 
     @axon
