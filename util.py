@@ -1,4 +1,5 @@
 import time
+import re
 import HTMLParser
 import requests
 import random
@@ -210,3 +211,63 @@ def zalgo(_string):
             zalgoed = u'%s%s' % (zalgoed, tic)
 
     return u'%s%s' % (base, zalgoed)
+
+lettertomorse = {
+   'a': '.-',
+   'b': '-...',
+   'c': '-.-.',
+   'd': '-..',
+   'e': '.',
+   'f': '..-.',
+   'g': '--.',
+   'h': '....',
+   'i': '..',
+   'j': '.---',
+   'k': '-.-',
+   'l': '.-..',
+   'm': '--',
+   'n': '-.',
+   'o': '---',
+   'p': '.--.',
+   'q': '--.-',
+   'r': '.-.',
+   's': '...',
+   't': '-',
+   'u': '..-',
+   'v': '...-',
+   'w': '.--',
+   'x': '-..-',
+   'y': '-.--',
+   'z': '--..',
+   '1': '.----',
+   '2': '..---',
+   '3': '...--',
+   '4': '....-',
+   '5': '.....',
+   '6': '-....',
+   '7': '--...',
+   '8': '---..',
+   '9': '----.',
+   '0': '-----',
+   ' ': ' / ',
+}
+
+morsetoletter = dict((v,k) for k,v in lettertomorse.iteritems())
+
+def encodemorse(string):
+    cleaned = re.sub('[^0-9a-zA-Z\s]+', '', string)
+    spaced = re.sub('[\s]+', ' ', string).strip()
+    morse = map(lambda x: lettertomorse[x], spaced)
+
+    return ' '.join(morse)
+
+def decodemorse(string):
+    cleaned = re.sub('[^\./\s-]+', '', string)
+    spaced = re.sub('[\s]+', ' ', string).strip()
+    words = spaced.split(' / ')
+    decoded = []
+    for word in words:
+        letters = map(lambda x: morsetoletter[x], word.split(' '))
+        decoded.append(''.join(letters))
+
+    return ' '.join(decoded)

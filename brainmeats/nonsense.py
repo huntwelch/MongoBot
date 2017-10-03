@@ -4,7 +4,7 @@ import simplejson
 import re
 
 from autonomic import axon, help, Dendrite, public, Receptor, Cerebellum, alias
-from util import colorize, shorten, zalgo
+from util import colorize, shorten, zalgo, encodemorse, decodemorse
 from staff import Browser
 from random import choice, randint
 from datastore import Drinker, Defaults
@@ -450,3 +450,26 @@ class Nonsense(Dendrite):
         except:
             return 'Unable to giphy'
 
+    @axon
+    def morse(self):
+
+        if not self.values:
+            return 'Morse what?'
+
+        try:
+            morsed = encodemorse(' '.join(self.values))
+        except:
+            return 'Morse fail'
+        return morsed
+
+    @axon
+    def unmorse(self):
+
+        if not self.values:
+            return 'Unmorse what?'
+
+        try:
+            unmorsed = decodemorse(' '.join(self.values))
+        except:
+            return 'Unmorse fail'
+        return unmorsed
