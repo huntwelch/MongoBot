@@ -255,7 +255,7 @@ lettertomorse = {
 morsetoletter = dict((v,k) for k,v in lettertomorse.iteritems())
 
 def encodemorse(string):
-    cleaned = re.sub('[^0-9a-zA-Z\s]+', '', string)
+    cleaned = re.sub('[^0-9a-zA-Z\s]+', '', string).lower()
     spaced = re.sub('[\s]+', ' ', string).strip()
     morse = map(lambda x: lettertomorse[x], spaced)
 
