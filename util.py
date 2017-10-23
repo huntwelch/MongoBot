@@ -6,6 +6,7 @@ import random
 import subprocess
 
 from config import load_config
+from PIL import Image
 
 secrets = load_config('config/secrets.yaml')
 settings = load_config('config/settings.yaml')
@@ -123,6 +124,9 @@ def savefromweb(url, path, thumber=False):
     #     img.save('server%s%s' % (THUMBS, fname))
     #     return '%s%s%s' % (WEBSITE, THUMBS, fname)
     pass
+
+def thumbnail():
+    return
 
 
 zalgochars = [

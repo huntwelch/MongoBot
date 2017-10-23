@@ -117,8 +117,8 @@ class Artsy(Dendrite):
 
         # I've noticed some people comment lines
         # like this. But, c'mon, it's so freaking
-        # what this does and why. Maybe in C it'd
-        # need some notes, but python is halfway
+        # obvious what this does and why. Maybe in C
+        # it'd need some notes, but python is halfway
         # to pseudocode as it is. I'm not explaining
         # this. Seriously.
         #

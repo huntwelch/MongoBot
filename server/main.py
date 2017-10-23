@@ -136,6 +136,14 @@ def upload():
     return "File saved: %s\n" % url
 
 
+@app.route("/images")
+def images():
+    imgs  = []
+    for (dirpath, dirnames, filenames) in os.walk('server/static/upload_thumbs'):
+        imgs.extend(filenames)
+        break
+    return render_template('images.html', title="Gallery", imgs=imgs)
+
 # Commented out until broca is fixed
 #@app.route("/random_poem")
 #def randompoem():
