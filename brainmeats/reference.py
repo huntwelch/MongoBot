@@ -472,3 +472,33 @@ class Reference(Dendrite):
 
         link = 'https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums=%s' % num
         return shorten(link)
+
+    @axon
+    @alias('ww')
+    def wherewatch(self):
+        if not self.values:
+            return 'Watch what?'
+
+        url = 'https://utelly-tv-shows-and-movies-availability-v1.p.mashape.com/lookup'
+
+        params = {
+            'country': 'us',
+            'term': ''.join(self.values)
+        }
+
+        headers = [
+            ('X-Mashape-Key', self.secrets.mashape_key),
+            ('Accept', 'application/json'),
+        ]
+
+        request = Browser(url, params=params, headers=headers)
+
+        return request
+
+        result = request.json()
+        places = []
+        for item in result['results']:
+            if item['display_name'] in places: continue
+            places.append(item['display_name'])
+
+        return ', '.join(places)

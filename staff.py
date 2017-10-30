@@ -54,7 +54,7 @@ class Browser(object):
     text = False
     error = False
 
-    def __init__(self, url, params={}, method='GET', userpass=False):
+    def __init__(self, url, params={}, method='GET', userpass=False, headers=[]):
         self.url = url
 
         self.robot.set_handle_equiv(True)
@@ -64,7 +64,8 @@ class Browser(object):
         self.robot.set_handle_robots(False)
         self.robot.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
 
-        self.robot.addheaders = [
+
+        baseheaders = [
             ('User-Agent', self.ua),
             ('Accept', '*/*'),
             ('Accept-Encoding', 'gzip,deflate,sdch'),
@@ -72,6 +73,8 @@ class Browser(object):
             ('Cache-Control', 'max-age=0'),
             ('Connection', 'keep-alive'),
         ]
+
+        self.robot.addheaders = baseheaders + headers
 
         if userpass:
             user, password = userpass.split(':')
