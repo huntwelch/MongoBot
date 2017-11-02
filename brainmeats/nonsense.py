@@ -4,7 +4,7 @@ import simplejson
 import re
 
 from autonomic import axon, help, Dendrite, public, Receptor, Cerebellum, alias
-from util import colorize, shorten, zalgo, encodemorse, decodemorse
+from util import colorize, shorten, zalgo, encodemorse, decodemorse, lettertobraille
 from staff import Browser
 from random import choice, randint
 from datastore import Drinker, Defaults
@@ -473,3 +473,14 @@ class Nonsense(Dendrite):
         except:
             return 'Unmorse fail'
         return unmorsed
+
+    @axon
+    def braille(self):
+        string = ' '.join(self.values).lower()
+        b = u''
+        for l in string:
+            if l in lettertobraille:
+                l = lettertobraille[l]
+            b += l
+        return b
+

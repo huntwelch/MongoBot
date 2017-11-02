@@ -22,6 +22,7 @@ plugins:
   - sms
   - stockgame
   - system
+  - tabbycats
   - tester
   - turing
   - twitting
