@@ -3,7 +3,32 @@
 {% block head %}
     {{ super() }}
     <style>
+        #history {
+            background: white;
+            border-left: 1px solid #eee;
+            bottom: 0;
+            color: #999;
+            right: 0;
+            line-height: 1.8;
+            overflow: scroll;
+            padding: 10px 10px 65px;
+            position: fixed;
+            top: 0;
+            width: 140px;
+        }
+        #history ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        #history ul li {
+            cursor: pointer;
+        }
+        #history ul li:hover {
+            color: black;
+        }
         #log {
+            margin-right: 160px;
             position: relative;
         }
         p {
@@ -76,7 +101,7 @@
         }
     </style>
     <script>
-       $(function() {
+        $(function() {
             $(document).on('copy', function() {
                 var temp = $('<div/>').prop('id', 'selector');
                 $('p.selected').each(function() {
@@ -128,6 +153,10 @@
                 );
             });
             $('body').on('keyup', function(e) {
+                console.log(e.keyCode);
+                if( e.keyCode == 27 ) {
+                    $('p.selected').removeClass('selected');
+                }
                 if( e.keyCode == 191 ) {
                     $('#search-bar, #overlay').show();
                     $('#search-bar input').focus();
@@ -135,6 +164,7 @@
             });
 
             $(window).on('scroll', function(e) {
+                return; // Full month load makes this obsolete
                 if( info.searching ) return;
 
                 var height = $(document).height() - $(window).height();
@@ -161,7 +191,8 @@
                         method: "get",
                         data: {
                             onetime: '{{ onetime }}',
-                            offset: offset
+                            offset: offset,
+                            log: localStorage.getItem('month')
                         },
                         success: function(data) {
                             render(data, back);
@@ -249,7 +280,8 @@
                         method: "get",
                         data: {
                             onetime: '{{ onetime }}',
-                            search: search.val()
+                            search: search.val(),
+                            log: localStorage.getItem('month')
                         },
                         success: function(data) {
                             $("#log").html('');
@@ -274,7 +306,27 @@
                     success: render
                 }
             );
-       });
+            localStorage.setItem('month', 'chat.log');
+            $('#history ul li').on('click', function() {
+                localStorage.setItem('month', $(this).attr('log'));
+                $.ajax(
+                    "/api/chat",
+                    {
+                        dataType: "json",
+                        method: "get",
+                        data: {
+                            onetime: '{{ onetime }}',
+                            log: localStorage.getItem('month')
+                        },
+                        success: function(data) {
+                            $('#log').empty();
+                            render(data, false);
+                            info.lock = false;
+                        }
+                    }
+                );
+            });
+        });
     </script>
 {% endblock %}
 {% block content %}
@@ -283,6 +335,14 @@
 
 {% include 'nav.html' %}
 <div id="log"></div>
+<div id="history">
+    <ul>
+    <li log="chat.log">This month</li>
+    {% for log in logs %}
+        <li log="{{ log.0 }}">{{ log.1 }}</li>
+    {% endfor %}
+    <ul>
+</div>
 <modal id="search-bar">
     <input class="search" placeholder="Search logs" name="search" />
 </modal>

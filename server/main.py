@@ -9,6 +9,7 @@
 
 
 import os
+import calendar
 import random
 import time
 import simplejson as json
@@ -33,7 +34,7 @@ secret = load_config('config/secrets.yaml')
 
 @app.errorhandler(500)
 def page_not_found(e):
-    return render_template('500.html'), 500
+    return render_template('500.html', error=e), 500
 
 
 @app.route("/")
@@ -45,11 +46,16 @@ def index():
 @requires_auth
 def api_chat():
     offset = False
+    log = 'chat.log'
+
+    if request.args.get('log'):
+        log = request.args.get('log')
+
     if request.args.get('offset'):
         offset = request.args.get('offset')
 
     try:
-        chats = fetch_chats(request, offset)
+        chats = fetch_chats(request, offset, log)
     except Exception as e:
         return str(e)
 
@@ -77,7 +83,18 @@ def defaults():
 def chatlogs():
     hint = 'Press "/" to search logs.'
     onetime = request.args.get('onetime')
-    return render_template('chatlogs.html', hint=hint, onetime=onetime)
+    logs = []
+    for (_, _, files) in os.walk(conf.directory.logdir):
+        logs = list(filter(lambda x: x[-10:] == '-mongo.log', files))
+        break
+    logs = list(reversed(sorted(logs)))
+    rendlogs = []
+    for log in logs:
+        year = log[:4]
+        month = calendar.month_name[int(log[4:6])]
+        datedisplay = '%s %s' % (month, year)
+        rendlogs.append( [log, datedisplay] )
+    return render_template('chatlogs.html', hint=hint, onetime=onetime, logs=rendlogs)
 
 
 @app.route("/errorlog")

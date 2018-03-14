@@ -419,6 +419,9 @@ class Cortex:
     def default(self):
         backup = Defaults.objects(command=self.lastcommand)
         if backup:
-            return choice(backup).response
+            try:
+                return choice(backup).response % tuple(self.values)
+            except:
+                return choice(backup).response
 
         self.act(" cannot do this thing :'(")

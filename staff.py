@@ -145,27 +145,24 @@ class Broker(object):
         ])
 
         # yahoo specific
-        url = 'http://download.finance.yahoo.com/d/quotes.csv'
-        params = {'f': ''.join(fields.values()), 's': symbol, 'e': '.csv'}
+        url = 'https://query1.finance.yahoo.com/v8/finance/chart/%s' % symbol #?range=1d&interval=1m'
+        params = {'range': '1d', 'interval': '1m'}
 
         try:
-            raw_string = Browser(url, params).read()
-            raw_list = raw_string.strip().replace('"', '').split(',')
-            data = {key: raw_list.pop(0) for (key) in fields.keys()}
+            fulldata = Browser(url, params).json()
         except Exception as e:
             print e
             return
 
-        if data['exchange'] == 'N/A':
+        data = fulldata["chart"]["result"][0]
+
+        if data['exchangeName'] == 'N/A':
             return
 
-        # Turn N/A - <b>92.73</b> into just the decimal
-        data['price'] = float(re.search('(\d|\.)+',
-                              data['price'].split('-').pop()).group())
+        data['price'] = 'borken'
         # Turn N/A - +0.84% into just the decimal
-        data['perc_change'] = float(re.search('(\+|-)?(\d|\.)+',
-                                    data['perc_change'].split('-').pop()).group())
-        data['change'] = float(data['change'])
+        data['perc_change'] = 'borken'
+        data['change'] = 'borken'
 
         for key, value in data.items():
             setattr(self, key, value)

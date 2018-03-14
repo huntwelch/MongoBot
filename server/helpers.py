@@ -41,9 +41,11 @@ def fetch_defaults():
     return render
 
 
-def fetch_chats(request, offset):
+def fetch_chats(request, offset, log):
 
-    log = open(config.directory.log, 'r')
+    logfile = '%s/%s' % (config.directory.logdir, log)
+
+    log = open(logfile, 'r')
     chats = []
 
     index = 0
@@ -131,13 +133,13 @@ def fetch_chats(request, offset):
 
     # account for zero start in js
 
-    if total <= lim:
-        chats = chats
-    elif offset == 0:
-        chats = chats[-lim:]
-    elif offset < 0:
-        chats = chats[0:offset + lim]
-    else:
-        chats = chats[offset:offset + lim]
+#    if total <= lim:
+#        chats = chats
+#    elif offset == 0:
+#        chats = chats[-lim:]
+#    elif offset < 0:
+#        chats = chats[0:offset + lim]
+#    else:
+#        chats = chats[offset:offset + lim]
 
     return chats
