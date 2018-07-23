@@ -4,6 +4,7 @@ import HTMLParser
 import requests
 import random
 import subprocess
+import tinyurl
 
 from config import load_config
 from PIL import Image
@@ -67,13 +68,9 @@ def colorize(text, color, colorize=True):
 
 
 def shorten(url):
-    short_url = requests.get(secrets.shortner.url, params={'roast': url})
-
-    if short_url:
-        return short_url.text
-
-    return url
-
+    # short_url = requests.get(secrets.shortner.url, params={'roast': url})
+    short_url = tinyurl.create_one(url)
+    return short_url
 
 def savevideo(url, path):
     args = [
@@ -86,7 +83,7 @@ def savevideo(url, path):
 
     # Save output from the real run in
     # for error checks. Someday.
-    feedback = subprocess.check_output(args)
+    feedback = subprocess.check_output(' '.join(args))
 
     # Simulated run to get the file name.
     # Though it pops more proc, there are
@@ -95,7 +92,7 @@ def savevideo(url, path):
     # error while still being useful.
     filename = False
     args.append('--get-filename')
-    filename = subprocess.check_output(args)
+    filename = subprocess.check_output(' '.join(args))
 
     return filename.strip()
 

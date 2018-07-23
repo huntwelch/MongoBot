@@ -66,7 +66,7 @@ class System(Dendrite):
 
             cats = ', '.join(cats)
 
-            return '%shelp WHAT where WHAT is one of the following: %s' % (self.cx.settings.bot.command_prefix, cats)
+            return '(Can also now visit: http://mongobot.com/help) %shelp WHAT where WHAT is one of the following: %s' % (self.cx.settings.bot.command_prefix, cats)
 
         which = self.values[0]
         if which in broken:

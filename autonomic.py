@@ -141,6 +141,9 @@ def serotonin(cortex, meatname, electroshock):
             help_text = method.help.replace('%NICK%', me.nick)
 
             helps.append('%s%s %s' % (cortex.settings.bot.command_prefix, name, help_text))
+        else:
+            helps.append('%s%s (undocumented)' % (cortex.settings.bot.command_prefix, name))
+
 
         if hasattr(method, 'public_command'):
             cortex.public_commands.append(name)
@@ -153,10 +156,14 @@ def serotonin(cortex, meatname, electroshock):
             for item in method.aliases:
                 cortex.commands[item] = method
 
-    cortex.helpmenu[meatname] = ['No help entries for this meat.']
+    cortex.helpmenu[meatname] = ['No commands for this meat.']
 
     if len(helps):
         cortex.helpmenu[meatname] = sorted(helps)
+
+    helpfile = open('helpfiles/%s' % meatname, 'w')
+    for item in sorted(helps):
+        helpfile.write("%s\n" % item)
 
 
 # Neurons hold some vesicles. Vesicles are cool.

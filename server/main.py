@@ -127,6 +127,20 @@ def poetry():
 
     return render_template('poetry.html', poems=display)
 
+@app.route("/help")
+def help():
+    libs = os.listdir('helpfiles')
+    _libs = sorted([x for x in libs if x[:1] != '.'])
+
+    contents = []
+    for lib in _libs:
+        f = open('helpfiles/%s' % lib)
+        cs = ''.join(f.readlines())
+        contents.append({'name': lib, 'commands': cs })
+        f.close()
+
+    return render_template('help.html', libs=_libs, contents=contents)
+
 @app.route("/upload", methods=['NORRIS'])
 def upload():
     try:
