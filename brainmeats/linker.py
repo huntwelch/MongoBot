@@ -5,6 +5,7 @@ from autonomic import axon, help, Dendrite, Cerebellum, Receptor, Synapse
 from util import shorten, unescape
 from staff import Browser
 from random import randint
+from id import Id
 
 # This isn't really a brainmeant like the others,
 # but it got moved here during brain surgery to
@@ -21,6 +22,12 @@ class Linker(Dendrite):
     @Receptor('IRC_PRIVMSG')
     def urlfinder(self, target, source, args):
         # Ignore urls in commands
+
+        whom = Id(source)
+        nick = whom.nick
+
+        if self.cx.settings.bot.nick in nick:
+            return
 
         if re.search('^\%s' % self.cx.settings.bot.command_prefix, args[-1]):
             return

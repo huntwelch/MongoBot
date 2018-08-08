@@ -22,7 +22,8 @@ while True:
             os.system("python medulla.py >> hippocampus/log/sys.log 2>>hippocampus/log/error.log &")
             print "It's cool, we had the thingy"
     except Exception as e:
+        os.system("ps ax | grep 'medulla.py' | grep -v grep | awk '{print $1}' | xargs kill")
         print e
         pass
 
-    sleep(10)
+    sleep(settings.sys.pulserate)
