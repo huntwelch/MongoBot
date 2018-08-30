@@ -3,7 +3,7 @@ import traceback
 
 from autonomic import axon, help, Dendrite, Cerebellum, Receptor
 from time import mktime, localtime
-from twilio.rest import TwilioRestClient
+from twilio.rest import Client
 from datastore import Drinker
 from config import load_config
 from id import Id
@@ -22,7 +22,7 @@ class Sms(Dendrite):
     def __init__(self, cortex):
         super(Sms, self).__init__(cortex)
 
-        self.client = TwilioRestClient(self.secrets.sid, self.secrets.token)
+        self.client = Client(self.secrets.sid, self.secrets.token)
 
 
     # smsticker is a receptor that responds to twitch

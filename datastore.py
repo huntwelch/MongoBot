@@ -75,25 +75,28 @@ def topScores(limit):
 class Entity(mongoengine.Document):
     name = StringField(required=True)
     value = IntField(default=0)
+    meta = {'strict': False}
 
 
 class Alias(mongoengine.EmbeddedDocument):
     name = StringField(required=True)
     definition = StringField(required=True)
+    meta = {'strict': False}
 
 
 class Defaults(mongoengine.Document):
     command = StringField(required=True)
     response = StringField(required=True)
+    meta = {'strict': False}
 
 
 class Position(EmbeddedDocument):
-
     symbol = StringField(required=True)
     date = DateTimeField(required=True)
     price = FloatField(min_value=0)
     quantity = IntField(min_value=0)
     type = StringField()
+    meta = {'strict': False}
 
 
 class Drinker(mongoengine.Document):
@@ -108,6 +111,7 @@ class Drinker(mongoengine.Document):
     positions = ListField(EmbeddedDocumentField(Position))
     aliases = ListField(EmbeddedDocumentField(Alias))
     data = DictField()
+    meta = {'strict': False}
 
 
 class Words(mongoengine.Document):
@@ -115,16 +119,19 @@ class Words(mongoengine.Document):
     partofspeech = StringField(required=True)
     definition = StringField(required=True)
     source = StringField(required=True)
+    meta = {'strict': False}
 
 
 class Learned(mongoengine.Document):
     word = StringField(required=True)
     partofspeech = StringField(required=True)
+    meta = {'strict': False}
 
 
 class Structure(mongoengine.Document):
     structure = ListField(StringField())
     contents = ListField(StringField())
+    meta = {'strict': False}
 
 
 class Quote(mongoengine.Document):
@@ -134,5 +141,6 @@ class Quote(mongoengine.Document):
     random = FloatField()
 
     meta = {
-        'indexes': ['random', 'text', ('text', 'random')]
+        'indexes': ['random', 'text', ('text', 'random')],
+        'strict': False,
     }
