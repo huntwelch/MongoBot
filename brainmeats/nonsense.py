@@ -54,14 +54,14 @@ class Nonsense(Dendrite):
     @public
     @help("<get cat fact>")
     def catfact(self):
-        url = 'http://catfacts-api.appspot.com/api/facts'
+        url = 'https://catfact.ninja/fact'
 
         try:
             json = Browser(url).json()
         except:
             return 'No meow facts.'
 
-        return json['facts'][0]
+        return json['fact']
 
 
     # Excellent antidote for a long meeting.

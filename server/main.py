@@ -7,7 +7,7 @@
 # temporary password thing. Will eventually document how to get it
 # up and running more extensively.
 
-
+import sys
 import os
 import calendar
 import random
@@ -23,6 +23,7 @@ from config import load_config
 from util import shorten
 from cybernetics import metacortex
 from server.spooner import Spoon
+from multiprocessing.connection import Client
 
 # Commented out until broca is fixed
 # from brainmeats.broca import Broca
@@ -41,6 +42,12 @@ def page_not_found(e):
 def index():
     return render_template('index.html')
 
+@app.route("/ear")
+def ear():
+    address = ('localhost', 4242)
+    call = Client(address)
+    call.send('buzz')
+    return call.recv()
 
 @app.route("/api/chat", methods=['GET', 'POST'])
 @requires_auth

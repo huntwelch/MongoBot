@@ -3,6 +3,7 @@ import sys
 
 import cortex
 import thalamus
+import cellphone
 
 from config import load_config
 from time import sleep, mktime, localtime
@@ -19,12 +20,13 @@ class Medulla:
 
     # Used by thalamus
     sock = False
+    radio = False
 
     def __init__(self):
 
         print '* Becoming self-aware'
-        self.settings = load_config('config/settings.yaml')
-        self.secrets = load_config('config/secrets.yaml')
+        self.settings = load_config('/usr/home/peter/bots/mongo/config/settings.yaml')
+        self.secrets = load_config('/usr/home/peter/bots/mongo/config/secrets.yaml')
         self.active = True
         self.logger = Hyperthymesia()
 
@@ -37,6 +39,9 @@ class Medulla:
         self.thalamus = thalamus.Thalamus(self, self.brain)
         self.thalamus.connect()
         self.brain.thalamus = self.thalamus
+        self.cellphone = cellphone.Cellphone(self, self.brain)
+        self.cellphone.connect()
+        self.brain.cellphone = self.cellphone
         self.brain.logger = self.logger
 
         metacortex.cx = self.brain

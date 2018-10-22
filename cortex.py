@@ -40,6 +40,7 @@ class Cortex:
     debugging = False
 
     thalamus = False
+    cellphone = False
     master = False
 
     channels = []
@@ -148,6 +149,7 @@ class Cortex:
     @Synapse('twitch')
     def monitor(self):
         self.thalamus.process()
+        self.cellphone.process()
 
 
     # If it is indeed a command, the cortex stores who sent it,
