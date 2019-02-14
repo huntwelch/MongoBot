@@ -1,4 +1,5 @@
 import socket
+import os
 
 from multiprocessing import Process
 from config import load_config
@@ -27,6 +28,10 @@ class Cellphone(object):
         self.phone, _ = self.radio.accept()
 
     def connect(self):
+        try:
+            os.remove(self.address)
+        except:
+            pass
         self.radio = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.radio.bind(self.address)
         self.master.radio = self.radio

@@ -127,10 +127,13 @@ def poetry():
     for poem in poems:
         if poem == '.gitignore':
             continue
-        f = open('%s/%s' % (conf.media.poems, poem), 'r')
-        title = f.readline()
-        f.close()
-        display.append({'title': title, 'link': poem[:-4]})
+        try:
+            f = open('%s/%s' % (conf.media.poems, poem), 'r')
+            title = f.readline()
+            f.close()
+            display.append({'title': title, 'link': poem[:-4]})
+        except Exception as e:
+            display.append({'title': 'brokeen', 'link': 'broken'})
 
     return render_template('poetry.html', poems=display)
 

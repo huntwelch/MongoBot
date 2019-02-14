@@ -21,8 +21,6 @@ class Finance(Dendrite):
     @help("STOCK_SYMBOL <get stock quote>")
     def q(self):
 
-        return 'Stocks have been broken for quite some time now. Perhaps you are volunteering to fix them? Just in case, here is .source: https://github.com/huntwelch/MongoBot/'
-
         symbol = self.values[0]
         if not symbol:
             return "Enter a symbol"

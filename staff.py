@@ -131,38 +131,16 @@ class Broker(object):
         # with dots from when we were using the Google API - look up with hyphen.
         symbol = symbol.replace('.', '-')
 
-        # yahoo fields
-        # See http://www.gummy-stuff.org/Yahoo-data.htm for more
-        fields = OrderedDict([
-            ('symbol', 's'),
-            ('price', 'l1'),
-            ('perc_change', 'p2'),
-            ('change', 'c1'),
-            ('exchange', 'x'),
-            ('company', 'n'),
-            ('volume', 'v'),
-            ('market_cap', 'j1'),
-        ])
-
         # yahoo specific
-        url = 'https://query1.finance.yahoo.com/v8/finance/chart/%s' % symbol #?range=1d&interval=1m'
-        params = {'range': '1d', 'interval': '1m'}
+        url = 'https://api.iextrading.com/1.0/stock/%s/quote' % symbol
 
         try:
-            fulldata = Browser(url, params).json()
+            fulldata = Browser(url).json()
         except Exception as e:
             print e
             return
 
-        data = fulldata["chart"]["result"][0]
-
-        if data['exchangeName'] == 'N/A':
-            return
-
-        data['price'] = 'borken'
-        # Turn N/A - +0.84% into just the decimal
-        data['perc_change'] = 'borken'
-        data['change'] = 'borken'
+        data = fulldata
 
         for key, value in data.items():
             setattr(self, key, value)
@@ -177,8 +155,8 @@ class Broker(object):
         if not self.stock:
             return False
 
-        name = "%s (%s)" % (self.company, self.symbol.upper())
-        changestring = str(self.change) + " (" + ("%.2f" % self.perc_change) + "%)"
+        name = "%s (%s)" % (self.companyName, self.symbol.upper())
+        changestring = str(self.change) + " (" + ("%.2f" % self.changePercent) + "%)"
 
         if self.change < 0:
             changestring = colorize(changestring, 'red')
@@ -187,23 +165,9 @@ class Broker(object):
 
         message = [
             name,
-            str(self.price),
+            str(self.iexRealtimePrice),
             changestring,
         ]
-
-        otherinfo = [
-            # ("pretty title", "dataname")
-            ("Exchange", "exchange"),
-            ("Trading volume", "volume"),
-            ("Market cap", "market_cap"),
-        ]
-
-        # TODO: Don't do this for not in channel, ensure it's a privmsg only. Currently not compatible with channeling
-        # if context != CHANNEL:
-        #     for item in otherinfo:
-        #         pretty, id = item
-        #         addon = pretty + ": " + getattr(self, id, 'N/A')
-        #         message.append(addon)
 
         link = 'http://finance.yahoo.com/q?s=' + self.symbol
         roasted = shorten(link)

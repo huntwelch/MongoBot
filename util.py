@@ -68,8 +68,9 @@ def colorize(text, color, colorize=True):
 
 
 def shorten(url):
-    # short_url = requests.get(secrets.shortner.url, params={'roast': url})
+    #short_url = requests.get(secrets.shortner.url, params={'roast': url})
     short_url = tinyurl.create_one(url)
+
     return short_url
 
 def savevideo(url, path):

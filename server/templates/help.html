@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Mongo commands{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+        body {
+            padding: 20px;
+        }
+        lib {
+            color: #900;
+            cursor: pointer;
+            display: block;
+            font-weight: bold;
+            margin: 10px;
+        }
+        span {
+            color: black;
+        }        
+        commands {
+            display: none;
+        }
+        pre {
+            margin: 0 0 20px 8px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <h3>Commands</h3>
+    {% for lib in libs %}
+        <lib class='{{ lib }}'>{{ lib }}</lib>
+    {% endfor %}
+    {% for c in contents %}
+        <commands id="{{ c.name }}">
+            <pre>{{ c.commands }} </pre>
+        </commands>
+    {% endfor %}
+
+    <script>
+        $('commands').each(function(item) {
+            $(this).detach().insertAfter($('.' + this.id))
+        });
+        $('lib').on('click', function() {
+            $('#' + this.className).toggle();
+        });
+    </script>
+{% endblock %}
