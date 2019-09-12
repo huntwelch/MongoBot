@@ -1,11 +1,10 @@
 import time
 import re
-import HTMLParser
 import requests
 import random
 import subprocess
-import tinyurl
 
+from html.parser import HTMLParser
 from config import load_config
 from PIL import Image
 
@@ -35,7 +34,7 @@ def ratelimited(maxPerSecond):
 
 
 def unescape(text):
-    parser = HTMLParser.HTMLParser()
+    parser = HTMLParser()
     return parser.unescape(text)
 
 
@@ -69,7 +68,8 @@ def colorize(text, color, colorize=True):
 
 def shorten(url):
     #short_url = requests.get(secrets.shortner.url, params={'roast': url})
-    short_url = tinyurl.create_one(url)
+    #short_url = tinyurl.create_one(url)
+    return 'Dis borked rite now'
 
     return short_url
 
@@ -293,7 +293,7 @@ lettertomorse = {
    ' ': ' / ',
 }
 
-morsetoletter = dict((v,k) for k,v in lettertomorse.iteritems())
+morsetoletter = dict((v,k) for k,v in lettertomorse.items())
 
 def encodemorse(string):
     cleaned = re.sub('[^0-9a-zA-Z\s]+', '', string).lower()

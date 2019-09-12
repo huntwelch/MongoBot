@@ -183,7 +183,7 @@ class Neurons(object):
 # aka, this be a hack
 def Cerebellum(object):
 
-    for name, method in object.__dict__.iteritems():
+    for name, method in object.__dict__.items():
         if hasattr(method, 'is_receptor'):
 
             receptors = Neurons.vesicles.get(method.name, [])

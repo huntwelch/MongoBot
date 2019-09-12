@@ -234,7 +234,7 @@ class Holdem(Dendrite):
     @axon
     @help("<show how much money everybody has>")
     def allmoney(self):
-        for player, p in self.players.iteritems():
+        for player, p in self.players.items():
             self.chat("%s: %d, %s" % (player, p.money, p.status))
             print(p)
 
@@ -429,7 +429,7 @@ class Holdem(Dendrite):
                     self.cardpointer += 1
 
         # handle initial states here
-        for player, p in self.players.iteritems():
+        for player, p in self.players.items():
             self.chat(" ".join(p.hand), player)
 
         self.pot = self.blind * 3
@@ -516,7 +516,7 @@ class Holdem(Dendrite):
                           (lastman, self.pot))
         else:
             contenders = []
-            for player, p in self.players.iteritems():
+            for player, p in self.players.items():
                 if p.status in ("in", "allin"):
                     self.announce("%s: %s" % (player, " ".join(p.hand)))
                     cardstock = self.translator("".join(p.hand) + "".join(self.hand))
@@ -572,7 +572,7 @@ class Holdem(Dendrite):
         left = 0
         last = None
         players_to_pop = []
-        for player, p in self.players.iteritems():
+        for player, p in self.players.items():
             if p.money == 0:
                 p.status = "done"
                 self.announce(player + " is out.")

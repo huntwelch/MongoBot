@@ -131,7 +131,9 @@ class Mail(Dendrite):
                 continue
 
             raw = data[0][1]
-            message = email.message_from_string(raw)
+            message = email.message_from_string(str(raw))
+
+            if not message: return
 
             if 'rollup' not in message['Subject']: continue
 

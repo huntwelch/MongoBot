@@ -173,7 +173,7 @@ class Peeps(Dendrite):
         if not peeps:
             return 'Is this real life? No one to announce anything to...'
 
-        peeps = ', '.join('%s' % (key) for (key, val) in peeps.iteritems())
+        peeps = ', '.join('%s' % (key) for (key, val) in peeps.items())
         return '%s, %s has something very important to say.' % (peeps,
                 announcer.name)
 

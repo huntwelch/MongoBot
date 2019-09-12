@@ -16,8 +16,8 @@ class Hyperthymesia(object):
     }
 
     def __init__(self, *arguments, **keywords):
-
-        logging.config.dictConfig(settings.logging)
+        #logging.config.dictConfig('settings.logging')
+        return
 
     def __set_log_level(self, level):
 

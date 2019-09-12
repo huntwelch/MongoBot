@@ -101,7 +101,7 @@ class Thalamus(object):
         # Temporary backwards compatibility as everything gets ported to the thalamus send
         data = data.rstrip('\r\n')
 
-        self.sock.send('%s%s%s' % (data, chr(0o15), chr(0o12)))
+        self.sock.send(bytes('%s%s%s' % (data, chr(0o15), chr(0o12)), 'utf-8'))
 
     # Process incoming data
     def process(self):
@@ -115,7 +115,7 @@ class Thalamus(object):
         if not data:
             return
 
-        self.buffer += data
+        self.buffer += str(data)
         lines = self.buffer.split(chr(0o12))
         self.buffer = lines.pop()
 

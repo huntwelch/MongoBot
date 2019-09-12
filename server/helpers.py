@@ -12,7 +12,7 @@ import base64
 config = load_config('config/settings.yaml')
 secrets = load_config('config/secrets.yaml')
 
-totp = pyotp.TOTP(base64.b32encode(secrets.webserver.password), interval=600)
+totp = pyotp.TOTP(base64.b32encode(bytes('%s' % secrets.webserver.password, 'utf-8')), interval=600)
 
 def render_xml(path):
     response = make_response(render_template(path))

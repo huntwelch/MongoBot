@@ -12,7 +12,6 @@ from datastore import Words, Learned, Structure
 from random import choice, randint
 from util import savefromweb
 from staff import Browser
-from wordnik import swagger, WordApi
 from id import Id
 
 
@@ -320,42 +319,43 @@ class Broca(Dendrite):
 
         return "Definition %s: %s" % (str(which + 1), definition)
 
-    def seekdef(self, word):
-        if not self.secrets.wordnik_api:
-            return "No api key is not set."
+    # Wordnik seems dead in py36
+    #def seekdef(self, word):
+    #    if not self.secrets.wordnik_api:
+    #        return "No api key is not set."
 
-        client = swagger.ApiClient(self.secrets.wordnik_api, 'http://api.wordnik.com/v4')
-        wapi = WordApi.WordApi(client)
-        results = wapi.getDefinitions(word.strip())
+    #    client = swagger.ApiClient(self.secrets.wordnik_api, 'http://api.wordnik.com/v4')
+    #    wapi = WordApi.WordApi(client)
+    #    results = wapi.getDefinitions(word.strip())
 
-        count = 0
+    #    count = 0
 
-        if not results:
-            self.chat('I got nothin.')
-            return
+    #    if not results:
+    #        self.chat('I got nothin.')
+    #        return
 
-        for item in results:
+    #    for item in results:
 
-            try:
-                definition = Words(word=item.word,
-                                   partofspeech=item.partOfSpeech,
-                                   definition=item.text,
-                                   source=item.sourceDictionary)
+    #        try:
+    #            definition = Words(word=item.word,
+    #                               partofspeech=item.partOfSpeech,
+    #                               definition=item.text,
+    #                               source=item.sourceDictionary)
 
-                definition.save()
-                if count == 0:
-                    tempdef = item.text
+    #            definition.save()
+    #            if count == 0:
+    #                tempdef = item.text
 
-                count += 1
-            except Exception as e:
-                print(e)
-                continue
+    #            count += 1
+    #        except Exception as e:
+    #            print(e)
+    #            continue
 
-        if count > 0:
-            self.chat("Wordnik coughed up " + str(count) + " definitions.")
-            self.chat("Definition 1:" + tempdef)
-        else:
-            return "I got nothin."
+    #    if count > 0:
+    #        self.chat("Wordnik coughed up " + str(count) + " definitions.")
+    #        self.chat("Definition 1:" + tempdef)
+    #    else:
+    #        return "I got nothin."
 
 
     # This is where all the conversational tics and

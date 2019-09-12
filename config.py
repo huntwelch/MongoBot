@@ -59,7 +59,7 @@ class YamlDict(OrderedDict):
     def __getitem__(self, key):
         v = super(YamlDict, self).__getitem__(key)
 
-        if isinstance(v, basestring):
+        if isinstance(v, str):
             v = v.format(**self.__root)
 
         return v
@@ -69,7 +69,7 @@ class YamlDict(OrderedDict):
 
         if isinstance(value, Mapping) and not isinstance(value, YamlDict):
             value = YamlDict(value)
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             pass
         elif isinstance(value, Sequence) and not isinstance(value, YamlList):
             value = YamlList(value)
@@ -85,7 +85,7 @@ class YamlDict(OrderedDict):
 
         self.__root = root
 
-        for k, v in self.iteritems():
+        for k, v in self.items():
             if hasattr(v, 'setAsRoot'):
                 v.setAsRoot(root)
 
@@ -101,7 +101,7 @@ class YamlList(list):
 
     def __getitem__(self, key):
         v = super(YamlList, self).__getitem__(key)
-        if isinstance(v, basestring):
+        if isinstance(v, str):
             v = v.format(**self.__root)
 
         return v
@@ -131,7 +131,7 @@ class YamlList(list):
 
 def load_config(config_file):
     try:
-        stream = file(config_file, 'r')
+        stream = open(config_file, 'r')
         data = yaml.load(stream, Config)
 
         if data is not None:
@@ -140,6 +140,7 @@ def load_config(config_file):
         return data
 
     except Exception as e:
+        print(e)
         pass
 
 Config.add_constructor('!include', Config.include)

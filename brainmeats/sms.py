@@ -30,7 +30,7 @@ class Sms(Dendrite):
     # broadcasts - which happen on every iteration of
     # monitor. To prevent hitting twilio too hard,
     # this gets self limited to every 10 seconds.
-    @Receptor('twitch')
+    #@Receptor('twitch')
     def smsticker(self):
 
         self.current = mktime(localtime())
@@ -45,6 +45,7 @@ class Sms(Dendrite):
             messages = self.client.sms.messages.list(to=self.secrets.number)
         except:
             print("Error fetching")
+            print(e)
             return
 
         while messages:

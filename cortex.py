@@ -69,7 +69,7 @@ class Cortex:
         self.context = self.secrets.primary_channel
         self.personality = self.settings.bot
 
-        self.enabled = self.settings.plugins.values().pop(0)
+        self.enabled = list(self.settings.plugins.values()).pop(0)
 
         metacortex.botnick = self.personality.nick
 
