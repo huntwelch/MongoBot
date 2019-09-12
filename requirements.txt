@@ -15,8 +15,8 @@ decorator
 facepy
 google-api-python-client
 gunicorn
-guppy
-hiredis
+guppy3
+hiredis==0.2.0
 howdoi
 httplib2
 itsdangerous
@@ -41,7 +41,6 @@ requests-cache
 requests-oauthlib
 simplejson
 six
-tinyurl
 tqdm
 tweepy
 twilio
@@ -50,5 +49,4 @@ unittest2
 update-checker
 wolframalpha
 wordnik
-wsgiref
 youtube-dl

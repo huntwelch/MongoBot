@@ -1,3 +1,4 @@
+from __future__ import print_function
 import imaplib
 import email
 import smtplib
@@ -84,7 +85,7 @@ class Mail(Dendrite):
         try:
             self.smtp.sendmail(self.secrets.email, sender, msg.as_string())
         except Exception as e:
-            print str(e)
+            print(str(e))
 
         return
 
@@ -138,7 +139,7 @@ class Mail(Dendrite):
                 self.imap.uid('store', mailid, '+FLAGS', r'(\Deleted)')
                 self.imap.expunge()
             except Exception as e:
-                print str(e)
+                print(str(e))
 
             sender = email.utils.parseaddr(message['From'])
             self.rollup(sender, message['Subject'])

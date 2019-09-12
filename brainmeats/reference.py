@@ -1,3 +1,4 @@
+from __future__ import print_function
 import textwrap
 import socket
 import re
@@ -307,7 +308,7 @@ class Reference(Dendrite):
         url = self.values[0]
         results = pythonwhois.get_whois(url)
 
-        print results
+        print(results)
 
         try:
             r = results['contacts']['registrant']

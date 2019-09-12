@@ -1,3 +1,4 @@
+from __future__ import print_function
 import re
 import string
 import random
@@ -347,7 +348,7 @@ class Broca(Dendrite):
 
                 count += 1
             except Exception as e:
-                print e
+                print(e)
                 continue
 
         if count > 0:

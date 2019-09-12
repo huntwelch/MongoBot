@@ -1,3 +1,4 @@
+from __future__ import print_function
 import hand
 import math
 import random
@@ -235,7 +236,7 @@ class Holdem(Dendrite):
     def allmoney(self):
         for player, p in self.players.iteritems():
             self.chat("%s: %d, %s" % (player, p.money, p.status))
-            print p
+            print(p)
 
 
     @axon

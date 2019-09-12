@@ -1,3 +1,4 @@
+from __future__ import print_function
 import re
 import traceback
 
@@ -43,7 +44,7 @@ class Sms(Dendrite):
         try:
             messages = self.client.sms.messages.list(to=self.secrets.number)
         except:
-            print "Error fetching"
+            print("Error fetching")
             return
 
         while messages:

@@ -1,8 +1,9 @@
+from __future__ import absolute_import
 import os
 
 from functools import wraps
 from flask import request, Response
-from helpers import totp
+from .helpers import totp
 from config import load_config
 
 config = load_config('config/secrets.yaml')
