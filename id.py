@@ -24,7 +24,7 @@ class Id(object):
 
         if not len(arguments) and len(keywords):
             # Prepend 'data__' to all keywords for appropriate searching in data dictfield
-            keywords = dict(map(lambda (key, value): ('data__' + str(key), value), keywords.items()))
+            keywords = dict(map(lambda key_value: ('data__' + str(key_value[0]), key_value[1]), keywords.items()))
 
             # Search for a user with the data field
             self.prop = Drinker.objects(**keywords).first()

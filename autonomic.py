@@ -1,3 +1,4 @@
+from __future__ import print_function
 import inspect
 import sys
 
@@ -46,7 +47,7 @@ class Dendrite(object):
         try:
             self.config = load_config('config/%s.yaml' % name)
         except Exception as e:
-            print e
+            print(e)
             pass
 
     def chat(self, what, target=False, error=False):
@@ -149,7 +150,7 @@ def serotonin(cortex, meatname, electroshock):
             cortex.public_commands.append(name)
 
         if name in cortex.commands and not electroshock:
-            print "Warning: overwriting %s command" % name
+            print("Warning: overwriting %s command" % name)
 
         cortex.commands[name] = method
         if hasattr(method, 'aliases') and method.aliases:

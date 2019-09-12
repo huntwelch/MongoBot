@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 
@@ -24,7 +25,7 @@ class Medulla:
 
     def __init__(self):
 
-        print '* Becoming self-aware'
+        print('* Becoming self-aware')
         self.settings = load_config('/usr/home/peter/bots/mongo/config/settings.yaml')
         self.secrets = load_config('/usr/home/peter/bots/mongo/config/secrets.yaml')
         self.active = True
@@ -52,10 +53,10 @@ class Medulla:
         # for too long, a signal kills it and reboots.
         # Note: this has become less of an issue
         # since all the bot's commands became threaded
-        print '* Establishing pulse'
+        print('* Establishing pulse')
         self.setpulse()
 
-        print '* Running monitor'
+        print('* Running monitor')
 
         while True:
             sleep(0.1)
@@ -130,7 +131,7 @@ class Medulla:
 
     def die(self, msg=None):
         if msg is not None:
-            print msg
+            print(msg)
         os._exit(1)
 
 connect = Medulla()

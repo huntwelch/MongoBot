@@ -1,3 +1,4 @@
+from __future__ import print_function
 import socket
 import os
 
@@ -48,7 +49,7 @@ class Cellphone(object):
             return
 
         if data == b'':
-            print 'Can you hear me now?'
+            print('Can you hear me now?')
             sys.exit()
 
         return data

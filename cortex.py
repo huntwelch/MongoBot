@@ -1,3 +1,4 @@
+from __future__ import print_function
 import re
 import os
 import shutil
@@ -60,7 +61,7 @@ class Cortex:
 
     def __init__(self, master, electroshock=False):
 
-        print '* Initializing'
+        print('* Initializing')
         self.master = master
         self.settings = master.settings
         self.secrets = master.secrets
@@ -72,23 +73,23 @@ class Cortex:
 
         metacortex.botnick = self.personality.nick
 
-        print '* Exciting neurons'
+        print('* Exciting neurons')
         Neurons.cortex = self
 
-        print '* Connecting to datastore'
+        print('* Connecting to datastore')
         connectdb()
 
-        print '* Fondly remembering daddy'
+        print('* Fondly remembering daddy')
         admin = Id(self.secrets.owner)
         if not admin.password:
-            print '*' * 40
-            print 'Hey %s! You haven\'t set a password yet! As my daddy you really need a password.' % self.secrets.owner
+            print('*' * 40)
+            print('Hey %s! You haven\'t set a password yet! As my daddy you really need a password.' % self.secrets.owner)
             tmp_pass = getpass('Before I can continue, please enter a password: ')
-            print 'See? Was that so hard?'
+            print('See? Was that so hard?')
             admin.setpassword(tmp_pass, True)
             tmp_pass = None
 
-        print '* Loading brainmeats'
+        print('* Loading brainmeats')
         self.loadbrains(electroshock)
 
         # print '* Waking butler'
@@ -106,10 +107,10 @@ class Cortex:
         areas = [name for _, name, _ in pkgutil.iter_modules(['brainmeats'])]
 
         for area in areas:
-            print '{0: <25}'.format('  - %s' % area),
+            print('{0: <25}'.format('  - %s' % area), end=' ')
 
             if area not in self.enabled:
-                print '[\033[93mDISABLED\033[0m]'
+                print('[\033[93mDISABLED\033[0m]')
                 continue
 
             try:
@@ -119,15 +120,15 @@ class Cortex:
                     reload(mod)
                 cls = getattr(mod, area.capitalize())
                 self.brainmeats[area] = cls(self)
-                print '[\033[0;32mOK\033[0m]'
+                print('[\033[0;32mOK\033[0m]')
             except Exception as e:
                 self.chat('Failed to load %s.' % area, error=str(e))
                 self.broken.append(area)
                 self.enabled.remove(area)
-                print '[\033[0;31mFAILED\033[0m]'
+                print('[\033[0;31mFAILED\033[0m]')
                 if self.settings.debug.verbose:
-                    print e
-                    print traceback.format_exc()
+                    print(e)
+                    print(traceback.format_exc())
 
         for brainmeat in self.brainmeats:
             serotonin(self, brainmeat, electroshock)
@@ -289,7 +290,7 @@ class Cortex:
             except Exception as e:
                 # self.chat(str(e))
                 self.chat(traceback.format_exc().replace('\n', ' '))
-                print traceback.format_exc()
+                print(traceback.format_exc())
 
         if not result:
             return

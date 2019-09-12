@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 
 from time import mktime, localtime, sleep
@@ -10,20 +11,20 @@ from config import load_config
 
 settings = load_config('config/settings.yaml')
 
-print "The doctor is in"
+print("The doctor is in")
 while True:
     pulse = open(settings.sys.pulse, 'r')
     lastpulse = pulse.readline()
 
     try:
         if mktime(localtime()) - float(lastpulse) > settings.sys.pulserate:
-            print "He's dead, Jim"
+            print("He's dead, Jim")
             os.system("ps ax | grep 'medulla.py' | grep -v grep | awk '{print $1}' | xargs kill")
             os.system("python medulla.py >> hippocampus/log/sys.log 2>>hippocampus/log/error.log &")
-            print "It's cool, we had the thingy"
+            print("It's cool, we had the thingy")
     except Exception as e:
         os.system("ps ax | grep 'medulla.py' | grep -v grep | awk '{print $1}' | xargs kill")
-        print e
+        print(e)
         pass
 
     sleep(settings.sys.pulserate)

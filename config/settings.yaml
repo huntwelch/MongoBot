@@ -27,7 +27,7 @@ irc:
   scan: '^:\w+\.freenode\.net'
 
 bot:
-  nick: 'MongoBot'
+  nick: 'Mongo3Bot'
   command_prefix: '.'
   multi_command_prefix: ':'
   flag_prefix: '-'

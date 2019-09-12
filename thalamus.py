@@ -1,3 +1,4 @@
+from __future__ import print_function
 import socket
 import ssl
 import sys
@@ -49,7 +50,7 @@ class Thalamus(object):
     def connect(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        print '[IRC] Connecting to %s:%s' % (self.settings.irc.host, self.settings.irc.port)
+        print('[IRC] Connecting to %s:%s' % (self.settings.irc.host, self.settings.irc.port))
         sock.connect((self.settings.irc.host, self.settings.irc.port))
 
         if hasattr(self.settings.irc, 'ssl') and self.settings.irc.ssl:
@@ -84,13 +85,13 @@ class Thalamus(object):
         try:
             data = self.sock.recv(256)
             self.cx.logroom(data)
-            print data
+            print(data)
         except Exception as e:
             return
 
         if data == b'':
             # TODO: Set up auto-reconnect here
-            print 'Connection lost.'
+            print('Connection lost.')
             sys.exit()
         return data
 
@@ -100,7 +101,7 @@ class Thalamus(object):
         # Temporary backwards compatibility as everything gets ported to the thalamus send
         data = data.rstrip('\r\n')
 
-        self.sock.send('%s%s%s' % (data, chr(015), chr(012)))
+        self.sock.send('%s%s%s' % (data, chr(0o15), chr(0o12)))
 
     # Process incoming data
     def process(self):
@@ -115,11 +116,11 @@ class Thalamus(object):
             return
 
         self.buffer += data
-        lines = self.buffer.split(chr(012))
+        lines = self.buffer.split(chr(0o12))
         self.buffer = lines.pop()
 
         for line in lines:
-            if line[-1] == chr(015):
+            if line[-1] == chr(0o15):
                 line = line[:-1]
 
             if not line:
@@ -149,19 +150,19 @@ class Thalamus(object):
                 if method is not None:
                     method(source, args)
             except Exception as e:
-                print "%s" % e
-                print traceback.format_exc()
+                print("%s" % e)
+                print(traceback.format_exc())
                 continue
 
     # Handle the welcome to the server message
     # by joining channels at this point
     def _cmd_001(self, source, args):
 
-        print '[IRC] Connected to %s' % (source)
+        print('[IRC] Connected to %s' % (source))
 
         for channel in self.secrets.channels:
 
-            print '[IRC] Joining %s' % (channel)
+            print('[IRC] Joining %s' % (channel))
             self.send('JOIN %s' % channel)
 
     # Handle incoming server information

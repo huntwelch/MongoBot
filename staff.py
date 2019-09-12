@@ -1,3 +1,4 @@
+from __future__ import print_function
 import mechanize
 import urllib
 import threading
@@ -137,7 +138,7 @@ class Broker(object):
         try:
             fulldata = Browser(url).json()
         except Exception as e:
-            print e
+            print(e)
             return
 
         data = fulldata
